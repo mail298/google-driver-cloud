@@ -1,0 +1,8 @@
+{
+  "storage_limit_gb": 15,
+  "admin_username": "admin",
+  "admin_password": "adminpass",
+  "client_username": "client",
+  "client_password": "clientpass",
+  "client_root_folder_id": ""
+}

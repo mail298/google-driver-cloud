@@ -1,0 +1,328 @@
+<?php
+// C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\DashboardController.php
+
+require_once dirname(__DIR__) . '/Models/PortalModel.php';
+require_once dirname(__DIR__) . '/Models/UserModel.php';
+
+class DashboardController {
+    public static function index() {
+        AuthController::checkClient();
+        
+        $pdo = Config::getPDO();
+        $apiKey = Config::get('GATEWAY_API_KEY');
+        $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+
+        if (!$userId) {
+            die("Error: The gateway API Key configured in .env is invalid or does not match any user in the database.");
+        }
+
+        // Read user-specific limits and folder restrictions (always refreshed from UserModel)
+        $currentUser = $_SESSION['user'] ?? null;
+        if ($currentUser && isset($currentUser['id'])) {
+            $refreshed = UserModel::getUserById($currentUser['id']);
+            if ($refreshed) {
+                $_SESSION['user'] = $refreshed;
+                $currentUser = $refreshed;
+            }
+        }
+        $limitGb = (float)($currentUser['storage_limit_gb'] ?? 15);
+        $rawClientRoot = trim($currentUser['root_folder_id'] ?? '');
+        $clientRootFolderId = PortalModel::extractFolderId($rawClientRoot);
+
+        $folderId = $_GET['folderId'] ?? null;
+        if ($folderId === '') $folderId = null;
+
+        // Ensure client root folder is properly resolved in DB if specified
+        $effectiveRootDbId = null;
+        if ($clientRootFolderId !== '') {
+            $rootFolderObj = PortalModel::getFolder($pdo, $userId, $clientRootFolderId);
+            if ($rootFolderObj) {
+                $effectiveRootDbId = $rootFolderObj['id'];
+            } else {
+                // Auto-create folder record in DB so client files/folders are isolated to this root
+                try {
+                    $connectedAccountId = PortalModel::getFirstConnectedAccountId($pdo, $userId);
+                    $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE provider_folder_id = VALUES(provider_folder_id)");
+                    $stmt->execute([$clientRootFolderId, $userId, $connectedAccountId, $clientRootFolderId]);
+                    $effectiveRootDbId = $clientRootFolderId;
+                } catch (Exception $e) {
+                    $effectiveRootDbId = $clientRootFolderId;
+                }
+            }
+        }
+
+        // If client root folder is configured and client opens main root (/), scope to their assigned root folder
+        if ($effectiveRootDbId !== null && $folderId === null) {
+            $folderId = $effectiveRootDbId;
+        }
+
+        // Verify folder belongs to user
+        if ($folderId !== null) {
+            $folder = PortalModel::getFolder($pdo, $userId, $folderId);
+            if (!$folder && $folderId !== $effectiveRootDbId && $folderId !== $clientRootFolderId) {
+                header('Location: /');
+                exit;
+            }
+        }
+
+        $searchQuery = trim($_GET['q'] ?? '');
+
+        // Fetch folders and files
+        if ($searchQuery !== '') {
+            // If searching, show matching files across all folders
+            $folders = []; // disable folder navigation during search
+            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND status = 'active' AND name LIKE ? ORDER BY name ASC");
+            $stmt->execute([$userId, '%' . $searchQuery . '%']);
+            $files = $stmt->fetchAll();
+            $breadcrumbs = [];
+        } else {
+            $folders = PortalModel::getFolders($pdo, $userId, $folderId);
+            $files = PortalModel::getFiles($pdo, $userId, $folderId);
+            $breadcrumbs = PortalModel::getFolderBreadcrumbs($pdo, $userId, $folderId);
+        }
+
+        $allFoldersList = PortalModel::getAllFolders($pdo, $userId);
+
+        // If restricted to a subfolder, trim breadcrumbs above it
+        if ($clientRootFolderId !== '' && empty($searchQuery)) {
+            $startIndex = -1;
+            foreach ($breadcrumbs as $index => $crumb) {
+                if ($crumb['id'] === $clientRootFolderId) {
+                    $startIndex = $index;
+                    break;
+                }
+            }
+            if ($startIndex !== -1) {
+                $breadcrumbs = array_slice($breadcrumbs, $startIndex + 1);
+            }
+        }
+
+        // Calculate storage details
+        $limitBytes = $limitGb * 1024 * 1024 * 1024;
+
+        // Photo size (image/*)
+        $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type LIKE 'image/%'");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        $photoSize = (float)($row['total'] ?? 0);
+
+        // Video size (video/*)
+        $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type LIKE 'video/%'");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        $videoSize = (float)($row['total'] ?? 0);
+
+        // Document size (others)
+        $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%'");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        $documentSize = (float)($row['total'] ?? 0);
+
+        $totalUsedBytes = $photoSize + $videoSize + $documentSize;
+        $storagePercent = min(100, round(($totalUsedBytes / $limitBytes) * 100, 2));
+
+        require_once dirname(__DIR__) . '/Views/dashboard.php';
+    }
+
+    public static function createFolder() {
+        AuthController::checkClient();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $pdo = Config::getPDO();
+            $apiKey = Config::get('GATEWAY_API_KEY');
+            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+
+            if (!$userId) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Invalid API key.']);
+                exit;
+            }
+
+            $name = trim($_POST['name'] ?? '');
+            $parentId = $_POST['parentId'] ?? null;
+            if ($parentId === '') $parentId = null;
+
+            if ($name === '') {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Folder name is required.']);
+                exit;
+            }
+
+            try {
+                $id = PortalModel::createFolder($pdo, $userId, $parentId, $name);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'id' => $id]);
+            } catch (Exception $e) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
+
+    public static function renameFolder() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $apiKey = Config::get('GATEWAY_API_KEY');
+            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $id = $_POST['id'] ?? '';
+            $name = trim($_POST['name'] ?? '');
+
+            if (!$userId || !$id || $name === '') {
+                echo json_encode(['success' => false, 'message' => 'Parameter tidak lengkap.']);
+                exit;
+            }
+
+            try {
+                PortalModel::renameFolder($pdo, $userId, $id, $name);
+                echo json_encode(['success' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
+
+    public static function deleteFolder() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $apiKey = Config::get('GATEWAY_API_KEY');
+            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $id = $_POST['id'] ?? '';
+
+            if (!$userId || !$id) {
+                echo json_encode(['success' => false, 'message' => 'Parameter tidak lengkap.']);
+                exit;
+            }
+
+            try {
+                PortalModel::deleteFolder($pdo, $userId, $id);
+                echo json_encode(['success' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
+
+    public static function renameFile() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $apiKey = Config::get('GATEWAY_API_KEY');
+            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $id = $_POST['id'] ?? '';
+            $name = trim($_POST['name'] ?? '');
+
+            if (!$userId || !$id || $name === '') {
+                echo json_encode(['success' => false, 'message' => 'Parameter tidak lengkap.']);
+                exit;
+            }
+
+            try {
+                PortalModel::renameFile($pdo, $userId, $id, $name);
+                echo json_encode(['success' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
+
+    public static function deleteFile() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $apiKey = Config::get('GATEWAY_API_KEY');
+            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $id = $_POST['id'] ?? '';
+
+            if (!$userId || !$id) {
+                echo json_encode(['success' => false, 'message' => 'Parameter tidak lengkap.']);
+                exit;
+            }
+
+            try {
+                PortalModel::deleteFile($pdo, $userId, $id);
+                echo json_encode(['success' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
+
+    public static function moveItem() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $apiKey = Config::get('GATEWAY_API_KEY');
+            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $type = $_POST['type'] ?? 'file';
+            $id = $_POST['id'] ?? '';
+            $targetFolderId = $_POST['targetFolderId'] ?? null;
+
+            if (!$userId || !$id) {
+                echo json_encode(['success' => false, 'message' => 'Parameter tidak lengkap.']);
+                exit;
+            }
+
+            try {
+                PortalModel::moveItem($pdo, $userId, $type, $id, $targetFolderId);
+                echo json_encode(['success' => true]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
+
+    public static function batchDelete() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $apiKey = Config::get('GATEWAY_API_KEY');
+            if (empty($apiKey)) {
+                $apiKey = PortalModel::getActiveApiKey($pdo);
+            }
+            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+
+            $rawItems = $_POST['items'] ?? '[]';
+            $items = json_decode($rawItems, true);
+
+            if (!$userId || !is_array($items) || empty($items)) {
+                echo json_encode(['success' => false, 'message' => 'Tidak ada item yang dipilih.']);
+                exit;
+            }
+
+            $deletedCount = 0;
+            foreach ($items as $item) {
+                $type = $item['type'] ?? 'file';
+                $id = $item['id'] ?? '';
+                if (empty($id)) continue;
+
+                try {
+                    if ($type === 'folder') {
+                        PortalModel::deleteFolder($pdo, $userId, $id);
+                    } else {
+                        PortalModel::deleteFile($pdo, $userId, $id);
+                    }
+                    $deletedCount++;
+                } catch (Exception $e) {
+                    // Continue with next
+                }
+            }
+
+            echo json_encode(['success' => true, 'count' => $deletedCount]);
+            exit;
+        }
+    }
+}

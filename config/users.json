@@ -1,0 +1,34 @@
+[
+    {
+        "id": "admin-1",
+        "username": "admin",
+        "password": "adminpass",
+        "role": "admin",
+        "storage_limit_gb": 100,
+        "root_folder_id": ""
+    },
+    {
+        "id": "client-1",
+        "username": "clientA",
+        "password": "clientpass",
+        "role": "client",
+        "storage_limit_gb": 15,
+        "root_folder_id": ""
+    },
+    {
+        "id": "user-6a65ecfc22c88",
+        "username": "mayya",
+        "password": "mayya123",
+        "role": "client",
+        "storage_limit_gb": 500,
+        "root_folder_id": "1IDuwu4BIFZSztx2QB2xYVSrVIdnnacz1"
+    },
+    {
+        "id": "user-6a65f413ad8fb",
+        "username": "clientB",
+        "password": "clientB",
+        "role": "client",
+        "storage_limit_gb": 15,
+        "root_folder_id": "1jlNSyIOvA0mHBJAwtfQ4slRKwtSKC2aK"
+    }
+]
