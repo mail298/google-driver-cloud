@@ -3,6 +3,7 @@
 
 require_once dirname(__DIR__) . '/Models/UserModel.php';
 require_once dirname(__DIR__) . '/Models/PortalModel.php';
+require_once dirname(__DIR__) . '/Models/IpWhitelistModel.php';
 
 class AdminController
 {
@@ -73,6 +74,10 @@ class AdminController
 
         $allocatedPercent = min(100, round(($totalAllocatedGb / $limitGb) * 100, 1));
         $storagePercent = min(100, round(($totalUsedBytes / ($limitGb * 1024 * 1024 * 1024)) * 100, 2));
+
+        // Fetch IP Whitelist Configuration
+        $ipConfig = IpWhitelistModel::getConfig();
+        $clientIp = IpWhitelistModel::getClientIp();
 
         require_once dirname(dirname(__DIR__)) . '/src/Views/admin.php';
     }
@@ -149,5 +154,43 @@ class AdminController
             }
             exit;
         }
+    }
+
+    public static function updateIpWhitelist()
+    {
+        AuthController::checkAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $action = $_POST['whitelist_action'] ?? '';
+            try {
+                if ($action === 'toggle') {
+                    $enabled = (bool)($_POST['enabled'] ?? false);
+                    IpWhitelistModel::toggleEnabled($enabled);
+                    $statusMsg = $enabled ? 'Keamanan Admin IP Whitelist BERHASIL DIAKTIFKAN' : 'Admin IP Whitelist NONAKTIF';
+                    header('Location: /admin?success=' . urlencode($statusMsg));
+                    exit;
+                } elseif ($action === 'add') {
+                    $ip = trim($_POST['ip_address'] ?? '');
+                    IpWhitelistModel::addIp($ip);
+                    header('Location: /admin?success=' . urlencode("Alamat IP $ip berhasil ditambahkan ke Whitelist"));
+                    exit;
+                } elseif ($action === 'add_current') {
+                    $currentIp = IpWhitelistModel::getClientIp();
+                    IpWhitelistModel::addIp($currentIp);
+                    header('Location: /admin?success=' . urlencode("IP Anda ($currentIp) berhasil ditambahkan ke Whitelist"));
+                    exit;
+                } elseif ($action === 'remove') {
+                    $ip = trim($_POST['ip_address'] ?? '');
+                    IpWhitelistModel::removeIp($ip);
+                    header('Location: /admin?success=' . urlencode("Alamat IP $ip berhasil dihapus dari Whitelist"));
+                    exit;
+                }
+            } catch (Exception $e) {
+                header('Location: /admin?error=' . urlencode($e->getMessage()));
+                exit;
+            }
+        }
+        header('Location: /admin');
+        exit;
     }
 }

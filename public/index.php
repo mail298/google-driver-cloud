@@ -77,6 +77,13 @@ switch ($requestUri) {
         }
         AdminController::deleteUser();
         break;
+    case '/admin/whitelist/update':
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            exit;
+        }
+        AdminController::updateIpWhitelist();
+        break;
     default:
         http_response_code(404);
         echo "404 - Page Not Found";

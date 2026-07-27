@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <!-- C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Views\admin.php -->
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard & Storage Control</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/style.css">
     <style>
         :root {
@@ -25,9 +28,10 @@
             --input-bg: rgba(10, 15, 29, 0.8);
         }
 
-        html, body.admin-page-body {
+        html,
+        body.admin-page-body {
             background-color: var(--bg-dark) !important;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
                 radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.07) 0%, transparent 45%) !important;
             color: var(--text-main);
@@ -95,7 +99,7 @@
             position: absolute;
             inset: -1px;
             border-radius: 15px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4), transparent);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent);
             mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
@@ -206,10 +210,21 @@
             transition: all 0.3s ease;
         }
 
-        .stat-card-blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .stat-card-amber::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .stat-card-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
-        .stat-card-purple::before { background: linear-gradient(90deg, #8b5cf6, #c084fc); }
+        .stat-card-blue::before {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+
+        .stat-card-amber::before {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .stat-card-emerald::before {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+
+        .stat-card-purple::before {
+            background: linear-gradient(90deg, #8b5cf6, #c084fc);
+        }
 
         .stat-card:hover {
             transform: translateY(-4px);
@@ -479,8 +494,8 @@
             transition: color 0.2s ease;
         }
 
-        .search-box input:focus + .search-icon,
-        .search-box input:not(:placeholder-shown) + .search-icon {
+        .search-box input:focus+.search-icon,
+        .search-box input:not(:placeholder-shown)+.search-icon {
             color: var(--accent-primary);
         }
 
@@ -636,8 +651,15 @@
         }
 
         @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .alert-success {
@@ -697,6 +719,7 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
             .content-grid {
                 grid-template-columns: 1fr;
             }
@@ -706,46 +729,52 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
             .admin-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 16px;
             }
+
             .admin-actions {
                 width: 100%;
                 justify-content: flex-end;
             }
+
             .admin-dashboard-container {
                 padding: 16px;
             }
         }
     </style>
 </head>
+
 <body class="admin-page-body">
     <?php
-        $allFolders = $allFolders ?? [];
-        function formatBytes($bytes, $precision = 2) {
-            if ($bytes >= 1099511627776) {
-                return round($bytes / 1099511627776, $precision) . ' TB';
-            } elseif ($bytes >= 1073741824) {
-                return round($bytes / 1073741824, $precision) . ' GB';
-            } elseif ($bytes >= 1048576) {
-                return round($bytes / 1048576, $precision) . ' MB';
-            } elseif ($bytes >= 1024) {
-                return round($bytes / 1024, $precision) . ' KB';
-            } else {
-                return $bytes . ' B';
-            }
+    $allFolders = $allFolders ?? [];
+    function formatBytes($bytes, $precision = 2)
+    {
+        if ($bytes >= 1099511627776) {
+            return round($bytes / 1099511627776, $precision) . ' TB';
+        } elseif ($bytes >= 1073741824) {
+            return round($bytes / 1073741824, $precision) . ' GB';
+        } elseif ($bytes >= 1048576) {
+            return round($bytes / 1048576, $precision) . ' MB';
+        } elseif ($bytes >= 1024) {
+            return round($bytes / 1024, $precision) . ' KB';
+        } else {
+            return $bytes . ' B';
         }
+    }
 
-        function formatStorageUnit($gb, $precision = 2) {
-            $gb = (float)$gb;
-            if ($gb >= 1024) {
-                $tb = round($gb / 1024, $precision);
-                return $tb . ' TB (' . number_format($gb) . ' GB)';
-            }
-            return number_format($gb, 1) . ' GB';
+    function formatStorageUnit($gb, $precision = 2)
+    {
+        $gb = (float) $gb;
+        if ($gb >= 1024) {
+            $tb = round($gb / 1024, $precision);
+            return $tb . ' TB (' . number_format($gb) . ' GB)';
         }
+        return number_format($gb, 1) . ' GB';
+    }
     ?>
 
     <div class="admin-dashboard-container">
@@ -753,24 +782,41 @@
         <header class="admin-header">
             <div class="admin-brand">
                 <div class="admin-brand-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="M6 18h.01"/><path d="M10 18h.01"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none"
+                        stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v8" />
+                        <path d="M6 18h.01" />
+                        <path d="M10 18h.01" />
+                        <rect width="20" height="8" x="2" y="14" rx="2" />
+                        <path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4" />
+                    </svg>
                 </div>
                 <div>
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <h1>Master Control</h1>
                         <span class="admin-brand-badge">Administrator</span>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Dynamic Storage Pool & Account Manager</div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Dynamic Storage Pool &
+                        Account Manager</div>
                 </div>
             </div>
 
             <div class="admin-actions">
                 <a href="/" class="btn-nav btn-nav-portal">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2" />
+                    </svg>
                     <span>Client Portal View</span>
                 </a>
                 <a href="/logout" class="btn-nav btn-nav-logout">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" x2="9" y1="12" y2="12" />
+                    </svg>
                     <span>Sign Out</span>
                 </a>
             </div>
@@ -780,20 +826,31 @@
         <?php if (isset($_GET['success'])): ?>
             <div class="alert-banner alert-success">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
                     <span><?= htmlspecialchars($_GET['success']) ?></span>
                 </div>
-                <button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; font-size: 20px; cursor:pointer; opacity: 0.7;">&times;</button>
+                <button onclick="this.parentElement.remove()"
+                    style="background:none; border:none; color:inherit; font-size: 20px; cursor:pointer; opacity: 0.7;">&times;</button>
             </div>
         <?php endif; ?>
 
         <?php if (isset($_GET['error'])): ?>
             <div class="alert-banner alert-error">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" x2="12" y1="8" y2="12" />
+                        <line x1="12" x2="12.01" y1="16" y2="16" />
+                    </svg>
                     <span><?= htmlspecialchars($_GET['error']) ?></span>
                 </div>
-                <button onclick="this.parentElement.remove()" style="background:none; border:none; color:inherit; font-size: 20px; cursor:pointer; opacity: 0.7;">&times;</button>
+                <button onclick="this.parentElement.remove()"
+                    style="background:none; border:none; color:inherit; font-size: 20px; cursor:pointer; opacity: 0.7;">&times;</button>
             </div>
         <?php endif; ?>
 
@@ -804,13 +861,17 @@
                 <div class="stat-header">
                     <span class="stat-title">Gateway Master API</span>
                     <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+                        </svg>
                     </div>
                 </div>
                 <div class="stat-value"><?= formatStorageUnit($limitGb) ?></div>
                 <div class="stat-subtext">Total Kapasitas Cloud Gateway API</div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa);"></div>
+                    <div class="stat-progress-fill"
+                        style="width: 100%; background: linear-gradient(90deg, #3b82f6, #60a5fa);"></div>
                 </div>
             </div>
 
@@ -819,13 +880,21 @@
                 <div class="stat-header">
                     <span class="stat-title">Storage Teralokasi</span>
                     <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
                     </div>
                 </div>
                 <div class="stat-value" style="color: #fbbf24;"><?= formatStorageUnit($totalAllocatedGb) ?></div>
                 <div class="stat-subtext"><?= $allocatedPercent ?>% dari Total Master Capacity</div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: <?= $allocatedPercent ?>%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
+                    <div class="stat-progress-fill"
+                        style="width: <?= $allocatedPercent ?>%; background: linear-gradient(90deg, #f59e0b, #fbbf24);">
+                    </div>
                 </div>
             </div>
 
@@ -834,7 +903,10 @@
                 <div class="stat-header">
                     <span class="stat-title">Sisa Admin Pool</span>
                     <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
                     </div>
                 </div>
                 <div class="stat-value" style="color: #34d399;"><?= formatStorageUnit($availablePoolGb) ?></div>
@@ -844,7 +916,9 @@
                     </span>
                 </div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: <?= max(0, 100 - $allocatedPercent) ?>%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+                    <div class="stat-progress-fill"
+                        style="width: <?= max(0, 100 - $allocatedPercent) ?>%; background: linear-gradient(90deg, #10b981, #34d399);">
+                    </div>
                 </div>
             </div>
 
@@ -853,97 +927,223 @@
                 <div class="stat-header">
                     <span class="stat-title">Penggunaan Fisik</span>
                     <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" x2="12" y1="3" y2="15" />
+                        </svg>
                     </div>
                 </div>
                 <div class="stat-value" style="color: #c084fc;"><?= formatBytes($totalUsedBytes) ?></div>
                 <div class="stat-subtext">
-                    📷 <?= formatBytes($photoSize) ?> &bull; 📹 <?= formatBytes($videoSize) ?> &bull; 📄 <?= formatBytes($documentSize) ?>
+                    📷 <?= formatBytes($photoSize) ?> &bull; 📹 <?= formatBytes($videoSize) ?> &bull; 📄
+                    <?= formatBytes($documentSize) ?>
                 </div>
                 <div class="stat-progress-bar">
-                    <div class="stat-progress-fill" style="width: <?= $storagePercent ?>%; background: linear-gradient(90deg, #8b5cf6, #c084fc);"></div>
+                    <div class="stat-progress-fill"
+                        style="width: <?= $storagePercent ?>%; background: linear-gradient(90deg, #8b5cf6, #c084fc);">
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Main Content Area -->
         <div class="content-grid">
-            <!-- Left: Create User Card -->
-            <div class="panel-card">
-                <div class="panel-header-title">
-                    <h2 class="panel-title">
-                        <span class="panel-title-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
-                        </span>
-                        Register Akun Client Baru
-                    </h2>
-                </div>
-
-                <form action="/admin/users/create" method="POST">
-                    <div class="form-group">
-                        <label for="create_username" class="form-label">
-                            <span>Username</span>
-                            <span style="font-size: 11px; color: var(--text-muted);">Wajib</span>
-                        </label>
-                        <input type="text" id="create_username" name="username" class="input-box" placeholder="contoh: clientA" required autocomplete="off">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="create_password" class="form-label">
-                            <span>Password</span>
-                            <span style="font-size: 11px; color: var(--text-muted);">Wajib</span>
-                        </label>
-                        <input type="text" id="create_password" name="password" class="input-box" placeholder="Password akun" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="create_role" class="form-label">Role Akses</label>
-                        <select id="create_role" name="role" class="input-box" onchange="updateCreateCalculator()">
-                            <option value="client" selected>Client User</option>
-                            <option value="admin">Administrator</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="create_storage_limit_gb" class="form-label">
-                            <span>Alokasi Storage (GB)</span>
-                            <span style="font-size: 11px; color: #34d399; font-weight: 700;">Tersedia: <?= $availablePoolGb ?> GB</span>
-                        </label>
-                        <input type="number" step="0.1" id="create_storage_limit_gb" name="storage_limit_gb" class="input-box" value="15" required oninput="updateCreateCalculator()">
-                        
-                        <!-- Interactive Live Calculator Widget -->
-                        <div id="create-pool-badge" class="pool-preview-badge pool-badge-ok">
-                            <span>⚡ Live Calculator: Sisa Admin Pool menjadi <strong id="create-calc-rem"><?= max(0, $availablePoolGb - 15) ?> GB</strong></span>
-                        </div>
-                    </div>
-
-                    <!-- Target Root Folder ID Card -->
-                    <div class="folder-picker-box">
-                        <label for="create_root_folder_id" class="form-label" style="color: #60a5fa; margin-bottom: 6px;">
-                            <span style="display: flex; align-items: center; gap: 6px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                                Target Root Folder ID (Opsional)
+            <!-- Left Column: Create User Card & IP Whitelist Card -->
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Left Panel 1: Create User Card -->
+                <div class="panel-card">
+                    <div class="panel-header-title">
+                        <h2 class="panel-title">
+                            <span class="panel-title-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <line x1="19" x2="19" y1="8" y2="14" />
+                                    <line x1="22" x2="16" y1="11" y2="11" />
+                                </svg>
                             </span>
-                        </label>
-                        <input type="text" id="create_root_folder_id" name="root_folder_id" class="input-box" placeholder="Tempel ID atau Link URL Google Drive..." style="margin-bottom: 10px;">
-                        
-                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                            <span style="font-size: 11px; color: var(--text-muted);">Atau pilih folder terdaftar:</span>
-                            <select class="input-box" style="font-size: 12px; padding: 8px 10px; background: rgba(15, 23, 42, 0.95);" onchange="if(this.value) document.getElementById('create_root_folder_id').value = this.value">
-                                <option value="">-- Pilih Folder Terdaftar di Drive --</option>
-                                <?php foreach ($allFolders as $af): ?>
-                                    <?php $val = !empty($af['provider_folder_id']) ? $af['provider_folder_id'] : $af['id']; ?>
-                                    <option value="<?= htmlspecialchars($val) ?>">📁 <?= htmlspecialchars($af['name']) ?> (<?= htmlspecialchars(substr($val, 0, 14)) ?>...)</option>
-                                <?php endforeach; ?>
+                            Register Akun Client Baru
+                        </h2>
+                    </div>
+
+                    <form action="/admin/users/create" method="POST">
+                        <div class="form-group">
+                            <label for="create_username" class="form-label">
+                                <span>Username</span>
+                                <span style="font-size: 11px; color: var(--text-muted);">Wajib</span>
+                            </label>
+                            <input type="text" id="create_username" name="username" class="input-box"
+                                placeholder="contoh: clientA" required autocomplete="off">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="create_password" class="form-label">
+                                <span>Password</span>
+                                <span style="font-size: 11px; color: var(--text-muted);">Wajib</span>
+                            </label>
+                            <input type="text" id="create_password" name="password" class="input-box"
+                                placeholder="Password akun" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="create_role" class="form-label">Role Akses</label>
+                            <select id="create_role" name="role" class="input-box" onchange="updateCreateCalculator()">
+                                <option value="client" selected>Client User</option>
+                                <option value="admin">Administrator</option>
                             </select>
                         </div>
+
+                        <div class="form-group">
+                            <label for="create_storage_limit_gb" class="form-label">
+                                <span>Alokasi Storage (GB)</span>
+                                <span style="font-size: 11px; color: #34d399; font-weight: 700;">Tersedia:
+                                    <?= $availablePoolGb ?> GB</span>
+                            </label>
+                            <input type="number" step="0.1" id="create_storage_limit_gb" name="storage_limit_gb"
+                                class="input-box" value="15" required oninput="updateCreateCalculator()">
+
+                            <!-- Interactive Live Calculator Widget -->
+                            <div id="create-pool-badge" class="pool-preview-badge pool-badge-ok">
+                                <span>⚡ Live Calculator: Sisa Admin Pool menjadi <strong
+                                        id="create-calc-rem"><?= max(0, $availablePoolGb - 15) ?> GB</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Target Root Folder ID Card -->
+                        <div class="folder-picker-box">
+                            <label for="create_root_folder_id" class="form-label"
+                                style="color: #60a5fa; margin-bottom: 6px;">
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                    </svg>
+                                    Target Root Folder ID (Opsional)
+                                </span>
+                            </label>
+                            <input type="text" id="create_root_folder_id" name="root_folder_id" class="input-box"
+                                placeholder="Tempel ID atau Link URL Google Drive..." style="margin-bottom: 10px;">
+                        </div>
+
+                        <button type="submit" id="btn-create-submit" class="btn-submit-primary">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2.5">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <line x1="19" x2="19" y1="8" y2="14" />
+                                <line x1="22" x2="16" y1="11" y2="11" />
+                            </svg>
+                            <span>Registrasi & Alokasikan Storage</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Left Panel 2: IP Whitelist Control -->
+                <div class="panel-card">
+                    <div class="panel-header-title" style="margin-bottom: 14px;">
+                        <h2 class="panel-title">
+                            <span class="panel-title-icon" style="background: rgba(16, 185, 129, 0.12); color: #34d399;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </span>
+                            <span>Admin IP Whitelist</span>
+                        </h2>
+                        <span class="role-tag" style="font-size: 10px; padding: 3px 8px; <?= !empty($ipConfig['enabled']) ? 'background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3);' : 'background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3);' ?>">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                            <?= !empty($ipConfig['enabled']) ? 'AKTIF' : 'NONAKTIF' ?>
+                        </span>
                     </div>
 
-                    <button type="submit" id="btn-create-submit" class="btn-submit-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
-                        <span>Registrasi & Alokasikan Storage</span>
-                    </button>
-                </form>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5;">
+                        Proteksi akses Admin berdasarkan daftar Alamat IP terverifikasi. Jika aktif, selain IP di bawah ini akan ditolak aksesnya (403 Forbidden).
+                    </div>
+
+                    <!-- Toggle Enable/Disable Form -->
+                    <form action="/admin/whitelist/update" method="POST" style="margin-bottom: 16px;">
+                        <input type="hidden" name="whitelist_action" value="toggle">
+                        <input type="hidden" name="enabled" value="<?= !empty($ipConfig['enabled']) ? '0' : '1' ?>">
+                        
+                        <?php if (!empty($ipConfig['enabled'])): ?>
+                            <button type="submit" class="btn-action-del" style="width: 100%; justify-content: center; padding: 9px 14px; border-radius: 10px; font-weight: 700;" onclick="return confirm('Apakah Anda yakin ingin MENONAKTIFKAN proteksi IP Whitelist Admin?')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span>Nonaktifkan IP Whitelist</span>
+                            </button>
+                        <?php else: ?>
+                            <button type="submit" class="btn-submit-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);" onclick="return confirm('Apakah Anda yakin ingin MENGAKTIFKAN proteksi IP Whitelist Admin?')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span>Aktifkan Proteksi IP Whitelist</span>
+                            </button>
+                        <?php endif; ?>
+                    </form>
+
+                    <!-- Current IP Widget -->
+                    <div style="background: rgba(10, 15, 29, 0.7); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 14px; padding: 12px 14px; margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 10.5px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">IP Anda Saat Ini</div>
+                                <div style="font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 700; color: #60a5fa; margin-top: 2px;">
+                                    🌐 <?= htmlspecialchars($clientIp) ?>
+                                </div>
+                            </div>
+                            
+                            <?php 
+                                $isCurrentInList = in_array($clientIp, $ipConfig['allowed_ips'] ?? [], true);
+                            ?>
+                            <?php if ($isCurrentInList): ?>
+                                <span style="font-size: 11px; font-weight: 700; color: #34d399; background: rgba(16,185,129,0.12); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.25);">
+                                    ✓ Terdaftar
+                                </span>
+                            <?php else: ?>
+                                <form action="/admin/whitelist/update" method="POST" style="margin:0;">
+                                    <input type="hidden" name="whitelist_action" value="add_current">
+                                    <button type="submit" class="btn-action-edit" style="font-size: 11px; padding: 5px 10px;">
+                                        + Tambah IP Saya
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Add Custom IP Form -->
+                    <form action="/admin/whitelist/update" method="POST" style="margin-bottom: 16px;">
+                        <input type="hidden" name="whitelist_action" value="add">
+                        <label for="ip_address_input" class="form-label" style="font-size: 11.5px;">Tambah Alamat IP / Wildcard</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="ip_address_input" name="ip_address" class="input-box" placeholder="contoh: 192.168.3.102" required style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px;">
+                            <button type="submit" class="btn-action-edit" style="white-space: nowrap; padding: 0 14px; font-weight: 700;">
+                                + Tambah
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Whitelisted IPs List -->
+                    <div>
+                        <div style="font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                            <span>Daftar IP Terdaftar (<?= count($ipConfig['allowed_ips'] ?? []) ?>)</span>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto;">
+                            <?php foreach (($ipConfig['allowed_ips'] ?? []) as $whitelistedIp): ?>
+                                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 10px;">
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+                                        <span><?= htmlspecialchars($whitelistedIp) ?></span>
+                                        <?php if ($whitelistedIp === $clientIp): ?>
+                                            <span style="font-size: 10px; color: #34d399; font-weight: 700; font-family: sans-serif;">(IP Anda)</span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <form action="/admin/whitelist/update" method="POST" style="margin: 0;" onsubmit="return confirm('Hapus <?= htmlspecialchars($whitelistedIp) ?> dari Whitelist?')">
+                                        <input type="hidden" name="whitelist_action" value="remove">
+                                        <input type="hidden" name="ip_address" value="<?= htmlspecialchars($whitelistedIp) ?>">
+                                        <button type="submit" style="background: none; border: none; color: #fca5a5; font-size: 16px; cursor: pointer; opacity: 0.7; padding: 2px 6px;" title="Hapus IP">&times;</button>
+                                    </form>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Right: Registered Users Table -->
@@ -951,11 +1151,17 @@
                 <div class="table-toolbar">
                     <div>
                         <h2 class="panel-title">Daftar Pengguna & Alokasi Storage</h2>
-                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">Kelola peran, batas kuota, dan pemakaian fisik tiap akun</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 3px;">Kelola peran, batas
+                            kuota, dan pemakaian fisik tiap akun</div>
                     </div>
                     <div class="search-box">
-                        <input type="text" id="table-search" class="input-box" placeholder="Cari username..." onkeyup="filterUserTable()">
-                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+                        <input type="text" id="table-search" class="input-box" placeholder="Cari username..."
+                            onkeyup="filterUserTable()">
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" x2="16.65" y1="21" y2="16.65" />
+                        </svg>
                     </div>
                 </div>
 
@@ -973,66 +1179,98 @@
                         </thead>
                         <tbody>
                             <?php foreach ($users as $u): ?>
-                                <?php 
-                                    $usage = $userUsageMap[$u['id']] ?? ['used_bytes' => 0, 'file_count' => 0];
-                                    $uLimitGb = (float)($u['storage_limit_gb'] ?? 15);
-                                    $uLimitBytes = $uLimitGb * 1024 * 1024 * 1024;
-                                    $uPercent = min(100, round(($usage['used_bytes'] / $uLimitBytes) * 100, 1));
-                                    $initial = strtoupper(substr($u['username'], 0, 1));
+                                <?php
+                                $usage = $userUsageMap[$u['id']] ?? ['used_bytes' => 0, 'file_count' => 0];
+                                $uLimitGb = (float) ($u['storage_limit_gb'] ?? 15);
+                                $uLimitBytes = $uLimitGb * 1024 * 1024 * 1024;
+                                $uPercent = min(100, round(($usage['used_bytes'] / $uLimitBytes) * 100, 1));
+                                $initial = strtoupper(substr($u['username'], 0, 1));
                                 ?>
                                 <tr>
                                     <td>
                                         <div class="user-info-cell">
                                             <div class="user-avatar"><?= htmlspecialchars($initial) ?></div>
                                             <div>
-                                                <div style="font-weight: 700; color: #fff; font-size: 14px;"><?= htmlspecialchars($u['username']) ?></div>
-                                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;"><?= $usage['file_count'] ?> active files</div>
+                                                <div style="font-weight: 700; color: #fff; font-size: 14px;">
+                                                    <?= htmlspecialchars($u['username']) ?>
+                                                </div>
+                                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">
+                                                    <?= $usage['file_count'] ?> active files
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         <span class="role-tag <?= $u['role'] === 'admin' ? 'role-admin' : 'role-client' ?>">
-                                            <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                                            <span
+                                                style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
                                             <?= htmlspecialchars($u['role']) ?>
                                         </span>
                                     </td>
                                     <td style="font-weight: 700; color: #fff;">
                                         <?php if ($u['role'] === 'admin'): ?>
-                                            <span style="color: #fca5a5; font-size: 11px; font-weight: 700; background: rgba(239, 68, 68, 0.12); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.25); display: inline-flex; align-items: center; white-space: nowrap;">Full Master Pool</span>
+                                            <span
+                                                style="color: #fca5a5; font-size: 11px; font-weight: 700; background: rgba(239, 68, 68, 0.12); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.25); display: inline-flex; align-items: center; white-space: nowrap;">Full
+                                                Master Pool</span>
                                         <?php else: ?>
                                             <?= htmlspecialchars($u['storage_limit_gb']) ?> GB
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <div style="font-size: 12.5px; font-weight: 600; color: #e2e8f0;">
-                                            <?= formatBytes($usage['used_bytes']) ?> <span style="color: var(--text-muted); font-size: 11px;">(<?= $uPercent ?>%)</span>
+                                            <?= formatBytes($usage['used_bytes']) ?> <span
+                                                style="color: var(--text-muted); font-size: 11px;">(<?= $uPercent ?>%)</span>
                                         </div>
                                         <div class="stat-progress-bar" style="height: 5px; width: 110px; margin-top: 5px;">
-                                            <div class="stat-progress-fill" style="width: <?= $uPercent ?>%; background: <?= $uPercent > 90 ? 'linear-gradient(90deg, #ef4444, #f87171)' : 'linear-gradient(90deg, #3b82f6, #60a5fa)' ?>;"></div>
+                                            <div class="stat-progress-fill"
+                                                style="width: <?= $uPercent ?>%; background: <?= $uPercent > 90 ? 'linear-gradient(90deg, #ef4444, #f87171)' : 'linear-gradient(90deg, #3b82f6, #60a5fa)' ?>;">
+                                            </div>
                                         </div>
                                     </td>
                                     <td>
                                         <?php if (!empty($u['root_folder_id'])): ?>
-                                            <span title="<?= htmlspecialchars($u['root_folder_id']) ?>" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #60a5fa; background: rgba(59,130,246,0.12); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(59,130,246,0.25); display: inline-flex; align-items: center; gap: 6px;">
-                                                📁 <?= htmlspecialchars(strlen($u['root_folder_id']) > 14 ? substr($u['root_folder_id'], 0, 14) . '...' : $u['root_folder_id']) ?>
+                                            <span title="<?= htmlspecialchars($u['root_folder_id']) ?>"
+                                                style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #60a5fa; background: rgba(59,130,246,0.12); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(59,130,246,0.25); display: inline-flex; align-items: center; gap: 6px;">
+                                                📁
+                                                <?= htmlspecialchars(strlen($u['root_folder_id']) > 14 ? substr($u['root_folder_id'], 0, 14) . '...' : $u['root_folder_id']) ?>
                                             </span>
                                         <?php else: ?>
-                                            <span style="color:#64748b; font-size: 11.5px; display: inline-flex; align-items: center; gap: 5px;">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                            <span
+                                                style="color:#64748b; font-size: 11.5px; display: inline-flex; align-items: center; gap: 5px;">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path
+                                                        d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                                                </svg>
                                                 Root Drive Utama
                                             </span>
                                         <?php endif; ?>
                                     </td>
                                     <td style="text-align: right;">
-                                        <div style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                                            <button type="button" class="btn-action-edit" onclick="openEditModal(<?= htmlspecialchars(json_encode($u), ENT_QUOTES, 'UTF-8') ?>)">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                        <div
+                                            style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+                                            <button type="button" class="btn-action-edit"
+                                                onclick="openEditModal(<?= htmlspecialchars(json_encode($u), ENT_QUOTES, 'UTF-8') ?>)">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M12 20h9" />
+                                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                                </svg>
                                                 <span>Edit</span>
                                             </button>
-                                            <form method="POST" action="/admin/users/delete" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun <?= htmlspecialchars($u['username']) ?>? Kuota storage akan dikembalikan ke Admin Pool.')">
+                                            <form method="POST" action="/admin/users/delete" style="display:inline;"
+                                                onsubmit="return confirm('Apakah Anda yakin ingin menghapus akun <?= htmlspecialchars($u['username']) ?>? Kuota storage akan dikembalikan ke Admin Pool.')">
                                                 <input type="hidden" name="id" value="<?= $u['id'] ?>">
                                                 <button type="submit" class="btn-action-del">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                                                        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                        stroke-width="2">
+                                                        <polyline points="3 6 5 6 21 6" />
+                                                        <path
+                                                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                                        <line x1="10" x2="10" y1="11" y2="17" />
+                                                        <line x1="14" x2="14" y1="11" y2="17" />
+                                                    </svg>
                                                     <span>Hapus</span>
                                                 </button>
                                             </form>
@@ -1050,20 +1288,28 @@
     <!-- Edit User Modal -->
     <div class="modal-overlay" id="edit-modal">
         <div class="modal-box">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-                <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 19px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                <h3
+                    style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 19px; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="#60a5fa" stroke-width="2.5">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                    </svg>
                     Edit Kuota & Root Folder User
                 </h3>
-                <button type="button" onclick="closeEditModal()" style="background:none; border:none; color:var(--text-muted); font-size: 24px; cursor:pointer; line-height: 1; transition: color 0.2s;">&times;</button>
+                <button type="button" onclick="closeEditModal()"
+                    style="background:none; border:none; color:var(--text-muted); font-size: 24px; cursor:pointer; line-height: 1; transition: color 0.2s;">&times;</button>
             </div>
 
             <form action="/admin/users/update" method="POST">
                 <input type="hidden" id="edit-id" name="id">
-                
+
                 <div class="form-group">
                     <label class="form-label">Username</label>
-                    <input type="text" id="edit-username" class="input-box" disabled style="opacity: 0.7; cursor: not-allowed; background: rgba(0,0,0,0.4);">
+                    <input type="text" id="edit-username" class="input-box" disabled
+                        style="opacity: 0.7; cursor: not-allowed; background: rgba(0,0,0,0.4);">
                 </div>
 
                 <div class="form-group">
@@ -1077,51 +1323,64 @@
                 <div class="form-group">
                     <label for="edit-storage_limit_gb" class="form-label">
                         <span>Alokasi Storage (GB)</span>
-                        <span style="font-size: 11px; color: #34d399; font-weight: 700;">Admin Pool: <?= $availablePoolGb ?> GB</span>
+                        <span style="font-size: 11px; color: #34d399; font-weight: 700;">Admin Pool:
+                            <?= $availablePoolGb ?> GB</span>
                     </label>
-                    <input type="number" step="0.1" id="edit-storage_limit_gb" name="storage_limit_gb" class="input-box" required oninput="updateEditCalculator()">
-                    
+                    <input type="number" step="0.1" id="edit-storage_limit_gb" name="storage_limit_gb" class="input-box"
+                        required oninput="updateEditCalculator()">
+
                     <div id="edit-pool-badge" class="pool-preview-badge pool-badge-ok">
-                        <span>⚡ Live Calculator: Sisa Admin Pool menjadi <strong id="edit-calc-rem">-- GB</strong></span>
+                        <span>⚡ Live Calculator: Sisa Admin Pool menjadi <strong id="edit-calc-rem">--
+                                GB</strong></span>
                     </div>
                 </div>
 
                 <div class="folder-picker-box">
                     <label for="edit-root_folder_id" class="form-label" style="color: #60a5fa; margin-bottom: 6px;">
                         <span style="display: flex; align-items: center; gap: 6px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                            </svg>
                             Target Root Folder ID (Opsional)
                         </span>
                     </label>
-                    <input type="text" id="edit-root_folder_id" name="root_folder_id" class="input-box" placeholder="Tempel ID atau Link URL Google Drive (https://drive.google.com/...)" style="margin-bottom: 10px;">
-                    
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <input type="text" id="edit-root_folder_id" name="root_folder_id" class="input-box"
+                        placeholder="Tempel ID atau Link URL Google Drive (https://drive.google.com/...)"
+                        style="margin-bottom: 10px;">
+
+                    <!-- <div style="display: flex; flex-direction: column; gap: 4px;">
                         <span style="font-size: 11px; color: var(--text-muted);">Atau pilih folder terdaftar:</span>
-                        <select class="input-box" style="font-size: 12px; padding: 8px 10px; background: rgba(15, 23, 42, 0.95);" onchange="if(this.value) document.getElementById('edit-root_folder_id').value = this.value">
+                        <select class="input-box"
+                            style="font-size: 12px; padding: 8px 10px; background: rgba(15, 23, 42, 0.95);"
+                            onchange="if(this.value) document.getElementById('edit-root_folder_id').value = this.value">
                             <option value="">-- Pilih Folder Terdaftar di Drive --</option>
                             <?php foreach ($allFolders as $af): ?>
                                 <?php $val = !empty($af['provider_folder_id']) ? $af['provider_folder_id'] : $af['id']; ?>
-                                <option value="<?= htmlspecialchars($val) ?>">📁 <?= htmlspecialchars($af['name']) ?> (<?= htmlspecialchars(substr($val, 0, 14)) ?>...)</option>
+                                <option value="<?= htmlspecialchars($val) ?>">📁 <?= htmlspecialchars($af['name']) ?>
+                                    (<?= htmlspecialchars(substr($val, 0, 14)) ?>...)</option>
                             <?php endforeach; ?>
                         </select>
-                    </div>
+                    </div> -->
                 </div>
 
                 <div class="form-group">
                     <label for="edit-password" class="form-label">Password Baru (Opsional)</label>
-                    <input type="text" id="edit-password" name="password" class="input-box" placeholder="Biarkan kosong jika tidak diubah">
+                    <input type="text" id="edit-password" name="password" class="input-box"
+                        placeholder="Biarkan kosong jika tidak diubah">
                 </div>
 
                 <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
                     <button type="button" class="btn-nav btn-nav-portal" onclick="closeEditModal()">Batal</button>
-                    <button type="submit" id="btn-edit-submit" class="btn-submit-primary" style="width: auto; padding: 10px 22px;">Simpan Perubahan</button>
+                    <button type="submit" id="btn-edit-submit" class="btn-submit-primary"
+                        style="width: auto; padding: 10px 22px;">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-        const initialAvailablePoolGb = <?= (float)$availablePoolGb ?>;
+        const initialAvailablePoolGb = <?= (float) $availablePoolGb ?>;
         let currentEditOriginalQuota = 0;
         let currentEditOriginalRole = 'client';
 
@@ -1154,7 +1413,7 @@
                 btnSubmit.style.opacity = '0.5';
             } else {
                 badge.className = 'pool-preview-badge pool-badge-ok';
-                badge.innerHTML = '<span>⚡ Live Calculator: Sisa Admin Pool menjadi <strong>' + formatJsStorageUnit(newRemaining) + '</strong></span>';
+                badge.innerHTML = '<span>⚡ Sisa storage : <strong>' + formatJsStorageUnit(newRemaining) + '</strong></span>';
                 btnSubmit.disabled = false;
                 btnSubmit.style.opacity = '1';
             }
@@ -1232,4 +1491,5 @@
         });
     </script>
 </body>
+
 </html>
