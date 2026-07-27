@@ -514,6 +514,7 @@
             padding: 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             vertical-align: middle;
+            white-space: nowrap;
             transition: background 0.2s ease;
         }
 
@@ -997,7 +998,7 @@
                                     </td>
                                     <td style="font-weight: 700; color: #fff;">
                                         <?php if ($u['role'] === 'admin'): ?>
-                                            <span style="color: #fca5a5; font-size: 11px; font-weight: 700; background: rgba(239, 68, 68, 0.12); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.25);">Full Master Pool</span>
+                                            <span style="color: #fca5a5; font-size: 11px; font-weight: 700; background: rgba(239, 68, 68, 0.12); padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.25); display: inline-flex; align-items: center; white-space: nowrap;">Full Master Pool</span>
                                         <?php else: ?>
                                             <?= htmlspecialchars($u['storage_limit_gb']) ?> GB
                                         <?php endif; ?>
