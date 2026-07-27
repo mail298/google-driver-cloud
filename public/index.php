@@ -2,11 +2,13 @@
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\public\index.php
 
 // Route static files directly if using PHP built-in server
-if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|svg)$/', $_SERVER["REQUEST_URI"])) {
+if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|svg|ico|woff|woff2|ttf)$/', $_SERVER["REQUEST_URI"])) {
     return false; // let the built-in server handle the request
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once dirname(__DIR__) . '/src/Models/SecurityModel.php';
+require_once dirname(__DIR__) . '/src/Models/IpWhitelistModel.php';
 require_once dirname(__DIR__) . '/src/Controllers/AuthController.php';
 require_once dirname(__DIR__) . '/src/Controllers/DashboardController.php';
 require_once dirname(__DIR__) . '/src/Controllers/UploadController.php';
@@ -14,6 +16,9 @@ require_once dirname(__DIR__) . '/src/Controllers/DownloadProxyController.php';
 require_once dirname(__DIR__) . '/src/Controllers/ShareController.php';
 require_once dirname(__DIR__) . '/src/Controllers/AdminController.php';
 require_once dirname(__DIR__) . '/src/Controllers/SettingsController.php';
+
+// Apply global security headers to all responses
+SecurityModel::sendSecurityHeaders();
 
 // Simple Router
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);

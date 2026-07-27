@@ -21,11 +21,18 @@ class IpWhitelistModel
                 ];
             }
         }
-        
-        // Default configuration
+
+        // Fallback: read from .env configuration
+        $envEnabled = Config::get('ADMIN_IP_WHITELIST_ENABLED', 'false') === 'true';
+        $envIps = Config::get('ADMIN_ALLOWED_IPS', '127.0.0.1,::1');
+        $allowedIps = array_values(array_filter(array_map('trim', explode(',', $envIps))));
+        if (empty($allowedIps)) {
+            $allowedIps = ['127.0.0.1', '::1'];
+        }
+
         return [
-            'enabled' => false,
-            'allowed_ips' => ['127.0.0.1', '::1']
+            'enabled' => $envEnabled,
+            'allowed_ips' => $allowedIps
         ];
     }
 

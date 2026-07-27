@@ -3,6 +3,7 @@
 
 require_once dirname(__DIR__) . '/Models/PortalModel.php';
 require_once dirname(__DIR__) . '/Models/UserModel.php';
+require_once dirname(__DIR__) . '/Models/SecurityModel.php';
 
 class DashboardController {
     public static function index() {

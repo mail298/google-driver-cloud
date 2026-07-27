@@ -4,6 +4,7 @@
 require_once dirname(__DIR__) . '/Models/UserModel.php';
 require_once dirname(__DIR__) . '/Models/PortalModel.php';
 require_once dirname(__DIR__) . '/Models/IpWhitelistModel.php';
+require_once dirname(__DIR__) . '/Models/SecurityModel.php';
 
 class AdminController
 {
@@ -78,6 +79,10 @@ class AdminController
         // Fetch IP Whitelist Configuration
         $ipConfig = IpWhitelistModel::getConfig();
         $clientIp = IpWhitelistModel::getClientIp();
+
+        // Fetch security status summary
+        $securityStatus = SecurityModel::getSecurityStatus();
+        $csrfToken = SecurityModel::getCsrfToken();
 
         require_once dirname(dirname(__DIR__)) . '/src/Views/admin.php';
     }

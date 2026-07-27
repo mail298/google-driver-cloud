@@ -865,10 +865,58 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Security Session Widget -->
+            <?php
+                $sesTimeout = (int) Config::get('SESSION_TIMEOUT_MINUTES', 60);
+                $sesRemaining = SecurityModel::getSessionRemainingSeconds();
+                $sesMins = floor($sesRemaining / 60);
+                $sesSecs = $sesRemaining % 60;
+            ?>
+            <div style="margin-top: 16px; padding: 12px 14px; background: rgba(10,15,29,0.7); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px;">
+                <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 8px;">
+                    <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.7); animation: sessPulse 2s infinite; flex-shrink:0;"></span>
+                    <span style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Sesi Aktif</span>
+                </div>
+                <div style="font-size: 12px; font-weight: 600; color: #94a3b8;"><?= htmlspecialchars($currentUser['username'] ?? '–') ?></div>
+                <?php if ($sesTimeout > 0): ?>
+                    <div id="dash-session-timer" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748b; margin-top: 4px;">
+                        Berakhir dalam <?= $sesMins ?>m <?= str_pad($sesSecs, 2, '0', STR_PAD_LEFT) ?>s
+                    </div>
+                    <script>
+                    (function(){
+                        var el = document.getElementById('dash-session-timer');
+                        var rem = <?= $sesRemaining ?>;
+                        setInterval(function() {
+                            if (rem <= 0) { el.textContent = 'Sesi habis'; el.style.color='#ef4444'; return; }
+                            rem--;
+                            var m = Math.floor(rem/60), s = rem%60;
+                            el.textContent = 'Berakhir dalam ' + m + 'm ' + String(s).padStart(2,'0') + 's';
+                            if (rem < 120) el.style.color = '#ef4444';
+                            else if (rem < 300) el.style.color = '#f59e0b';
+                        }, 1000);
+                    })();
+                    </script>
+                <?php else: ?>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Tidak ada batas waktu</div>
+                <?php endif; ?>
+            </div>
+            <style>@keyframes sessPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }</style>
         </aside>
 
         <!-- Right Content Area -->
         <main class="main-content">
+
+            <!-- Quota Alert Banner -->
+            <?php if ($storagePercent >= 85): ?>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 11px 16px; margin-bottom: 14px; border-radius: 14px;
+                <?= $storagePercent >= 95 ? 'background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5;' : 'background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); color: #fde68a;' ?>;
+                font-size: 13px; font-weight: 600;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                <span><?= $storagePercent >= 95 ? '⚠️ Kuota hampir penuh!' : '📊 Storage hampir penuh' ?> — <?= $storagePercent ?>% terpakai (<?= formatBytes($totalUsedBytes) ?> / <?= $limitGb ?> GB). Segera hubungi administrator.</span>
+            </div>
+            <?php endif; ?>
+
             <!-- Top Header Search -->
             <div class="app-header">
                 <form action="/" method="GET" class="search-container">
