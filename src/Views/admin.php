@@ -25,17 +25,18 @@
             --input-bg: rgba(10, 15, 29, 0.8);
         }
 
-        body {
-            background-color: var(--bg-dark);
+        html, body.admin-page-body {
+            background-color: var(--bg-dark) !important;
             background-image: 
-                radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.06) 0%, transparent 40%),
-                radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.05) 0%, transparent 40%);
+                radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(139, 92, 246, 0.07) 0%, transparent 45%) !important;
             color: var(--text-main);
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            overflow-y: auto;
+            height: auto !important;
+            overflow-y: auto !important;
         }
 
         .admin-dashboard-container {
@@ -719,7 +720,7 @@
         }
     </style>
 </head>
-<body>
+<body class="admin-page-body">
     <?php
         $allFolders = $allFolders ?? [];
         function formatBytes($bytes, $precision = 2) {
