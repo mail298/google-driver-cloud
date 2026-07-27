@@ -43,7 +43,7 @@ Sistem Portal Klien & Management User yang terintegrasi dengan **9drive Gateway*
                            │                               │
                            ▼ (Upload Stream)               ▼ (Metadata & Quota)
 ┌──────────────────────────────────────────────┐  ┌────────────────────────────────┐
-│         9drive Gateway API (Port 4000)        │  │       MySQL Database (9drive)   │
+│         SuperDriver Gateway API (Port 4000)        │  │       MySQL Database (SuperDriver)   │
 │  - Multi-account Storage Router              │  │  - storage_accounts            │
 │  - Auto-fallback Akun Penuh                  │  │  - files & folders metadata    │
 └──────────────────────────┬───────────────────┘  └────────────────────────────────┘
@@ -51,8 +51,8 @@ Sistem Portal Klien & Management User yang terintegrasi dengan **9drive Gateway*
                            ▼
 ┌──────────────────────────────────────────────────────────────────────────────────┐
 │                              GOOGLE DRIVE CLOUD STORAGE                          │
-│   Akun 1: windrinofedri944@gmail.com (5 TB)                                      │
-│   Akun 2: windrinofedri123@gmail.com (15 GB)                                     │
+│   Akun 1: [EMAIL_ADDRESS] (5 TB)                                      │
+│   Akun 2: [EMAIL_ADDRESS] (15 GB)                                     │
 └──────────────────────────────────────────────────────────────────────────────────┘
 ```
 
