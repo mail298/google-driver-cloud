@@ -126,20 +126,36 @@ class UserModel {
         self::saveAllUsers($filtered);
     }
 
-    public static function updateUser($id, $storageLimitGb, $role = null, $rootFolderId = null, $password = null, $masterLimitGb = 100) {
+    public static function updateUser($id, $storageLimitGb, $role = null, $rootFolderId = null, $password = null, $masterLimitGb = 100, $username = null) {
         $users = self::getAllUsers();
-        $found = false;
+        $targetIndex = null;
         
-        $currentUser = self::getUserById($id);
-        if (!$currentUser) {
+        foreach ($users as $index => $u) {
+            if ($u['id'] === $id) {
+                $targetIndex = $index;
+                break;
+            }
+        }
+
+        if ($targetIndex === null) {
             throw new Exception("User tidak ditemukan.");
+        }
+
+        $currentUser = $users[$targetIndex];
+
+        if (!empty($username) && strtolower(trim($username)) !== strtolower($currentUser['username'])) {
+            foreach ($users as $u) {
+                if ($u['id'] !== $id && strtolower($u['username'] ?? '') === strtolower(trim($username))) {
+                    throw new Exception("Username '$username' sudah digunakan pengguna lain.");
+                }
+            }
         }
 
         $targetRole = ($role !== null && in_array($role, ['admin', 'client'])) ? $role : $currentUser['role'];
         $newQuotaGb = (float)$storageLimitGb;
 
         if ($targetRole === 'client') {
-            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float)$currentUser['storage_limit_gb'] : 0;
+            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float)($currentUser['storage_limit_gb'] ?? 0) : 0;
             $availableGb = self::getAdminAvailableStorageGb($masterLimitGb);
             $netDifference = $newQuotaGb - $oldQuotaGb;
 
@@ -148,25 +164,22 @@ class UserModel {
             }
         }
 
-        foreach ($users as &$u) {
-            if ($u['id'] === $id) {
-                $u['storage_limit_gb'] = $newQuotaGb;
-                $u['role'] = $targetRole;
-                if ($rootFolderId !== null) {
-                    $u['root_folder_id'] = trim($rootFolderId);
-                }
-                if (!empty($password)) {
-                    $u['password'] = password_hash(trim($password), PASSWORD_BCRYPT);
-                }
-                $found = true;
-                break;
-            }
+        if (!empty($username)) {
+            $users[$targetIndex]['username'] = trim($username);
+        }
+        $users[$targetIndex]['storage_limit_gb'] = $newQuotaGb;
+        $users[$targetIndex]['role'] = $targetRole;
+        if ($rootFolderId !== null) {
+            $users[$targetIndex]['root_folder_id'] = trim($rootFolderId);
+        }
+        if (!empty($password)) {
+            $users[$targetIndex]['password'] = password_hash(trim($password), PASSWORD_BCRYPT);
         }
 
         // Ensure at least one admin remains
         $adminCount = 0;
         foreach ($users as $u) {
-            if ($u['role'] === 'admin') $adminCount++;
+            if (($u['role'] ?? '') === 'admin') $adminCount++;
         }
         if ($adminCount === 0) {
             throw new Exception("Minimal satu akun administrator harus tetap ada.");
@@ -177,32 +190,36 @@ class UserModel {
 
     public static function updateUserPassword($userId, $oldPassword, $newPassword) {
         $users = self::getAllUsers();
-        $updated = false;
+        $targetIndex = null;
 
-        foreach ($users as &$user) {
+        foreach ($users as $index => $user) {
             if ($user['id'] === $userId) {
-                // Support both hashed and plain text legacy passwords
-                $isHashed = password_get_info($user['password'])['algoName'] !== 'unknown';
-                $oldPasswordValid = $isHashed
-                    ? password_verify($oldPassword, $user['password'])
-                    : ($user['password'] === $oldPassword);
-
-                if (!$oldPasswordValid) {
-                    throw new Exception("Password lama Anda tidak cocok.");
-                }
-                if (empty(trim($newPassword))) {
-                    throw new Exception("Password baru tidak boleh kosong.");
-                }
-                $user['password'] = password_hash(trim($newPassword), PASSWORD_BCRYPT);
-                $updated = true;
+                $targetIndex = $index;
                 break;
             }
         }
 
-        if ($updated) {
-            self::saveAllUsers($users);
-            return true;
+        if ($targetIndex === null) {
+            throw new Exception("User tidak ditemukan.");
         }
-        throw new Exception("User tidak ditemukan.");
+
+        $user = $users[$targetIndex];
+
+        // Support both hashed and plain text legacy passwords
+        $isHashed = password_get_info($user['password'])['algoName'] !== 'unknown';
+        $oldPasswordValid = $isHashed
+            ? password_verify($oldPassword, $user['password'])
+            : ($user['password'] === $oldPassword);
+
+        if (!$oldPasswordValid) {
+            throw new Exception("Password lama Anda tidak cocok.");
+        }
+        if (empty(trim($newPassword))) {
+            throw new Exception("Password baru tidak boleh kosong.");
+        }
+
+        $users[$targetIndex]['password'] = password_hash(trim($newPassword), PASSWORD_BCRYPT);
+        self::saveAllUsers($users);
+        return true;
     }
 }

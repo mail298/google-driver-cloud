@@ -119,7 +119,7 @@ class AdminController
     {
         AuthController::checkAdmin();
 
-        $id = $_POST['id'] ?? null;
+        $id = $_POST['user_id'] ?? $_POST['id'] ?? null;
         if ($id) {
             try {
                 UserModel::deleteUser($id);
@@ -129,7 +129,7 @@ class AdminController
             }
             exit;
         }
-        header('Location: /admin');
+        header('Location: /admin?error=User+ID+wajib+diisi');
         exit;
     }
 
@@ -138,7 +138,8 @@ class AdminController
         AuthController::checkAdmin();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['id'] ?? '';
+            $id = $_POST['user_id'] ?? $_POST['id'] ?? '';
+            $username = trim($_POST['username'] ?? '');
             $storageLimitGb = (float) ($_POST['storage_limit_gb'] ?? 15);
             $role = $_POST['role'] ?? null;
             $rawRootFolder = $_POST['root_folder_id'] ?? null;
@@ -152,7 +153,14 @@ class AdminController
 
             $masterGb = self::getMasterCapacityGb();
             try {
-                UserModel::updateUser($id, $storageLimitGb, $role, $rootFolderId, $password, $masterGb);
+                UserModel::updateUser($id, $storageLimitGb, $role, $rootFolderId, $password, $masterGb, $username);
+                if (isset($_SESSION['user']['id']) && $_SESSION['user']['id'] === $id) {
+                    $refreshed = UserModel::getUserById($id);
+                    if ($refreshed) {
+                        $_SESSION['user'] = $refreshed;
+                        $_SESSION['user_role'] = $refreshed['role'];
+                    }
+                }
                 header('Location: /admin?success=Pengaturan+dan+kuota+storage+pengguna+berhasil+diperbarui');
             } catch (Exception $e) {
                 header('Location: /admin?error=' . urlencode($e->getMessage()));

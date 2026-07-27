@@ -1211,6 +1211,7 @@
                             <tr>
                                 <th>Pengguna</th>
                                 <th>Role</th>
+                                <th>Target Root Folder</th>
                                 <th>Kuota Alokasi</th>
                                 <th>Pemakaian Fisik</th>
                                 <th>Aksi</th>
@@ -1226,6 +1227,7 @@
                                 $pct = $limitBytes > 0 ? min(100, round($usedBytes / $limitBytes * 100)) : 0;
                                 $usedFmt = $usedBytes < 1024**3 ? round($usedBytes/(1024**2), 1).' MB' : round($usedBytes/(1024**3), 2).' GB';
                                 $barColor = $pct >= 90 ? '#ef4444' : ($pct >= 70 ? '#f59e0b' : '#10b981');
+                                $rfId = trim($u['root_folder_id'] ?? '');
                             ?>
                             <tr>
                                 <td>
@@ -1249,6 +1251,16 @@
                                             <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                                             Client
                                         </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if (!empty($rfId)): ?>
+                                        <div style="display: inline-flex; align-items: center; gap: 6px; color: #60a5fa; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.25); padding: 4px 10px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;" title="Target Root Folder ID: <?= htmlspecialchars($rfId) ?>">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                            <span><?= htmlspecialchars(mb_strimwidth($rfId, 0, 20, '...')) ?></span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span style="color: var(--muted); font-size: 11.5px; font-style: italic;">📁 Utama (Main Root)</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
