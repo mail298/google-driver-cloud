@@ -35,12 +35,12 @@ RUN sed -ri -e "s!/var/www/html!${APACHE_DOCUMENT_ROOT}!g" \
 RUN sed -ri -e 's/AllowOverride None/AllowOverride All/g' \
     /etc/apache2/apache2.conf
 
-# Increase PHP upload limits for large files (videos, etc.)
-RUN echo "upload_max_filesize = 5G" > /usr/local/etc/php/conf.d/upload.ini \
-    && echo "post_max_size = 5G" >> /usr/local/etc/php/conf.d/upload.ini \
-    && echo "max_execution_time = 3600" >> /usr/local/etc/php/conf.d/upload.ini \
-    && echo "max_input_time = 3600" >> /usr/local/etc/php/conf.d/upload.ini \
-    && echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/upload.ini
+# Remove PHP upload limits (unlimited file size)
+RUN echo "upload_max_filesize = 10G" > /usr/local/etc/php/conf.d/upload.ini \
+    && echo "post_max_size = 10G" >> /usr/local/etc/php/conf.d/upload.ini \
+    && echo "max_execution_time = 0" >> /usr/local/etc/php/conf.d/upload.ini \
+    && echo "max_input_time = -1" >> /usr/local/etc/php/conf.d/upload.ini \
+    && echo "memory_limit = -1" >> /usr/local/etc/php/conf.d/upload.ini
 
 # Copy application source code into container
 COPY . /var/www/html/
