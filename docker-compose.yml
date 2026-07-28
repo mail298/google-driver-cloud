@@ -1,10 +1,27 @@
 services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-9drive}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
   backend:
     build:
       context: ./backend
     restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
     environment:
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL:-mysql://root:${MYSQL_ROOT_PASSWORD:-root}@mysql:3306/${MYSQL_DATABASE:-9drive}}
       APP_PORT: 4000
       FRONTEND_URL: ${FRONTEND_URL}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
@@ -15,8 +32,8 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}
-    expose:
-      - "4000"
+    ports:
+      - "4001:4000"
 
   frontend:
     build:
@@ -27,5 +44,8 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    expose:
-      - "80"
+    ports:
+      - "5174:80"
+
+volumes:
+  mysql_data:
