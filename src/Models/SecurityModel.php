@@ -18,8 +18,11 @@ class SecurityModel
 
             // Force HTTPS in production
             if (Config::get('FORCE_HTTPS', 'false') === 'true') {
-                if (!isset($_SERVER['HTTPS']) || $_SERVER['HTTPS'] !== 'on') {
-                    $url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+                $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
+                    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+                if (!$isHttps) {
+                    $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+                    $url = 'https://' . $host . $_SERVER['REQUEST_URI'];
                     header('Location: ' . $url, true, 301);
                     exit;
                 }

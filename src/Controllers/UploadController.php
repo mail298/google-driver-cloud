@@ -59,6 +59,17 @@ class UploadController
                 exit;
             }
 
+            // Resolve Google Drive parent folder ID
+            $providerParentId = null;
+            if ($folderId) {
+                $folder = PortalModel::getFolder($pdo, $userId, $folderId);
+                if ($folder && !empty($folder['provider_folder_id'])) {
+                    $providerParentId = $folder['provider_folder_id'];
+                }
+            } elseif ($currentUser && !empty($currentUser['root_folder_id'])) {
+                $providerParentId = PortalModel::extractFolderId($currentUser['root_folder_id']);
+            }
+
             // 1. Prepare filesMeta
             $mimeType = !empty($file['type']) ? $file['type'] : 'application/octet-stream';
             $filesMeta = [
@@ -69,8 +80,8 @@ class UploadController
                     'sizeBytes' => (string) $file['size'],
                 ]
             ];
-            if ($folderId !== null) {
-                $filesMeta[0]['folderId'] = $folderId;
+            if ($providerParentId) {
+                $filesMeta[0]['providerParentId'] = $providerParentId;
             }
 
             // 2. Prepare post fields for cURL
@@ -100,6 +111,25 @@ class UploadController
             } else {
                 $responseData = json_decode($response, true);
                 if ($httpCode >= 200 && $httpCode < 300) {
+                    $uploadedFile = $responseData['file'] ?? ($responseData['files'][0] ?? null);
+                    if ($uploadedFile && !empty($uploadedFile['id'])) {
+                        try {
+                            $stmt = $pdo->prepare("INSERT IGNORE INTO files (id, user_id, folder_id, connected_account_id, provider, provider_file_id, name, mime_type, size_bytes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())");
+                            $stmt->execute([
+                                $uploadedFile['id'],
+                                $userId,
+                                !empty($folderId) ? $folderId : null,
+                                $uploadedFile['connectedAccountId'] ?? '',
+                                $uploadedFile['provider'] ?? 'google_drive',
+                                $uploadedFile['providerFileId'] ?? '',
+                                $uploadedFile['name'] ?? $file['name'],
+                                $uploadedFile['mimeType'] ?? $mimeType,
+                                (int)($uploadedFile['sizeBytes'] ?? $file['size']),
+                            ]);
+                        } catch (Exception $e) {
+                            error_log('File record save failed: ' . $e->getMessage());
+                        }
+                    }
                     echo json_encode(['success' => true, 'data' => $responseData]);
                 } else {
                     echo json_encode([
