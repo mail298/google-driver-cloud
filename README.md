@@ -115,6 +115,81 @@ Akses portal melalui browser di **`http://localhost:7878`**.
 
 ---
 
+## 🐳 Deployment dengan Docker
+
+### Prasyarat
+- [Docker](https://docs.docker.com/get-docker/) ≥ 20.x
+- [Docker Compose](https://docs.docker.com/compose/install/) ≥ 2.x
+
+### Langkah Deploy
+
+**1. Salin dan Konfigurasi `.env`:**
+```bash
+cp .env.example .env
+# Edit .env dengan kredensial yang sesuai
+```
+
+**2. Bangun dan Jalankan Container:**
+```bash
+docker compose up -d --build
+```
+
+**3. Akses Portal:**
+Portal akan berjalan di **`http://localhost:7878`** (default, sesuai `PORTAL_PORT` di `.env`).
+
+### Variabel Docker Penting
+
+| Variabel | Default | Keterangan |
+|---|---|---|
+| `PORTAL_PORT` | `7878` | Port host untuk mengakses portal |
+| `DB_HOST` | `db` | Nama service MySQL di Docker network |
+| `DB_EXPOSE_PORT` | `3307` | Port MySQL yang diekspos ke host |
+| `GATEWAY_API_URL` | `http://gateway:4000` | URL 9drive Gateway di dalam network |
+
+### Integrasi dengan 9drive (Satu Network)
+
+Jika 9drive dan cliend dijalankan terpisah namun ingin saling terhubung, hubungkan keduanya ke external network yang sama:
+
+```yaml
+# Di docker-compose.yml cliend, tambahkan:
+networks:
+  default:
+    external:
+      name: superdriver-network
+```
+
+```bash
+# Buat network terlebih dahulu
+docker network create superdriver-network
+
+# Jalankan 9drive dulu, lalu cliend
+docker compose -f ../9drive/docker-compose.yml up -d
+docker compose up -d --build
+```
+
+Lalu di `.env` cliend, set:
+```env
+GATEWAY_API_URL=http://backend:4000
+DB_HOST=db
+```
+
+### Perintah Docker Berguna
+```bash
+# Lihat status container
+docker compose ps
+
+# Lihat log real-time
+docker compose logs -f portal
+
+# Stop semua container
+docker compose down
+
+# Stop dan hapus semua data (volume)
+docker compose down -v
+```
+
+---
+
 ## 🔑 Kredensial Default
 
 - **Admin Portal**: `http://localhost:7878/login`

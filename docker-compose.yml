@@ -1,0 +1,74 @@
+services:
+
+  # ============================================================
+  # Drive Portal Client (cliend) - PHP 8.2 + Apache
+  # ============================================================
+  portal:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "${PORTAL_PORT:-7878}:80"
+    environment:
+      # --- Database ---
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-9drive}
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_PASS:-}
+
+      # --- 9drive / SuperDriver Gateway ---
+      GATEWAY_API_URL: ${GATEWAY_API_URL:-http://gateway:4000}
+      GATEWAY_API_KEY: ${GATEWAY_API_KEY}
+      GATEWAY_MASTER_STORAGE_GB: ${GATEWAY_MASTER_STORAGE_GB:-5120}
+      PORTAL_USERNAME: ${PORTAL_USERNAME:-client}
+      PORTAL_PASSWORD: ${PORTAL_PASSWORD:-clientpass}
+
+      # --- Google OAuth & Token Decryption ---
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+
+      # --- Admin Security ---
+      ADMIN_IP_WHITELIST_ENABLED: ${ADMIN_IP_WHITELIST_ENABLED:-false}
+      ADMIN_ALLOWED_IPS: ${ADMIN_ALLOWED_IPS:-127.0.0.1,::1}
+
+      # --- Session & Auth ---
+      SESSION_TIMEOUT_MINUTES: ${SESSION_TIMEOUT_MINUTES:-60}
+      LOGIN_MAX_ATTEMPTS: ${LOGIN_MAX_ATTEMPTS:-5}
+      LOGIN_LOCKOUT_MINUTES: ${LOGIN_LOCKOUT_MINUTES:-15}
+      CSRF_PROTECTION_ENABLED: ${CSRF_PROTECTION_ENABLED:-true}
+      FORCE_HTTPS: ${FORCE_HTTPS:-false}
+
+    volumes:
+      # Persist users.json data across container restarts
+      - portal_users:/var/www/html/config
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ============================================================
+  # MySQL Database
+  # ============================================================
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-}
+      MYSQL_DATABASE: ${DB_NAME:-9drive}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "${DB_EXPOSE_PORT:-3307}:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  db_data:
+  portal_users:
