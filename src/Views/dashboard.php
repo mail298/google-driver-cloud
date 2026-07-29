@@ -905,6 +905,7 @@
                             <span>Laporan Berkas (CSV)</span>
                         </a>
                     </li>
+                    <!--
                     <li class="sidebar-menu-item">
                         <a href="/client/backup/zip" class="sidebar-menu-link" style="color: #34d399;" title="Unduh seluruh berkas aktif milik Anda sebagai arsip ZIP">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -915,16 +916,7 @@
                             <span>Unduh Semua (ZIP)</span>
                         </a>
                     </li>
-                    <li class="sidebar-menu-item">
-                        <a href="javascript:void(0)" onclick="openDeleteAllModal()" class="sidebar-menu-link" style="color: #f87171;" title="Hapus seluruh berkas dan folder Anda secara total">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6h18"/>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                            </svg>
-                            <span>Hapus Semua Data</span>
-                        </a>
-                    </li>
+                    -->
                 </ul>
             </div>
 
@@ -1145,29 +1137,38 @@
                         </div>
                     <?php endif; ?>
 
-                    <div class="view-mode-toggle">
-                        <button type="button" class="btn-view-mode active" id="view-mode-grid"
-                            onclick="setViewMode('grid')" title="Tampilan Grid">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5">
-                                <rect width="7" height="7" x="3" y="3" rx="1.5" />
-                                <rect width="7" height="7" x="14" y="3" rx="1.5" />
-                                <rect width="7" height="7" x="14" y="14" rx="1.5" />
-                                <rect width="7" height="7" x="3" y="14" rx="1.5" />
-                            </svg>
-                        </button>
-                        <button type="button" class="btn-view-mode" id="view-mode-list" onclick="setViewMode('list')"
-                            title="Tampilan Tabel">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2.5">
-                                <line x1="8" x2="21" y1="6" y2="6" />
-                                <line x1="8" x2="21" y1="12" y2="12" />
-                                <line x1="8" x2="21" y1="18" y2="18" />
-                                <line x1="3" x2="3.01" y1="6" y2="6" />
-                                <line x1="3" x2="3.01" y1="12" y2="12" />
-                                <line x1="3" x2="3.01" y1="18" y2="18" />
-                            </svg>
-                        </button>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <?php if (!empty($folders) || !empty($files)): ?>
+                            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #94a3b8; cursor: pointer; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--card-border); user-select: none;">
+                                <input type="checkbox" id="master-select-all-checkbox" onclick="toggleSelectAll(this)" style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px;">
+                                <span>Pilih Semua</span>
+                            </label>
+                        <?php endif; ?>
+
+                        <div class="view-mode-toggle">
+                            <button type="button" class="btn-view-mode active" id="view-mode-grid"
+                                onclick="setViewMode('grid')" title="Tampilan Grid">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <rect width="7" height="7" x="3" y="3" rx="1.5" />
+                                    <rect width="7" height="7" x="14" y="3" rx="1.5" />
+                                    <rect width="7" height="7" x="14" y="14" rx="1.5" />
+                                    <rect width="7" height="7" x="3" y="14" rx="1.5" />
+                                </svg>
+                            </button>
+                            <button type="button" class="btn-view-mode" id="view-mode-list" onclick="setViewMode('list')"
+                                title="Tampilan Tabel">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <line x1="8" x2="21" y1="6" y2="6" />
+                                    <line x1="8" x2="21" y1="12" y2="12" />
+                                    <line x1="8" x2="21" y1="18" y2="18" />
+                                    <line x1="3" x2="3.01" y1="6" y2="6" />
+                                    <line x1="3" x2="3.01" y1="12" y2="12" />
+                                    <line x1="3" x2="3.01" y1="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1936,10 +1937,12 @@
             <span class="bulk-count-badge" id="bulk-count-text">0 item dipilih</span>
         </div>
         <div class="bulk-buttons">
+            <!--
             <button type="button" onclick="downloadSelectedZip()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y1="3"/></svg>
                 <span>Unduh ZIP</span>
             </button>
+            -->
             <button type="button" class="btn-bulk-delete" onclick="openBulkDeleteModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                 <span>Hapus Terpilih</span>

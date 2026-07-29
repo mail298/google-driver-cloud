@@ -1288,6 +1288,22 @@ function getSelectedItems() {
 
 function updateSelectionState() {
     const selected = getSelectedItems();
+    const allCheckboxes = document.querySelectorAll('.item-checkbox');
+    const masterCbs = document.querySelectorAll('#select-all-checkbox, #master-select-all-checkbox');
+
+    masterCbs.forEach(masterCb => {
+        if (allCheckboxes.length > 0 && selected.length === allCheckboxes.length) {
+            masterCb.checked = true;
+            masterCb.indeterminate = false;
+        } else if (selected.length > 0) {
+            masterCb.checked = false;
+            masterCb.indeterminate = true;
+        } else {
+            masterCb.checked = false;
+            masterCb.indeterminate = false;
+        }
+    });
+
     const bar = document.getElementById('bulk-action-bar');
     const countText = document.getElementById('bulk-count-text');
 
@@ -1307,16 +1323,24 @@ function toggleSelectAll(masterCb) {
     checkboxes.forEach(cb => {
         cb.checked = isChecked;
     });
+    const masterCbs = document.querySelectorAll('#select-all-checkbox, #master-select-all-checkbox');
+    masterCbs.forEach(cb => {
+        cb.checked = isChecked;
+        cb.indeterminate = false;
+    });
     updateSelectionState();
 }
 
 function deselectAllItems() {
     const checkboxes = document.querySelectorAll('.item-checkbox');
-    const masterCb = document.getElementById('select-all-checkbox');
+    const masterCbs = document.querySelectorAll('#select-all-checkbox, #master-select-all-checkbox');
     checkboxes.forEach(cb => {
         cb.checked = false;
     });
-    if (masterCb) masterCb.checked = false;
+    masterCbs.forEach(cb => {
+        cb.checked = false;
+        cb.indeterminate = false;
+    });
     updateSelectionState();
 }
 
