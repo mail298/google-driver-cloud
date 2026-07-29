@@ -6,14 +6,39 @@ class UserModel {
         return dirname(dirname(__DIR__)) . '/config/users.json';
     }
 
+    private static $cacheMemory = [];
+
+    private static function cacheFetch($key) {
+        if (function_exists('apcu_fetch')) {
+            return apcu_fetch($key);
+        }
+        return isset(self::$cacheMemory[$key]) ? self::$cacheMemory[$key] : false;
+    }
+
+    private static function cacheStore($key, $var, $ttl = 0) {
+        if (function_exists('apcu_store')) {
+            return apcu_store($key, $var, $ttl);
+        }
+        self::$cacheMemory[$key] = $var;
+        return true;
+    }
+
+    private static function cacheDelete($key) {
+        if (function_exists('apcu_delete')) {
+            return apcu_delete($key);
+        }
+        unset(self::$cacheMemory[$key]);
+        return true;
+    }
+
     public static function getAllUsers() {
-        $cached = apcu_fetch('users_all');
+        $cached = self::cacheFetch('users_all');
         if ($cached !== false) return $cached;
         $path = self::getFilePath();
         if (file_exists($path)) {
             $data = json_decode(file_get_contents($path), true);
             if (is_array($data)) {
-                apcu_store('users_all', $data, 30);
+                self::cacheStore('users_all', $data, 30);
                 return $data;
             }
         }
@@ -35,14 +60,14 @@ class UserModel {
                 'root_folder_id' => ''
             ]
         ];
-        apcu_store('users_all', $default, 30);
+        self::cacheStore('users_all', $default, 30);
         return $default;
     }
 
     public static function saveAllUsers($users) {
         $path = self::getFilePath();
         file_put_contents($path, json_encode(array_values($users), JSON_PRETTY_PRINT));
-        apcu_delete('users_all');
+        self::cacheDelete('users_all');
     }
 
     public static function getUserByUsername($username) {

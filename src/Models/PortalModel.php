@@ -174,9 +174,26 @@ class PortalModel {
         return openssl_decrypt(base64_decode($encryptedBase64), 'aes-256-gcm', $key, OPENSSL_RAW_DATA, base64_decode($ivBase64), base64_decode($tagBase64));
     }
 
+    private static $cacheMemory = [];
+
+    private static function cacheFetch($key) {
+        if (function_exists('apcu_fetch')) {
+            return apcu_fetch($key);
+        }
+        return isset(self::$cacheMemory[$key]) ? self::$cacheMemory[$key] : false;
+    }
+
+    private static function cacheStore($key, $var, $ttl = 0) {
+        if (function_exists('apcu_store')) {
+            return apcu_store($key, $var, $ttl);
+        }
+        self::$cacheMemory[$key] = $var;
+        return true;
+    }
+
     public static function getGoogleDriveToken($pdo, $userId) {
         $cacheKey = 'gdrive_token_' . $userId;
-        $cached = apcu_fetch($cacheKey);
+        $cached = self::cacheFetch($cacheKey);
         if ($cached !== false) return $cached;
 
         $encryptionKey = Config::get('TOKEN_ENCRYPTION_KEY');
@@ -215,7 +232,7 @@ class PortalModel {
             curl_close($ch);
             if ($code === 200) {
                 $result = ['token' => $accessToken, 'connected_account_id' => $acc['id']];
-                apcu_store($cacheKey, $result, 1500);
+                self::cacheStore($cacheKey, $result, 1500);
                 return $result;
             }
         }
@@ -235,7 +252,7 @@ class PortalModel {
             $data = json_decode($res, true);
             if (isset($data['access_token'])) {
                 $result = ['token' => $data['access_token'], 'connected_account_id' => $acc['id']];
-                apcu_store($cacheKey, $result, 1500);
+                self::cacheStore($cacheKey, $result, 1500);
                 return $result;
             }
         }
