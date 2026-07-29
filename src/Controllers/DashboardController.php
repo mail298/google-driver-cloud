@@ -51,7 +51,7 @@ class DashboardController {
                 // Auto-create folder record in DB so client files/folders are isolated to this root
                 try {
                     $connectedAccountId = PortalModel::getFirstConnectedAccountId($pdo, $gatewayUserId);
-                    $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE provider_folder_id = VALUES(provider_folder_id)");
+                    $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE provider_folder_id = VALUES(provider_folder_id), deleted_at = NULL, updated_at = NOW()");
                     $stmt->execute([$clientRootFolderId, $userId, $connectedAccountId, $clientRootFolderId]);
                     $effectiveRootDbId = $clientRootFolderId;
                 } catch (Exception $e) {

@@ -1,6 +1,8 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Models\PortalModel.php
 
+require_once dirname(__DIR__) . '/Models/UserModel.php';
+
 class PortalModel {
     public static function generateUuid() {
         return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
@@ -315,11 +317,9 @@ class PortalModel {
     public static function createFolder($pdo, $userId, $parentId, $name) {
         $effectiveParentId = $parentId;
         if (empty($effectiveParentId)) {
-            $stmtUser = $pdo->prepare("SELECT root_folder_id FROM users WHERE id = ? LIMIT 1");
-            $stmtUser->execute([$userId]);
-            $userRow = $stmtUser->fetch();
-            if ($userRow && !empty($userRow['root_folder_id'])) {
-                $effectiveParentId = self::extractFolderId($userRow['root_folder_id']);
+            $user = UserModel::getUserById($userId);
+            if ($user && !empty($user['root_folder_id'])) {
+                $effectiveParentId = self::extractFolderId($user['root_folder_id']);
             }
         }
 
