@@ -1431,9 +1431,14 @@
                     <span id="queue-percent-text">0%</span>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; flex-shrink: 0;">
+            <div style="display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap;">
+                <button type="button" onclick="triggerFileInput()"
+                    style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 10px; cursor:pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    Tambah Berkas
+                </button>
                 <button type="button" id="btn-upload-start" onclick="startUploadQueue()"
-                    style="flex: 1; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                     Upload Terpilih
                 </button>
                 <button type="button" onclick="closeUploadQueue()"
@@ -1843,7 +1848,7 @@
     <script>
         const CURRENT_FOLDER_ID = <?= json_encode($folderId) ?>;
     </script>
-    <script src="/assets/js/portal.js"></script>
+    <script src="/assets/js/portal.js?v=<?= filemtime(__DIR__ . '/../../public/assets/js/portal.js') ?>"></script>
 </body>
 
 </html>
