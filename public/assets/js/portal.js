@@ -75,75 +75,329 @@ function submitCreateFolder() {
         });
 }
 
-// Handle file selection
+// Helper functions
+function formatFileSize(bytes) {
+    if (bytes >= 1099511627776) return (bytes / 1099511627776).toFixed(2) + ' TB';
+    if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(2) + ' GB';
+    if (bytes >= 1048576) return (bytes / 1048576).toFixed(2) + ' MB';
+    if (bytes >= 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return bytes + ' B';
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+// Upload Queue State
+let uploadQueueItems = [];
+let isUploading = false;
+const MAX_BATCH_BYTES = 5 * 1024 * 1024 * 1024; // 5GB limit per batch
+
+// Handle file selection (multi-file)
 function handleFileSelect(event) {
     const files = event.target.files;
     if (files.length === 0) return;
-    uploadFileObject(files[0]);
+    addFilesToQueue(files);
+    openUploadQueue();
+    event.target.value = '';
 }
 
-// Core File Upload Function
-function uploadFileObject(file) {
+// Add files to queue
+function addFilesToQueue(fileList) {
+    for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        uploadQueueItems.push({
+            file: file,
+            name: file.name,
+            size: file.size,
+            checked: true,
+            status: 'waiting',
+            progress: 0,
+            error: ''
+        });
+    }
+    renderUploadQueue();
+
+    // Check if total selected size exceeds 5GB batch limit
+    var totalBatchBytes = 0;
+    uploadQueueItems.forEach(function(item) {
+        if (item.checked) totalBatchBytes += item.size;
+    });
+    if (totalBatchBytes > MAX_BATCH_BYTES) {
+        showBatchSizePopup(totalBatchBytes, MAX_BATCH_BYTES);
+        document.getElementById('btn-upload-start').disabled = true;
+    } else {
+        document.getElementById('btn-upload-start').disabled = false;
+    }
+}
+
+// Render queue list
+function renderUploadQueue() {
+    const list = document.getElementById('upload-queue-list');
+    if (!list) return;
+
+    if (uploadQueueItems.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">Tidak ada berkas dipilih.</div>';
+        document.getElementById('btn-upload-start').disabled = true;
+        return;
+    }
+
+    let html = '';
+    let checkedCount = 0;
+    uploadQueueItems.forEach((item, idx) => {
+        if (item.checked) checkedCount++;
+        const sizeStr = formatFileSize(item.size);
+        let statusHtml = '';
+        if (item.status === 'waiting') {
+            statusHtml = '<span style="color:#94a3b8; font-size:11px;">Menunggu</span>';
+        } else if (item.status === 'uploading') {
+            statusHtml = '<div style="display:flex; align-items:center; gap:6px;"><div class="progress-bar-bg" style="flex:1; background:rgba(255,255,255,0.08); height:4px; border-radius:4px; overflow:hidden;"><div class="progress-bar-fill" style="background:#3b82f6; height:100%; width:' + item.progress + '%;"></div></div><span style="color:#60a5fa; font-size:11px; min-width:32px; text-align:right;">' + item.progress + '%</span></div>';
+        } else if (item.status === 'completed') {
+            statusHtml = '<span style="color:#34d399; font-size:11px; font-weight:600;">Selesai ✓</span>';
+        } else if (item.status === 'failed') {
+            statusHtml = '<span style="color:#f87171; font-size:11px;" title="' + item.error + '">Gagal</span>';
+        }
+
+        html += '<div class="upload-queue-item" data-index="' + idx + '" style="display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.04);">';
+        html += '<input type="checkbox" class="queue-item-checkbox" data-index="' + idx + '" ' + (item.checked ? 'checked' : '') + ' ' + (item.status === 'uploading' || item.status === 'completed' ? 'disabled' : '') + ' onchange="toggleQueueItem(' + idx + ')" style="accent-color:#3b82f6; cursor:pointer; width:16px; height:16px; flex-shrink:0;">';
+        html += '<div style="flex:1; min-width:0;">';
+        html += '<div style="font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
+        html += '<div style="font-size:11px; color:#64748b;">' + sizeStr + '</div>';
+        html += '</div>';
+        html += '<div style="flex-shrink:0; min-width:60px; text-align:right;">' + statusHtml + '</div>';
+        html += '</div>';
+    });
+    list.innerHTML = html;
+
+    var totalCheckedBytes = 0;
+    uploadQueueItems.forEach(function(item) {
+        if (item.checked) totalCheckedBytes += item.size;
+    });
+    var overBatchLimit = totalCheckedBytes > MAX_BATCH_BYTES;
+    document.getElementById('btn-upload-start').disabled = (checkedCount === 0 || isUploading || overBatchLimit);
+    if (overBatchLimit) {
+        document.getElementById('btn-upload-start').textContent = 'Melebihi batas ' + formatFileSize(MAX_BATCH_BYTES);
+    } else if (isUploading) {
+        document.getElementById('btn-upload-start').textContent = 'Mengunggah...';
+    } else {
+        document.getElementById('btn-upload-start').textContent = 'Upload Terpilih (' + checkedCount + ')';
+    }
+}
+
+function toggleQueueItem(index) {
+    if (isUploading) return;
+    uploadQueueItems[index].checked = !uploadQueueItems[index].checked;
+    renderUploadQueue();
+
+    // Re-check batch limit after toggle
+    var totalBatchBytes = 0;
+    uploadQueueItems.forEach(function(item) {
+        if (item.checked) totalBatchBytes += item.size;
+    });
+    if (totalBatchBytes > MAX_BATCH_BYTES) {
+        showBatchSizePopup(totalBatchBytes, MAX_BATCH_BYTES);
+    } else {
+        closeBatchSizePopup();
+    }
+}
+
+function openUploadQueue() {
+    const modal = document.getElementById('upload-queue-modal');
+    if (modal) modal.classList.add('active');
+    renderUploadQueue();
+}
+
+function closeUploadQueue() {
+    if (isUploading) return;
+    const modal = document.getElementById('upload-queue-modal');
+    if (modal) modal.classList.remove('active');
+    closeBatchSizePopup();
+    if (!isUploading) {
+        uploadQueueItems = [];
+        renderUploadQueue();
+    }
+}
+
+// Start sequential upload queue
+function startUploadQueue() {
+    if (isUploading) return;
+
+    // Re-check batch 5GB limit before starting
+    var totalBatchBytes = 0;
+    uploadQueueItems.forEach(function(item) {
+        if (item.checked) totalBatchBytes += item.size;
+    });
+    if (totalBatchBytes > MAX_BATCH_BYTES) {
+        showBatchSizePopup(totalBatchBytes, MAX_BATCH_BYTES);
+        return;
+    }
+
+    const checked = uploadQueueItems.filter(i => i.checked && i.status !== 'completed');
+    if (checked.length === 0) return;
+
+    isUploading = true;
+    document.getElementById('upload-queue-summary').style.display = 'block';
+    document.getElementById('btn-upload-start').textContent = 'Mengunggah...';
+    document.getElementById('btn-upload-start').disabled = true;
+
+    updateQueueSummary();
+    processQueueItem(0);
+}
+
+function updateQueueSummary() {
+    const total = uploadQueueItems.filter(i => i.checked).length;
+    const done = uploadQueueItems.filter(i => i.checked && i.status === 'completed').length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    document.getElementById('queue-status-text').textContent = done + ' / ' + total + ' selesai';
+    document.getElementById('queue-percent-text').textContent = pct + '%';
+    document.getElementById('queue-progress-fill').style.width = pct + '%';
+}
+
+function processQueueItem(idx) {
+    // Find next checked item that's not completed
+    while (idx < uploadQueueItems.length) {
+        const item = uploadQueueItems[idx];
+        if (item.checked && item.status !== 'completed') {
+            break;
+        }
+        idx++;
+    }
+
+    if (idx >= uploadQueueItems.length) {
+        isUploading = false;
+        document.getElementById('btn-upload-start').textContent = 'Upload Terpilih';
+        document.getElementById('btn-upload-start').disabled = false;
+        updateQueueSummary();
+        return;
+    }
+
+    const item = uploadQueueItems[idx];
+    item.status = 'uploading';
+    item.progress = 0;
+    renderUploadQueue();
+
+    uploadFileObject(item.file, function(pct) {
+        item.progress = pct;
+        updateQueueSummary();
+        const el = document.querySelector('.upload-queue-item[data-index="' + idx + '"]');
+        if (el) {
+            const statusCell = el.querySelector('div:last-child');
+            if (statusCell) {
+                statusCell.innerHTML = '<div style="display:flex; align-items:center; gap:6px;"><div class="progress-bar-bg" style="flex:1; background:rgba(255,255,255,0.08); height:4px; border-radius:4px; overflow:hidden;"><div class="progress-bar-fill" style="background:#3b82f6; height:100%; width:' + pct + '%;"></div></div><span style="color:#60a5fa; font-size:11px; min-width:32px; text-align:right;">' + pct + '%</span></div>';
+            }
+        }
+    }, function(success, errorMsg) {
+        if (success) {
+            item.status = 'completed';
+            item.progress = 100;
+        } else {
+            item.status = 'failed';
+            item.error = errorMsg || 'Unknown error';
+
+            // Check if failure is due to quota
+            if (errorMsg && (errorMsg.toLowerCase().includes('kuota') || errorMsg.toLowerCase().includes('quota') || errorMsg.toLowerCase().includes('melebihi sisa'))) {
+                // Show quota popup with remaining failed items
+                const remaining = uploadQueueItems.slice(idx).filter(i => i.checked && i.status !== 'completed');
+                showQuotaPopup(remaining);
+                // Mark remaining as failed too
+                remaining.forEach(r => { r.status = 'failed'; r.error = 'Kuota tidak mencukupi'; });
+                isUploading = false;
+                document.getElementById('btn-upload-start').textContent = 'Upload Terpilih';
+                document.getElementById('btn-upload-start').disabled = false;
+                renderUploadQueue();
+                updateQueueSummary();
+                return;
+            }
+        }
+        renderUploadQueue();
+        updateQueueSummary();
+        processQueueItem(idx + 1);
+    });
+}
+
+// Core File Upload Function with callbacks
+function uploadFileObject(file, onProgress, onComplete) {
     const formData = new FormData();
     formData.append('file', file);
     if (typeof CURRENT_FOLDER_ID !== 'undefined' && CURRENT_FOLDER_ID) {
         formData.append('folderId', CURRENT_FOLDER_ID);
     }
 
-    const progressContainer = document.getElementById('progress-container');
-    const progressFill = document.getElementById('progress-fill');
-    const progressPercent = document.getElementById('progress-percent');
-
-    if (progressContainer) {
-        progressContainer.style.display = 'block';
-        if (progressFill) progressFill.style.width = '0%';
-        if (progressPercent) progressPercent.innerText = '0%';
-    }
-
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/upload', true);
 
     xhr.upload.onprogress = function (e) {
-        if (e.lengthComputable && progressFill && progressPercent) {
+        if (e.lengthComputable && onProgress) {
             const percentComplete = Math.round((e.loaded / e.total) * 100);
-            progressFill.style.width = percentComplete + '%';
-            progressPercent.innerText = percentComplete + '%';
+            onProgress(percentComplete);
         }
     };
 
     xhr.onload = function () {
-        if (progressContainer) progressContainer.style.display = 'none';
-
         if (xhr.status === 200) {
             try {
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
-                    window.location.reload();
+                    if (onComplete) onComplete(true, '');
                 } else {
-                    alert('Gagal mengunggah: ' + response.message);
+                    if (onComplete) onComplete(false, response.message || 'Gagal mengunggah');
                 }
             } catch (e) {
-                alert('Respons pengunggahan tidak valid.');
+                if (onComplete) onComplete(false, 'Respons pengunggahan tidak valid.');
             }
         } else {
-            alert('Gagal mengunggah dengan kode status ' + xhr.status);
+            if (onComplete) onComplete(false, 'Kode status ' + xhr.status);
         }
-
-        const fileInput = document.getElementById('file-input');
-        if (fileInput) fileInput.value = '';
     };
 
     xhr.onerror = function () {
-        if (progressContainer) progressContainer.style.display = 'none';
-        alert('Terjadi kesalahan saat mengunggah berkas.');
-        const fileInput = document.getElementById('file-input');
-        if (fileInput) fileInput.value = '';
+        if (onComplete) onComplete(false, 'Kesalahan koneksi.');
     };
 
     xhr.send(formData);
 }
 
-// Drag & Drop Listeners
+// Batch size exceeded popup (5GB limit)
+function showBatchSizePopup(totalBytes, maxBytes) {
+    const modal = document.getElementById('batch-size-popup-modal');
+    const totalEl = document.getElementById('batch-total-size');
+    const maxEl = document.getElementById('batch-max-size');
+    if (!modal) return;
+    if (totalEl) totalEl.textContent = formatFileSize(totalBytes);
+    if (maxEl) maxEl.textContent = formatFileSize(maxBytes);
+    modal.classList.add('active');
+}
+
+function closeBatchSizePopup() {
+    const modal = document.getElementById('batch-size-popup-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+// Quota popup
+function showQuotaPopup(failedItems) {
+    const modal = document.getElementById('quota-popup-modal');
+    const list = document.getElementById('quota-failed-list');
+    if (!modal || !list) return;
+
+    let html = '';
+    failedItems.forEach(item => {
+        html += '<div style="padding: 4px 0; display:flex; justify-content:space-between; gap:8px;">';
+        html += '<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + escapeHtml(item.name) + '</span>';
+        html += '<span style="flex-shrink:0; font-family:monospace; color:#94a3b8;">' + formatFileSize(item.size) + '</span>';
+        html += '</div>';
+    });
+    list.innerHTML = html;
+    modal.classList.add('active');
+}
+
+function closeQuotaPopup() {
+    const modal = document.getElementById('quota-popup-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+// Drag & Drop Listeners - add to queue
 document.addEventListener('dragover', function (e) {
     e.preventDefault();
     const overlay = document.getElementById('drag-overlay');
@@ -164,7 +418,8 @@ document.addEventListener('drop', function (e) {
 
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
-        uploadFileObject(files[0]);
+        addFilesToQueue(files);
+        openUploadQueue();
     }
 });
 

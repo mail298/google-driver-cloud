@@ -1366,8 +1366,8 @@
         </main>
     </div>
 
-    <!-- Hidden Input for File Upload -->
-    <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
+    <!-- Hidden Input for File Upload (Multiple) -->
+    <input type="file" id="file-input" style="display: none;" multiple onchange="handleFileSelect(event)">
 
     <!-- New Folder Modal -->
     <div class="modal-overlay" id="folder-modal">
@@ -1411,17 +1411,92 @@
         </div>
     </div>
 
-    <!-- Upload Progress Popup -->
-    <div class="upload-progress-container" id="progress-container"
-        style="background: #0f172a; border: 1px solid var(--card-border); border-radius: 14px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-        <div class="progress-header" style="color:#fff; font-weight: 700; margin-bottom: 8px;">
-            <span>Mengunggah berkas...</span>
-            <span id="progress-percent" style="color: #60a5fa;">0%</span>
+    <!-- Upload Queue Modal -->
+    <div class="modal-overlay" id="upload-queue-modal">
+        <div class="modal-card"
+            style="max-width: 600px; width: 94%; max-height: 80vh; display: flex; flex-direction: column; background: #0f172a; border: 1px solid var(--card-border); border-radius: 20px; padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Unggah Berkas</h3>
+                <button type="button" onclick="closeUploadQueue()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:22px;">&times;</button>
+            </div>
+            <div id="upload-queue-list"
+                style="flex: 1; overflow-y: auto; margin-bottom: 12px; min-height: 100px; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 8px;">
+            </div>
+            <div id="upload-queue-summary" style="flex-shrink: 0; display: none;">
+                <div class="progress-bar-bg" style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
+                    <div class="progress-bar-fill" id="queue-progress-fill" style="background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 0%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 12px;">
+                    <span id="queue-status-text">0 / 0 selesai</span>
+                    <span id="queue-percent-text">0%</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                <button type="button" id="btn-upload-start" onclick="startUploadQueue()"
+                    style="flex: 1; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    Upload Terpilih
+                </button>
+                <button type="button" onclick="closeUploadQueue()"
+                    style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 10px 16px; border-radius: 10px; cursor:pointer; font-weight: 600;">Tutup</button>
+            </div>
         </div>
-        <div class="progress-bar-bg"
-            style="background: rgba(255,255,255,0.08); height: 8px; border-radius: 10px; overflow: hidden;">
-            <div class="progress-bar-fill" id="progress-fill"
-                style="background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 0%;"></div>
+    </div>
+
+    <!-- Batch Size Exceeded Popup Modal (5GB Limit) -->
+    <div class="modal-overlay" id="batch-size-popup-modal">
+        <div class="modal-card"
+            style="max-width: 480px; width: 92%; background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 20px; padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 10px; color: #fbbf24; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                </div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Batas Unggah Tercapai</h3>
+            </div>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 8px; line-height: 1.5;">
+                Total ukuran berkas yang dipilih melebihi batas maksimal <strong id="batch-max-size" style="color: #fbbf24;">5 GB</strong> per sesi unggah.
+            </p>
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; margin-bottom: 4px;">
+                    <span>Total ukuran dipilih:</span>
+                    <span id="batch-total-size" style="color: #fca5a5; font-weight: 700; font-family: monospace;">0 B</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8;">
+                    <span>Batas maksimal:</span>
+                    <span style="color: #6ee7b7; font-weight: 700; font-family: monospace;">5 GB</span>
+                </div>
+            </div>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
+                Pilihan berkas Anda tidak dihapus — cukup <strong>hapus centang</strong> beberapa berkas untuk mengurangi total ukuran, lalu klik "Upload Terpilih".
+            </p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeBatchSizePopup()"
+                    style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quota Exceeded Popup Modal -->
+    <div class="modal-overlay" id="quota-popup-modal">
+        <div class="modal-card"
+            style="max-width: 440px; width: 92%; background: #0f172a; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 20px; padding: 24px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 10px; color: #f87171; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                </div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Batas Kuota Tercapai</h3>
+            </div>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 8px; line-height: 1.5;">
+                Penyimpanan Anda tidak mencukupi untuk mengunggah beberapa berkas berikut:
+            </p>
+            <div id="quota-failed-list" style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; margin-bottom: 16px; max-height: 150px; overflow-y: auto; font-size: 13px; color: #fca5a5;">
+            </div>
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
+                File yang berhasil diunggah sebelum batas kuota tercapai akan tetap tersimpan. Anda dapat menghapus beberapa file atau menghubungi administrator untuk menambah kuota.
+            </p>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeQuotaPopup()"
+                    style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer; font-weight: 600;">Mengerti</button>
+            </div>
         </div>
     </div>
 
