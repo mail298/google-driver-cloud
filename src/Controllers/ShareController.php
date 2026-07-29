@@ -19,6 +19,15 @@ class ShareController {
             die("Berkas tidak ditemukan atau telah dihapus.");
         }
 
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        $isImageMime = !empty($file['mime_type']) && strpos($file['mime_type'], 'image/') === 0;
+
+        // Auto-fallback: If landing page requests share link directly inside <img> tag or CSS background
+        if ($isImageMime && ((strpos($accept, 'image/') !== false && strpos($accept, 'text/html') === false) || isset($_GET['raw']) || isset($_GET['img']))) {
+            DownloadProxyController::download();
+            exit;
+        }
+
         require_once dirname(__DIR__) . '/Views/share.php';
     }
 }
