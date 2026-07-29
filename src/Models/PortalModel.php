@@ -3,18 +3,25 @@
 
 require_once dirname(__DIR__) . '/Models/UserModel.php';
 
-class PortalModel {
-    public static function generateUuid() {
-        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+class PortalModel
+{
+    public static function generateUuid()
+    {
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
             mt_rand(0, 0xffff),
             mt_rand(0, 0x0fff) | 0x4000,
             mt_rand(0, 0x3fff) | 0x8000,
-            mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff),
+            mt_rand(0, 0xffff)
         );
     }
 
-    public static function getUserIdFromApiKey($pdo, $apiKey = null) {
+    public static function getUserIdFromApiKey($pdo, $apiKey = null)
+    {
         if (!empty($apiKey)) {
             $prefix = substr($apiKey, 0, 16);
             $stmt = $pdo->prepare("SELECT user_id FROM api_keys WHERE key_prefix = ? AND status = 'active' LIMIT 1");
@@ -32,7 +39,8 @@ class PortalModel {
             if ($row && !empty($row['user_id'])) {
                 return $row['user_id'];
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         // Fallback 2: Any connected account
         try {
@@ -41,7 +49,8 @@ class PortalModel {
             if ($row && !empty($row['user_id'])) {
                 return $row['user_id'];
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         // Fallback 3: Any file record
         try {
@@ -50,14 +59,17 @@ class PortalModel {
             if ($row && !empty($row['user_id'])) {
                 return $row['user_id'];
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
 
         return null;
     }
 
-    public static function getActiveApiKey($pdo) {
+    public static function getActiveApiKey($pdo)
+    {
         $apiKey = Config::get('GATEWAY_API_KEY');
-        if (!empty($apiKey)) return $apiKey;
+        if (!empty($apiKey))
+            return $apiKey;
 
         try {
             $stmt = $pdo->query("SELECT key_prefix FROM api_keys WHERE status = 'active' ORDER BY created_at DESC LIMIT 1");
@@ -68,7 +80,8 @@ class PortalModel {
         }
     }
 
-    public static function getMasterStorageCapacityGb($pdo, $userId = null) {
+    public static function getMasterStorageCapacityGb($pdo, $userId = null)
+    {
         if ($userId) {
             $stmt = $pdo->prepare("
                 SELECT COALESCE(SUM(sa.total_bytes), 0) as total 
@@ -77,37 +90,40 @@ class PortalModel {
                 WHERE ca.user_id = ? AND ca.status = 'connected'
             ");
             $stmt->execute([$userId]);
-            $bytes = (float)($stmt->fetch()['total'] ?? 0);
+            $bytes = (float) ($stmt->fetch()['total'] ?? 0);
             if ($bytes > 0) {
                 return round($bytes / (1024 * 1024 * 1024), 2);
             }
         }
-        
+
         $stmt = $pdo->query("
             SELECT COALESCE(SUM(sa.total_bytes), 0) as total 
             FROM storage_accounts sa 
             JOIN connected_accounts ca ON sa.connected_account_id = ca.id 
             WHERE ca.status = 'connected'
         ");
-        $bytes = (float)($stmt->fetch()['total'] ?? 0);
+        $bytes = (float) ($stmt->fetch()['total'] ?? 0);
         if ($bytes > 0) {
             return round($bytes / (1024 * 1024 * 1024), 2);
         }
 
-        return (float)Config::get('GATEWAY_MASTER_STORAGE_GB', 100);
+        return (float) Config::get('GATEWAY_MASTER_STORAGE_GB', 100);
     }
 
-    public static function getFirstConnectedAccountId($pdo, $userId) {
+    public static function getFirstConnectedAccountId($pdo, $userId)
+    {
         $stmt = $pdo->prepare("SELECT id FROM connected_accounts WHERE user_id = ? AND status = 'connected' LIMIT 1");
         $stmt->execute([$userId]);
         $row = $stmt->fetch();
         return $row ? $row['id'] : null;
     }
 
-    public static function extractFolderId($input) {
-        $input = trim((string)$input);
-        if (empty($input)) return '';
-        
+    public static function extractFolderId($input)
+    {
+        $input = trim((string) $input);
+        if (empty($input))
+            return '';
+
         // Extract raw ID if input is a full Google Drive URL like https://drive.google.com/drive/folders/1IDuwu4B...
         if (preg_match('/\/folders\/([a-zA-Z0-9_-]+)/', $input, $matches)) {
             return $matches[1];
@@ -115,64 +131,93 @@ class PortalModel {
         if (preg_match('/[?&]id=([a-zA-Z0-9_-]+)/', $input, $matches)) {
             return $matches[1];
         }
-        
+
         return $input;
     }
 
-    public static function getFolders($pdo, $userId, $parentId) {
+    public static function getFolders($pdo, $userId, $parentId)
+    {
+        $gatewayUserId = self::getUserIdFromApiKey($pdo);
+
         if ($parentId === null) {
             // At root level: exclude the Folder Klien container (it's a root wrapper, not a user folder)
-            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND parent_id IS NULL AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
-            $stmt->execute([$userId]);
+            $stmt = $pdo->prepare("SELECT * FROM folders WHERE (user_id = ? OR user_id = ?) AND parent_id IS NULL AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
+            $stmt->execute([$userId, $gatewayUserId]);
         } else {
             $cleanParentId = self::extractFolderId($parentId);
             $parentFolder = self::getFolder($pdo, $userId, $cleanParentId);
-            $effectiveDbParentId = $parentFolder ? $parentFolder['id'] : $cleanParentId;
+
+            $parentIds = array_values(array_filter(array_unique([
+                $cleanParentId,
+                $parentFolder ? $parentFolder['id'] : null,
+                $parentFolder ? ($parentFolder['provider_folder_id'] ?? null) : null
+            ])));
+
+            $placeholders = implode(',', array_fill(0, count($parentIds), '?'));
+            $params = array_merge([$userId, $gatewayUserId], $parentIds);
 
             // Inside a folder: show direct children, excluding any Folder Klien wrappers
-            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND (parent_id = ? OR parent_id = ?) AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
-            $stmt->execute([$userId, $cleanParentId, $effectiveDbParentId]);
+            $stmt = $pdo->prepare("SELECT * FROM folders WHERE (user_id = ? OR user_id = ?) AND parent_id IN ($placeholders) AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
+            $stmt->execute($params);
         }
         return $stmt->fetchAll();
     }
 
-    public static function getAllFolders($pdo, $userId) {
-        $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND deleted_at IS NULL ORDER BY name ASC");
-        $stmt->execute([$userId]);
+    public static function getAllFolders($pdo, $userId)
+    {
+        $gatewayUserId = self::getUserIdFromApiKey($pdo);
+        $stmt = $pdo->prepare("SELECT * FROM folders WHERE (user_id = ? OR user_id = ?) AND deleted_at IS NULL ORDER BY name ASC");
+        $stmt->execute([$userId, $gatewayUserId]);
         return $stmt->fetchAll();
     }
 
-    public static function getFolder($pdo, $userId, $folderId) {
-        if (!$folderId) return null;
+    public static function getFolder($pdo, $userId, $folderId)
+    {
+        if (!$folderId)
+            return null;
         $cleanId = self::extractFolderId($folderId);
-        
+        $gatewayUserId = self::getUserIdFromApiKey($pdo);
+
         $stmt = $pdo->prepare("
             SELECT * FROM folders 
-            WHERE user_id = ? AND (id = ? OR provider_folder_id = ?) AND deleted_at IS NULL 
+            WHERE (user_id = ? OR user_id = ?) AND (id = ? OR provider_folder_id = ?) AND deleted_at IS NULL 
             LIMIT 1
         ");
-        $stmt->execute([$userId, $cleanId, $cleanId]);
+        $stmt->execute([$userId, $gatewayUserId, $cleanId, $cleanId]);
         return $stmt->fetch();
     }
 
-    public static function getFiles($pdo, $userId, $folderId) {
+    public static function getFiles($pdo, $userId, $folderId)
+    {
+        $gatewayUserId = self::getUserIdFromApiKey($pdo);
+
         if ($folderId === null) {
-            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND folder_id IS NULL AND status = 'active' ORDER BY name ASC");
-            $stmt->execute([$userId]);
+            $stmt = $pdo->prepare("SELECT * FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id IS NULL AND status = 'active' ORDER BY name ASC");
+            $stmt->execute([$userId, $gatewayUserId]);
         } else {
             $cleanFolderId = self::extractFolderId($folderId);
             $targetFolder = self::getFolder($pdo, $userId, $cleanFolderId);
-            $effectiveDbFolderId = $targetFolder ? $targetFolder['id'] : $cleanFolderId;
 
-            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND (folder_id = ? OR folder_id = ?) AND status = 'active' ORDER BY name ASC");
-            $stmt->execute([$userId, $cleanFolderId, $effectiveDbFolderId]);
+            $folderIds = array_values(array_filter(array_unique([
+                $cleanFolderId,
+                $targetFolder ? $targetFolder['id'] : null,
+                $targetFolder ? ($targetFolder['provider_folder_id'] ?? null) : null
+            ])));
+
+            $placeholders = implode(',', array_fill(0, count($folderIds), '?'));
+            $params = array_merge([$userId, $gatewayUserId], $folderIds);
+
+            $stmt = $pdo->prepare("SELECT * FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id IN ($placeholders) AND status = 'active' ORDER BY name ASC");
+            $stmt->execute($params);
         }
         return $stmt->fetchAll();
     }
 
-    public static function decryptText($payload, $secret) {
+    public static function decryptText($payload, $secret)
+    {
         $parts = explode(':', $payload);
-        if (count($parts) !== 3) return null;
+        if (count($parts) !== 3)
+            return null;
         list($ivBase64, $tagBase64, $encryptedBase64) = $parts;
         $key = hash('sha256', $secret, true);
         return openssl_decrypt(base64_decode($encryptedBase64), 'aes-256-gcm', $key, OPENSSL_RAW_DATA, base64_decode($ivBase64), base64_decode($tagBase64));
@@ -180,14 +225,16 @@ class PortalModel {
 
     private static $cacheMemory = [];
 
-    private static function cacheFetch($key) {
+    private static function cacheFetch($key)
+    {
         if (function_exists('apcu_fetch')) {
             return apcu_fetch($key);
         }
         return isset(self::$cacheMemory[$key]) ? self::$cacheMemory[$key] : false;
     }
 
-    private static function cacheStore($key, $var, $ttl = 0) {
+    private static function cacheStore($key, $var, $ttl = 0)
+    {
         if (function_exists('apcu_store')) {
             return apcu_store($key, $var, $ttl);
         }
@@ -195,7 +242,8 @@ class PortalModel {
         return true;
     }
 
-    public static function cacheDelete($key) {
+    public static function cacheDelete($key)
+    {
         if (function_exists('apcu_delete')) {
             return apcu_delete($key);
         }
@@ -203,10 +251,12 @@ class PortalModel {
         return true;
     }
 
-    public static function getGoogleDriveToken($pdo, $userId) {
+    public static function getGoogleDriveToken($pdo, $userId)
+    {
         $cacheKey = 'gdrive_token_' . $userId;
         $cached = self::cacheFetch($cacheKey);
-        if ($cached !== false) return $cached;
+        if ($cached !== false)
+            return $cached;
 
         $encryptionKey = Config::get('TOKEN_ENCRYPTION_KEY');
         $clientId = Config::get('GOOGLE_CLIENT_ID');
@@ -230,7 +280,8 @@ class PortalModel {
             $acc = $stmt->fetch();
         }
 
-        if (!$acc) return null;
+        if (!$acc)
+            return null;
 
         $accessToken = !empty($acc['access_token_encrypted']) ? self::decryptText($acc['access_token_encrypted'], $encryptionKey) : null;
         $refreshToken = !empty($acc['refresh_token_encrypted']) ? self::decryptText($acc['refresh_token_encrypted'], $encryptionKey) : null;
@@ -272,7 +323,8 @@ class PortalModel {
         return null;
     }
 
-    public static function createFolderOnGoogleDrive($pdo, $userId, $parentId, $name) {
+    public static function createFolderOnGoogleDrive($pdo, $userId, $parentId, $name)
+    {
         try {
             $tokenInfo = self::getGoogleDriveToken($pdo, $userId);
             if (!$tokenInfo || empty($tokenInfo['token'])) {
@@ -324,7 +376,8 @@ class PortalModel {
         return null;
     }
 
-    public static function createFolder($pdo, $userId, $parentId, $name) {
+    public static function createFolder($pdo, $userId, $parentId, $name)
+    {
         $effectiveParentId = $parentId;
         if (empty($effectiveParentId)) {
             $user = UserModel::getUserById($userId);
@@ -364,22 +417,26 @@ class PortalModel {
         return $id;
     }
 
-    public static function getFolderBreadcrumbs($pdo, $userId, $folderId) {
+    public static function getFolderBreadcrumbs($pdo, $userId, $folderId)
+    {
         $crumbs = [];
         $currentId = $folderId;
         while ($currentId !== null) {
             $folder = self::getFolder($pdo, $userId, $currentId);
-            if (!$folder) break;
+            if (!$folder)
+                break;
             array_unshift($crumbs, $folder);
             $currentId = $folder['parent_id'];
         }
         return $crumbs;
     }
 
-    public static function updateGoogleDriveItemName($pdo, $userId, $providerId, $newName) {
+    public static function updateGoogleDriveItemName($pdo, $userId, $providerId, $newName)
+    {
         try {
             $tokenInfo = self::getGoogleDriveToken($pdo, $userId);
-            if (!$tokenInfo || empty($tokenInfo['token'])) return false;
+            if (!$tokenInfo || empty($tokenInfo['token']))
+                return false;
 
             $ch = curl_init("https://www.googleapis.com/drive/v3/files/" . urlencode($providerId) . "?supportsAllDrives=true");
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
@@ -398,10 +455,12 @@ class PortalModel {
         }
     }
 
-    public static function trashGoogleDriveItem($pdo, $userId, $providerId) {
+    public static function trashGoogleDriveItem($pdo, $userId, $providerId)
+    {
         try {
             $tokenInfo = self::getGoogleDriveToken($pdo, $userId);
-            if (!$tokenInfo || empty($tokenInfo['token'])) return false;
+            if (!$tokenInfo || empty($tokenInfo['token']))
+                return false;
 
             $ch = curl_init("https://www.googleapis.com/drive/v3/files/" . urlencode($providerId) . "?supportsAllDrives=true");
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
@@ -420,7 +479,8 @@ class PortalModel {
         }
     }
 
-    public static function renameFolder($pdo, $userId, $folderId, $newName) {
+    public static function renameFolder($pdo, $userId, $folderId, $newName)
+    {
         $folder = self::getFolder($pdo, $userId, $folderId);
         if ($folder && !empty($folder['provider_folder_id'])) {
             self::updateGoogleDriveItemName($pdo, $userId, $folder['provider_folder_id'], $newName);
@@ -429,7 +489,8 @@ class PortalModel {
         return $stmt->execute([$newName, $userId, $folderId, $folderId]);
     }
 
-    public static function deleteFolder($pdo, $userId, $folderId) {
+    public static function deleteFolder($pdo, $userId, $folderId)
+    {
         // Protect admin-assigned Root Folder from being deleted
         $user = UserModel::getUserById($userId);
         if ($user && !empty($user['root_folder_id'])) {
@@ -451,7 +512,8 @@ class PortalModel {
         return $stmt->execute([$userId, $folderId, $folderId]);
     }
 
-    public static function renameFile($pdo, $userId, $fileId, $newName) {
+    public static function renameFile($pdo, $userId, $fileId, $newName)
+    {
         $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND id = ? LIMIT 1");
         $stmt->execute([$userId, $fileId]);
         $file = $stmt->fetch();
@@ -462,7 +524,8 @@ class PortalModel {
         return $stmt->execute([$newName, $userId, $fileId]);
     }
 
-    public static function deleteFile($pdo, $userId, $fileId) {
+    public static function deleteFile($pdo, $userId, $fileId)
+    {
         $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND id = ? LIMIT 1");
         $stmt->execute([$userId, $fileId]);
         $file = $stmt->fetch();
@@ -473,12 +536,15 @@ class PortalModel {
         return $stmt->execute([$userId, $fileId]);
     }
 
-    public static function moveItem($pdo, $userId, $type, $id, $targetFolderId) {
-        if ($targetFolderId === '') $targetFolderId = null;
+    public static function moveItem($pdo, $userId, $type, $id, $targetFolderId)
+    {
+        if ($targetFolderId === '')
+            $targetFolderId = null;
 
         if ($type === 'folder') {
             $folder = self::getFolder($pdo, $userId, $id);
-            if (!$folder) return false;
+            if (!$folder)
+                return false;
 
             if (!empty($folder['provider_folder_id'])) {
                 self::moveGoogleDriveItem($pdo, $userId, $folder['provider_folder_id'], $targetFolderId);
@@ -490,7 +556,8 @@ class PortalModel {
             $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND id = ? LIMIT 1");
             $stmt->execute([$userId, $id]);
             $file = $stmt->fetch();
-            if (!$file) return false;
+            if (!$file)
+                return false;
 
             if (!empty($file['provider_file_id'])) {
                 self::moveGoogleDriveItem($pdo, $userId, $file['provider_file_id'], $targetFolderId);
@@ -501,10 +568,12 @@ class PortalModel {
         }
     }
 
-    public static function moveGoogleDriveItem($pdo, $userId, $providerId, $targetParentId) {
+    public static function moveGoogleDriveItem($pdo, $userId, $providerId, $targetParentId)
+    {
         try {
             $tokenInfo = self::getGoogleDriveToken($pdo, $userId);
-            if (!$tokenInfo || empty($tokenInfo['token'])) return false;
+            if (!$tokenInfo || empty($tokenInfo['token']))
+                return false;
 
             $ch = curl_init("https://www.googleapis.com/drive/v3/files/" . urlencode($providerId) . "?fields=parents");
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -524,8 +593,10 @@ class PortalModel {
 
             $url = "https://www.googleapis.com/drive/v3/files/" . urlencode($providerId);
             $queryParams = [];
-            if (!empty($cleanTargetId)) $queryParams['addParents'] = $cleanTargetId;
-            if (!empty($previousParents)) $queryParams['removeParents'] = $previousParents;
+            if (!empty($cleanTargetId))
+                $queryParams['addParents'] = $cleanTargetId;
+            if (!empty($previousParents))
+                $queryParams['removeParents'] = $previousParents;
 
             if (!empty($queryParams)) {
                 $url .= '?' . http_build_query($queryParams);
