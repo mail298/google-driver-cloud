@@ -1000,20 +1000,6 @@ function cmActionCopyLink() {
     }
 }
 
-function cmActionCopyCdnLink() {
-    closeContextMenu();
-    if (activeContextItem && activeContextItem.type === 'file') {
-        const fileId = activeContextItem.id;
-        const cdnUrl = window.location.origin + '/share?id=' + encodeURIComponent(fileId);
-
-        copyToClipboard(cdnUrl).then(() => {
-            showToast('Link Gambar White-Label berhasil disalin!');
-        }).catch(() => {
-            prompt('Salin Link Gambar White-Label:', cdnUrl);
-        });
-    }
-}
-
 function cmActionInvite() {
     closeContextMenu();
     const inviteLink = window.location.origin;

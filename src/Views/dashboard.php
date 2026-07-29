@@ -1874,10 +1874,6 @@
             <kbd
                 style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; color:#94a3b8;">Ctrl+L</kbd>
         </button>
-        <button type="button" class="cm-item" id="cm-btn-copycdn" onclick="cmActionCopyCdnLink()" style="color: #60a5fa;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            <span style="flex:1;">Salin Link CDN Gambar (Super Cepat)</span>
-        </button>
         <button type="button" class="cm-item" onclick="cmActionInvite()">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
