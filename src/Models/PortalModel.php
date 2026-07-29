@@ -288,9 +288,6 @@ class PortalModel {
     }
 
     public static function createFolder($pdo, $userId, $parentId, $name) {
-        $id = self::generateUuid();
-        $connectedAccountId = self::getFirstConnectedAccountId($pdo, $userId);
-
         $effectiveParentId = $parentId;
         if (empty($effectiveParentId)) {
             $stmtUser = $pdo->prepare("SELECT root_folder_id FROM users WHERE id = ? LIMIT 1");
@@ -300,7 +297,27 @@ class PortalModel {
                 $effectiveParentId = self::extractFolderId($userRow['root_folder_id']);
             }
         }
-        
+
+        // Duplicate folder spam protection: return existing folder ID if folder with same name exists under parent
+        if (!empty($effectiveParentId)) {
+            $stmtCheck = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND parent_id = ? AND name = ? LIMIT 1");
+            $stmtCheck->execute([$userId, $effectiveParentId, $name]);
+            $existing = $stmtCheck->fetch();
+            if ($existing) {
+                return $existing['id'];
+            }
+        } else {
+            $stmtCheck = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND parent_id IS NULL AND name = ? LIMIT 1");
+            $stmtCheck->execute([$userId, $name]);
+            $existing = $stmtCheck->fetch();
+            if ($existing) {
+                return $existing['id'];
+            }
+        }
+
+        $id = self::generateUuid();
+        $connectedAccountId = self::getFirstConnectedAccountId($pdo, $userId);
+
         $gdriveResult = self::createFolderOnGoogleDrive($pdo, $userId, $effectiveParentId, $name);
         $providerFolderId = $gdriveResult['provider_folder_id'] ?? null;
         if (!empty($gdriveResult['connected_account_id'])) {

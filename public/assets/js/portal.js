@@ -41,14 +41,30 @@ function closeNewFolderModal() {
     }
 }
 
+let isFolderSubmitting = false;
+
 // Submit folder creation
 function submitCreateFolder() {
+    if (isFolderSubmitting) return;
+
     const nameInput = document.getElementById('new-folder-name');
     const name = nameInput ? nameInput.value.trim() : '';
     if (!name) {
         alert('Silakan masukkan nama folder.');
         return;
     }
+
+    const btn = document.querySelector('#folder-modal button.btn-primary') || document.querySelector('#folder-modal button[onclick*="submitCreateFolder"]');
+    let origText = '';
+    if (btn) {
+        origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<span style="display:inline-block; width:12px; height:12px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spinRing 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Membuat...';
+    }
+
+    isFolderSubmitting = true;
 
     const formData = new FormData();
     formData.append('name', name);
@@ -67,11 +83,25 @@ function submitCreateFolder() {
                 window.location.reload();
             } else {
                 alert('Gagal membuat folder: ' + data.message);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.innerHTML = origText;
+                }
+                isFolderSubmitting = false;
             }
         })
         .catch(err => {
             console.error(err);
             alert('Terjadi kesalahan saat membuat folder.');
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.innerHTML = origText;
+            }
+            isFolderSubmitting = false;
         });
 }
 
@@ -1047,9 +1077,22 @@ function closeMoveModal() {
     if (modal) modal.classList.remove('active');
 }
 
+let isMoveSubmitting = false;
 function submitMoveItem() {
+    if (isMoveSubmitting) return;
     const targetFolderSelect = document.getElementById('move-target-folder');
     if (!targetFolderSelect) return;
+
+    const btn = document.querySelector('#move-modal button[onclick*="submitMoveItem"]');
+    let origText = '';
+    if (btn) {
+        origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<span style="display:inline-block; width:12px; height:12px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spinRing 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Memindahkan...';
+    }
+    isMoveSubmitting = true;
 
     const targetFolderId = targetFolderSelect.value;
     const formData = new FormData();
@@ -1067,10 +1110,14 @@ function submitMoveItem() {
                 window.location.reload();
             } else {
                 alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                isMoveSubmitting = false;
             }
         })
         .catch(err => {
             alert('Gagal terhubung ke server.');
+            if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+            isMoveSubmitting = false;
         });
 }
 
@@ -1117,7 +1164,9 @@ function closeRenameModal() {
     if (modal) modal.classList.remove('active');
 }
 
+let isRenameSubmitting = false;
 function submitRename() {
+    if (isRenameSubmitting) return;
     const input = document.getElementById('rename-item-name');
     const newName = input ? input.value.trim() : '';
 
@@ -1130,6 +1179,17 @@ function submitRename() {
         closeRenameModal();
         return;
     }
+
+    const btn = document.querySelector('#rename-modal button[onclick*="submitRename"]');
+    let origText = '';
+    if (btn) {
+        origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<span style="display:inline-block; width:12px; height:12px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spinRing 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Menyimpan...';
+    }
+    isRenameSubmitting = true;
 
     const endpoint = currentRenameItem.type === 'folder' ? '/rename-folder' : '/rename-file';
     const formData = new FormData();
@@ -1147,11 +1207,15 @@ function submitRename() {
                 window.location.reload();
             } else {
                 alert('Gagal mengubah nama: ' + (data.message || 'Terjadi kesalahan'));
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                isRenameSubmitting = false;
             }
         })
         .catch(err => {
             console.error(err);
             alert('Terjadi kesalahan koneksi.');
+            if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+            isRenameSubmitting = false;
         });
 }
 
@@ -1176,7 +1240,21 @@ function closeDeleteModal() {
     if (modal) modal.classList.remove('active');
 }
 
+let isDeleteSubmitting = false;
 function submitDelete() {
+    if (isDeleteSubmitting) return;
+
+    const btn = document.querySelector('#delete-modal button[onclick*="submitDelete"]');
+    let origText = '';
+    if (btn) {
+        origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<span style="display:inline-block; width:12px; height:12px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spinRing 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Menghapus...';
+    }
+    isDeleteSubmitting = true;
+
     const endpoint = currentDeleteItem.type === 'folder' ? '/delete-folder' : '/delete-file';
     const formData = new FormData();
     formData.append('id', currentDeleteItem.id);
@@ -1192,11 +1270,15 @@ function submitDelete() {
                 window.location.reload();
             } else {
                 alert('Gagal menghapus: ' + (data.message || 'Terjadi kesalahan'));
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                isDeleteSubmitting = false;
             }
         })
         .catch(err => {
             console.error(err);
             alert('Terjadi kesalahan koneksi.');
+            if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+            isDeleteSubmitting = false;
         });
 }
 
@@ -1263,9 +1345,22 @@ function closeBulkDeleteModal() {
     if (modal) modal.classList.remove('active');
 }
 
+let isBulkDeleteSubmitting = false;
 function submitBulkDelete() {
+    if (isBulkDeleteSubmitting) return;
     const selected = getSelectedItems();
     if (selected.length === 0) return;
+
+    const btn = document.querySelector('#bulk-delete-modal button[onclick*="submitBulkDelete"]');
+    let origText = '';
+    if (btn) {
+        origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<span style="display:inline-block; width:12px; height:12px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spinRing 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Menghapus...';
+    }
+    isBulkDeleteSubmitting = true;
 
     const formData = new FormData();
     formData.append('items', JSON.stringify(selected));
@@ -1281,11 +1376,15 @@ function submitBulkDelete() {
                 window.location.reload();
             } else {
                 alert('Gagal menghapus item: ' + (data.message || 'Terjadi kesalahan'));
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                isBulkDeleteSubmitting = false;
             }
         })
         .catch(err => {
             console.error(err);
             alert('Terjadi kesalahan koneksi.');
+            if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+            isBulkDeleteSubmitting = false;
         });
 }
 
