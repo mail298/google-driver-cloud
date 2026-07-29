@@ -403,6 +403,19 @@ class PortalModel {
     }
 
     public static function deleteFolder($pdo, $userId, $folderId) {
+        // Protect admin-assigned Root Folder from being deleted
+        $user = UserModel::getUserById($userId);
+        if ($user && !empty($user['root_folder_id'])) {
+            $rootId = self::extractFolderId($user['root_folder_id']);
+            if (!empty($rootId)) {
+                $folderObj = self::getFolder($pdo, $userId, $folderId);
+                if ($folderId === $rootId || ($folderObj && ($folderObj['id'] === $rootId || $folderObj['provider_folder_id'] === $rootId))) {
+                    // Root folder protected - cannot be deleted by client
+                    return false;
+                }
+            }
+        }
+
         $folder = self::getFolder($pdo, $userId, $folderId);
         if ($folder && !empty($folder['provider_folder_id'])) {
             self::trashGoogleDriveItem($pdo, $userId, $folder['provider_folder_id']);

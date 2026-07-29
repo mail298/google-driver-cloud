@@ -345,6 +345,10 @@ class DashboardController {
                 exit;
             }
 
+            // Exclude Admin-assigned Root Folder from deletion
+            $rawClientRoot = trim($currentUser['root_folder_id'] ?? '');
+            $clientRootFolderId = PortalModel::extractFolderId($rawClientRoot);
+
             try {
                 // Delete all active files for user
                 $stmtFiles = $pdo->prepare("SELECT id FROM files WHERE user_id = ? AND status = 'active'");
@@ -359,12 +363,19 @@ class DashboardController {
                     } catch (Exception $e) {}
                 }
 
-                // Delete all active folders for user
-                $stmtFolders = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND deleted_at IS NULL");
+                // Delete all active sub-folders for user (EXCEPT the assigned root folder)
+                $stmtFolders = $pdo->prepare("SELECT id, provider_folder_id FROM folders WHERE user_id = ? AND deleted_at IS NULL");
                 $stmtFolders->execute([$userId]);
                 $allFolders = $stmtFolders->fetchAll();
 
                 foreach ($allFolders as $f) {
+                    // Do NOT delete the admin-assigned root folder!
+                    if ($clientRootFolderId !== '') {
+                        if ($f['id'] === $clientRootFolderId || $f['provider_folder_id'] === $clientRootFolderId) {
+                            continue;
+                        }
+                    }
+
                     try {
                         PortalModel::deleteFolder($pdo, $userId, $f['id']);
                     } catch (Exception $e) {}
