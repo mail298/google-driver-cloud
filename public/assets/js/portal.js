@@ -1000,6 +1000,19 @@ function cmActionCopyLink() {
     }
 }
 
+function cmActionCopyCdnLink() {
+    closeContextMenu();
+    if (activeContextItem && activeContextItem.type === 'file') {
+        const gdriveId = activeContextItem.providerFileId || activeContextItem.id;
+        const cdnUrl = `https://lh3.googleusercontent.com/d/${gdriveId}=s0`;
+        copyToClipboard(cdnUrl).then(() => {
+            showToast('Link CDN Gambar (Super Cepat) berhasil disalin ke clipboard! Siap dipakai di Landing Page.');
+        }).catch(() => {
+            prompt('Salin Link CDN Gambar:', cdnUrl);
+        });
+    }
+}
+
 function cmActionInvite() {
     closeContextMenu();
     const inviteLink = window.location.origin;
