@@ -1979,6 +1979,35 @@
         </div>
     </div>
 
+    <!-- Welcome & Feature Announcement Onboarding Modal -->
+    <div class="modal-overlay" id="onboarding-guide-modal" style="display: none; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="modal-card" style="max-width: 460px; width: 92%; background: #111827; color: #f8fafc; border-radius: 20px; padding: 26px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65); border: 1.5px solid #f59e0b; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; animate: fadeIn 0.3s ease;">
+            <!-- Close Button -->
+            <button type="button" onclick="closeOnboardingModal()" style="position: absolute; top: 16px; right: 16px; background: rgba(255, 255, 255, 0.05); border: none; color: #9ca3af; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">&times;</button>
+            
+            <!-- Slide Content Container -->
+            <div id="onboarding-slide-container" style="min-height: 140px;">
+                <!-- Dynamically populated via portal.js -->
+            </div>
+
+            <!-- Slide Dots Indicator & Navigation Buttons -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                <div id="onboarding-dots" style="display: flex; gap: 6px;">
+                    <!-- Dots injected via JS -->
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="button" id="btn-onboarding-prev" onclick="prevOnboardingSlide()" style="background: rgba(255, 255, 255, 0.08); color: #e5e7eb; border: 1px solid rgba(255, 255, 255, 0.15); padding: 8px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                        &larr; Previous
+                    </button>
+                    <button type="button" id="btn-onboarding-next" onclick="nextOnboardingSlide()" style="background: #f59e0b; color: #0f172a; border: none; padding: 8px 22px; border-radius: 10px; font-size: 13.5px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); transition: all 0.2s ease;">
+                        Mengerti
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const CURRENT_FOLDER_ID = <?= json_encode($folderId) ?>;
         const EXISTING_FILE_NAMES = <?= json_encode(array_values(array_map(function($f) { return $f['name']; }, $files ?? []))) ?>;

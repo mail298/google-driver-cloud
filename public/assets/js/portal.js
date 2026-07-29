@@ -1388,3 +1388,119 @@ function submitBulkDelete() {
         });
 }
 
+// Onboarding Guide Feature Announcement Tour Popup Modal
+const onboardingSlides = [
+    {
+        title: 'Fitur Pencarian Baru',
+        desc: 'Gunakan kolom pencarian di bagian atas untuk mencari dokumen, foto, atau video dengan mudah. Ketik kata kunci dan daftar berkas akan tersaring secara otomatis.',
+        iconColor: '#f59e0b'
+    },
+    {
+        title: 'Link Gambar CDN White-Label',
+        desc: 'Klik opsi <strong>Share Link</strong> pada berkas gambar untuk menyalin URL kustom domain (<code>clouds.wn-cdn.net/share?id=...</code>) yang dapat langsung dipasang di HTML atau CSS Landing Page Anda secara cepat (0ms cache).',
+        iconColor: '#3b82f6'
+    },
+    {
+        title: 'Pengunggah File & Anti-Spam',
+        desc: 'Unggah file hingga 5GB dengan mudah melalui tombol atau Drag & Drop. Seluruh aksi pembuatan folder dan penghapusan kini dilengkapi proteksi instan anti-spam.',
+        iconColor: '#10b981'
+    }
+];
+
+let currentOnboardingIndex = 0;
+
+function renderOnboardingSlide() {
+    const container = document.getElementById('onboarding-slide-container');
+    const dotsContainer = document.getElementById('onboarding-dots');
+    const prevBtn = document.getElementById('btn-onboarding-prev');
+    const nextBtn = document.getElementById('btn-onboarding-next');
+
+    if (!container || !onboardingSlides[currentOnboardingIndex]) return;
+
+    const slide = onboardingSlides[currentOnboardingIndex];
+    container.innerHTML = `
+        <h3 style="margin: 0 0 12px 0; font-size: 20px; font-weight: 800; color: #f59e0b; font-family: 'Outfit', sans-serif;">${slide.title}</h3>
+        <p style="font-size: 14px; color: #cbd5e1; margin: 0; line-height: 1.6;">${slide.desc}</p>
+    `;
+
+    // Render Dots
+    if (dotsContainer) {
+        let dotsHtml = '';
+        onboardingSlides.forEach((_, i) => {
+            const active = i === currentOnboardingIndex;
+            dotsHtml += `<div style="width: ${active ? '20px' : '8px'}; height: 8px; border-radius: 100px; background: ${active ? '#f59e0b' : 'rgba(255,255,255,0.2)'}; transition: all 0.3s ease;"></div>`;
+        });
+        dotsContainer.innerHTML = dotsHtml;
+    }
+
+    // Prev Button state
+    if (prevBtn) {
+        if (currentOnboardingIndex === 0) {
+            prevBtn.style.opacity = '0.4';
+            prevBtn.style.pointerEvents = 'none';
+        } else {
+            prevBtn.style.opacity = '1';
+            prevBtn.style.pointerEvents = 'auto';
+        }
+    }
+
+    // Next Button text
+    if (nextBtn) {
+        if (currentOnboardingIndex === onboardingSlides.length - 1) {
+            nextBtn.innerText = 'Mengerti';
+        } else {
+            nextBtn.innerText = 'Lanjut \u2192';
+        }
+    }
+}
+
+function prevOnboardingSlide() {
+    if (currentOnboardingIndex > 0) {
+        currentOnboardingIndex--;
+        renderOnboardingSlide();
+    }
+}
+
+function nextOnboardingSlide() {
+    if (currentOnboardingIndex < onboardingSlides.length - 1) {
+        currentOnboardingIndex++;
+        renderOnboardingSlide();
+    } else {
+        closeOnboardingModal();
+    }
+}
+
+function closeOnboardingModal() {
+    const modal = document.getElementById('onboarding-guide-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
+    // Store in sessionStorage so it shows once per new session / tab
+    try {
+        sessionStorage.setItem('portal_onboarding_seen', 'true');
+    } catch (e) {}
+}
+
+function checkAutoOnboardingPopup() {
+    try {
+        const seen = sessionStorage.getItem('portal_onboarding_seen');
+        if (!seen) {
+            const modal = document.getElementById('onboarding-guide-modal');
+            if (modal) {
+                currentOnboardingIndex = 0;
+                renderOnboardingSlide();
+                modal.style.display = 'flex';
+                modal.classList.add('active');
+            }
+        }
+    } catch (e) {}
+}
+
+// Auto-trigger when page completes loading
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkAutoOnboardingPopup);
+} else {
+    setTimeout(checkAutoOnboardingPopup, 300);
+}
+
