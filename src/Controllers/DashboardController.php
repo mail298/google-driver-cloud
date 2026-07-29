@@ -40,18 +40,9 @@ class DashboardController {
         $effectiveRootDbId = null;
         if ($clientRootFolderId !== '') {
             try {
+                // Move files that have no folder assigned into the root folder
                 $stmtFix = $pdo->prepare("UPDATE files SET folder_id = ? WHERE user_id = ? AND (folder_id IS NULL OR folder_id = '')");
                 $stmtFix->execute([$clientRootFolderId, $userId]);
-            } catch (Exception $e) {}
-
-            try {
-                $stmtFixFolders = $pdo->prepare("UPDATE folders SET parent_id = ? WHERE user_id = ? AND (parent_id IS NULL OR parent_id = '') AND id != ? AND provider_folder_id != ? AND name != 'Folder Klien' AND deleted_at IS NULL");
-                $stmtFixFolders->execute([$clientRootFolderId, $userId, $clientRootFolderId, $clientRootFolderId]);
-            } catch (Exception $e) {}
-
-            try {
-                $stmtCleanRoot = $pdo->prepare("UPDATE folders SET parent_id = NULL WHERE (id = ? OR provider_folder_id = ? OR name = 'Folder Klien') AND user_id = ?");
-                $stmtCleanRoot->execute([$clientRootFolderId, $clientRootFolderId, $userId]);
             } catch (Exception $e) {}
 
             $rootFolderObj = PortalModel::getFolder($pdo, $userId, $clientRootFolderId);

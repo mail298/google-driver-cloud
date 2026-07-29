@@ -121,6 +121,7 @@ class PortalModel {
 
     public static function getFolders($pdo, $userId, $parentId) {
         if ($parentId === null) {
+            // At root level: exclude the Folder Klien container (it's a root wrapper, not a user folder)
             $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND parent_id IS NULL AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
             $stmt->execute([$userId]);
         } else {
@@ -128,8 +129,9 @@ class PortalModel {
             $parentFolder = self::getFolder($pdo, $userId, $cleanParentId);
             $effectiveDbParentId = $parentFolder ? $parentFolder['id'] : $cleanParentId;
 
-            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND (parent_id = ? OR parent_id = ?) AND id != ? AND id != ? AND provider_folder_id != ? AND provider_folder_id != ? AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
-            $stmt->execute([$userId, $cleanParentId, $effectiveDbParentId, $cleanParentId, $effectiveDbParentId, $cleanParentId, $effectiveDbParentId]);
+            // Inside a folder: show direct children, excluding any Folder Klien wrappers
+            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND (parent_id = ? OR parent_id = ?) AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
+            $stmt->execute([$userId, $cleanParentId, $effectiveDbParentId]);
         }
         return $stmt->fetchAll();
     }
