@@ -177,6 +177,7 @@
     $mime = strtolower($file['mime_type']);
     $isImage = (strpos($mime, 'image/') === 0);
     $isVideo = (strpos($mime, 'video/') === 0);
+    $isPdf = ($mime === 'application/pdf' || strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)) === 'pdf');
     $formattedDate = isset($file['created_at']) ? date('M j, Y, g:i A', strtotime($file['created_at'])) : '';
     ?>
 
@@ -231,12 +232,14 @@
                 class="share-full-img">
         <?php elseif ($isVideo): ?>
             <video src="/download?id=<?= $file['id'] ?>&inline=1" controls class="share-full-video" autoplay></video>
+        <?php elseif ($isPdf): ?>
+            <iframe src="/download?id=<?= $file['id'] ?>&inline=1" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
         <?php else: ?>
             <div class="share-generic-card">
                 <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
                 <h2 style="font-size: 18px; margin: 0 0 8px 0;"><?= htmlspecialchars($file['name']) ?></h2>
                 <p style="font-size: 13px; color: #94a3b8; margin: 0 0 20px 0;"><?= formatBytesShare($file['size_bytes']) ?>
-                    • Pratinjau tidak tersedia</p>
+                    • Pratinjau langsung tidak tersedia</p>
                 <a href="/download?id=<?= $file['id'] ?>" class="btn-download-main">Unduh Berkas</a>
             </div>
         <?php endif; ?>

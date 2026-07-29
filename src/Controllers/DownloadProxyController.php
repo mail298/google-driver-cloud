@@ -129,7 +129,6 @@ class DownloadProxyController {
         curl_exec($ch);
         curl_close($ch);
         exit;
-        exit;
     }
 
     private static function encryptText($value, $encryptionKey) {
