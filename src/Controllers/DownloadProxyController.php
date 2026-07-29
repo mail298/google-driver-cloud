@@ -52,13 +52,7 @@ class DownloadProxyController {
         $isImage = !empty($file['mime_type']) && strpos($file['mime_type'], 'image/') === 0;
         $isInline = isset($_GET['inline']) || isset($_GET['cdn']) || $isImage;
 
-        // Direct Google Edge CDN redirect (0ms response time for landing page images)
-        if (isset($_GET['cdn']) || isset($_GET['redirect']) || (isset($_GET['raw']) && $_GET['raw'] == '1')) {
-            if (!empty($file['provider_file_id'])) {
-                header("Location: https://lh3.googleusercontent.com/d/" . $file['provider_file_id'] . "=s0");
-                exit;
-            }
-        }
+        // 100% Custom Domain White-Labeling (Stream directly under custom domain)
 
         // Support HTTP 304 Not Modified browser caching for 0ms re-loads
         $etag = '"' . md5($file['id'] . '_' . ($file['updated_at'] ?? '') . '_' . $file['size_bytes']) . '"';

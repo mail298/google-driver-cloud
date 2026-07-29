@@ -1004,17 +1004,12 @@ function cmActionCopyCdnLink() {
     closeContextMenu();
     if (activeContextItem && activeContextItem.type === 'file') {
         const fileId = activeContextItem.id;
-        const gdriveId = activeContextItem.providerFileId || activeContextItem.provider_file_id || '';
-        
-        let cdnUrl = window.location.origin + '/download?id=' + encodeURIComponent(fileId) + '&cdn=1';
-        if (gdriveId && !gdriveId.includes('-') && gdriveId.length > 20) {
-            cdnUrl = 'https://lh3.googleusercontent.com/d/' + gdriveId + '=s0';
-        }
+        const cdnUrl = window.location.origin + '/share?id=' + encodeURIComponent(fileId);
 
         copyToClipboard(cdnUrl).then(() => {
-            showToast('Link CDN Gambar (Super Cepat) berhasil disalin ke clipboard!');
+            showToast('Link Gambar White-Label berhasil disalin!');
         }).catch(() => {
-            prompt('Salin Link CDN Gambar:', cdnUrl);
+            prompt('Salin Link Gambar White-Label:', cdnUrl);
         });
     }
 }
