@@ -695,6 +695,68 @@
                 box-sizing: border-box !important;
             }
         }
+
+        /* Mobile Upload Queue - Bottom Sheet Style */
+        @media (max-width: 640px) {
+            #upload-queue-modal.modal-overlay {
+                align-items: flex-end;
+                background: rgba(0,0,0,0.5);
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+            }
+            #upload-queue-modal .modal-card {
+                max-width: 100% !important;
+                width: 100% !important;
+                max-height: 85vh !important;
+                border-radius: 20px 20px 0 0 !important;
+                padding: 16px !important;
+                transform: translateY(0);
+                margin-top: auto;
+            }
+            .upload-queue-item {
+                padding: 10px 6px !important;
+                gap: 10px !important;
+            }
+            .upload-queue-item .queue-thumb {
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: rgba(255,255,255,0.04);
+                overflow: hidden;
+            }
+            .upload-queue-item .queue-thumb img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+            .upload-queue-item input[type="checkbox"] {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            .upload-queue-item .queue-item-name {
+                font-size: 13px;
+                font-weight: 600;
+                color: #fff;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .upload-queue-item .queue-item-size {
+                font-size: 11px;
+                color: #64748b;
+            }
+            .upload-queue-toolbar {
+                gap: 6px !important;
+            }
+            .upload-queue-toolbar button {
+                font-size: 11px !important;
+                padding: 6px 10px !important;
+            }
+        }
     </style>
 </head>
 
@@ -1415,34 +1477,51 @@
     <div class="modal-overlay" id="upload-queue-modal">
         <div class="modal-card"
             style="max-width: 600px; width: 94%; max-height: 80vh; display: flex; flex-direction: column; background: #0f172a; border: 1px solid var(--card-border); border-radius: 20px; padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Unggah Berkas</h3>
-                <button type="button" onclick="closeUploadQueue()" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:22px;">&times;</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2); border-radius: 10px; padding: 8px; color: #60a5fa; display: flex;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size:17px; font-weight:800; color:#fff; line-height:1.2;">Unggah Berkas</h3>
+                        <span id="queue-header-count" style="font-size:11px; color:#64748b;">Tidak ada berkas</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeUploadQueue()" style="background:rgba(255,255,255,0.06); border:none; color:#94a3b8; width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center;">&times;</button>
+            </div>
+            <div class="upload-queue-toolbar" style="display:flex; gap:8px; margin-bottom:10px; flex-shrink:0; flex-wrap:wrap;">
+                <button type="button" onclick="triggerFileInput()" style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.05); border:1px solid var(--card-border); color:#e2e8f0; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+                    Tambah
+                </button>
+                <button type="button" onclick="selectAllQueueItems()" style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.05); border:1px solid var(--card-border); color:#e2e8f0; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Pilih Semua
+                </button>
+                <button type="button" onclick="deselectAllQueueItems()" style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.05); border:1px solid var(--card-border); color:#e2e8f0; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                    Hapus Semua
+                </button>
             </div>
             <div id="upload-queue-list"
-                style="flex: 1; overflow-y: auto; margin-bottom: 12px; min-height: 100px; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 8px;">
+                style="flex: 1; overflow-y: auto; margin-bottom: 10px; min-height: 80px; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 6px;">
             </div>
             <div id="upload-queue-summary" style="flex-shrink: 0; display: none;">
-                <div class="progress-bar-bg" style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
+                <div class="progress-bar-bg" style="background: rgba(255,255,255,0.08); height: 5px; border-radius: 10px; overflow: hidden; margin-bottom: 6px;">
                     <div class="progress-bar-fill" id="queue-progress-fill" style="background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 0%;"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 10px;">
                     <span id="queue-status-text">0 / 0 selesai</span>
                     <span id="queue-percent-text">0%</span>
                 </div>
             </div>
-            <div style="display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap;">
-                <button type="button" onclick="triggerFileInput()"
-                    style="background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 10px; cursor:pointer; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-                    Tambah Berkas
-                </button>
+            <div style="display: flex; gap: 8px; flex-shrink: 0;">
                 <button type="button" id="btn-upload-start" onclick="startUploadQueue()"
-                    style="flex: 1; min-width: 140px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                    style="flex: 2; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size:14px; cursor:pointer; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                     Upload Terpilih
                 </button>
                 <button type="button" onclick="closeUploadQueue()"
-                    style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 10px 16px; border-radius: 10px; cursor:pointer; font-weight: 600;">Tutup</button>
+                    style="flex: 1; background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 12px 16px; border-radius: 12px; cursor:pointer; font-weight: 600; font-size:14px;">Tutup</button>
             </div>
         </div>
     </div>

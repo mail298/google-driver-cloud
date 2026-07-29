@@ -141,8 +141,13 @@ function renderUploadQueue() {
     if (uploadQueueItems.length === 0) {
         list.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">Tidak ada berkas dipilih.</div>';
         document.getElementById('btn-upload-start').disabled = true;
+        var headerCount = document.getElementById('queue-header-count');
+        if (headerCount) headerCount.textContent = 'Tidak ada berkas';
         return;
     }
+
+    var headerCount = document.getElementById('queue-header-count');
+    if (headerCount) headerCount.textContent = uploadQueueItems.length + ' berkas dipilih';
 
     let html = '';
     let checkedCount = 0;
@@ -157,14 +162,33 @@ function renderUploadQueue() {
         } else if (item.status === 'completed') {
             statusHtml = '<span style="color:#34d399; font-size:11px; font-weight:600;">Selesai ✓</span>';
         } else if (item.status === 'failed') {
-            statusHtml = '<span style="color:#f87171; font-size:11px;" title="' + item.error + '">Gagal</span>';
+            statusHtml = '<span style="color:#f87171; font-size:11px;" title="' + escapeHtml(item.error) + '">Gagal</span>';
+        }
+
+        // Generate thumbnail based on file type
+        var thumbHtml = '';
+        var name = item.name.toLowerCase();
+        if (item.file && item.file.type && item.file.type.startsWith('image/')) {
+            try {
+                var thumbUrl = URL.createObjectURL(item.file);
+                thumbHtml = '<img src="' + thumbUrl + '" alt="">';
+            } catch(e) {
+                thumbHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
+            }
+        } else if (item.file && item.file.type && item.file.type.startsWith('video/')) {
+            thumbHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2" ry="2"/></svg>';
+        } else if (item.file && item.file.type && item.file.type.startsWith('audio/')) {
+            thumbHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+        } else {
+            thumbHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
         }
 
         html += '<div class="upload-queue-item" data-index="' + idx + '" style="display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.04);">';
         html += '<input type="checkbox" class="queue-item-checkbox" data-index="' + idx + '" ' + (item.checked ? 'checked' : '') + ' ' + (item.status === 'uploading' || item.status === 'completed' ? 'disabled' : '') + ' onchange="toggleQueueItem(' + idx + ')" style="accent-color:#3b82f6; cursor:pointer; width:16px; height:16px; flex-shrink:0;">';
+        html += '<div class="queue-thumb" style="width:32px; height:32px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); overflow:hidden;">' + thumbHtml + '</div>';
         html += '<div style="flex:1; min-width:0;">';
-        html += '<div style="font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
-        html += '<div style="font-size:11px; color:#64748b;">' + sizeStr + '</div>';
+        html += '<div class="queue-item-name" style="font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
+        html += '<div class="queue-item-size" style="font-size:11px; color:#64748b;">' + sizeStr + '</div>';
         html += '</div>';
         html += '<div style="flex-shrink:0; min-width:60px; text-align:right;">' + statusHtml + '</div>';
         html += '</div>';
@@ -201,6 +225,26 @@ function toggleQueueItem(index) {
     } else {
         closeBatchSizePopup();
     }
+}
+
+function selectAllQueueItems() {
+    if (isUploading) return;
+    uploadQueueItems.forEach(function(item) {
+        if (item.status !== 'completed' && item.status !== 'uploading') {
+            item.checked = true;
+        }
+    });
+    renderUploadQueue();
+}
+
+function deselectAllQueueItems() {
+    if (isUploading) return;
+    uploadQueueItems.forEach(function(item) {
+        if (item.status !== 'completed' && item.status !== 'uploading') {
+            item.checked = false;
+        }
+    });
+    renderUploadQueue();
 }
 
 function openUploadQueue() {
