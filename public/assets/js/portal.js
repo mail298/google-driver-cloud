@@ -1008,27 +1008,14 @@ function copyToClipboard(text) {
     });
 }
 
-function cmActionShare() {
-    closeContextMenu();
-    if (activeContextItem) {
-        const shareLink = window.location.origin + (activeContextItem.type === 'file' ? `/share?id=${activeContextItem.id}` : `/?folderId=${activeContextItem.id}`);
-        copyToClipboard(shareLink).then(() => {
-            showToast('Tautan Berbagi berhasil disalin ke clipboard');
-        }).catch(() => {
-            prompt('Salin tautan berbagi:', shareLink);
-        });
-    }
-}
-
 function cmActionCopyLink() {
     closeContextMenu();
-    if (activeContextItem && activeContextItem.type === 'file') {
-        const fileId = activeContextItem.id;
-        const link = window.location.origin + '/share?id=' + encodeURIComponent(fileId);
+    if (activeContextItem) {
+        const link = window.location.origin + (activeContextItem.type === 'file' ? `/share?id=${encodeURIComponent(activeContextItem.id)}` : `/?folderId=${encodeURIComponent(activeContextItem.id)}`);
         copyToClipboard(link).then(() => {
-            showToast('Tautan Berbagi White-Label berhasil disalin ke clipboard');
+            showToast('Tautan Berbagi & CDN White-Label berhasil disalin');
         }).catch(() => {
-            prompt('Salin tautan berbagi:', link);
+            prompt('Salin tautan:', link);
         });
     }
 }
@@ -1400,7 +1387,7 @@ const onboardingSlides = [
     },
     {
         title: '2. Link Gambar CDN Landing Page',
-        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div>Klik opsi <strong>⋮ (titik tiga)</strong> pada gambar &rarr; Pilih <strong>Share Link</strong>.</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Tautan kustom domain tersalin (contoh: <code>clouds.wn-cdn.net/share?id=...</code>).</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Pasang langsung pada tag HTML <code>&lt;img src="..."&gt;</code> atau CSS Background Landing Page secara cepat tanpa mengekspos domain Google.</div></div></div>',
+        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div>Klik opsi <strong>⋮ (titik tiga)</strong> pada gambar &rarr; Pilih <strong>Copy Link</strong>.</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Tautan kustom domain tersalin (contoh: <code>clouds.wn-cdn.net/share?id=...</code>).</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Pasang langsung pada tag HTML <code>&lt;img src="..."&gt;</code> atau CSS Background Landing Page secara cepat tanpa mengekspos domain Google.</div></div></div>',
         iconColor: '#3b82f6'
     },
     {

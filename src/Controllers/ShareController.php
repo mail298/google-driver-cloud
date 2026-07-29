@@ -1,8 +1,10 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\ShareController.php
 
-class ShareController {
-    public static function viewShare() {
+class ShareController
+{
+    public static function viewShare()
+    {
         $fileId = $_GET['id'] ?? null;
         if (!$fileId) {
             http_response_code(404);
