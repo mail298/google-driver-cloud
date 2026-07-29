@@ -175,6 +175,10 @@ class PortalModel {
     }
 
     public static function getGoogleDriveToken($pdo, $userId) {
+        $cacheKey = 'gdrive_token_' . $userId;
+        $cached = apcu_fetch($cacheKey);
+        if ($cached !== false) return $cached;
+
         $encryptionKey = Config::get('TOKEN_ENCRYPTION_KEY');
         $clientId = Config::get('GOOGLE_CLIENT_ID');
         $clientSecret = Config::get('GOOGLE_CLIENT_SECRET');
@@ -210,7 +214,9 @@ class PortalModel {
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             if ($code === 200) {
-                return ['token' => $accessToken, 'connected_account_id' => $acc['id']];
+                $result = ['token' => $accessToken, 'connected_account_id' => $acc['id']];
+                apcu_store($cacheKey, $result, 1500);
+                return $result;
             }
         }
 
@@ -228,7 +234,9 @@ class PortalModel {
             curl_close($ch);
             $data = json_decode($res, true);
             if (isset($data['access_token'])) {
-                return ['token' => $data['access_token'], 'connected_account_id' => $acc['id']];
+                $result = ['token' => $data['access_token'], 'connected_account_id' => $acc['id']];
+                apcu_store($cacheKey, $result, 1500);
+                return $result;
             }
         }
 

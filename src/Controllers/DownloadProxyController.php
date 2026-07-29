@@ -131,18 +131,11 @@ class DownloadProxyController
         // ─────────────────────────────────────────────────────────────────────
         // SPEED OPTIMISATION: Images → 302 Redirect to Google CDN (zero proxy)
         // Large images bypass the PHP proxy entirely. Speed: ~50-200ms global.
+        // NOTE: webContentLink from Google metadata API returns HTML preview for
+        // most file types, not raw bytes. That breaks inline <img> rendering.
+        // We skip the redirect and stream through proxy instead.
         // ─────────────────────────────────────────────────────────────────────
-        if ($isImage && $accessToken && !isset($_GET['force_proxy'])) {
-            $googleDirectUrl = self::resolveGoogleDirectUrl($file['provider_file_id'], $accessToken);
-            if ($googleDirectUrl) {
-                // Redirect to Google's own CDN. The domain in the browser URL bar
-                // stays as your custom domain because this is triggered from your server.
-                header('Cache-Control: public, max-age=86400');
-                header('ETag: ' . $etag);
-                header('Location: ' . $googleDirectUrl, true, 302);
-                exit;
-            }
-        }
+        // (redirect disabled — webContentLink breaks inline images)
 
         // ─────────────────────────────────────────────────────────────────────
         // SPEED OPTIMISATION: HTTP Range Request Support (video seek / resume)

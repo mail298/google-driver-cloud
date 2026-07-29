@@ -1,26 +1,58 @@
 [
     {
         "id": "admin-1",
-        "username": "admin",
-        "password": "adminpass",
+        "username": "Rudalpolo",
+        "password": "Rudalpolo011",
         "role": "admin",
         "storage_limit_gb": 100,
         "root_folder_id": ""
     },
     {
-        "id": "client-1",
-        "username": "clientA",
-        "password": "$2y$10$feuZN6YTBpTJ9ADk4kSxvORlO\/MXHgTbZWOG3wYfk33WUXGn\/8QDG",
+        "id": "user-6a69855093a54",
+        "username": "mayya",
+        "password": "$2y$10$LgGXWDleozDDlMnIr5xxTOPwSLFWZUTlyIxXL6fp9g6ZuqMLzWgqK",
         "role": "client",
-        "storage_limit_gb": 15,
-        "root_folder_id": ""
+        "storage_limit_gb": 100,
+        "root_folder_id": "1bp7T36jUR_CvhiK6cGkzCLRBFC5ZPC5_"
     },
     {
-        "id": "user-6a65ecfc22c88",
-        "username": "mayya",
-        "password": "mayya123",
+        "id": "user-6a6986212dd67",
+        "username": "Ricke",
+        "password": "$2y$10$HoxeF7ph0IffhLN5gXwsdujw25r99rJPMRluvdcP09loiNRRXU\/Zy",
         "role": "client",
-        "storage_limit_gb": 500,
-        "root_folder_id": "1IDuwu4BIFZSztx2QB2xYVSrVIdnnacz1"
+        "storage_limit_gb": 80,
+        "root_folder_id": "1k77k2gGr8UbIv33qJoIecziAYCi6c8yY"
+    },
+    {
+        "id": "user-6a6986c6a312b",
+        "username": "clienA",
+        "password": "$2y$10$CRcDHnAUuSeozAHU3dGDRePYzdu20TlTthLFzcd.wWmsPNuFC2ofO",
+        "role": "client",
+        "storage_limit_gb": 15,
+        "root_folder_id": "1KweUSbFzYHY8NuAOzVhsnuE4drKTZ6Zf"
+    },
+    {
+        "id": "user-6a6986e44fed3",
+        "username": "clienB",
+        "password": "$2y$10$Uj\/pnVZXpbR3lDr1mVaWg..IWHO3YPK8WSb2CveLG3X8RjdGKGAhy",
+        "role": "client",
+        "storage_limit_gb": 10,
+        "root_folder_id": "1vud0X8N1-SXsD3Hcdc_B7LlpWUuRCoi9"
+    },
+    {
+        "id": "user-6a69a8fb240c8",
+        "username": "ecko",
+        "password": "$2y$10$jslzqDhIVkUqFD2ppItlRupfNMkt31gkeGA.Exk9Odx0Vp1tc\/Yr2",
+        "role": "client",
+        "storage_limit_gb": 10,
+        "root_folder_id": "1UbPJUlWCjnrGMJ5y1EsrMf83GFNcAY2p"
+    },
+    {
+        "id": "user-6a69a983264d2",
+        "username": "wantos",
+        "password": "$2y$10$2MuAGJlr5hTkNsEEKrUEGuubC1Ytrh6dSdAEHYILZjEeN1mUpjRZm",
+        "role": "client",
+        "storage_limit_gb": 10,
+        "root_folder_id": "16myN2v-e1iii6S6ANmUfSyt8eqKjjay3"
     }
 ]

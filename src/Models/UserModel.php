@@ -7,14 +7,17 @@ class UserModel {
     }
 
     public static function getAllUsers() {
+        $cached = apcu_fetch('users_all');
+        if ($cached !== false) return $cached;
         $path = self::getFilePath();
         if (file_exists($path)) {
             $data = json_decode(file_get_contents($path), true);
             if (is_array($data)) {
+                apcu_store('users_all', $data, 30);
                 return $data;
             }
         }
-        return [
+        $default = [
             [
                 'id' => 'admin-1',
                 'username' => 'admin',
@@ -32,11 +35,14 @@ class UserModel {
                 'root_folder_id' => ''
             ]
         ];
+        apcu_store('users_all', $default, 30);
+        return $default;
     }
 
     public static function saveAllUsers($users) {
         $path = self::getFilePath();
         file_put_contents($path, json_encode(array_values($users), JSON_PRETTY_PRINT));
+        apcu_delete('users_all');
     }
 
     public static function getUserByUsername($username) {
