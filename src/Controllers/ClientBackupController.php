@@ -20,8 +20,10 @@ class ClientBackupController
         }
 
         $pdo = Config::getPDO();
-        $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND status = 'active' ORDER BY name ASC");
-        $stmt->execute([$userId]);
+        $gatewayUserId = PortalModel::getUserIdFromApiKey($pdo);
+
+        $stmt = $pdo->prepare("SELECT * FROM files WHERE (user_id = ? OR user_id = ?) AND status = 'active' ORDER BY name ASC");
+        $stmt->execute([$userId, $gatewayUserId]);
         $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $timestamp = date('Ymd_His');
@@ -76,19 +78,20 @@ class ClientBackupController
         }
 
         $pdo = Config::getPDO();
+        $gatewayUserId = PortalModel::getUserIdFromApiKey($pdo);
 
         $rawIds = $_GET['ids'] ?? $_POST['ids'] ?? '';
         $selectedIds = array_filter(array_map('trim', explode(',', $rawIds)));
 
         if (!empty($selectedIds)) {
             $placeholders = implode(',', array_fill(0, count($selectedIds), '?'));
-            $params = array_merge([$userId], $selectedIds);
-            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND status = 'active' AND id IN ($placeholders)");
+            $params = array_merge([$userId, $gatewayUserId], $selectedIds);
+            $stmt = $pdo->prepare("SELECT * FROM files WHERE (user_id = ? OR user_id = ?) AND status = 'active' AND id IN ($placeholders)");
             $stmt->execute($params);
         } else {
             // Default: all files for this client
-            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND status = 'active'");
-            $stmt->execute([$userId]);
+            $stmt = $pdo->prepare("SELECT * FROM files WHERE (user_id = ? OR user_id = ?) AND status = 'active'");
+            $stmt->execute([$userId, $gatewayUserId]);
         }
 
         $files = $stmt->fetchAll(PDO::FETCH_ASSOC);
