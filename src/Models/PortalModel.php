@@ -182,6 +182,21 @@ class PortalModel {
         $stmt = $pdo->prepare("SELECT * FROM connected_accounts WHERE user_id = ? AND provider = 'google_drive' AND status = 'connected' ORDER BY created_at DESC LIMIT 1");
         $stmt->execute([$userId]);
         $acc = $stmt->fetch();
+
+        if (!$acc) {
+            $gatewayUserId = self::getUserIdFromApiKey($pdo);
+            if ($gatewayUserId && $gatewayUserId !== $userId) {
+                $stmt = $pdo->prepare("SELECT * FROM connected_accounts WHERE user_id = ? AND provider = 'google_drive' AND status = 'connected' ORDER BY created_at DESC LIMIT 1");
+                $stmt->execute([$gatewayUserId]);
+                $acc = $stmt->fetch();
+            }
+        }
+
+        if (!$acc) {
+            $stmt = $pdo->query("SELECT * FROM connected_accounts WHERE provider = 'google_drive' AND status = 'connected' ORDER BY created_at DESC LIMIT 1");
+            $acc = $stmt->fetch();
+        }
+
         if (!$acc) return null;
 
         $accessToken = !empty($acc['access_token_encrypted']) ? self::decryptText($acc['access_token_encrypted'], $encryptionKey) : null;
