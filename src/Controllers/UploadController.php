@@ -67,8 +67,10 @@ class UploadController
                 $apiKey = PortalModel::getActiveApiKey($pdo);
             }
 
-            // Resolve Google Drive parent folder ID
+            // Resolve Google Drive parent folder ID & enforce client root folder isolation
             $providerParentId = null;
+            $clientRootFolderId = (!empty($currentUser) && !empty($currentUser['root_folder_id'])) ? PortalModel::extractFolderId($currentUser['root_folder_id']) : null;
+
             if ($folderId) {
                 $folder = PortalModel::getFolder($pdo, $userId, $folderId);
                 if ($folder && !empty($folder['provider_folder_id'])) {
@@ -76,9 +78,13 @@ class UploadController
                 } else {
                     $providerParentId = PortalModel::extractFolderId($folderId);
                 }
+            } else if ($clientRootFolderId) {
+                $folderId = $clientRootFolderId;
+                $providerParentId = $clientRootFolderId;
             }
-            if (empty($providerParentId) && $currentUser && !empty($currentUser['root_folder_id'])) {
-                $providerParentId = PortalModel::extractFolderId($currentUser['root_folder_id']);
+
+            if (empty($providerParentId) && $clientRootFolderId) {
+                $providerParentId = $clientRootFolderId;
             }
 
             // 1. Prepare filesMeta
@@ -144,11 +150,13 @@ class UploadController
                                 }
                             }
 
+                            $targetDbFolderId = !empty($folderId) ? $folderId : $clientRootFolderId;
+
                             $stmt = $pdo->prepare("INSERT IGNORE INTO files (id, user_id, folder_id, connected_account_id, provider, provider_file_id, name, mime_type, size_bytes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())");
                             $stmt->execute([
                                 $uploadedFile['id'],
                                 $userId,
-                                !empty($folderId) ? $folderId : null,
+                                $targetDbFolderId,
                                 $uploadedFile['connectedAccountId'] ?? '',
                                 $uploadedFile['provider'] ?? 'google_drive',
                                 $uploadedFile['providerFileId'] ?? '',

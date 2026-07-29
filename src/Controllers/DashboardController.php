@@ -39,6 +39,11 @@ class DashboardController {
         // Ensure client root folder is properly resolved in DB if specified
         $effectiveRootDbId = null;
         if ($clientRootFolderId !== '') {
+            try {
+                $stmtFix = $pdo->prepare("UPDATE files SET folder_id = ? WHERE user_id = ? AND (folder_id IS NULL OR folder_id = '')");
+                $stmtFix->execute([$clientRootFolderId, $userId]);
+            } catch (Exception $e) {}
+
             $rootFolderObj = PortalModel::getFolder($pdo, $userId, $clientRootFolderId);
             if ($rootFolderObj) {
                 $effectiveRootDbId = $rootFolderObj['id'];
