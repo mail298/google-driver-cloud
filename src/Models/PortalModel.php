@@ -323,16 +323,16 @@ class PortalModel {
             }
         }
 
-        // Duplicate folder spam protection: return existing folder ID if folder with same name exists under parent
+        // Duplicate folder spam protection: return existing active folder ID if folder with same name exists under parent
         if (!empty($effectiveParentId)) {
-            $stmtCheck = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND parent_id = ? AND name = ? LIMIT 1");
+            $stmtCheck = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND parent_id = ? AND name = ? AND deleted_at IS NULL LIMIT 1");
             $stmtCheck->execute([$userId, $effectiveParentId, $name]);
             $existing = $stmtCheck->fetch();
             if ($existing) {
                 return $existing['id'];
             }
         } else {
-            $stmtCheck = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND parent_id IS NULL AND name = ? LIMIT 1");
+            $stmtCheck = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND parent_id IS NULL AND name = ? AND deleted_at IS NULL LIMIT 1");
             $stmtCheck->execute([$userId, $name]);
             $existing = $stmtCheck->fetch();
             if ($existing) {
@@ -350,7 +350,7 @@ class PortalModel {
         }
 
         $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, ?, ?, 'google_drive', ?, ?, 'text-blue-500', NOW(), NOW())");
-        $stmt->execute([$id, $userId, $parentId, $connectedAccountId, $providerFolderId, $name]);
+        $stmt->execute([$id, $userId, $effectiveParentId, $connectedAccountId, $providerFolderId, $name]);
         return $id;
     }
 

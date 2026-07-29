@@ -44,6 +44,11 @@ class DashboardController {
                 $stmtFix->execute([$clientRootFolderId, $userId]);
             } catch (Exception $e) {}
 
+            try {
+                $stmtFixFolders = $pdo->prepare("UPDATE folders SET parent_id = ? WHERE user_id = ? AND (parent_id IS NULL OR parent_id = '') AND id != ? AND provider_folder_id != ? AND deleted_at IS NULL");
+                $stmtFixFolders->execute([$clientRootFolderId, $userId, $clientRootFolderId, $clientRootFolderId]);
+            } catch (Exception $e) {}
+
             $rootFolderObj = PortalModel::getFolder($pdo, $userId, $clientRootFolderId);
             if ($rootFolderObj) {
                 $effectiveRootDbId = $rootFolderObj['id'];
