@@ -784,6 +784,8 @@ function previewFile(id, name, mimeType) {
         content.innerHTML = `<video src="${previewUrl}" controls autoplay style="max-width: 100%; max-height: 480px; border-radius: 8px; outline: none;"></video>`;
     } else if (mimeType.startsWith('audio/')) {
         content.innerHTML = `<audio src="${previewUrl}" controls autoplay style="width: 90%; max-width: 480px; outline: none;"></audio>`;
+    } else if (mimeType === 'application/pdf' || name.toLowerCase().endsWith('.pdf')) {
+        content.innerHTML = `<iframe src="${previewUrl}" style="width: 100%; height: 500px; border: none; border-radius: 8px; background: #fff;"></iframe>`;
     } else {
         content.innerHTML = `
             <div style="text-align: center; padding: 30px;">
@@ -791,8 +793,9 @@ function previewFile(id, name, mimeType) {
                     <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
                     <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
                 </svg>
-                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Pratinjau tidak tersedia untuk jenis berkas ini.</p>
+                <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">Pratinjau langsung tidak tersedia untuk format berkas ini.</p>
                 <p style="font-size: 12px; color: var(--accent-primary); font-weight: 600;">${mimeType}</p>
+                <a href="${downloadBtn.href}" class="btn-action btn-primary" style="display: inline-block; margin-top: 12px; text-decoration: none; padding: 8px 16px; border-radius: 8px;">Unduh Berkas</a>
             </div>
         `;
     }
@@ -1020,12 +1023,12 @@ function cmActionShare() {
 function cmActionCopyLink() {
     closeContextMenu();
     if (activeContextItem && activeContextItem.type === 'file') {
-        const gdriveId = activeContextItem.providerFileId || activeContextItem.id;
-        const link = `https://drive.google.com/file/d/${gdriveId}/view`;
+        const fileId = activeContextItem.id;
+        const link = window.location.origin + '/share?id=' + encodeURIComponent(fileId);
         copyToClipboard(link).then(() => {
-            showToast('Tautan Google Drive berhasil disalin ke clipboard');
+            showToast('Tautan Berbagi White-Label berhasil disalin ke clipboard');
         }).catch(() => {
-            prompt('Salin tautan Google Drive:', link);
+            prompt('Salin tautan berbagi:', link);
         });
     }
 }

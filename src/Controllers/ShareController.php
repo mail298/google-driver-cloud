@@ -22,11 +22,11 @@ class ShareController {
         $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
         $isImageMime = !empty($file['mime_type']) && strpos($file['mime_type'], 'image/') === 0;
 
-        // Auto-stream image directly under white-labeled domain when embedded in <img> tag, CSS background, or raw/inline request
-        if ($isImageMime && (
+        // Auto-stream file directly under white-labeled domain when embedded or requested inline/raw/cdn
+        if (
             (strpos($accept, 'image/') !== false && strpos($accept, 'text/html') === false) ||
             isset($_GET['raw']) || isset($_GET['img']) || isset($_GET['inline']) || isset($_GET['cdn'])
-        )) {
+        ) {
             DownloadProxyController::download();
             exit;
         }
