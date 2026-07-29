@@ -1470,6 +1470,16 @@ function nextOnboardingSlide() {
     }
 }
 
+function openOnboardingModalManually() {
+    const modal = document.getElementById('onboarding-guide-modal');
+    if (modal) {
+        currentOnboardingIndex = 0;
+        renderOnboardingSlide();
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+    }
+}
+
 function closeOnboardingModal() {
     const modal = document.getElementById('onboarding-guide-modal');
     if (modal) {
