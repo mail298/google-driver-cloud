@@ -1509,3 +1509,13 @@ if (document.readyState === 'loading') {
     setTimeout(checkAutoOnboardingPopup, 300);
 }
 
+// Accidental Refresh & Page Close Warning Listener during Active Uploads
+window.addEventListener('beforeunload', function (e) {
+    if ((typeof isUploading !== 'undefined' && isUploading) || (typeof isGDriveUploading !== 'undefined' && isGDriveUploading)) {
+        const confirmationMessage = 'Proses unggah berkas sedang berlangsung. Jika Anda menyegarkan atau menutup halaman, pengunggahan akan terhenti!';
+        e.preventDefault();
+        e.returnValue = confirmationMessage;
+        return confirmationMessage;
+    }
+});
+
