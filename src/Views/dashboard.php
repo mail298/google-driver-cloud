@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/style.css">
     <style>
@@ -2038,12 +2038,6 @@
             </div>
             <!-- Item List -->
             <div id="gdrive-widget-item-list" style="max-height: 220px; overflow-y: auto; padding: 4px 0; background: #0f172a;">
-                <!-- Dynamic Upload Rows -->
-            </div>
-        </div>
-    </div>
-            <!-- Item List -->
-            <div id="gdrive-widget-item-list" style="max-height: 220px; overflow-y: auto; padding: 4px 0;">
                 <!-- Dynamic Upload Rows -->
             </div>
         </div>

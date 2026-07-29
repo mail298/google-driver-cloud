@@ -195,6 +195,14 @@ class PortalModel {
         return true;
     }
 
+    public static function cacheDelete($key) {
+        if (function_exists('apcu_delete')) {
+            return apcu_delete($key);
+        }
+        unset(self::$cacheMemory[$key]);
+        return true;
+    }
+
     public static function getGoogleDriveToken($pdo, $userId) {
         $cacheKey = 'gdrive_token_' . $userId;
         $cached = self::cacheFetch($cacheKey);
