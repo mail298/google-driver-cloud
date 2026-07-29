@@ -1,21 +1,25 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Models\UserModel.php
 
-class UserModel {
-    private static function getFilePath() {
+class UserModel
+{
+    private static function getFilePath()
+    {
         return dirname(dirname(__DIR__)) . '/config/users.json';
     }
 
     private static $cacheMemory = [];
 
-    private static function cacheFetch($key) {
+    private static function cacheFetch($key)
+    {
         if (function_exists('apcu_fetch')) {
             return apcu_fetch($key);
         }
         return isset(self::$cacheMemory[$key]) ? self::$cacheMemory[$key] : false;
     }
 
-    private static function cacheStore($key, $var, $ttl = 0) {
+    private static function cacheStore($key, $var, $ttl = 0)
+    {
         if (function_exists('apcu_store')) {
             return apcu_store($key, $var, $ttl);
         }
@@ -23,7 +27,8 @@ class UserModel {
         return true;
     }
 
-    private static function cacheDelete($key) {
+    private static function cacheDelete($key)
+    {
         if (function_exists('apcu_delete')) {
             return apcu_delete($key);
         }
@@ -31,9 +36,11 @@ class UserModel {
         return true;
     }
 
-    public static function getAllUsers() {
+    public static function getAllUsers()
+    {
         $cached = self::cacheFetch('users_all');
-        if ($cached !== false) return $cached;
+        if ($cached !== false)
+            return $cached;
         $path = self::getFilePath();
         if (file_exists($path)) {
             $data = json_decode(file_get_contents($path), true);
@@ -64,13 +71,15 @@ class UserModel {
         return $default;
     }
 
-    public static function saveAllUsers($users) {
+    public static function saveAllUsers($users)
+    {
         $path = self::getFilePath();
         file_put_contents($path, json_encode(array_values($users), JSON_PRETTY_PRINT));
         self::cacheDelete('users_all');
     }
 
-    public static function getUserByUsername($username) {
+    public static function getUserByUsername($username)
+    {
         $users = self::getAllUsers();
         foreach ($users as $user) {
             if (strtolower($user['username']) === strtolower($username)) {
@@ -80,7 +89,8 @@ class UserModel {
         return null;
     }
 
-    public static function getUserById($id) {
+    public static function getUserById($id)
+    {
         $users = self::getAllUsers();
         foreach ($users as $user) {
             if ($user['id'] === $id) {
@@ -90,24 +100,27 @@ class UserModel {
         return null;
     }
 
-    public static function getTotalAllocatedStorageGb() {
+    public static function getTotalAllocatedStorageGb()
+    {
         $users = self::getAllUsers();
         $total = 0;
         foreach ($users as $user) {
             if (($user['role'] ?? 'client') === 'client') {
-                $total += (float)($user['storage_limit_gb'] ?? 0);
+                $total += (float) ($user['storage_limit_gb'] ?? 0);
             }
         }
         return $total;
     }
 
-    public static function getAdminAvailableStorageGb($masterLimitGb = 100) {
-        return max(0, (float)$masterLimitGb - self::getTotalAllocatedStorageGb());
+    public static function getAdminAvailableStorageGb($masterLimitGb = 100)
+    {
+        return max(0, (float) $masterLimitGb - self::getTotalAllocatedStorageGb());
     }
 
-    public static function createUser($username, $password, $role, $storageLimitGb, $rootFolderId, $masterLimitGb = 100) {
+    public static function createUser($username, $password, $role, $storageLimitGb, $rootFolderId, $masterLimitGb = 100)
+    {
         $users = self::getAllUsers();
-        
+
         // Check if username exists
         foreach ($users as $u) {
             if (strtolower($u['username']) === strtolower($username)) {
@@ -116,7 +129,7 @@ class UserModel {
         }
 
         $targetRole = in_array($role, ['admin', 'client']) ? $role : 'client';
-        $requestedGb = (float)$storageLimitGb;
+        $requestedGb = (float) $storageLimitGb;
 
         if ($targetRole === 'client') {
             $availableGb = self::getAdminAvailableStorageGb($masterLimitGb);
@@ -139,16 +152,18 @@ class UserModel {
         return $newUser;
     }
 
-    public static function deleteUser($id) {
+    public static function deleteUser($id)
+    {
         $users = self::getAllUsers();
-        $filtered = array_filter($users, function($u) use ($id) {
+        $filtered = array_filter($users, function ($u) use ($id) {
             return $u['id'] !== $id;
         });
 
         // Ensure at least one admin remains
         $adminCount = 0;
         foreach ($filtered as $u) {
-            if ($u['role'] === 'admin') $adminCount++;
+            if ($u['role'] === 'admin')
+                $adminCount++;
         }
         if ($adminCount === 0) {
             throw new Exception("Tidak dapat menghapus akun admin terakhir.");
@@ -157,10 +172,11 @@ class UserModel {
         self::saveAllUsers($filtered);
     }
 
-    public static function updateUser($id, $storageLimitGb, $role = null, $rootFolderId = null, $password = null, $masterLimitGb = 100, $username = null) {
+    public static function updateUser($id, $storageLimitGb, $role = null, $rootFolderId = null, $password = null, $masterLimitGb = 100, $username = null)
+    {
         $users = self::getAllUsers();
         $targetIndex = null;
-        
+
         foreach ($users as $index => $u) {
             if ($u['id'] === $id) {
                 $targetIndex = $index;
@@ -183,10 +199,10 @@ class UserModel {
         }
 
         $targetRole = ($role !== null && in_array($role, ['admin', 'client'])) ? $role : $currentUser['role'];
-        $newQuotaGb = (float)$storageLimitGb;
+        $newQuotaGb = (float) $storageLimitGb;
 
         if ($targetRole === 'client') {
-            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float)($currentUser['storage_limit_gb'] ?? 0) : 0;
+            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float) ($currentUser['storage_limit_gb'] ?? 0) : 0;
             $availableGb = self::getAdminAvailableStorageGb($masterLimitGb);
             $netDifference = $newQuotaGb - $oldQuotaGb;
 
@@ -210,7 +226,8 @@ class UserModel {
         // Ensure at least one admin remains
         $adminCount = 0;
         foreach ($users as $u) {
-            if (($u['role'] ?? '') === 'admin') $adminCount++;
+            if (($u['role'] ?? '') === 'admin')
+                $adminCount++;
         }
         if ($adminCount === 0) {
             throw new Exception("Minimal satu akun administrator harus tetap ada.");
@@ -219,7 +236,8 @@ class UserModel {
         self::saveAllUsers($users);
     }
 
-    public static function updateUserPassword($userId, $oldPassword, $newPassword) {
+    public static function updateUserPassword($userId, $oldPassword, $newPassword)
+    {
         $users = self::getAllUsers();
         $targetIndex = null;
 

@@ -288,7 +288,7 @@ class PortalModel {
                 $requestBody['parents'] = $parents;
             }
 
-            $ch = curl_init("https://www.googleapis.com/drive/v3/files");
+            $ch = curl_init("https://www.googleapis.com/drive/v3/files?supportsAllDrives=true");
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -371,7 +371,7 @@ class PortalModel {
             $tokenInfo = self::getGoogleDriveToken($pdo, $userId);
             if (!$tokenInfo || empty($tokenInfo['token'])) return false;
 
-            $ch = curl_init("https://www.googleapis.com/drive/v3/files/" . urlencode($providerId));
+            $ch = curl_init("https://www.googleapis.com/drive/v3/files/" . urlencode($providerId) . "?supportsAllDrives=true");
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -393,7 +393,7 @@ class PortalModel {
             $tokenInfo = self::getGoogleDriveToken($pdo, $userId);
             if (!$tokenInfo || empty($tokenInfo['token'])) return false;
 
-            $ch = curl_init("https://www.googleapis.com/drive/v3/files/" . urlencode($providerId));
+            $ch = curl_init("https://www.googleapis.com/drive/v3/files/" . urlencode($providerId) . "?supportsAllDrives=true");
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
