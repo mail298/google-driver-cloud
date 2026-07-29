@@ -121,15 +121,15 @@ class PortalModel {
 
     public static function getFolders($pdo, $userId, $parentId) {
         if ($parentId === null) {
-            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND parent_id IS NULL AND deleted_at IS NULL ORDER BY name ASC");
+            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND parent_id IS NULL AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
             $stmt->execute([$userId]);
         } else {
             $cleanParentId = self::extractFolderId($parentId);
             $parentFolder = self::getFolder($pdo, $userId, $cleanParentId);
             $effectiveDbParentId = $parentFolder ? $parentFolder['id'] : $cleanParentId;
 
-            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND (parent_id = ? OR parent_id = ?) AND deleted_at IS NULL ORDER BY name ASC");
-            $stmt->execute([$userId, $cleanParentId, $effectiveDbParentId]);
+            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND (parent_id = ? OR parent_id = ?) AND id != ? AND id != ? AND provider_folder_id != ? AND provider_folder_id != ? AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
+            $stmt->execute([$userId, $cleanParentId, $effectiveDbParentId, $cleanParentId, $effectiveDbParentId, $cleanParentId, $effectiveDbParentId]);
         }
         return $stmt->fetchAll();
     }
