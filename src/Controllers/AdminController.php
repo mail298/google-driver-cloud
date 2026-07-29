@@ -183,7 +183,7 @@ class AdminController
                     header('Location: /admin?success=' . urlencode($statusMsg));
                     exit;
                 } elseif ($action === 'add') {
-                    $ip = trim($_POST['ip_address'] ?? '');
+                    $ip = trim($_POST['ip'] ?? $_POST['ip_address'] ?? '');
                     IpWhitelistModel::addIp($ip);
                     header('Location: /admin?success=' . urlencode("Alamat IP $ip berhasil ditambahkan ke Whitelist"));
                     exit;
@@ -193,7 +193,7 @@ class AdminController
                     header('Location: /admin?success=' . urlencode("IP Anda ($currentIp) berhasil ditambahkan ke Whitelist"));
                     exit;
                 } elseif ($action === 'remove') {
-                    $ip = trim($_POST['ip_address'] ?? '');
+                    $ip = trim($_POST['ip'] ?? $_POST['ip_address'] ?? '');
                     IpWhitelistModel::removeIp($ip);
                     header('Location: /admin?success=' . urlencode("Alamat IP $ip berhasil dihapus dari Whitelist"));
                     exit;
