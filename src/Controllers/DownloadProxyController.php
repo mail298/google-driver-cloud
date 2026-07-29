@@ -63,7 +63,7 @@ class DownloadProxyController {
             exit;
         }
 
-        // Get connected account for the token
+        // Get OAuth Token
         $account = null;
         if (!empty($file['connected_account_id'])) {
             $stmt = $pdo->prepare("SELECT * FROM connected_accounts WHERE id = ? LIMIT 1");
@@ -79,7 +79,26 @@ class DownloadProxyController {
         $encryptionKey = Config::get('TOKEN_ENCRYPTION_KEY', 'change-this-encryption-key-32bytes!');
         $accessToken = $account ? self::decryptText($account['access_token_encrypted'], $encryptionKey) : null;
 
+        // Auto-refresh token if account has refresh token before sending image headers
+        $clientId = Config::get('GOOGLE_CLIENT_ID');
+        $clientSecret = Config::get('GOOGLE_CLIENT_SECRET');
+
+        if ($account && !empty($account['refresh_token_encrypted'])) {
+            $refreshToken = self::decryptText($account['refresh_token_encrypted'], $encryptionKey);
+            if ($clientId && $clientSecret && $refreshToken) {
+                $newToken = self::refreshAccessToken($clientId, $clientSecret, $refreshToken);
+                if ($newToken) {
+                    $accessToken = $newToken;
+                }
+            }
+        }
+
         $url = "https://www.googleapis.com/drive/v3/files/" . $file['provider_file_id'] . "?alt=media";
+
+        // Clean any active output buffers to prevent corrupted image header bytes
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
 
         $disposition = $isInline ? 'inline' : 'attachment';
 
@@ -87,9 +106,6 @@ class DownloadProxyController {
         header('Content-Disposition: ' . $disposition . '; filename="' . $file['name'] . '"');
         header('Cache-Control: public, max-age=31536000, immutable');
         header('ETag: ' . $etag);
-        if (!empty($file['size_bytes'])) {
-            header('Content-Length: ' . $file['size_bytes']);
-        }
 
         @set_time_limit(0);
 
@@ -111,36 +127,8 @@ class DownloadProxyController {
         }
 
         curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-
-        // If 401 token expired, attempt refresh
-        if ($httpCode === 401 && $account && !empty($account['refresh_token_encrypted'])) {
-            $refreshToken = self::decryptText($account['refresh_token_encrypted'], $encryptionKey);
-            $clientId = Config::get('GOOGLE_CLIENT_ID');
-            $clientSecret = Config::get('GOOGLE_CLIENT_SECRET');
-
-            if ($clientId && $clientSecret && $refreshToken) {
-                $newAccessToken = self::refreshAccessToken($clientId, $clientSecret, $refreshToken);
-                if ($newAccessToken) {
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-                    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $chunk) {
-                        echo $chunk;
-                        if (ob_get_level() > 0) ob_flush();
-                        flush();
-                        return strlen($chunk);
-                    });
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                        "Authorization: Bearer " . $newAccessToken
-                    ]);
-                    curl_exec($ch);
-                    curl_close($ch);
-                }
-            }
-        }
+        exit;
         exit;
     }
 
