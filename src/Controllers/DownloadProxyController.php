@@ -36,7 +36,6 @@ class DownloadProxyController {
     public static function download() {
         $fileId = $_GET['id'] ?? null;
         if (!$fileId) {
-            AuthController::checkAny();
             die("File ID is required.");
         }
 
@@ -50,35 +49,79 @@ class DownloadProxyController {
             die("File not found or access denied.");
         }
 
+        $isImage = !empty($file['mime_type']) && strpos($file['mime_type'], 'image/') === 0;
+        $isInline = isset($_GET['inline']) || isset($_GET['cdn']) || $isImage;
+
+        // Direct Google Edge CDN redirect (0ms response time for landing page images)
+        if (isset($_GET['cdn']) || isset($_GET['redirect']) || (isset($_GET['raw']) && $_GET['raw'] == '1')) {
+            if (!empty($file['provider_file_id'])) {
+                header("Location: https://lh3.googleusercontent.com/d/" . $file['provider_file_id'] . "=s0");
+                exit;
+            }
+        }
+
+        // Support HTTP 304 Not Modified browser caching for 0ms re-loads
+        $etag = '"' . md5($file['id'] . '_' . ($file['updated_at'] ?? '') . '_' . $file['size_bytes']) . '"';
+        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
+            header('HTTP/1.1 304 Not Modified');
+            header('Cache-Control: public, max-age=31536000, immutable');
+            header('ETag: ' . $etag);
+            exit;
+        }
+
         // Get connected account for the token
-        $stmt = $pdo->prepare("SELECT * FROM connected_accounts WHERE id = ? LIMIT 1");
-        $stmt->execute([$file['connected_account_id']]);
-        $account = $stmt->fetch();
+        $account = null;
+        if (!empty($file['connected_account_id'])) {
+            $stmt = $pdo->prepare("SELECT * FROM connected_accounts WHERE id = ? LIMIT 1");
+            $stmt->execute([$file['connected_account_id']]);
+            $account = $stmt->fetch();
+        }
+
         if (!$account) {
-            die("Connected storage account not found.");
+            $stmt = $pdo->query("SELECT * FROM connected_accounts WHERE provider = 'google_drive' AND status = 'connected' ORDER BY created_at DESC LIMIT 1");
+            $account = $stmt->fetch();
         }
 
         $encryptionKey = Config::get('TOKEN_ENCRYPTION_KEY', 'change-this-encryption-key-32bytes!');
-        $accessToken = self::decryptText($account['access_token_encrypted'], $encryptionKey);
+        $accessToken = $account ? self::decryptText($account['access_token_encrypted'], $encryptionKey) : null;
 
-        // Download from Google Drive
         $url = "https://www.googleapis.com/drive/v3/files/" . $file['provider_file_id'] . "?alt=media";
+
+        $disposition = $isInline ? 'inline' : 'attachment';
+
+        header('Content-Type: ' . ($file['mime_type'] ?: 'application/octet-stream'));
+        header('Content-Disposition: ' . $disposition . '; filename="' . $file['name'] . '"');
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('ETag: ' . $etag);
+        if (!empty($file['size_bytes'])) {
+            header('Content-Length: ' . $file['size_bytes']);
+        }
+
+        @set_time_limit(0);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Authorization: Bearer " . $accessToken
-        ]);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $chunk) {
+            echo $chunk;
+            if (ob_get_level() > 0) ob_flush();
+            flush();
+            return strlen($chunk);
+        });
 
-        $response = curl_exec($ch);
+        if ($accessToken) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                "Authorization: Bearer " . $accessToken
+            ]);
+        }
+
+        curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
         curl_close($ch);
 
-        // If access token is expired (401), try to refresh it
-        if ($httpCode === 401 && !empty($account['refresh_token_encrypted'])) {
+        // If 401 token expired, attempt refresh
+        if ($httpCode === 401 && $account && !empty($account['refresh_token_encrypted'])) {
             $refreshToken = self::decryptText($account['refresh_token_encrypted'], $encryptionKey);
             $clientId = Config::get('GOOGLE_CLIENT_ID');
             $clientSecret = Config::get('GOOGLE_CLIENT_SECRET');
@@ -86,44 +129,25 @@ class DownloadProxyController {
             if ($clientId && $clientSecret && $refreshToken) {
                 $newAccessToken = self::refreshAccessToken($clientId, $clientSecret, $refreshToken);
                 if ($newAccessToken) {
-                    // Update database with new access token
-                    $encryptedNewToken = self::encryptText($newAccessToken, $encryptionKey);
-                    $stmt = $pdo->prepare("UPDATE connected_accounts SET access_token_encrypted = ?, token_expires_at = DATE_ADD(NOW(), INTERVAL 1 HOUR) WHERE id = ?");
-                    $stmt->execute([$encryptedNewToken, $account['id']]);
-
-                    // Retry download
                     $ch = curl_init();
                     curl_setopt($ch, CURLOPT_URL, $url);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                    curl_setopt($ch, CURLOPT_HEADER, true);
+                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+                    curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $chunk) {
+                        echo $chunk;
+                        if (ob_get_level() > 0) ob_flush();
+                        flush();
+                        return strlen($chunk);
+                    });
                     curl_setopt($ch, CURLOPT_HTTPHEADER, [
                         "Authorization: Bearer " . $newAccessToken
                     ]);
-                    $response = curl_exec($ch);
-                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                    curl_exec($ch);
                     curl_close($ch);
                 }
             }
         }
-
-        if ($httpCode === 200) {
-            $body = substr($response, $headerSize);
-            
-            $disposition = isset($_GET['inline']) ? 'inline' : 'attachment';
-            
-            header('Content-Description: File Transfer');
-            header('Content-Type: ' . ($file['mime_type'] ?: 'application/octet-stream'));
-            header('Content-Disposition: ' . $disposition . '; filename="' . $file['name'] . '"');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate');
-            header('Pragma: public');
-            header('Content-Length: ' . strlen($body));
-            echo $body;
-            exit;
-        } else {
-            die("Failed to download file from Google Drive. HTTP Code: " . $httpCode);
-        }
+        exit;
     }
 
     private static function encryptText($value, $encryptionKey) {
