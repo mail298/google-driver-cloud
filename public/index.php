@@ -62,6 +62,9 @@ switch ($requestUri) {
     case '/batch-delete':
         DashboardController::batchDelete();
         break;
+    case '/delete-all-files':
+        DashboardController::deleteAllFiles();
+        break;
     case '/client/backup/zip':
         ClientBackupController::downloadUserZip();
         break;

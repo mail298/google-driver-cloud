@@ -331,4 +331,50 @@ class DashboardController {
             exit;
         }
     }
+
+    public static function deleteAllFiles() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
+
+            if (!$userId) {
+                echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
+                exit;
+            }
+
+            try {
+                // Delete all active files for user
+                $stmtFiles = $pdo->prepare("SELECT id FROM files WHERE user_id = ? AND status = 'active'");
+                $stmtFiles->execute([$userId]);
+                $allFiles = $stmtFiles->fetchAll();
+
+                $deletedCount = 0;
+                foreach ($allFiles as $f) {
+                    try {
+                        PortalModel::deleteFile($pdo, $userId, $f['id']);
+                        $deletedCount++;
+                    } catch (Exception $e) {}
+                }
+
+                // Delete all active folders for user
+                $stmtFolders = $pdo->prepare("SELECT id FROM folders WHERE user_id = ? AND deleted_at IS NULL");
+                $stmtFolders->execute([$userId]);
+                $allFolders = $stmtFolders->fetchAll();
+
+                foreach ($allFolders as $f) {
+                    try {
+                        PortalModel::deleteFolder($pdo, $userId, $f['id']);
+                    } catch (Exception $e) {}
+                }
+
+                echo json_encode(['success' => true, 'count' => $deletedCount]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
 }

@@ -1349,6 +1349,59 @@ function closeBulkDeleteModal() {
     if (modal) modal.classList.remove('active');
 }
 
+function openDeleteAllModal() {
+    const modal = document.getElementById('delete-all-modal');
+    if (modal) modal.classList.add('active');
+}
+
+function closeDeleteAllModal() {
+    const modal = document.getElementById('delete-all-modal');
+    if (modal) modal.classList.remove('active');
+}
+
+let isDeleteAllSubmitting = false;
+function submitDeleteAllFiles() {
+    if (isDeleteAllSubmitting) return;
+
+    const btn = document.getElementById('btn-submit-delete-all');
+    if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = '0.6';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<span style="display:inline-block; width:12px; height:12px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spinRing 0.8s linear infinite; vertical-align:middle; margin-right:6px;"></span> Menghapus Semua Data...';
+    }
+    isDeleteAllSubmitting = true;
+
+    fetch('/delete-all-files', {
+        method: 'POST'
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.href = '/';
+            } else {
+                alert(data.message || 'Gagal menghapus semua data');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.innerHTML = 'Ya, Hapus Semua Data';
+                }
+                isDeleteAllSubmitting = false;
+            }
+        })
+        .catch(err => {
+            alert('Terjadi kesalahan jaringan.');
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                btn.innerHTML = 'Ya, Hapus Semua Data';
+            }
+            isDeleteAllSubmitting = false;
+        });
+}
+
 let isBulkDeleteSubmitting = false;
 function submitBulkDelete() {
     if (isBulkDeleteSubmitting) return;

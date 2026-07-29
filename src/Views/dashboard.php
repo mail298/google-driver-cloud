@@ -915,6 +915,16 @@
                             <span>Unduh Semua (ZIP)</span>
                         </a>
                     </li>
+                    <li class="sidebar-menu-item">
+                        <a href="javascript:void(0)" onclick="openDeleteAllModal()" class="sidebar-menu-link" style="color: #f87171;" title="Hapus seluruh berkas dan folder Anda secara total">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                            </svg>
+                            <span>Hapus Semua Data</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
 
@@ -1953,6 +1963,29 @@
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                 <button type="button" onclick="closeBulkDeleteModal()" style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer;">Batal</button>
                 <button type="button" onclick="submitBulkDelete()" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Ya, Hapus Terpilih</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete All Confirmation Modal -->
+    <div class="modal-overlay" id="delete-all-modal">
+        <div class="modal-card" style="max-width: 460px; width: 92%; background: #0f172a; border: 1px solid rgba(239,68,68,0.4); border-radius: 20px; padding: 24px; box-shadow: 0 20px 50px rgba(239,68,68,0.2);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 12px; padding: 10px; color: #ef4444; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                </div>
+                <div>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">⚠️ Hapus SELURUH Data Portal</h3>
+                    <span style="font-size: 11.5px; color: #fca5a5; font-weight: 600;">PERINGATAN BAHAYA</span>
+                </div>
+            </div>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5;">Apakah Anda yakin ingin <strong style="color: #ef4444;">MENGHAPUS SELURUH BERKAS & FOLDER</strong> milik Anda?</p>
+            <div style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #fca5a5; margin-bottom: 20px;">
+                Tindakan ini akan mengosongkan seluruh ruang penyimpanan Anda dan tidak dapat dibatalkan.
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeDeleteAllModal()" style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer;">Batal</button>
+                <button type="button" id="btn-submit-delete-all" onclick="submitDeleteAllFiles()" style="background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%); color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-weight: 800; cursor:pointer; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);">Ya, Hapus Semua Data</button>
             </div>
         </div>
     </div>
