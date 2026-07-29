@@ -43,7 +43,7 @@ class SecurityModel
         }
 
         if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+            AuthController::startSession();
         }
 
         // Check last activity
@@ -90,7 +90,7 @@ class SecurityModel
     public static function generateCsrfToken()
     {
         if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+            AuthController::startSession();
         }
 
         if (empty($_SESSION['csrf_token'])) {
