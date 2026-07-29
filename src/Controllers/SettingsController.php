@@ -27,7 +27,11 @@ class SettingsController {
 
             try {
                 UserModel::updateUserPassword($currentUser['id'], $oldPassword, $newPassword);
-                $_SESSION['user']['password'] = $newPassword;
+                // Refresh session user from storage to reflect the new hashed password
+                $refreshed = UserModel::getUserById($currentUser['id']);
+                if ($refreshed) {
+                    $_SESSION['user'] = $refreshed;
+                }
                 header('Location: /?settings_success=' . urlencode('Password akun Anda berhasil diperbarui.'));
                 exit;
             } catch (Exception $e) {
