@@ -1003,10 +1003,16 @@ function cmActionCopyLink() {
 function cmActionCopyCdnLink() {
     closeContextMenu();
     if (activeContextItem && activeContextItem.type === 'file') {
-        const gdriveId = activeContextItem.providerFileId || activeContextItem.id;
-        const cdnUrl = `https://lh3.googleusercontent.com/d/${gdriveId}=s0`;
+        const fileId = activeContextItem.id;
+        const gdriveId = activeContextItem.providerFileId || activeContextItem.provider_file_id || '';
+        
+        let cdnUrl = window.location.origin + '/download?id=' + encodeURIComponent(fileId) + '&cdn=1';
+        if (gdriveId && !gdriveId.includes('-') && gdriveId.length > 20) {
+            cdnUrl = 'https://lh3.googleusercontent.com/d/' + gdriveId + '=s0';
+        }
+
         copyToClipboard(cdnUrl).then(() => {
-            showToast('Link CDN Gambar (Super Cepat) berhasil disalin ke clipboard! Siap dipakai di Landing Page.');
+            showToast('Link CDN Gambar (Super Cepat) berhasil disalin ke clipboard!');
         }).catch(() => {
             prompt('Salin Link CDN Gambar:', cdnUrl);
         });
