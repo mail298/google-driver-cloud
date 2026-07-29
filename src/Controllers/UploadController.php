@@ -19,6 +19,8 @@ class UploadController
             if ($folderId === '')
                 $folderId = null;
 
+            $replaceDuplicate = !empty($_POST['replace']) && ($_POST['replace'] === '1' || $_POST['replace'] === 'true');
+
             $gatewayUrl = Config::get('GATEWAY_API_URL', 'http://localhost:4000');
             $apiKey = Config::get('GATEWAY_API_KEY');
 
@@ -71,8 +73,11 @@ class UploadController
                 $folder = PortalModel::getFolder($pdo, $userId, $folderId);
                 if ($folder && !empty($folder['provider_folder_id'])) {
                     $providerParentId = $folder['provider_folder_id'];
+                } else {
+                    $providerParentId = PortalModel::extractFolderId($folderId);
                 }
-            } elseif ($currentUser && !empty($currentUser['root_folder_id'])) {
+            }
+            if (empty($providerParentId) && $currentUser && !empty($currentUser['root_folder_id'])) {
                 $providerParentId = PortalModel::extractFolderId($currentUser['root_folder_id']);
             }
 
@@ -120,6 +125,25 @@ class UploadController
                     $uploadedFile = $responseData['file'] ?? ($responseData['files'][0] ?? null);
                     if ($uploadedFile && !empty($uploadedFile['id'])) {
                         try {
+                            if ($replaceDuplicate) {
+                                $fileNameToMatch = $uploadedFile['name'] ?? $file['name'];
+                                if ($folderId !== null) {
+                                    $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE user_id = ? AND folder_id = ? AND name = ? AND status = 'active'");
+                                    $stmtExist->execute([$userId, $folderId, $fileNameToMatch]);
+                                } else {
+                                    $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE user_id = ? AND folder_id IS NULL AND name = ? AND status = 'active'");
+                                    $stmtExist->execute([$userId, $fileNameToMatch]);
+                                }
+                                $existingFiles = $stmtExist->fetchAll();
+                                foreach ($existingFiles as $ef) {
+                                    $stmtDel = $pdo->prepare("DELETE FROM files WHERE id = ?");
+                                    $stmtDel->execute([$ef['id']]);
+                                    if (!empty($ef['provider_file_id'])) {
+                                        PortalModel::trashGoogleDriveItem($pdo, $userId, $ef['provider_file_id']);
+                                    }
+                                }
+                            }
+
                             $stmt = $pdo->prepare("INSERT IGNORE INTO files (id, user_id, folder_id, connected_account_id, provider, provider_file_id, name, mime_type, size_bytes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())");
                             $stmt->execute([
                                 $uploadedFile['id'],
@@ -134,6 +158,12 @@ class UploadController
                             ]);
                         } catch (Exception $e) {
                             error_log('File record save failed: ' . $e->getMessage());
+                        }
+
+                        // Automatically move uploaded file to client's designated Google Drive folder
+                        $providerFileId = $uploadedFile['providerFileId'] ?? '';
+                        if (!empty($providerParentId) && !empty($providerFileId)) {
+                            PortalModel::moveGoogleDriveItem($pdo, $userId, $providerFileId, $providerParentId);
                         }
                     }
                     echo json_encode(['success' => true, 'data' => $responseData]);

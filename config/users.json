@@ -10,7 +10,7 @@
     {
         "id": "client-1",
         "username": "clientA",
-        "password": "clientpass",
+        "password": "$2y$10$feuZN6YTBpTJ9ADk4kSxvORlO\/MXHgTbZWOG3wYfk33WUXGn\/8QDG",
         "role": "client",
         "storage_limit_gb": 15,
         "root_folder_id": ""

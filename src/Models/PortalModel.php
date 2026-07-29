@@ -275,8 +275,18 @@ class PortalModel {
     public static function createFolder($pdo, $userId, $parentId, $name) {
         $id = self::generateUuid();
         $connectedAccountId = self::getFirstConnectedAccountId($pdo, $userId);
+
+        $effectiveParentId = $parentId;
+        if (empty($effectiveParentId)) {
+            $stmtUser = $pdo->prepare("SELECT root_folder_id FROM users WHERE id = ? LIMIT 1");
+            $stmtUser->execute([$userId]);
+            $userRow = $stmtUser->fetch();
+            if ($userRow && !empty($userRow['root_folder_id'])) {
+                $effectiveParentId = self::extractFolderId($userRow['root_folder_id']);
+            }
+        }
         
-        $gdriveResult = self::createFolderOnGoogleDrive($pdo, $userId, $parentId, $name);
+        $gdriveResult = self::createFolderOnGoogleDrive($pdo, $userId, $effectiveParentId, $name);
         $providerFolderId = $gdriveResult['provider_folder_id'] ?? null;
         if (!empty($gdriveResult['connected_account_id'])) {
             $connectedAccountId = $gdriveResult['connected_account_id'];

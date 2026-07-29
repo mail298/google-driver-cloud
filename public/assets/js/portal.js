@@ -90,47 +90,258 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-// Upload Queue State
+// Upload Queue State & Google Drive Style Upload Workflow
 let uploadQueueItems = [];
 let isUploading = false;
 const MAX_BATCH_BYTES = 5 * 1024 * 1024 * 1024; // 5GB limit per batch
 
+let pendingDuplicateFiles = null;
+let gdriveQueue = [];
+let isGDriveUploading = false;
+let isWidgetCollapsed = false;
+
 // Handle file selection (multi-file)
 function handleFileSelect(event) {
     const files = event.target.files;
-    if (files.length === 0) return;
-    addFilesToQueue(files);
-    openUploadQueue();
+    if (!files || files.length === 0) return;
+
+    const fileArray = Array.from(files);
     event.target.value = '';
+
+    // Check if any selected file name already exists in current folder
+    const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? EXISTING_FILE_NAMES : [];
+    const duplicate = fileArray.find(f => existingList.includes(f.name));
+
+    if (duplicate) {
+        pendingDuplicateFiles = fileArray;
+        const textEl = document.getElementById('duplicate-filename-text');
+        if (textEl) textEl.textContent = duplicate.name;
+        const modal = document.getElementById('gdrive-duplicate-modal');
+        if (modal) modal.style.display = 'flex';
+    } else {
+        startGDriveUpload(fileArray, { isReplace: false });
+    }
 }
 
-// Add files to queue
-function addFilesToQueue(fileList) {
-    for (let i = 0; i < fileList.length; i++) {
-        const file = fileList[i];
-        uploadQueueItems.push({
-            file: file,
-            name: file.name,
-            size: file.size,
-            checked: true,
-            status: 'waiting',
-            progress: 0,
-            error: ''
-        });
-    }
-    renderUploadQueue();
+function cancelDuplicateUpload() {
+    pendingDuplicateFiles = null;
+    const modal = document.getElementById('gdrive-duplicate-modal');
+    if (modal) modal.style.display = 'none';
+}
 
-    // Check if total selected size exceeds 5GB batch limit
-    var totalBatchBytes = 0;
-    uploadQueueItems.forEach(function(item) {
-        if (item.checked) totalBatchBytes += item.size;
-    });
-    if (totalBatchBytes > MAX_BATCH_BYTES) {
-        showBatchSizePopup(totalBatchBytes, MAX_BATCH_BYTES);
-        document.getElementById('btn-upload-start').disabled = true;
+function confirmDuplicateUpload() {
+    const modal = document.getElementById('gdrive-duplicate-modal');
+    if (modal) modal.style.display = 'none';
+
+    if (!pendingDuplicateFiles || pendingDuplicateFiles.length === 0) return;
+
+    const selectedOption = document.querySelector('input[name="duplicate_option"]:checked');
+    const optionValue = selectedOption ? selectedOption.value : 'replace';
+
+    if (optionValue === 'replace') {
+        startGDriveUpload(pendingDuplicateFiles, { isReplace: true, versionText: 'Versi 2' });
     } else {
-        document.getElementById('btn-upload-start').disabled = false;
+        const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? [...EXISTING_FILE_NAMES] : [];
+        const processedFiles = pendingDuplicateFiles.map(file => {
+            if (existingList.includes(file.name)) {
+                const newName = getUniqueFileName(file.name, existingList);
+                existingList.push(newName);
+                return new File([file], newName, { type: file.type, lastModified: file.lastModified });
+            }
+            return file;
+        });
+        startGDriveUpload(processedFiles, { isReplace: false });
     }
+
+    pendingDuplicateFiles = null;
+}
+
+function getUniqueFileName(originalName, existingNames) {
+    if (!existingNames.includes(originalName)) return originalName;
+    const dotIndex = originalName.lastIndexOf('.');
+    let baseName = originalName;
+    let ext = '';
+    if (dotIndex !== -1) {
+        baseName = originalName.substring(0, dotIndex);
+        ext = originalName.substring(dotIndex);
+    }
+    let counter = 1;
+    let newName = baseName + ' (' + counter + ')' + ext;
+    while (existingNames.includes(newName)) {
+        counter++;
+        newName = baseName + ' (' + counter + ')' + ext;
+    }
+    return newName;
+}
+
+function startGDriveUpload(files, options) {
+    options = options || {};
+    const widget = document.getElementById('gdrive-upload-widget');
+    if (!widget) return;
+
+    widget.style.display = 'block';
+    const body = document.getElementById('gdrive-widget-body');
+    if (body) body.style.display = 'block';
+
+    gdriveQueue = files.map((file, idx) => ({
+        id: idx,
+        file: file,
+        name: file.name,
+        size: file.size,
+        status: 'waiting',
+        progress: 0,
+        isReplace: !!options.isReplace,
+        versionText: options.versionText || (options.isReplace ? 'Versi 2' : '')
+    }));
+
+    renderGDriveWidget();
+    if (!isGDriveUploading) {
+        processGDriveQueueItem(0);
+    }
+}
+
+function renderGDriveWidget() {
+    const titleEl = document.getElementById('gdrive-widget-title');
+    const statusTextEl = document.getElementById('gdrive-widget-status-text');
+    const itemListEl = document.getElementById('gdrive-widget-item-list');
+    if (!itemListEl) return;
+
+    const total = gdriveQueue.length;
+    const completed = gdriveQueue.filter(i => i.status === 'completed').length;
+    const isFinished = (completed === total && total > 0);
+
+    if (titleEl) {
+        titleEl.textContent = isFinished ? completed + ' upload selesai' : 'Mengupload ' + total + ' item';
+    }
+    if (statusTextEl) {
+        statusTextEl.textContent = isFinished ? 'Semua pengunggahan selesai' : 'Menyelesaikan upload...';
+    }
+
+    let html = '';
+    gdriveQueue.forEach((item) => {
+        let statusIcon = '';
+        if (item.status === 'waiting') {
+            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1;"></div>';
+        } else if (item.status === 'uploading') {
+            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #e2e8f0; border-top: 3px solid #0b57d0; animation: spinRing 0.8s linear infinite;"></div>';
+        } else if (item.status === 'completed') {
+            statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #1e8e3e; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">✓</div>';
+        } else if (item.status === 'failed') {
+            statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #d93025; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">✕</div>';
+        }
+
+        let fileIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
+        if (item.file && item.file.type && item.file.type.startsWith('image/')) {
+            fileIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d93025" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
+        }
+
+        const versionHtml = item.versionText ? '<span style="font-size: 12px; color: #5f6368; background: #f1f3f4; padding: 2px 7px; border-radius: 4px; margin-right: 8px; font-weight: 500;">' + escapeHtml(item.versionText) + '</span>' : '';
+
+        html += '<div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #f1f3f4;">';
+        html += '<div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">' + fileIcon + '</div>';
+        html += '<div style="flex: 1; min-width: 0;">';
+        html += '<div style="font-size: 13.5px; font-weight: 500; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
+        html += '</div>';
+        html += '<div style="display: flex; align-items: center; flex-shrink: 0;">';
+        html += versionHtml;
+        html += statusIcon;
+        html += '</div>';
+        html += '</div>';
+    });
+
+    itemListEl.innerHTML = html;
+}
+
+function processGDriveQueueItem(idx) {
+    if (idx >= gdriveQueue.length) {
+        isGDriveUploading = false;
+        renderGDriveWidget();
+        setTimeout(function() {
+            window.location.reload();
+        }, 1200);
+        return;
+    }
+
+    isGDriveUploading = true;
+    const item = gdriveQueue[idx];
+    item.status = 'uploading';
+    renderGDriveWidget();
+
+    const formData = new FormData();
+    formData.append('file', item.file);
+    if (typeof CURRENT_FOLDER_ID !== 'undefined' && CURRENT_FOLDER_ID) {
+        formData.append('folderId', CURRENT_FOLDER_ID);
+    }
+    if (item.isReplace) {
+        formData.append('replace', '1');
+    }
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload', true);
+
+    xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+            item.progress = Math.round((e.loaded / e.total) * 100);
+            renderGDriveWidget();
+        }
+    };
+
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    item.status = 'completed';
+                } else {
+                    item.status = 'failed';
+                    item.error = response.message || 'Gagal mengunggah';
+                }
+            } catch (e) {
+                item.status = 'failed';
+            }
+        } else {
+            item.status = 'failed';
+        }
+        renderGDriveWidget();
+        processGDriveQueueItem(idx + 1);
+    };
+
+    xhr.onerror = function () {
+        item.status = 'failed';
+        renderGDriveWidget();
+        processGDriveQueueItem(idx + 1);
+    };
+
+    xhr.send(formData);
+}
+
+function toggleUploadWidgetCollapse() {
+    const body = document.getElementById('gdrive-widget-body');
+    const btn = document.getElementById('btn-widget-toggle');
+    if (!body) return;
+
+    isWidgetCollapsed = !isWidgetCollapsed;
+    if (isWidgetCollapsed) {
+        body.style.display = 'none';
+        if (btn) btn.style.transform = 'rotate(180deg)';
+    } else {
+        body.style.display = 'block';
+        if (btn) btn.style.transform = 'rotate(0deg)';
+    }
+}
+
+function closeUploadWidget() {
+    const widget = document.getElementById('gdrive-upload-widget');
+    if (widget) widget.style.display = 'none';
+    if (!isGDriveUploading && gdriveQueue.some(i => i.status === 'completed')) {
+        window.location.reload();
+    }
+}
+
+function cancelUploadWidgetQueue() {
+    gdriveQueue = [];
+    isGDriveUploading = false;
+    closeUploadWidget();
 }
 
 // Render queue list
@@ -139,10 +350,18 @@ function renderUploadQueue() {
     if (!list) return;
 
     if (uploadQueueItems.length === 0) {
-        list.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:13px;">Tidak ada berkas dipilih.</div>';
-        document.getElementById('btn-upload-start').disabled = true;
+        list.innerHTML = '<div style="text-align:center; padding:36px 20px; color:#94a3b8; font-size:13px; display:flex; flex-direction:column; align-items:center; gap:8px;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg><span>Tidak ada berkas dipilih.</span></div>';
+        var btn = document.getElementById('btn-upload-start');
+        if (btn) {
+            btn.disabled = true;
+            btn.onclick = startUploadQueue;
+            btn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+            btn.textContent = 'Upload Terpilih';
+        }
         var headerCount = document.getElementById('queue-header-count');
         if (headerCount) headerCount.textContent = 'Tidak ada berkas';
+        const summary = document.getElementById('upload-queue-summary');
+        if (summary) summary.style.display = 'none';
         return;
     }
 
@@ -156,22 +375,21 @@ function renderUploadQueue() {
         const sizeStr = formatFileSize(item.size);
         let statusHtml = '';
         if (item.status === 'waiting') {
-            statusHtml = '<span style="color:#94a3b8; font-size:11px;">Menunggu</span>';
+            statusHtml = '<span style="background:rgba(255,255,255,0.06); color:#94a3b8; font-size:11px; padding:4px 9px; border-radius:6px; font-weight:600; display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Menunggu</span>';
         } else if (item.status === 'uploading') {
-            statusHtml = '<div style="display:flex; align-items:center; gap:6px;"><div class="progress-bar-bg" style="flex:1; background:rgba(255,255,255,0.08); height:4px; border-radius:4px; overflow:hidden;"><div class="progress-bar-fill" style="background:#3b82f6; height:100%; width:' + item.progress + '%;"></div></div><span style="color:#60a5fa; font-size:11px; min-width:32px; text-align:right;">' + item.progress + '%</span></div>';
+            statusHtml = '<div style="display:flex; align-items:center; gap:8px; min-width:120px;"><div class="progress-bar-bg" style="flex:1; background:rgba(255,255,255,0.1); height:6px; border-radius:10px; overflow:hidden;"><div class="progress-bar-fill" style="background:linear-gradient(90deg, #3b82f6, #60a5fa); height:100%; width:' + item.progress + '%; transition: width 0.2s ease;"></div></div><span style="color:#60a5fa; font-size:11px; font-weight:700; min-width:32px; text-align:right;">' + item.progress + '%</span></div>';
         } else if (item.status === 'completed') {
-            statusHtml = '<span style="color:#34d399; font-size:11px; font-weight:600;">Selesai ✓</span>';
+            statusHtml = '<span style="background:rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(52,211,153,0.3); font-size:11px; padding:4px 10px; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:4px; box-shadow:0 0 10px rgba(52,211,153,0.15);"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Selesai ✓</span>';
         } else if (item.status === 'failed') {
-            statusHtml = '<span style="color:#f87171; font-size:11px;" title="' + escapeHtml(item.error) + '">Gagal</span>';
+            statusHtml = '<span style="background:rgba(239,68,68,0.15); color:#f87171; border:1px solid rgba(248,113,113,0.3); font-size:11px; padding:4px 9px; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:4px;" title="' + escapeHtml(item.error) + '">✕ Gagal</span>';
         }
 
         // Generate thumbnail based on file type
         var thumbHtml = '';
-        var name = item.name.toLowerCase();
         if (item.file && item.file.type && item.file.type.startsWith('image/')) {
             try {
                 var thumbUrl = URL.createObjectURL(item.file);
-                thumbHtml = '<img src="' + thumbUrl + '" alt="">';
+                thumbHtml = '<img src="' + thumbUrl + '" alt="" style="width:100%; height:100%; object-fit:cover;">';
             } catch(e) {
                 thumbHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
             }
@@ -183,14 +401,14 @@ function renderUploadQueue() {
             thumbHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
         }
 
-        html += '<div class="upload-queue-item" data-index="' + idx + '" style="display:flex; align-items:center; gap:10px; padding:8px 6px; border-bottom:1px solid rgba(255,255,255,0.04);">';
+        html += '<div class="upload-queue-item" data-index="' + idx + '" style="display:flex; align-items:center; gap:12px; padding:10px 10px; border-bottom:1px solid rgba(255,255,255,0.05); transition: background 0.15s ease; border-radius: 8px;">';
         html += '<input type="checkbox" class="queue-item-checkbox" data-index="' + idx + '" ' + (item.checked ? 'checked' : '') + ' ' + (item.status === 'uploading' || item.status === 'completed' ? 'disabled' : '') + ' onchange="toggleQueueItem(' + idx + ')" style="accent-color:#3b82f6; cursor:pointer; width:16px; height:16px; flex-shrink:0;">';
-        html += '<div class="queue-thumb" style="width:32px; height:32px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.04); overflow:hidden;">' + thumbHtml + '</div>';
+        html += '<div class="queue-thumb" style="width:36px; height:36px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); overflow:hidden;">' + thumbHtml + '</div>';
         html += '<div style="flex:1; min-width:0;">';
         html += '<div class="queue-item-name" style="font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
-        html += '<div class="queue-item-size" style="font-size:11px; color:#64748b;">' + sizeStr + '</div>';
+        html += '<div class="queue-item-size" style="font-size:11px; color:#64748b; margin-top:2px;">' + sizeStr + '</div>';
         html += '</div>';
-        html += '<div style="flex-shrink:0; min-width:60px; text-align:right;">' + statusHtml + '</div>';
+        html += '<div style="flex-shrink:0; text-align:right;">' + statusHtml + '</div>';
         html += '</div>';
     });
     list.innerHTML = html;
@@ -200,13 +418,30 @@ function renderUploadQueue() {
         if (item.checked) totalCheckedBytes += item.size;
     });
     var overBatchLimit = totalCheckedBytes > MAX_BATCH_BYTES;
-    document.getElementById('btn-upload-start').disabled = (checkedCount === 0 || isUploading || overBatchLimit);
-    if (overBatchLimit) {
-        document.getElementById('btn-upload-start').textContent = 'Melebihi batas ' + formatFileSize(MAX_BATCH_BYTES);
-    } else if (isUploading) {
-        document.getElementById('btn-upload-start').textContent = 'Mengunggah...';
-    } else {
-        document.getElementById('btn-upload-start').textContent = 'Upload Terpilih (' + checkedCount + ')';
+    var btn = document.getElementById('btn-upload-start');
+    if (btn) {
+        var completedCount = uploadQueueItems.filter(i => i.checked && i.status === 'completed').length;
+        var totalChecked = uploadQueueItems.filter(i => i.checked).length;
+        
+        if (completedCount > 0 && completedCount === totalChecked && !isUploading) {
+            btn.disabled = false;
+            btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            btn.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.4)';
+            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>Selesai & Refresh';
+            btn.onclick = function() { window.location.reload(); };
+        } else if (overBatchLimit) {
+            btn.disabled = true;
+            btn.textContent = 'Melebihi batas ' + formatFileSize(MAX_BATCH_BYTES);
+        } else if (isUploading) {
+            btn.disabled = true;
+            btn.textContent = 'Mengunggah...';
+        } else {
+            btn.disabled = (checkedCount === 0);
+            btn.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+            btn.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+            btn.textContent = 'Upload Terpilih (' + checkedCount + ')';
+            btn.onclick = startUploadQueue;
+        }
     }
 }
 
@@ -282,9 +517,23 @@ function startUploadQueue() {
     if (checked.length === 0) return;
 
     isUploading = true;
-    document.getElementById('upload-queue-summary').style.display = 'block';
-    document.getElementById('btn-upload-start').textContent = 'Mengunggah...';
-    document.getElementById('btn-upload-start').disabled = true;
+    const summary = document.getElementById('upload-queue-summary');
+    if (summary) {
+        summary.style.display = 'block';
+        summary.innerHTML = '<div class="progress-bar-bg" style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">' +
+            '<div class="progress-bar-fill" id="queue-progress-fill" style="background: linear-gradient(90deg, #3b82f6, #10b981); height: 100%; width: 0%; transition: width 0.3s ease;"></div>' +
+            '</div>' +
+            '<div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 10px;">' +
+            '<span id="queue-status-text">0 / 0 selesai</span>' +
+            '<span id="queue-percent-text" style="font-weight: 700; color: #60a5fa;">0%</span>' +
+            '</div>';
+    }
+
+    const btn = document.getElementById('btn-upload-start');
+    if (btn) {
+        btn.textContent = 'Mengunggah...';
+        btn.disabled = true;
+    }
 
     updateQueueSummary();
     processQueueItem(0);
@@ -294,9 +543,12 @@ function updateQueueSummary() {
     const total = uploadQueueItems.filter(i => i.checked).length;
     const done = uploadQueueItems.filter(i => i.checked && i.status === 'completed').length;
     const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-    document.getElementById('queue-status-text').textContent = done + ' / ' + total + ' selesai';
-    document.getElementById('queue-percent-text').textContent = pct + '%';
-    document.getElementById('queue-progress-fill').style.width = pct + '%';
+    const statusText = document.getElementById('queue-status-text');
+    if (statusText) statusText.textContent = done + ' / ' + total + ' selesai';
+    const percentText = document.getElementById('queue-percent-text');
+    if (percentText) percentText.textContent = pct + '%';
+    const fill = document.getElementById('queue-progress-fill');
+    if (fill) fill.style.width = pct + '%';
 }
 
 function processQueueItem(idx) {
@@ -311,9 +563,25 @@ function processQueueItem(idx) {
 
     if (idx >= uploadQueueItems.length) {
         isUploading = false;
-        document.getElementById('btn-upload-start').textContent = 'Upload Terpilih';
-        document.getElementById('btn-upload-start').disabled = false;
         updateQueueSummary();
+        renderUploadQueue();
+
+        const completedCount = uploadQueueItems.filter(i => i.checked && i.status === 'completed').length;
+        const totalChecked = uploadQueueItems.filter(i => i.checked).length;
+        if (completedCount > 0 && completedCount === totalChecked) {
+            const summary = document.getElementById('upload-queue-summary');
+            if (summary) {
+                summary.innerHTML = '<div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.1) 100%); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 12px 14px; margin-top: 10px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15); animate: fadeIn 0.3s ease;">' +
+                    '<div style="background: rgba(16, 185, 129, 0.25); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #34d399;">' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' +
+                    '</div>' +
+                    '<div style="flex: 1;">' +
+                    '<div style="font-size: 13.5px; font-weight: 700; color: #34d399;">Pengunggahan Selesai!</div>' +
+                    '<div style="font-size: 11.5px; color: #a7f3d0; margin-top: 1px;">' + completedCount + ' berkas telah tersimpan dengan aman di folder Google Drive Anda.</div>' +
+                    '</div>' +
+                    '</div>';
+            }
+        }
         return;
     }
 
@@ -329,7 +597,7 @@ function processQueueItem(idx) {
         if (el) {
             const statusCell = el.querySelector('div:last-child');
             if (statusCell) {
-                statusCell.innerHTML = '<div style="display:flex; align-items:center; gap:6px;"><div class="progress-bar-bg" style="flex:1; background:rgba(255,255,255,0.08); height:4px; border-radius:4px; overflow:hidden;"><div class="progress-bar-fill" style="background:#3b82f6; height:100%; width:' + pct + '%;"></div></div><span style="color:#60a5fa; font-size:11px; min-width:32px; text-align:right;">' + pct + '%</span></div>';
+                statusCell.innerHTML = '<div style="display:flex; align-items:center; gap:8px; min-width:120px;"><div class="progress-bar-bg" style="flex:1; background:rgba(255,255,255,0.1); height:6px; border-radius:10px; overflow:hidden;"><div class="progress-bar-fill" style="background:linear-gradient(90deg, #3b82f6, #60a5fa); height:100%; width:' + pct + '%; transition: width 0.2s ease;"></div></div><span style="color:#60a5fa; font-size:11px; font-weight:700; min-width:32px; text-align:right;">' + pct + '%</span></div>';
             }
         }
     }, function(success, errorMsg) {
@@ -348,8 +616,6 @@ function processQueueItem(idx) {
                 // Mark remaining as failed too
                 remaining.forEach(r => { r.status = 'failed'; r.error = 'Kuota tidak mencukupi'; });
                 isUploading = false;
-                document.getElementById('btn-upload-start').textContent = 'Upload Terpilih';
-                document.getElementById('btn-upload-start').disabled = false;
                 renderUploadQueue();
                 updateQueueSummary();
                 return;
