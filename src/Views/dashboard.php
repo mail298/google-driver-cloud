@@ -1941,48 +1941,54 @@
     </div>
 
     <!-- Google Drive Style Duplicate File Option Modal ("Opsi upload") -->
-    <div class="modal-overlay" id="gdrive-duplicate-modal" style="display: none; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 10000; align-items: center; justify-content: center;">
-        <div class="modal-card" style="max-width: 440px; width: 90%; background: #ffffff; color: #1f2937; border-radius: 28px; padding: 28px; box-shadow: 0 12px 40px rgba(0,0,0,0.35); border: none; font-family: 'Plus Jakarta Sans', sans-serif;">
-            <h3 style="margin: 0 0 14px 0; font-size: 22px; font-weight: 600; color: #1f2937; font-family: 'Outfit', sans-serif;">Opsi upload</h3>
-            <p style="font-size: 13.5px; color: #5f6368; margin-bottom: 20px; line-height: 1.5;">
-                <strong id="duplicate-filename-text" style="color: #202124;">file.png</strong> sudah ada di lokasi ini. Apakah Anda ingin mengganti file yang ada dengan versi baru atau menyimpan kedua file? Mengganti file tidak akan mengubah setelan berbagi.
+    <div class="modal-overlay" id="gdrive-duplicate-modal" style="display: none; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="modal-card" style="max-width: 440px; width: 90%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
+            <h3 style="margin: 0 0 14px 0; font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">Opsi Upload Berkas</h3>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 20px; line-height: 1.5;">
+                Berkas <strong id="duplicate-filename-text" style="color: #60a5fa;">file.png</strong> sudah ada di lokasi ini. Apakah Anda ingin mengganti file yang ada dengan versi baru atau menyimpan kedua file?
             </p>
             <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px;">
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #202124; font-weight: 500;">
-                    <input type="radio" name="duplicate_option" value="replace" checked style="accent-color: #0b57d0; width: 18px; height: 18px; cursor: pointer;">
-                    <span>Ganti file yang ada</span>
+                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
+                    <input type="radio" name="duplicate_option" value="replace" checked style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
+                    <span>Ganti file yang ada (Versi Baru)</span>
                 </label>
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #202124; font-weight: 500;">
-                    <input type="radio" name="duplicate_option" value="keep_both" style="accent-color: #0b57d0; width: 18px; height: 18px; cursor: pointer;">
-                    <span>Simpan kedua file</span>
+                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
+                    <input type="radio" name="duplicate_option" value="keep_both" style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
+                    <span>Simpan kedua file (Duplikat)</span>
                 </label>
             </div>
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
-                <button type="button" onclick="cancelDuplicateUpload()" style="background: transparent; border: none; color: #0b57d0; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; border-radius: 100px;">Batal</button>
-                <button type="button" onclick="confirmDuplicateUpload()" style="background: #0b57d0; color: #ffffff; border: none; padding: 10px 26px; border-radius: 100px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(11, 87, 208, 0.3);">Upload</button>
+                <button type="button" onclick="cancelDuplicateUpload()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 9px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Batal</button>
+                <button type="button" onclick="confirmDuplicateUpload()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; border: none; padding: 9px 24px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);">Upload</button>
             </div>
         </div>
     </div>
 
     <!-- Google Drive Style Floating Upload Panel (Bottom-Right Widget) -->
-    <div id="gdrive-upload-widget" style="display: none; position: fixed; bottom: 0; right: 24px; z-index: 9999; width: 350px; background: #ffffff; color: #1f2937; border-radius: 12px 12px 0 0; box-shadow: 0 8px 30px rgba(0,0,0,0.3); border: 1px solid rgba(0,0,0,0.1); font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; transition: transform 0.25s ease;">
+    <div id="gdrive-upload-widget" style="display: none; position: fixed; bottom: 0; right: 24px; z-index: 9999; width: 350px; background: #0f172a; color: #f8fafc; border-radius: 16px 16px 0 0; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; transition: transform 0.25s ease;">
         <!-- Widget Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: #f8fafd; border-bottom: 1px solid #e5e7eb;">
-            <span id="gdrive-widget-title" style="font-size: 15px; font-weight: 600; color: #1f2937;">Mengupload 1 item</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: #1e293b; border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <span id="gdrive-widget-title" style="font-size: 14.5px; font-weight: 700; color: #f8fafc;">Mengupload 1 item</span>
             <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" onclick="toggleUploadWidgetCollapse()" id="btn-widget-toggle" style="background: transparent; border: none; color: #4b5563; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                <button type="button" onclick="toggleUploadWidgetCollapse()" id="btn-widget-toggle" style="background: transparent; border: none; color: #94a3b8; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                 </button>
-                <button type="button" onclick="closeUploadWidget()" style="background: transparent; border: none; color: #4b5563; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px;">&times;</button>
+                <button type="button" onclick="closeUploadWidget()" style="background: transparent; border: none; color: #94a3b8; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px;">&times;</button>
             </div>
         </div>
         <!-- Widget Body Container -->
         <div id="gdrive-widget-body">
             <!-- Subheader status line -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: #edf2fa; font-size: 13px; color: #444746; border-bottom: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: rgba(255,255,255,0.03); font-size: 12.5px; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.06);">
                 <span id="gdrive-widget-status-text">Menyelesaikan upload...</span>
-                <button type="button" id="gdrive-widget-cancel-btn" onclick="cancelUploadWidgetQueue()" style="background: transparent; border: none; color: #0b57d0; font-weight: 600; font-size: 13px; cursor: pointer; padding: 0;">Batal</button>
+                <button type="button" id="gdrive-widget-cancel-btn" onclick="cancelUploadWidgetQueue()" style="background: transparent; border: none; color: #60a5fa; font-weight: 700; font-size: 12.5px; cursor: pointer; padding: 0;">Batal</button>
             </div>
+            <!-- Item List -->
+            <div id="gdrive-widget-item-list" style="max-height: 220px; overflow-y: auto; padding: 4px 0; background: #0f172a;">
+                <!-- Dynamic Upload Rows -->
+            </div>
+        </div>
+    </div>
             <!-- Item List -->
             <div id="gdrive-widget-item-list" style="max-height: 220px; overflow-y: auto; padding: 4px 0;">
                 <!-- Dynamic Upload Rows -->

@@ -251,26 +251,26 @@ function renderGDriveWidget() {
     gdriveQueue.forEach((item) => {
         let statusIcon = '';
         if (item.status === 'waiting') {
-            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1;"></div>';
+            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #64748b;"></div>';
         } else if (item.status === 'uploading') {
-            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid #e2e8f0; border-top: 3px solid #0b57d0; animation: spinRing 0.8s linear infinite;"></div>';
+            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); border-top: 3px solid #3b82f6; animation: spinRing 0.8s linear infinite;"></div>';
         } else if (item.status === 'completed') {
-            statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #1e8e3e; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">✓</div>';
+            statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px rgba(16,185,129,0.3);">✓</div>';
         } else if (item.status === 'failed') {
-            statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #d93025; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">✕</div>';
+            statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #ef4444; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">✕</div>';
         }
 
-        let fileIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5f6368" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
+        let fileIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
         if (item.file && item.file.type && item.file.type.startsWith('image/')) {
-            fileIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d93025" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
+            fileIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
         }
 
-        const versionHtml = item.versionText ? '<span style="font-size: 12px; color: #5f6368; background: #f1f3f4; padding: 2px 7px; border-radius: 4px; margin-right: 8px; font-weight: 500;">' + escapeHtml(item.versionText) + '</span>' : '';
+        const versionHtml = item.versionText ? '<span style="font-size: 11.5px; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; margin-right: 8px; font-weight: 600;">' + escapeHtml(item.versionText) + '</span>' : '';
 
-        html += '<div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #f1f3f4;">';
+        html += '<div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: #0f172a;">';
         html += '<div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">' + fileIcon + '</div>';
         html += '<div style="flex: 1; min-width: 0;">';
-        html += '<div style="font-size: 13.5px; font-weight: 500; color: #1f2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
+        html += '<div style="font-size: 13px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
         html += '</div>';
         html += '<div style="display: flex; align-items: center; flex-shrink: 0;">';
         html += versionHtml;
@@ -1391,19 +1391,24 @@ function submitBulkDelete() {
 // Onboarding Guide Feature Announcement Tour Popup Modal
 const onboardingSlides = [
     {
-        title: 'Fitur Pencarian Baru',
-        desc: 'Gunakan kolom pencarian di bagian atas untuk mencari dokumen, foto, atau video dengan mudah. Ketik kata kunci dan daftar berkas akan tersaring secara otomatis.',
+        title: '1. Unggah Berkas & Buat Folder',
+        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Unggah Berkas</strong>: Klik tombol <strong>↑ Unggah File</strong> atau seret (drag & drop) file langsung ke area mana saja di layar.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Buat Folder</strong>: Klik <strong>📁 Folder Baru</strong>. Tombol dilengkapi sistem terkunci otomatis (anti-duplikat).</div></div></div>',
         iconColor: '#f59e0b'
     },
     {
-        title: 'Link Gambar CDN White-Label',
-        desc: 'Klik opsi <strong>Share Link</strong> pada berkas gambar untuk menyalin URL kustom domain (<code>clouds.wn-cdn.net/share?id=...</code>) yang dapat langsung dipasang di HTML atau CSS Landing Page Anda secara cepat (0ms cache).',
+        title: '2. Link Gambar CDN Landing Page',
+        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div>Klik opsi <strong>⋮ (titik tiga)</strong> pada gambar &rarr; Pilih <strong>Share Link</strong>.</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Tautan kustom domain tersalin (contoh: <code>clouds.wn-cdn.net/share?id=...</code>).</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Pasang langsung pada tag HTML <code>&lt;img src="..."&gt;</code> atau CSS Background Landing Page secara cepat tanpa mengekspos domain Google.</div></div></div>',
         iconColor: '#3b82f6'
     },
     {
-        title: 'Pengunggah File & Anti-Spam',
-        desc: 'Unggah file hingga 5GB dengan mudah melalui tombol atau Drag & Drop. Seluruh aksi pembuatan folder dan penghapusan kini dilengkapi proteksi instan anti-spam.',
+        title: '3. Pencarian & Opsi Berkas',
+        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Pencarian</strong>: Ketik nama berkas di kolom atas untuk menyaring berkas secara instan.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Opsi Berkas (⋮)</strong>: Klik item untuk Pratinjau (Preview), Unduh, Ubah Nama, Pindahkan, atau Detail Ukuran.</div></div></div>',
         iconColor: '#10b981'
+    },
+    {
+        title: '4. Hapus Massal & Pengaturan Akun',
+        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Hapus Banyak Berkas</strong>: Centang beberapa berkas &rarr; Klik tombol merah <strong>Hapus Terpilih</strong> di baris bawah.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Pengaturan Akun</strong>: Klik <strong>Pengaturan Akun</strong> di sidebar kiri untuk ubah password, atau <strong>Panduan Fitur</strong> untuk membuka petunjuk ini lagi.</div></div></div>',
+        iconColor: '#a78bfa'
     }
 ];
 
