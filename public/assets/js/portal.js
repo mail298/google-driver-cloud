@@ -286,7 +286,7 @@ function processGDriveQueueItem(idx) {
     if (idx >= gdriveQueue.length) {
         isGDriveUploading = false;
         renderGDriveWidget();
-        setTimeout(function() {
+        setTimeout(function () {
             window.location.reload();
         }, 1200);
         return;
@@ -420,7 +420,7 @@ function renderUploadQueue() {
             try {
                 var thumbUrl = URL.createObjectURL(item.file);
                 thumbHtml = '<img src="' + thumbUrl + '" alt="" style="width:100%; height:100%; object-fit:cover;">';
-            } catch(e) {
+            } catch (e) {
                 thumbHtml = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
             }
         } else if (item.file && item.file.type && item.file.type.startsWith('video/')) {
@@ -444,7 +444,7 @@ function renderUploadQueue() {
     list.innerHTML = html;
 
     var totalCheckedBytes = 0;
-    uploadQueueItems.forEach(function(item) {
+    uploadQueueItems.forEach(function (item) {
         if (item.checked) totalCheckedBytes += item.size;
     });
     var overBatchLimit = totalCheckedBytes > MAX_BATCH_BYTES;
@@ -452,13 +452,13 @@ function renderUploadQueue() {
     if (btn) {
         var completedCount = uploadQueueItems.filter(i => i.checked && i.status === 'completed').length;
         var totalChecked = uploadQueueItems.filter(i => i.checked).length;
-        
+
         if (completedCount > 0 && completedCount === totalChecked && !isUploading) {
             btn.disabled = false;
             btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
             btn.style.boxShadow = '0 4px 15px rgba(16, 185, 129, 0.4)';
             btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>Selesai & Refresh';
-            btn.onclick = function() { window.location.reload(); };
+            btn.onclick = function () { window.location.reload(); };
         } else if (overBatchLimit) {
             btn.disabled = true;
             btn.textContent = 'Melebihi batas ' + formatFileSize(MAX_BATCH_BYTES);
@@ -482,7 +482,7 @@ function toggleQueueItem(index) {
 
     // Re-check batch limit after toggle
     var totalBatchBytes = 0;
-    uploadQueueItems.forEach(function(item) {
+    uploadQueueItems.forEach(function (item) {
         if (item.checked) totalBatchBytes += item.size;
     });
     if (totalBatchBytes > MAX_BATCH_BYTES) {
@@ -494,7 +494,7 @@ function toggleQueueItem(index) {
 
 function selectAllQueueItems() {
     if (isUploading) return;
-    uploadQueueItems.forEach(function(item) {
+    uploadQueueItems.forEach(function (item) {
         if (item.status !== 'completed' && item.status !== 'uploading') {
             item.checked = true;
         }
@@ -504,7 +504,7 @@ function selectAllQueueItems() {
 
 function deselectAllQueueItems() {
     if (isUploading) return;
-    uploadQueueItems.forEach(function(item) {
+    uploadQueueItems.forEach(function (item) {
         if (item.status !== 'completed' && item.status !== 'uploading') {
             item.checked = false;
         }
@@ -535,7 +535,7 @@ function startUploadQueue() {
 
     // Re-check batch 5GB limit before starting
     var totalBatchBytes = 0;
-    uploadQueueItems.forEach(function(item) {
+    uploadQueueItems.forEach(function (item) {
         if (item.checked) totalBatchBytes += item.size;
     });
     if (totalBatchBytes > MAX_BATCH_BYTES) {
@@ -620,7 +620,7 @@ function processQueueItem(idx) {
     item.progress = 0;
     renderUploadQueue();
 
-    uploadFileObject(item.file, function(pct) {
+    uploadFileObject(item.file, function (pct) {
         item.progress = pct;
         updateQueueSummary();
         const el = document.querySelector('.upload-queue-item[data-index="' + idx + '"]');
@@ -630,7 +630,7 @@ function processQueueItem(idx) {
                 statusCell.innerHTML = '<div style="display:flex; align-items:center; gap:8px; min-width:120px;"><div class="progress-bar-bg" style="flex:1; background:rgba(255,255,255,0.1); height:6px; border-radius:10px; overflow:hidden;"><div class="progress-bar-fill" style="background:linear-gradient(90deg, #3b82f6, #60a5fa); height:100%; width:' + pct + '%; transition: width 0.2s ease;"></div></div><span style="color:#60a5fa; font-size:11px; font-weight:700; min-width:32px; text-align:right;">' + pct + '%</span></div>';
             }
         }
-    }, function(success, errorMsg) {
+    }, function (success, errorMsg) {
         if (success) {
             item.status = 'completed';
             item.progress = 100;
@@ -1013,7 +1013,7 @@ function cmActionCopyLink() {
     if (activeContextItem) {
         const link = window.location.origin + (activeContextItem.type === 'file' ? `/share?id=${encodeURIComponent(activeContextItem.id)}` : `/?folderId=${encodeURIComponent(activeContextItem.id)}`);
         copyToClipboard(link).then(() => {
-            showToast('Tautan Berbagi & CDN White-Label berhasil disalin');
+            showToast('Tautan berhasil disalin');
         }).catch(() => {
             prompt('Salin tautan:', link);
         });
@@ -1551,7 +1551,7 @@ function closeOnboardingModal() {
     // Store in sessionStorage so it shows once per new session / tab
     try {
         sessionStorage.setItem('portal_onboarding_seen', 'true');
-    } catch (e) {}
+    } catch (e) { }
 }
 
 function checkAutoOnboardingPopup() {
@@ -1566,7 +1566,7 @@ function checkAutoOnboardingPopup() {
                 modal.classList.add('active');
             }
         }
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // Auto-trigger when page completes loading
