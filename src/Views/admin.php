@@ -1183,6 +1183,37 @@
                 </p>
             </div>
 
+            <!-- ---- Card: System Backup & Restore ---- -->
+            <div class="panel-card" style="margin-top: 20px;">
+                <div class="panel-card-title">
+                    <h2>
+                        <div class="title-icon" style="background: var(--blue-glow);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        </div>
+                        Backup & Restore System
+                    </h2>
+                </div>
+                <p style="font-size: 12.5px; color: var(--muted-light); margin-bottom: 14px; line-height: 1.5;">
+                    Unduh file cadangan database MySQL dan konfigurasi akun sistem dalam format ZIP, atau pulihkan data sistem dari file backup.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="/admin/backup/export" class="btn-primary btn-green" style="text-decoration: none; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        Unduh Backup System (.ZIP)
+                    </a>
+                    
+                    <hr class="section-divider" style="margin: 4px 0;">
+
+                    <form action="/admin/backup/restore" method="POST" enctype="multipart/form-data" onsubmit="return confirm('APAKAH ANDA YAKIN? Memulihkan data akan menimpa database dan konfigurasi pengguna saat ini!')">
+                        <label class="form-label" style="margin-bottom: 6px;">Pulihkan Data (Restore ZIP)</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="file" name="backup_zip" accept=".zip" required class="input-box" style="padding: 7px 10px; font-size: 12px; flex: 1;">
+                            <button type="submit" class="btn-primary btn-rose" style="width: auto; padding: 0 16px;">Restore</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
         </div><!-- end left-column -->
 
         <!-- ===== RIGHT COLUMN: USER TABLE ===== -->

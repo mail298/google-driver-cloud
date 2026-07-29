@@ -16,6 +16,8 @@ require_once dirname(__DIR__) . '/src/Controllers/DownloadProxyController.php';
 require_once dirname(__DIR__) . '/src/Controllers/ShareController.php';
 require_once dirname(__DIR__) . '/src/Controllers/AdminController.php';
 require_once dirname(__DIR__) . '/src/Controllers/SettingsController.php';
+require_once dirname(__DIR__) . '/src/Controllers/BackupController.php';
+require_once dirname(__DIR__) . '/src/Controllers/ClientBackupController.php';
 
 // Apply global security headers to all responses
 SecurityModel::sendSecurityHeaders();
@@ -60,6 +62,12 @@ switch ($requestUri) {
     case '/batch-delete':
         DashboardController::batchDelete();
         break;
+    case '/client/backup/zip':
+        ClientBackupController::downloadUserZip();
+        break;
+    case '/client/backup/csv':
+        ClientBackupController::exportMetadataCsv();
+        break;
     case '/upload':
         UploadController::upload();
         break;
@@ -68,6 +76,12 @@ switch ($requestUri) {
         break;
     case '/admin':
         AdminController::index();
+        break;
+    case '/admin/backup/export':
+        BackupController::exportAdminBackup();
+        break;
+    case '/admin/backup/restore':
+        BackupController::restoreAdminBackup();
         break;
     case '/admin/users/create':
         AdminController::createUser();

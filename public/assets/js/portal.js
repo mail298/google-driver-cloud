@@ -1320,6 +1320,20 @@ function deselectAllItems() {
     updateSelectionState();
 }
 
+function downloadSelectedZip() {
+    const selectedFileCheckboxes = document.querySelectorAll('.item-checkbox[data-type="file"]:checked');
+    if (selectedFileCheckboxes.length === 0) {
+        if (typeof showToast === 'function') {
+            showToast('Pilih setidaknya satu berkas untuk diunduh sebagai ZIP');
+        } else {
+            alert('Pilih setidaknya satu berkas untuk diunduh sebagai ZIP');
+        }
+        return;
+    }
+    const ids = Array.from(selectedFileCheckboxes).map(cb => cb.getAttribute('data-id'));
+    window.location.href = '/client/backup/zip?ids=' + encodeURIComponent(ids.join(','));
+}
+
 function openBulkDeleteModal() {
     const selected = getSelectedItems();
     if (selected.length === 0) return;
