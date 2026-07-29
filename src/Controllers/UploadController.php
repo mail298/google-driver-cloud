@@ -22,14 +22,10 @@ class UploadController
             $gatewayUrl = Config::get('GATEWAY_API_URL', 'http://localhost:4000');
             $apiKey = Config::get('GATEWAY_API_KEY');
 
-            // Enforce storage quota limits
+            // Enforce storage quota limits per user (from session, not API key)
             require_once dirname(__DIR__) . '/Models/PortalModel.php';
             require_once dirname(__DIR__) . '/Models/UserModel.php';
             $pdo = Config::getPDO();
-            if (empty($apiKey)) {
-                $apiKey = PortalModel::getActiveApiKey($pdo);
-            }
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
 
             $currentUser = $_SESSION['user'] ?? null;
             if ($currentUser && isset($currentUser['id'])) {
@@ -39,16 +35,21 @@ class UploadController
                     $currentUser = $refreshed;
                 }
             }
+            $userId = $currentUser['id'] ?? null;
+            if (!$userId) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
+                exit;
+            }
+
             $limitGb = (float) ($currentUser['storage_limit_gb'] ?? 15);
             $limitBytes = $limitGb * 1024 * 1024 * 1024;
 
             $totalUsedBytes = 0;
-            if ($userId) {
-                $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total_size FROM files WHERE user_id = ? AND status = 'active'");
-                $stmt->execute([$userId]);
-                $row = $stmt->fetch();
-                $totalUsedBytes = (float) ($row['total_size'] ?? 0);
-            }
+            $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total_size FROM files WHERE user_id = ? AND status = 'active'");
+            $stmt->execute([$userId]);
+            $row = $stmt->fetch();
+            $totalUsedBytes = (float) ($row['total_size'] ?? 0);
 
             if ($totalUsedBytes + $file['size'] > $limitBytes) {
                 header('Content-Type: application/json');
@@ -57,6 +58,11 @@ class UploadController
                     'message' => 'Pengunggahan ditolak: Ukuran berkas melebihi sisa kuota storage Anda (' . $limitGb . ' GB). Silakan hubungi Administrator.'
                 ]);
                 exit;
+            }
+
+            // Resolve API key owner for gateway upload
+            if (empty($apiKey)) {
+                $apiKey = PortalModel::getActiveApiKey($pdo);
             }
 
             // Resolve Google Drive parent folder ID

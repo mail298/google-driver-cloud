@@ -10,12 +10,6 @@ class DashboardController {
         AuthController::checkClient();
         
         $pdo = Config::getPDO();
-        $apiKey = Config::get('GATEWAY_API_KEY');
-        $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
-
-        if (!$userId) {
-            die("Error: The gateway API Key configured in .env is invalid or does not match any user in the database.");
-        }
 
         // Read user-specific limits and folder restrictions (always refreshed from UserModel)
         $currentUser = $_SESSION['user'] ?? null;
@@ -26,12 +20,21 @@ class DashboardController {
                 $currentUser = $refreshed;
             }
         }
+        $userId = $currentUser['id'] ?? null;
+        if (!$userId) {
+            die("Error: Session user not found.");
+        }
+
         $limitGb = (float)($currentUser['storage_limit_gb'] ?? 15);
         $rawClientRoot = trim($currentUser['root_folder_id'] ?? '');
         $clientRootFolderId = PortalModel::extractFolderId($rawClientRoot);
 
         $folderId = $_GET['folderId'] ?? null;
         if ($folderId === '') $folderId = null;
+
+        // Get API key owner for connected accounts resolution
+        $apiKey = Config::get('GATEWAY_API_KEY');
+        $gatewayUserId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
 
         // Ensure client root folder is properly resolved in DB if specified
         $effectiveRootDbId = null;
@@ -42,7 +45,7 @@ class DashboardController {
             } else {
                 // Auto-create folder record in DB so client files/folders are isolated to this root
                 try {
-                    $connectedAccountId = PortalModel::getFirstConnectedAccountId($pdo, $userId);
+                    $connectedAccountId = PortalModel::getFirstConnectedAccountId($pdo, $gatewayUserId);
                     $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE provider_folder_id = VALUES(provider_folder_id)");
                     $stmt->execute([$clientRootFolderId, $userId, $connectedAccountId, $clientRootFolderId]);
                     $effectiveRootDbId = $clientRootFolderId;
@@ -130,12 +133,12 @@ class DashboardController {
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo = Config::getPDO();
-            $apiKey = Config::get('GATEWAY_API_KEY');
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
 
             if (!$userId) {
                 header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'Invalid API key.']);
+                echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
                 exit;
             }
 
@@ -166,8 +169,8 @@ class DashboardController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
             $pdo = Config::getPDO();
-            $apiKey = Config::get('GATEWAY_API_KEY');
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
             $id = $_POST['id'] ?? '';
             $name = trim($_POST['name'] ?? '');
 
@@ -191,8 +194,8 @@ class DashboardController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
             $pdo = Config::getPDO();
-            $apiKey = Config::get('GATEWAY_API_KEY');
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
             $id = $_POST['id'] ?? '';
 
             if (!$userId || !$id) {
@@ -215,8 +218,8 @@ class DashboardController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
             $pdo = Config::getPDO();
-            $apiKey = Config::get('GATEWAY_API_KEY');
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
             $id = $_POST['id'] ?? '';
             $name = trim($_POST['name'] ?? '');
 
@@ -240,8 +243,8 @@ class DashboardController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
             $pdo = Config::getPDO();
-            $apiKey = Config::get('GATEWAY_API_KEY');
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
             $id = $_POST['id'] ?? '';
 
             if (!$userId || !$id) {
@@ -264,8 +267,8 @@ class DashboardController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
             $pdo = Config::getPDO();
-            $apiKey = Config::get('GATEWAY_API_KEY');
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
             $type = $_POST['type'] ?? 'file';
             $id = $_POST['id'] ?? '';
             $targetFolderId = $_POST['targetFolderId'] ?? null;
@@ -290,11 +293,8 @@ class DashboardController {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
             $pdo = Config::getPDO();
-            $apiKey = Config::get('GATEWAY_API_KEY');
-            if (empty($apiKey)) {
-                $apiKey = PortalModel::getActiveApiKey($pdo);
-            }
-            $userId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
 
             $rawItems = $_POST['items'] ?? '[]';
             $items = json_decode($rawItems, true);
