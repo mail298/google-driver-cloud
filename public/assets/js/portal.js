@@ -737,31 +737,67 @@ function closeQuotaPopup() {
     if (modal) modal.classList.remove('active');
 }
 
-// Drag & Drop Listeners - add to queue
-document.addEventListener('dragover', function (e) {
+// ─────────────────────────────────────────────────────────────────────
+// Full Screen Drag & Drop File Upload Handlers
+// Allows users to drag and drop files anywhere on the browser window.
+// ─────────────────────────────────────────────────────────────────────
+let dragCounter = 0;
+
+window.addEventListener('dragenter', function (e) {
     e.preventDefault();
-    const overlay = document.getElementById('drag-overlay');
-    if (overlay) overlay.classList.add('active');
+    dragCounter++;
+    if (e.dataTransfer && e.dataTransfer.types && Array.from(e.dataTransfer.types).includes('Files')) {
+        const overlay = document.getElementById('drag-overlay');
+        if (overlay) overlay.classList.add('active');
+    }
 });
 
-document.addEventListener('dragleave', function (e) {
-    if (e.clientX === 0 || e.clientY === 0) {
+window.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'copy';
+    }
+});
+
+window.addEventListener('dragleave', function (e) {
+    e.preventDefault();
+    dragCounter--;
+    if (dragCounter <= 0) {
+        dragCounter = 0;
         const overlay = document.getElementById('drag-overlay');
         if (overlay) overlay.classList.remove('active');
     }
 });
 
-document.addEventListener('drop', function (e) {
+window.addEventListener('drop', function (e) {
     e.preventDefault();
+    dragCounter = 0;
     const overlay = document.getElementById('drag-overlay');
     if (overlay) overlay.classList.remove('active');
 
-    const files = e.dataTransfer.files;
+    const files = e.dataTransfer ? e.dataTransfer.files : null;
     if (files && files.length > 0) {
-        addFilesToQueue(files);
-        openUploadQueue();
+        processDroppedFiles(files);
     }
 });
+
+function processDroppedFiles(files) {
+    if (!files || files.length === 0) return;
+    const fileArray = Array.from(files);
+
+    const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? EXISTING_FILE_NAMES : [];
+    const duplicate = fileArray.find(f => existingList.includes(f.name));
+
+    if (duplicate) {
+        pendingDuplicateFiles = fileArray;
+        const textEl = document.getElementById('duplicate-filename-text');
+        if (textEl) textEl.textContent = duplicate.name;
+        const modal = document.getElementById('gdrive-duplicate-modal');
+        if (modal) modal.style.display = 'flex';
+    } else {
+        startGDriveUpload(fileArray, { isReplace: false });
+    }
+}
 
 // File Preview Handling
 function previewFile(id, name, mimeType) {
