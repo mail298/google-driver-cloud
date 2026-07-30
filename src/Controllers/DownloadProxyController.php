@@ -17,7 +17,7 @@ class DownloadProxyController
     // ─────────────────────────────────────────────────────────────────────
     private static function getCacheDir()
     {
-        $dir = dirname(dirname(dirname(__DIR__))) . '/storage/cache/files';
+        $dir = dirname(__DIR__, 2) . '/storage/cache/files';
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
