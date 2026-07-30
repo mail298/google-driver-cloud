@@ -280,18 +280,11 @@ class PortalModel
         $refreshToken = !empty($acc['refresh_token_encrypted']) ? self::decryptText($acc['refresh_token_encrypted'], $encryptionKey) : null;
 
         if ($accessToken) {
-            $ch = curl_init("https://www.googleapis.com/drive/v3/files?pageSize=1");
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $accessToken"]);
-            $res = curl_exec($ch);
-            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            if ($code === 200) {
-                $result = ['token' => $accessToken, 'connected_account_id' => $acc['id']];
-                self::cacheStore($cacheKey, $result, 1500);
-                return $result;
-            }
+            $result = ['token' => $accessToken, 'connected_account_id' => $acc['id']];
+            self::cacheStore($cacheKey, $result, 1500);
+            return $result;
         }
+
 
         if ($refreshToken && $clientId && $clientSecret) {
             $ch = curl_init("https://oauth2.googleapis.com/token");

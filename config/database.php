@@ -4,6 +4,7 @@
 class Config
 {
     private static $env = null;
+    private static $pdoInstance = null;
 
     public static function loadEnv()
     {
@@ -38,6 +39,10 @@ class Config
 
     public static function getPDO()
     {
+        if (self::$pdoInstance !== null) {
+            return self::$pdoInstance;
+        }
+
         self::loadEnv();
         $host = self::get('DB_HOST', 'localhost');
         $port = self::get('DB_PORT', '3306');
@@ -53,8 +58,10 @@ class Config
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_TIMEOUT => 1,
             ]);
-            return $pdo;
+            self::$pdoInstance = $pdo;
+            return self::$pdoInstance;
         } catch (PDOException $e) {
             if ($host === 'db') {
                 $exposePort = self::get('DB_EXPOSE_PORT', '3307');
@@ -63,11 +70,14 @@ class Config
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                         PDO::ATTR_EMULATE_PREPARES => false,
+                        PDO::ATTR_TIMEOUT => 2,
                     ]);
-                    return $pdo;
+                    self::$pdoInstance = $pdo;
+                    return self::$pdoInstance;
                 } catch (PDOException $e2) {}
             }
             die("Database connection failed: " . $e->getMessage());
         }
     }
 }
+
