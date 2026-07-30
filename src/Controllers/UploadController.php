@@ -5,16 +5,58 @@ class UploadController
 {
     public static function upload()
     {
+        @set_time_limit(0);
+        @ini_set('memory_limit', '-1');
+        @ini_set('max_execution_time', '0');
+        @ini_set('max_input_time', '-1');
+
         AuthController::checkClient();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+
+            // Detect post_max_size overflow (when $_POST and $_FILES are empty but Content-Length > 0)
+            $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+            if (empty($_FILES) && empty($_POST) && $contentLength > 0) {
+                $maxPost = ini_get('post_max_size');
+                $sizeMb  = round($contentLength / (1024 * 1024), 1);
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Ukuran unggahan ({$sizeMb} MB) melebihi batas post_max_size PHP ({$maxPost}). Silakan jalankan PHP server dengan batas 10G."
+                ]);
+                exit;
+            }
+
             if (!isset($_FILES['file'])) {
-                header('Content-Type: application/json');
-                echo json_encode(['success' => false, 'message' => 'No file uploaded.']);
+                echo json_encode(['success' => false, 'message' => 'Tidak ada berkas yang diunggah.']);
                 exit;
             }
 
             $file = $_FILES['file'];
+
+            // Check PHP upload error codes
+            if (isset($file['error']) && $file['error'] !== UPLOAD_ERR_OK) {
+                $errorMsg = 'Gagal mengunggah berkas.';
+                switch ($file['error']) {
+                    case UPLOAD_ERR_INI_SIZE:
+                    case UPLOAD_ERR_FORM_SIZE:
+                        $maxUpload = ini_get('upload_max_filesize');
+                        $errorMsg = "Ukuran berkas melebihi batas upload_max_filesize PHP ({$maxUpload}).";
+                        break;
+                    case UPLOAD_ERR_PARTIAL:
+                        $errorMsg = "Pengunggahan terputus di tengah jalan.";
+                        break;
+                    case UPLOAD_ERR_NO_FILE:
+                        $errorMsg = "Tidak ada berkas yang dipilih.";
+                        break;
+                    case UPLOAD_ERR_CANT_WRITE:
+                        $errorMsg = "Gagal menulis berkas ke disk server.";
+                        break;
+                }
+                echo json_encode(['success' => false, 'message' => $errorMsg]);
+                exit;
+            }
+
             $folderId = $_POST['folderId'] ?? null;
             if ($folderId === '')
                 $folderId = null;
@@ -39,7 +81,6 @@ class UploadController
             }
             $userId = $currentUser['id'] ?? null;
             if (!$userId) {
-                header('Content-Type: application/json');
                 echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
                 exit;
             }
@@ -54,7 +95,6 @@ class UploadController
             $totalUsedBytes = (float) ($row['total_size'] ?? 0);
 
             if ($totalUsedBytes + $file['size'] > $limitBytes) {
-                header('Content-Type: application/json');
                 echo json_encode([
                     'success' => false,
                     'message' => 'Pengunggahan ditolak: Ukuran berkas melebihi sisa kuota storage Anda (' . $limitGb . ' GB). Silakan hubungi Administrator.'
@@ -107,12 +147,14 @@ class UploadController
                 'file-0' => new CURLFile($file['tmp_name'], $mimeType, $file['name'])
             ];
 
-            // 3. Make cURL request to  API
+            // 3. Make cURL request to Gateway API with unlimited timeout for large 500MB+ files
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, rtrim($gatewayUrl, '/') . '/api/v1/uploads');
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 0); // No timeout for large video uploads
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Authorization: Bearer ' . $apiKey
             ]);
