@@ -129,18 +129,29 @@ class UploadController
                 $responseData = json_decode($response, true);
                 if ($httpCode >= 200 && $httpCode < 300) {
                     $uploadedFile = $responseData['file'] ?? ($responseData['files'][0] ?? null);
+                    $isDuplicateDetected = false;
+                    $replaced = false;
+
                     if ($uploadedFile && !empty($uploadedFile['id'])) {
+                        $fileNameToMatch = $uploadedFile['name'] ?? $file['name'];
+                        $targetDbFolderId = !empty($folderId) ? $folderId : $clientRootFolderId;
+
                         try {
-                            if ($replaceDuplicate) {
-                                $fileNameToMatch = $uploadedFile['name'] ?? $file['name'];
-                                if ($folderId !== null) {
-                                    $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE user_id = ? AND folder_id = ? AND name = ? AND status = 'active'");
-                                    $stmtExist->execute([$userId, $folderId, $fileNameToMatch]);
-                                } else {
-                                    $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE user_id = ? AND folder_id IS NULL AND name = ? AND status = 'active'");
-                                    $stmtExist->execute([$userId, $fileNameToMatch]);
-                                }
-                                $existingFiles = $stmtExist->fetchAll();
+                            // Check if a file with the same name already exists in this folder
+                            if ($targetDbFolderId !== null) {
+                                $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id = ? AND name = ? AND status = 'active'");
+                                $stmtExist->execute([$userId, PortalModel::getUserIdFromApiKey($pdo), $targetDbFolderId, $fileNameToMatch]);
+                            } else {
+                                $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id IS NULL AND name = ? AND status = 'active'");
+                                $stmtExist->execute([$userId, PortalModel::getUserIdFromApiKey($pdo), $fileNameToMatch]);
+                            }
+                            $existingFiles = $stmtExist->fetchAll();
+
+                            if (!empty($existingFiles)) {
+                                $isDuplicateDetected = true;
+                            }
+
+                            if ($replaceDuplicate && !empty($existingFiles)) {
                                 foreach ($existingFiles as $ef) {
                                     $stmtDel = $pdo->prepare("DELETE FROM files WHERE id = ?");
                                     $stmtDel->execute([$ef['id']]);
@@ -148,9 +159,8 @@ class UploadController
                                         PortalModel::trashGoogleDriveItem($pdo, $userId, $ef['provider_file_id']);
                                     }
                                 }
+                                $replaced = true;
                             }
-
-                            $targetDbFolderId = !empty($folderId) ? $folderId : $clientRootFolderId;
 
                             $stmt = $pdo->prepare("INSERT IGNORE INTO files (id, user_id, folder_id, connected_account_id, provider, provider_file_id, name, mime_type, size_bytes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())");
                             $stmt->execute([
@@ -174,7 +184,21 @@ class UploadController
                             PortalModel::moveGoogleDriveItem($pdo, $userId, $providerFileId, $providerParentId);
                         }
                     }
-                    echo json_encode(['success' => true, 'data' => $responseData]);
+
+                    $msg = 'File berhasil diunggah.';
+                    if ($replaced) {
+                        $msg = 'Berkas "' . $file['name'] . '" sudah ada dan telah diganti dengan versi baru.';
+                    } elseif ($isDuplicateDetected) {
+                        $msg = 'Informasi: Berkas dengan nama "' . $file['name'] . '" sudah ada di folder ini.';
+                    }
+
+                    echo json_encode([
+                        'success' => true,
+                        'isDuplicate' => $isDuplicateDetected,
+                        'replaced' => $replaced,
+                        'message' => $msg,
+                        'data' => $responseData
+                    ]);
                 } else {
                     echo json_encode([
                         'success' => false,

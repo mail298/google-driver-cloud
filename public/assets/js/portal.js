@@ -144,6 +144,9 @@ function handleFileSelect(event) {
 
     if (duplicate) {
         pendingDuplicateFiles = fileArray;
+        if (typeof showToast === 'function') {
+            showToast('⚠️ Berkas/gambar "' + duplicate.name + '" sudah ada di folder ini.', 'warning');
+        }
         const textEl = document.getElementById('duplicate-filename-text');
         if (textEl) textEl.textContent = duplicate.name;
         const modal = document.getElementById('gdrive-duplicate-modal');
@@ -169,6 +172,9 @@ function confirmDuplicateUpload() {
     const optionValue = selectedOption ? selectedOption.value : 'replace';
 
     if (optionValue === 'replace') {
+        if (typeof showToast === 'function') {
+            showToast('Mengganti berkas dengan versi baru...', 'info');
+        }
         startGDriveUpload(pendingDuplicateFiles, { isReplace: true, versionText: 'Versi 2' });
     } else {
         const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? [...EXISTING_FILE_NAMES] : [];
@@ -180,6 +186,9 @@ function confirmDuplicateUpload() {
             }
             return file;
         });
+        if (typeof showToast === 'function') {
+            showToast('Menyimpan kedua berkas (nama duplikat baru)...', 'info');
+        }
         startGDriveUpload(processedFiles, { isReplace: false });
     }
 
@@ -322,6 +331,17 @@ function processGDriveQueueItem(idx) {
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
                     item.status = 'completed';
+                    // Update in-memory file names list dynamically
+                    if (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) {
+                        if (!EXISTING_FILE_NAMES.includes(item.file.name)) {
+                            EXISTING_FILE_NAMES.push(item.file.name);
+                        }
+                    }
+                    if (response.replaced && typeof showToast === 'function') {
+                        showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
+                    } else if (response.isDuplicate && typeof showToast === 'function') {
+                        showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
+                    }
                 } else {
                     item.status = 'failed';
                     item.error = response.message || 'Gagal mengunggah';
@@ -790,6 +810,9 @@ function processDroppedFiles(files) {
 
     if (duplicate) {
         pendingDuplicateFiles = fileArray;
+        if (typeof showToast === 'function') {
+            showToast('⚠️ Berkas/gambar "' + duplicate.name + '" sudah ada di folder ini.', 'warning');
+        }
         const textEl = document.getElementById('duplicate-filename-text');
         if (textEl) textEl.textContent = duplicate.name;
         const modal = document.getElementById('gdrive-duplicate-modal');
