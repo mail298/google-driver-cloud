@@ -48,6 +48,11 @@ services:
       db:
         condition: service_healthy
 
+    # Allow container to reach the host server (for cross-Docker-project communication)
+    # e.g. GATEWAY_API_URL=http://host.docker.internal:4001 will reach 9drive backend on host port 4001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   # ============================================================
   # MySQL Database
   # ============================================================
