@@ -222,17 +222,11 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
                 targetParentId = folderRecord.providerFolderId
               }
             }
-            const uploaded = await drive.files.create(
-              {
-                requestBody: { name: fileName, parents: [targetParentId] },
-                media: { mimeType: meta.mimeType, body: fs.createReadStream(tempPath) },
-                fields: 'id,name,mimeType,size',
-              },
-              {
-                maxBodyLength: Infinity,
-                maxContentLength: Infinity,
-              }
-            )
+            const uploaded = await drive.files.create({
+              requestBody: { name: fileName, parents: [targetParentId] },
+              media: { mimeType: meta.mimeType, body: fs.createReadStream(tempPath) },
+              fields: 'id,name,mimeType,size',
+            })
             providerFileId = uploaded.data.id ?? ''
             uploadedName = uploaded.data.name ?? fileName
             uploadedMimeType = uploaded.data.mimeType ?? meta.mimeType
