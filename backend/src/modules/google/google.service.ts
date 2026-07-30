@@ -162,11 +162,23 @@ export async function syncGoogleAppFolderFiles(accountId: string, userId: string
       continue
     }
 
-    const needsUpdate = existing.name !== driveFile.name || existing.mimeType !== driveFile.mimeType || existing.sizeBytes !== driveFile.sizeBytes || existing.status !== 'active' || existing.deletedAt !== null || existing.folderId !== dbFolderId
+    // Only update metadata (name, mimeType, size, folder) - never resurrect soft-deleted files
+    const needsUpdate = existing.name !== driveFile.name || existing.mimeType !== driveFile.mimeType || existing.sizeBytes !== driveFile.sizeBytes || existing.folderId !== dbFolderId
     if (needsUpdate) {
+      const updateData: Record<string, unknown> = {
+        name: driveFile.name,
+        mimeType: driveFile.mimeType,
+        sizeBytes: driveFile.sizeBytes,
+        folderId: dbFolderId,
+      }
+      // Only touch status/deletedAt if file was never manually deleted
+      if (existing.status === 'active' && existing.deletedAt === null) {
+        updateData.status = 'active'
+        updateData.deletedAt = null
+      }
       await prisma.file.update({
         where: { id: existing.id },
-        data: { name: driveFile.name, mimeType: driveFile.mimeType, sizeBytes: driveFile.sizeBytes, status: 'active', deletedAt: null, folderId: dbFolderId },
+        data: updateData,
       })
       updated += 1
     }
