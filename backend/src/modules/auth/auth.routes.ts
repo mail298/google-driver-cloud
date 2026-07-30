@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import { google } from 'googleapis'
 import { z } from 'zod'
+import rateLimit from 'express-rate-limit'
 import { prisma } from '../../config/prisma.js'
 import { env } from '../../config/env.js'
 import { requireAuth, type AuthRequest } from '../../middleware/auth.middleware.js'
@@ -10,6 +11,31 @@ import { signAccessToken } from '../../utils/jwt.js'
 import { createOAuthClient, syncGoogleQuota } from '../google/google.service.js'
 
 export const authRouter = Router()
+
+// Rate limiters for auth endpoints
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000,  // 1 minute
+  max: 10,              // 10 attempts per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many login attempts. Please try again in a minute.' },
+})
+
+const registerLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 5,               // 5 registrations per minute per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many registration attempts. Please try again in a minute.' },
+})
+
+const refreshLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many token refresh attempts. Please try again in a minute.' },
+})
 
 const registerSchema = z.object({ name: z.string().min(2), email: z.string().email(), password: z.string().min(8), captchaToken: z.string().optional() })
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(1) })
@@ -40,7 +66,7 @@ async function verifyCaptcha(token: string | undefined) {
   return Boolean(data.success)
 }
 
-authRouter.post('/register', async (req, res, next) => {
+authRouter.post('/register', registerLimiter, async (req, res, next) => {
   try {
     const body = registerSchema.parse(req.body)
     if (!(await verifyCaptcha(body.captchaToken))) return res.status(400).json({ code: 'CAPTCHA_FAILED', message: 'Captcha verification failed.' })
@@ -54,7 +80,7 @@ authRouter.post('/register', async (req, res, next) => {
   }
 })
 
-authRouter.post('/login', async (req, res, next) => {
+authRouter.post('/login', loginLimiter, async (req, res, next) => {
   try {
     const body = loginSchema.parse(req.body)
     const user = await prisma.user.findUnique({ where: { email: body.email } })
@@ -167,7 +193,7 @@ authRouter.post('/google/exchange', async (req, res, next) => {
   }
 })
 
-authRouter.post('/refresh', async (req, res, next) => {
+authRouter.post('/refresh', refreshLimiter, async (req, res, next) => {
   try {
     const body = refreshSchema.parse(req.body)
     const session = await prisma.userSession.findFirst({ where: { refreshTokenHash: hashToken(body.refreshToken), revokedAt: null, expiresAt: { gt: new Date() } } })
