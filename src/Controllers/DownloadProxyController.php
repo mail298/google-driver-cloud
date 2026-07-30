@@ -37,30 +37,33 @@ class DownloadProxyController
     }
 
     /**
-     * Resolve a fresh Google Drive direct-download URL for the given file.
-     * Returns the URL string or null on failure.
+     * Resolve a short-lived Google Drive direct CDN URL for inline media.
+     * Uses the Drive v3 webContentLink (for download) or constructs a
+     * direct ?alt=media link with the access token embedded in query string.
+     * Returns a URL string or null on failure.
      */
     private static function resolveGoogleDirectUrl($providerFileId, $accessToken)
     {
         if (empty($accessToken)) return null;
 
-        // Google Drive v3 webContentLink via metadata endpoint
-        $metaUrl = "https://www.googleapis.com/drive/v3/files/{$providerFileId}?fields=webContentLink,webViewLink";
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $metaUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ["Authorization: Bearer $accessToken"]);
-        $resp = curl_exec($ch);
-        curl_close($ch);
+        // Google Drive v3: ?alt=media streams raw bytes directly from Google CDN
+        // This URL is valid as long as the access token (TTL ~1h) is alive.
+        return "https://www.googleapis.com/drive/v3/files/{$providerFileId}?alt=media&supportsAllDrives=true&access_token=" . urlencode($accessToken);
+    }
 
-        if ($resp) {
-            $meta = json_decode($resp, true);
-            // webContentLink is a direct CDN link, no auth needed after redirect
-            if (!empty($meta['webContentLink'])) {
-                return $meta['webContentLink'];
-            }
+    /**
+     * Determine if a MIME type should be served via CDN redirect (not proxied).
+     * Images, videos and audio benefit most — browser renders them inline and
+     * they are large enough for the proxy overhead to matter.
+     */
+    private static function isCdnEligible($mime)
+    {
+        if (empty($mime)) return false;
+        $streamable = ['image/', 'video/', 'audio/'];
+        foreach ($streamable as $prefix) {
+            if (strpos($mime, $prefix) === 0) return true;
         }
-        return null;
+        return false;
     }
 
     public static function download()
@@ -129,13 +132,21 @@ class DownloadProxyController
         }
 
         // ─────────────────────────────────────────────────────────────────────
-        // SPEED OPTIMISATION: Images → 302 Redirect to Google CDN (zero proxy)
-        // Large images bypass the PHP proxy entirely. Speed: ~50-200ms global.
-        // NOTE: webContentLink from Google metadata API returns HTML preview for
-        // most file types, not raw bytes. That breaks inline <img> rendering.
-        // We skip the redirect and stream through proxy instead.
+        // SPEED OPTIMISATION: Images / Video / Audio → 302 Redirect to Google CDN
+        // For media files, we redirect the browser straight to Google's CDN edge.
+        // The browser downloads at Google's full CDN speed — no PHP bottleneck.
+        // Documents and archives still go through the proxy (they need headers).
         // ─────────────────────────────────────────────────────────────────────
-        // (redirect disabled — webContentLink breaks inline images)
+        if (self::isCdnEligible($mime) && !empty($file['provider_file_id']) && $accessToken && !isset($_SERVER['HTTP_RANGE'])) {
+            $cdnUrl = self::resolveGoogleDirectUrl($file['provider_file_id'], $accessToken);
+            if ($cdnUrl) {
+                while (ob_get_level()) { ob_end_clean(); }
+                header('Cache-Control: public, max-age=3600');
+                header('ETag: ' . $etag);
+                header('Location: ' . $cdnUrl, true, 302);
+                exit;
+            }
+        }
 
         // ─────────────────────────────────────────────────────────────────────
         // SPEED OPTIMISATION: HTTP Range Request Support (video seek / resume)
