@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <!-- C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Views\admin_403.php -->
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>403 - Akses Ditolak (IP Not Whitelisted)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+        rel="stylesheet">
     <style>
         body {
             background-color: #080c14;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 50% 30%, rgba(239, 68, 68, 0.12) 0%, transparent 60%),
                 radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
             color: #f8fafc;
@@ -50,18 +53,15 @@
             background: linear-gradient(90deg, #ef4444, #f43f5e);
         }
 
-        .error-icon-box {
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            background: rgba(239, 68, 68, 0.15);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Styling gambar pengganti icon */
+        .error-image {
+            width: 120px;
+            /* Sesuaikan ukuran gambar di sini */
+            height: auto;
+            max-width: 100%;
             margin: 0 auto 20px auto;
-            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.25);
+            display: block;
+            filter: drop-shadow(0 8px 24px rgba(239, 68, 68, 0.25));
         }
 
         .error-card h1 {
@@ -114,13 +114,15 @@
         }
     </style>
 </head>
+
 <body>
     <div class="error-card">
-        <div class="error-icon-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </div>
+        <!-- Gantilah atribut 'src' di bawah dengan lokasi file gambar kamu -->
+        <img src="../image/403/forbidden-403.png" alt="Akses Ditolak" class="error-image">
+
         <h1>403 - Akses Ditolak</h1>
-        <p>Halaman Admin dilindungi oleh Kebijakan Admin IP Whitelist. Alamat IP Anda tidak memiliki izin untuk mengakses area ini.</p>
+        <p>Halaman Admin dilindungi oleh Kebijakan Admin IP Whitelist. Alamat IP Anda tidak memiliki izin untuk
+            mengakses area ini.</p>
 
         <div>
             <span style="font-size: 12px; color: #64748b; display: block;">ALAMAT IP ANDA</span>
@@ -129,10 +131,15 @@
 
         <div>
             <a href="/" class="btn-home">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
                 <span>Kembali ke Client Portal</span>
             </a>
         </div>
     </div>
 </body>
+
 </html>

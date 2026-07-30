@@ -13,7 +13,8 @@ class UserModel
     public static function ensureTable()
     {
         static $initialized = false;
-        if ($initialized) return;
+        if ($initialized)
+            return;
         $initialized = true;
 
         $pdo = self::getPdo();
@@ -31,7 +32,7 @@ class UserModel
         ");
 
         $stmt = $pdo->query("SELECT COUNT(*) FROM portal_users");
-        $count = (int)$stmt->fetchColumn();
+        $count = (int) $stmt->fetchColumn();
 
         if ($count === 0) {
             $jsonPath = dirname(__DIR__, 2) . '/config/users.json';
@@ -50,7 +51,7 @@ class UserModel
                             trim($u['username']),
                             $u['password'],
                             in_array($u['role'] ?? '', ['admin', 'client']) ? $u['role'] : 'client',
-                            (float)($u['storage_limit_gb'] ?? 15),
+                            (float) ($u['storage_limit_gb'] ?? 15),
                             trim($u['root_folder_id'] ?? '')
                         ]);
                     }
@@ -60,7 +61,7 @@ class UserModel
 
             if (!$migrated) {
                 $stmtCheck = $pdo->query("SELECT COUNT(*) FROM portal_users");
-                if ((int)$stmtCheck->fetchColumn() === 0) {
+                if ((int) $stmtCheck->fetchColumn() === 0) {
                     $insertStmt = $pdo->prepare("
                         INSERT INTO portal_users (id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at)
                         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
@@ -78,7 +79,7 @@ class UserModel
         $stmt = self::getPdo()->query("SELECT id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at FROM portal_users ORDER BY created_at ASC");
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return array_map(function ($row) {
-            $row['storage_limit_gb'] = (float)$row['storage_limit_gb'];
+            $row['storage_limit_gb'] = (float) $row['storage_limit_gb'];
             return $row;
         }, $rows);
     }
@@ -90,7 +91,7 @@ class UserModel
         $stmt->execute([trim($username)]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row) {
-            $row['storage_limit_gb'] = (float)$row['storage_limit_gb'];
+            $row['storage_limit_gb'] = (float) $row['storage_limit_gb'];
             return $row;
         }
         return null;
@@ -103,7 +104,7 @@ class UserModel
         $stmt->execute([$id]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row) {
-            $row['storage_limit_gb'] = (float)$row['storage_limit_gb'];
+            $row['storage_limit_gb'] = (float) $row['storage_limit_gb'];
             return $row;
         }
         return null;
@@ -113,12 +114,12 @@ class UserModel
     {
         self::ensureTable();
         $stmt = self::getPdo()->query("SELECT COALESCE(SUM(storage_limit_gb), 0) FROM portal_users WHERE role = 'client'");
-        return (float)$stmt->fetchColumn();
+        return (float) $stmt->fetchColumn();
     }
 
     public static function getAdminAvailableStorageGb($masterLimitGb = 100)
     {
-        return max(0, (float)$masterLimitGb - self::getTotalAllocatedStorageGb());
+        return max(0, (float) $masterLimitGb - self::getTotalAllocatedStorageGb());
     }
 
     public static function createUser($username, $password, $role, $storageLimitGb, $rootFolderId, $masterLimitGb = 100)
@@ -132,7 +133,7 @@ class UserModel
         }
 
         $targetRole = in_array($role, ['admin', 'client']) ? $role : 'client';
-        $requestedGb = (float)$storageLimitGb;
+        $requestedGb = (float) $storageLimitGb;
 
         if ($targetRole === 'client') {
             $availableGb = self::getAdminAvailableStorageGb($masterLimitGb);
@@ -164,7 +165,7 @@ class UserModel
 
         if ($user['role'] === 'admin') {
             $stmt = self::getPdo()->query("SELECT COUNT(*) FROM portal_users WHERE role = 'admin'");
-            $adminCount = (int)$stmt->fetchColumn();
+            $adminCount = (int) $stmt->fetchColumn();
             if ($adminCount <= 1) {
                 throw new Exception("Tidak dapat menghapus akun admin terakhir.");
             }
@@ -190,10 +191,10 @@ class UserModel
         }
 
         $targetRole = ($role !== null && in_array($role, ['admin', 'client'])) ? $role : $currentUser['role'];
-        $newQuotaGb = (float)$storageLimitGb;
+        $newQuotaGb = (float) $storageLimitGb;
 
         if ($targetRole === 'client') {
-            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float)$currentUser['storage_limit_gb'] : 0;
+            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float) $currentUser['storage_limit_gb'] : 0;
             $availableGb = self::getAdminAvailableStorageGb($masterLimitGb);
             $netDifference = $newQuotaGb - $oldQuotaGb;
 
@@ -204,7 +205,7 @@ class UserModel
 
         if ($currentUser['role'] === 'admin' && $targetRole !== 'admin') {
             $stmt = self::getPdo()->query("SELECT COUNT(*) FROM portal_users WHERE role = 'admin'");
-            $adminCount = (int)$stmt->fetchColumn();
+            $adminCount = (int) $stmt->fetchColumn();
             if ($adminCount <= 1) {
                 throw new Exception("Minimal satu akun administrator harus tetap ada.");
             }
