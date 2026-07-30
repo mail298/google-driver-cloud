@@ -1640,27 +1640,33 @@
         </div>
     </div>
 
-    <!-- Quota Exceeded Popup Modal -->
-    <div class="modal-overlay" id="quota-popup-modal">
-        <div class="modal-card"
-            style="max-width: 440px; width: 92%; background: #0f172a; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 20px; padding: 24px;">
+    <!-- Storage Quota Exceeded Popup Modal -->
+    <div class="modal-overlay" id="quota-popup-modal" style="display: none; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="modal-card" style="max-width: 460px; width: 92%; background: #0f172a; border: 1.5px solid rgba(239, 68, 68, 0.4); border-radius: 24px; padding: 26px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75); font-family: 'Plus Jakarta Sans', sans-serif;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 10px; color: #f87171; display: flex; align-items: center; justify-content: center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 14px; padding: 10px; color: #f87171; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
                 </div>
-                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Batas Kuota Tercapai</h3>
+                <div>
+                    <h3 style="margin: 0; font-size: 19px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">Ruang Penyimpanan Tidak Cukup</h3>
+                    <span style="font-size: 11.5px; color: #fca5a5; font-weight: 600;">Kapasitas Storage Ditetapkan Admin</span>
+                </div>
             </div>
-            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 8px; line-height: 1.5;">
-                Penyimpanan Anda tidak mencukupi untuk mengunggah beberapa berkas berikut:
-            </p>
-            <div id="quota-failed-list" style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px; padding: 12px; margin-bottom: 16px; max-height: 150px; overflow-y: auto; font-size: 13px; color: #fca5a5;">
+
+            <div id="quota-info-box" style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 14px; font-size: 12.5px; color: #fca5a5; display: flex; flex-direction: column; gap: 4px;">
+                <!-- Dynamically populated via JS -->
             </div>
-            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
-                File yang berhasil diunggah sebelum batas kuota tercapai akan tetap tersimpan. Anda dapat menghapus beberapa file atau menghubungi administrator untuk menambah kuota.
+
+            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">Berkas yang Melebihi Kapasitas:</p>
+            <div id="quota-failed-list" style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; margin-bottom: 18px; max-height: 160px; overflow-y: auto; font-size: 12.5px; color: #fca5a5;">
+            </div>
+
+            <p style="font-size: 12px; color: #94a3b8; margin-bottom: 20px; line-height: 1.45;">
+                Anda dapat menghapus beberapa berkas lama atau menghubungi Administrator untuk meningkatkan batas kapasitas penyimpanan akun Anda.
             </p>
+
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="closeQuotaPopup()"
-                    style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer; font-weight: 600;">Mengerti</button>
+                <button type="button" onclick="closeQuotaPopup()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);">Mengerti</button>
             </div>
         </div>
     </div>
@@ -2108,6 +2114,9 @@
     <script>
         const CURRENT_FOLDER_ID = <?= json_encode($folderId) ?>;
         const EXISTING_FILE_NAMES = <?= json_encode(array_values(array_map(function($f) { return $f['name']; }, $files ?? []))) ?>;
+        const STORAGE_LIMIT_BYTES = <?= json_encode((float)($limitBytes ?? 0)) ?>;
+        const STORAGE_USED_BYTES = <?= json_encode((float)($totalUsedBytes ?? 0)) ?>;
+        const STORAGE_LIMIT_GB = <?= json_encode((float)($limitGb ?? 15)) ?>;
     </script>
     <script src="/assets/js/portal.js?v=<?= filemtime(__DIR__ . '/../../public/assets/js/portal.js') ?>"></script>
 </body>

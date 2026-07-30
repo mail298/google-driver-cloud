@@ -213,8 +213,30 @@ function getUniqueFileName(originalName, existingNames) {
     return newName;
 }
 
+function checkStorageQuotaBeforeUpload(files) {
+    if (!files || files.length === 0) return true;
+    const fileArray = Array.from(files);
+    const totalUploadBytes = fileArray.reduce((acc, f) => acc + (f.size || 0), 0);
+    const limitBytes = (typeof STORAGE_LIMIT_BYTES !== 'undefined') ? Number(STORAGE_LIMIT_BYTES) : 0;
+    const usedBytes = (typeof STORAGE_USED_BYTES !== 'undefined') ? Number(STORAGE_USED_BYTES) : 0;
+
+    if (limitBytes > 0 && (usedBytes + totalUploadBytes) > limitBytes) {
+        showQuotaPopupForFiles(fileArray, totalUploadBytes, usedBytes, limitBytes);
+        const remaining = Math.max(0, limitBytes - usedBytes);
+        if (typeof showToast === 'function') {
+            showToast('⚠️ Ruang penyimpanan tidak mencukupi! Sisa kuota: ' + formatFileSize(remaining), 'error');
+        }
+        return false;
+    }
+    return true;
+}
+
 function startGDriveUpload(files, options) {
     options = options || {};
+    if (!checkStorageQuotaBeforeUpload(files)) {
+        return;
+    }
+
     const widget = document.getElementById('gdrive-upload-widget');
     if (!widget) return;
 
@@ -735,26 +757,54 @@ function closeBatchSizePopup() {
     if (modal) modal.classList.remove('active');
 }
 
-// Quota popup
-function showQuotaPopup(failedItems) {
+// Quota Exceeded Popup Modal Handler
+function showQuotaPopupForFiles(files, totalUploadBytes, usedBytes, limitBytes) {
     const modal = document.getElementById('quota-popup-modal');
+    const infoBox = document.getElementById('quota-info-box');
     const list = document.getElementById('quota-failed-list');
-    if (!modal || !list) return;
+    if (!modal) return;
 
-    let html = '';
-    failedItems.forEach(item => {
-        html += '<div style="padding: 4px 0; display:flex; justify-content:space-between; gap:8px;">';
-        html += '<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + escapeHtml(item.name) + '</span>';
-        html += '<span style="flex-shrink:0; font-family:monospace; color:#94a3b8;">' + formatFileSize(item.size) + '</span>';
-        html += '</div>';
-    });
-    list.innerHTML = html;
-    modal.classList.add('active');
+    totalUploadBytes = totalUploadBytes || files.reduce((sum, f) => sum + (f.size || f.sizeBytes || 0), 0);
+    usedBytes = (usedBytes !== undefined) ? usedBytes : ((typeof STORAGE_USED_BYTES !== 'undefined') ? Number(STORAGE_USED_BYTES) : 0);
+    limitBytes = (limitBytes !== undefined) ? limitBytes : ((typeof STORAGE_LIMIT_BYTES !== 'undefined') ? Number(STORAGE_LIMIT_BYTES) : 0);
+
+    const remainingBytes = Math.max(0, limitBytes - usedBytes);
+    const limitGb = (limitBytes / (1024 * 1024 * 1024)).toFixed(1);
+
+    if (infoBox) {
+        let shortageHtml = '';
+        if (totalUploadBytes > remainingBytes) {
+            shortageHtml = '<div style="color: #ef4444; font-weight: 700; margin-top: 2px;"><strong>Kekurangan Ruang:</strong> ' + formatFileSize(totalUploadBytes - remainingBytes) + '</div>';
+        }
+        infoBox.innerHTML = '<div><strong>Total Ukuran Berkas:</strong> ' + formatFileSize(totalUploadBytes) + '</div>' +
+            '<div><strong>Sisa Kapasitas Storage:</strong> ' + formatFileSize(remainingBytes) + ' (Limit Admin: ' + limitGb + ' GB)</div>' +
+            shortageHtml;
+    }
+
+    if (list) {
+        let html = '';
+        files.forEach(file => {
+            const name = file.name || file.fileName || 'Berkas';
+            const sz = file.size || file.sizeBytes || 0;
+            html += '<div style="padding: 5px 0; display:flex; justify-content:space-between; gap:10px; border-bottom: 1px dashed rgba(255,255,255,0.08);">';
+            html += '<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#f8fafc; font-weight:500;">' + escapeHtml(name) + '</span>';
+            html += '<span style="flex-shrink:0; font-family:monospace; color:#fca5a5; font-weight:700;">' + formatFileSize(sz) + '</span>';
+            html += '</div>';
+        });
+        list.innerHTML = html;
+    }
+
+    modal.style.display = 'flex';
+}
+
+function showQuotaPopup(failedItems) {
+    const totalUpload = (failedItems || []).reduce((acc, i) => acc + (i.size || 0), 0);
+    showQuotaPopupForFiles(failedItems || [], totalUpload);
 }
 
 function closeQuotaPopup() {
     const modal = document.getElementById('quota-popup-modal');
-    if (modal) modal.classList.remove('active');
+    if (modal) modal.style.display = 'none';
 }
 
 // ─────────────────────────────────────────────────────────────────────
