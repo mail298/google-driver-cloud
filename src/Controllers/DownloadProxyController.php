@@ -8,8 +8,12 @@ class DownloadProxyController
     // Files served via this proxy are cached to disk after the first fetch.
     // Subsequent requests are served directly from local disk — no Google
     // API call, no network roundtrip. Speed: ~5–20ms from local SSD.
-    // Cache TTL: 7 days (604800s). Only images, video, audio are cached.
-    // Max single cached file: 50 MB (larger files are always streamed live).
+    //
+    // CACHE_TTL          : 7 days. Expired files auto-purged on next access.
+    // CACHE_MAX_BYTES    : Max per-file size eligible for caching (50 MB).
+    // CACHE_MAX_TOTAL_MB : Total cache dir size limit (500 MB). When this is
+    //                      exceeded, oldest files are evicted until usage drops
+    //                      to 80% of the limit — protects disk from exhaustion.
     // ─────────────────────────────────────────────────────────────────────
     private static function getCacheDir()
     {
@@ -27,9 +31,66 @@ class DownloadProxyController
         return self::getCacheDir() . '/' . $safe . '_' . $hash . '.cache';
     }
 
-    private const CACHE_TTL       = 604800; // 7 days
-    private const CACHE_MAX_BYTES = 52428800; // 50 MB
+    private const CACHE_TTL          = 604800;    // 7 days per-file TTL
+    private const CACHE_MAX_TOTAL_MB = 500;       // max total cache dir size (MB)
+    private const CACHE_MAX_BYTES = 52428800; // 50 MB max per-file cache
     private const PROXY_BUF_SIZE  = 524288;  // 512 KB streaming buffer
+
+    // ─────────────────────────────────────────────────────────────────────
+
+    /**
+     * Return total cache directory size in MB.
+     */
+    private static function getCacheDirSizeMB()
+    {
+        $total = 0;
+        foreach (glob(self::getCacheDir() . '/*.cache') as $f) {
+            $total += filesize($f);
+        }
+        return $total / 1048576;
+    }
+
+    /**
+     * Eviction: delete expired files first, then oldest-access files until
+     * total cache size drops below 80% of CACHE_MAX_TOTAL_MB.
+     * Run only on cache-miss writes to avoid overhead on every request.
+     */
+    private static function runEviction()
+    {
+        $cacheDir = self::getCacheDir();
+        $files    = glob($cacheDir . '/*.cache');
+        if (empty($files)) return;
+
+        // Phase 1: purge TTL-expired files
+        foreach ($files as $f) {
+            if ((time() - filemtime($f)) > self::CACHE_TTL) {
+                @unlink($f);
+            }
+        }
+
+        // Phase 2: if still over 80% limit, evict oldest (by last access time)
+        $targetBytes = self::CACHE_MAX_TOTAL_MB * 1048576 * 0.8;
+        $files = glob($cacheDir . '/*.cache');
+        if (empty($files)) return;
+
+        $total = 0;
+        $meta  = [];
+        foreach ($files as $f) {
+            $sz    = filesize($f);
+            $total += $sz;
+            $meta[] = ['path' => $f, 'size' => $sz, 'atime' => fileatime($f)];
+        }
+
+        if ($total <= $targetBytes) return;
+
+        // Sort by oldest access time first
+        usort($meta, fn($a, $b) => $a['atime'] <=> $b['atime']);
+        foreach ($meta as $entry) {
+            if ($total <= $targetBytes) break;
+            @unlink($entry['path']);
+            $total -= $entry['size'];
+        }
+    }
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -265,6 +326,11 @@ class DownloadProxyController
         if (self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id']) && $accessToken && !isset($_SERVER['HTTP_RANGE'])) {
             $cachePath = self::getCachePath($file['id'], $etag);
             $tmpPath   = $cachePath . '.tmp';
+
+            // Guard: run eviction if disk cache is at or over the total size limit
+            if (self::getCacheDirSizeMB() >= self::CACHE_MAX_TOTAL_MB) {
+                self::runEviction();
+            }
 
             if (self::fetchToFile($upstreamUrl, $curlHeaders, $tmpPath)) {
                 rename($tmpPath, $cachePath);
