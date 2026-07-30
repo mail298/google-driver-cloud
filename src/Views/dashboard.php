@@ -335,17 +335,23 @@
             left: 50%;
             transform: translateX(-50%) translateY(100px);
             z-index: 9990;
-            background: #0f172a;
+            background: rgba(15, 23, 42, 0.94);
             border: 1px solid rgba(59, 130, 246, 0.4);
-            border-radius: 16px;
-            padding: 10px 20px;
+            border-radius: 18px;
+            padding: 10px 18px;
             box-shadow: 0 16px 40px rgba(0,0,0,0.7);
             display: flex;
             align-items: center;
-            gap: 16px;
+            justify-content: space-between;
+            gap: 14px;
             opacity: 0;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            max-width: calc(100vw - 32px);
+            width: auto;
+            white-space: nowrap;
         }
 
         .bulk-action-bar.active {
@@ -354,46 +360,73 @@
             pointer-events: auto;
         }
 
+        .bulk-info {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
         .bulk-count-badge {
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 700;
             color: #60a5fa;
             background: rgba(59, 130, 246, 0.15);
-            padding: 4px 10px;
-            border-radius: 8px;
+            padding: 6px 12px;
+            border-radius: 10px;
             border: 1px solid rgba(59, 130, 246, 0.3);
+            white-space: nowrap;
+            display: inline-block;
+            flex-shrink: 0;
         }
 
         .bulk-buttons {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         .btn-bulk-delete {
-            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-            color: #fff;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
             border: none;
             padding: 8px 16px;
             border-radius: 10px;
             font-size: 13px;
             font-weight: 700;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            white-space: nowrap;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-bulk-delete:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5);
         }
 
         .btn-bulk-cancel {
             background: rgba(255, 255, 255, 0.08);
             color: #cbd5e1;
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 8px 14px;
             border-radius: 10px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-bulk-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
         }
 
         .cm-header {
