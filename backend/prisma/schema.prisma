@@ -351,3 +351,17 @@ model WorkspaceInvite {
   @@index([targetType, targetId])
   @@map("workspace_invites")
 }
+
+model PortalUser {
+  id             String   @id @db.VarChar(64)
+  username       String   @unique @db.VarChar(191)
+  password       String   @db.VarChar(255)
+  role           String   @default("client") @db.VarChar(32)
+  storageLimitGb Float    @default(15.0) @map("storage_limit_gb")
+  rootFolderId   String   @default("") @map("root_folder_id") @db.VarChar(255)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("portal_users")
+}
+
