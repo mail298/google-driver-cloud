@@ -1,135 +1,138 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Models\UserModel.php
 
+require_once dirname(__DIR__, 2) . '/config/database.php';
+
 class UserModel
 {
-    private static function getFilePath()
+    private static function getPdo()
     {
-        return dirname(dirname(__DIR__)) . '/config/users.json';
+        return Config::getPDO();
     }
 
-    private static $cacheMemory = [];
-
-    private static function cacheFetch($key)
+    public static function ensureTable()
     {
-        if (function_exists('apcu_fetch')) {
-            return apcu_fetch($key);
-        }
-        return isset(self::$cacheMemory[$key]) ? self::$cacheMemory[$key] : false;
-    }
+        static $initialized = false;
+        if ($initialized) return;
+        $initialized = true;
 
-    private static function cacheStore($key, $var, $ttl = 0)
-    {
-        if (function_exists('apcu_store')) {
-            return apcu_store($key, $var, $ttl);
-        }
-        self::$cacheMemory[$key] = $var;
-        return true;
-    }
+        $pdo = self::getPdo();
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS portal_users (
+                id VARCHAR(64) PRIMARY KEY,
+                username VARCHAR(191) NOT NULL UNIQUE,
+                password VARCHAR(255) NOT NULL,
+                role VARCHAR(32) NOT NULL DEFAULT 'client',
+                storage_limit_gb DECIMAL(10,2) NOT NULL DEFAULT 15.00,
+                root_folder_id VARCHAR(255) NOT NULL DEFAULT '',
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
 
-    private static function cacheDelete($key)
-    {
-        if (function_exists('apcu_delete')) {
-            return apcu_delete($key);
+        $stmt = $pdo->query("SELECT COUNT(*) FROM portal_users");
+        $count = (int)$stmt->fetchColumn();
+
+        if ($count === 0) {
+            $jsonPath = dirname(__DIR__, 2) . '/config/users.json';
+            $migrated = false;
+            if (file_exists($jsonPath)) {
+                $raw = file_get_contents($jsonPath);
+                $users = json_decode($raw, true);
+                if (is_array($users) && !empty($users)) {
+                    $insertStmt = $pdo->prepare("
+                        INSERT IGNORE INTO portal_users (id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+                    ");
+                    foreach ($users as $u) {
+                        $insertStmt->execute([
+                            $u['id'] ?? ('user-' . bin2hex(random_bytes(8))),
+                            trim($u['username']),
+                            $u['password'],
+                            in_array($u['role'] ?? '', ['admin', 'client']) ? $u['role'] : 'client',
+                            (float)($u['storage_limit_gb'] ?? 15),
+                            trim($u['root_folder_id'] ?? '')
+                        ]);
+                    }
+                    $migrated = true;
+                }
+            }
+
+            if (!$migrated) {
+                $stmtCheck = $pdo->query("SELECT COUNT(*) FROM portal_users");
+                if ((int)$stmtCheck->fetchColumn() === 0) {
+                    $insertStmt = $pdo->prepare("
+                        INSERT INTO portal_users (id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at)
+                        VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+                    ");
+                    $insertStmt->execute(['admin-1', 'admin', password_hash('adminpass', PASSWORD_BCRYPT), 'admin', 100.0, '']);
+                    $insertStmt->execute(['client-1', 'client', password_hash('clientpass', PASSWORD_BCRYPT), 'client', 15.0, '']);
+                }
+            }
         }
-        unset(self::$cacheMemory[$key]);
-        return true;
     }
 
     public static function getAllUsers()
     {
-        $cached = self::cacheFetch('users_all');
-        if ($cached !== false)
-            return $cached;
-        $path = self::getFilePath();
-        if (file_exists($path)) {
-            $data = json_decode(file_get_contents($path), true);
-            if (is_array($data)) {
-                self::cacheStore('users_all', $data, 30);
-                return $data;
-            }
-        }
-        $default = [
-            [
-                'id' => 'admin-1',
-                'username' => 'admin',
-                'password' => 'adminpass',
-                'role' => 'admin',
-                'storage_limit_gb' => 100,
-                'root_folder_id' => ''
-            ],
-            [
-                'id' => 'client-1',
-                'username' => 'client',
-                'password' => 'clientpass',
-                'role' => 'client',
-                'storage_limit_gb' => 15,
-                'root_folder_id' => ''
-            ]
-        ];
-        self::cacheStore('users_all', $default, 30);
-        return $default;
-    }
-
-    public static function saveAllUsers($users)
-    {
-        $path = self::getFilePath();
-        file_put_contents($path, json_encode(array_values($users), JSON_PRETTY_PRINT));
-        self::cacheDelete('users_all');
+        self::ensureTable();
+        $stmt = self::getPdo()->query("SELECT id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at FROM portal_users ORDER BY created_at ASC");
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return array_map(function ($row) {
+            $row['storage_limit_gb'] = (float)$row['storage_limit_gb'];
+            return $row;
+        }, $rows);
     }
 
     public static function getUserByUsername($username)
     {
-        $users = self::getAllUsers();
-        foreach ($users as $user) {
-            if (strtolower($user['username']) === strtolower($username)) {
-                return $user;
-            }
+        self::ensureTable();
+        $stmt = self::getPdo()->prepare("SELECT id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at FROM portal_users WHERE LOWER(username) = LOWER(?) LIMIT 1");
+        $stmt->execute([trim($username)]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $row['storage_limit_gb'] = (float)$row['storage_limit_gb'];
+            return $row;
         }
         return null;
     }
 
     public static function getUserById($id)
     {
-        $users = self::getAllUsers();
-        foreach ($users as $user) {
-            if ($user['id'] === $id) {
-                return $user;
-            }
+        self::ensureTable();
+        $stmt = self::getPdo()->prepare("SELECT id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at FROM portal_users WHERE id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $row['storage_limit_gb'] = (float)$row['storage_limit_gb'];
+            return $row;
         }
         return null;
     }
 
     public static function getTotalAllocatedStorageGb()
     {
-        $users = self::getAllUsers();
-        $total = 0;
-        foreach ($users as $user) {
-            if (($user['role'] ?? 'client') === 'client') {
-                $total += (float) ($user['storage_limit_gb'] ?? 0);
-            }
-        }
-        return $total;
+        self::ensureTable();
+        $stmt = self::getPdo()->query("SELECT COALESCE(SUM(storage_limit_gb), 0) FROM portal_users WHERE role = 'client'");
+        return (float)$stmt->fetchColumn();
     }
 
     public static function getAdminAvailableStorageGb($masterLimitGb = 100)
     {
-        return max(0, (float) $masterLimitGb - self::getTotalAllocatedStorageGb());
+        return max(0, (float)$masterLimitGb - self::getTotalAllocatedStorageGb());
     }
 
     public static function createUser($username, $password, $role, $storageLimitGb, $rootFolderId, $masterLimitGb = 100)
     {
-        $users = self::getAllUsers();
+        self::ensureTable();
+        $username = trim($username);
+        $password = trim($password);
 
-        // Check if username exists
-        foreach ($users as $u) {
-            if (strtolower($u['username']) === strtolower($username)) {
-                throw new Exception("Username sudah terdaftar.");
-            }
+        if (self::getUserByUsername($username)) {
+            throw new Exception("Username sudah terdaftar.");
         }
 
         $targetRole = in_array($role, ['admin', 'client']) ? $role : 'client';
-        $requestedGb = (float) $storageLimitGb;
+        $requestedGb = (float)$storageLimitGb;
 
         if ($targetRole === 'client') {
             $availableGb = self::getAdminAvailableStorageGb($masterLimitGb);
@@ -138,71 +141,59 @@ class UserModel
             }
         }
 
-        $newUser = [
-            'id' => 'user-' . uniqid(),
-            'username' => trim($username),
-            'password' => password_hash(trim($password), PASSWORD_BCRYPT),
-            'role' => $targetRole,
-            'storage_limit_gb' => $requestedGb,
-            'root_folder_id' => trim($rootFolderId)
-        ];
+        $id = 'user-' . bin2hex(random_bytes(8));
+        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        $rootFolderId = trim($rootFolderId);
 
-        $users[] = $newUser;
-        self::saveAllUsers($users);
-        return $newUser;
+        $stmt = self::getPdo()->prepare("
+            INSERT INTO portal_users (id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ");
+        $stmt->execute([$id, $username, $hashedPassword, $targetRole, $requestedGb, $rootFolderId]);
+
+        return self::getUserById($id);
     }
 
     public static function deleteUser($id)
     {
-        $users = self::getAllUsers();
-        $filtered = array_filter($users, function ($u) use ($id) {
-            return $u['id'] !== $id;
-        });
-
-        // Ensure at least one admin remains
-        $adminCount = 0;
-        foreach ($filtered as $u) {
-            if ($u['role'] === 'admin')
-                $adminCount++;
-        }
-        if ($adminCount === 0) {
-            throw new Exception("Tidak dapat menghapus akun admin terakhir.");
+        self::ensureTable();
+        $user = self::getUserById($id);
+        if (!$user) {
+            throw new Exception("User tidak ditemukan.");
         }
 
-        self::saveAllUsers($filtered);
+        if ($user['role'] === 'admin') {
+            $stmt = self::getPdo()->query("SELECT COUNT(*) FROM portal_users WHERE role = 'admin'");
+            $adminCount = (int)$stmt->fetchColumn();
+            if ($adminCount <= 1) {
+                throw new Exception("Tidak dapat menghapus akun admin terakhir.");
+            }
+        }
+
+        $stmt = self::getPdo()->prepare("DELETE FROM portal_users WHERE id = ?");
+        $stmt->execute([$id]);
     }
 
     public static function updateUser($id, $storageLimitGb, $role = null, $rootFolderId = null, $password = null, $masterLimitGb = 100, $username = null)
     {
-        $users = self::getAllUsers();
-        $targetIndex = null;
-
-        foreach ($users as $index => $u) {
-            if ($u['id'] === $id) {
-                $targetIndex = $index;
-                break;
-            }
-        }
-
-        if ($targetIndex === null) {
+        self::ensureTable();
+        $currentUser = self::getUserById($id);
+        if (!$currentUser) {
             throw new Exception("User tidak ditemukan.");
         }
 
-        $currentUser = $users[$targetIndex];
-
         if (!empty($username) && strtolower(trim($username)) !== strtolower($currentUser['username'])) {
-            foreach ($users as $u) {
-                if ($u['id'] !== $id && strtolower($u['username'] ?? '') === strtolower(trim($username))) {
-                    throw new Exception("Username '$username' sudah digunakan pengguna lain.");
-                }
+            $existing = self::getUserByUsername(trim($username));
+            if ($existing && $existing['id'] !== $id) {
+                throw new Exception("Username '$username' sudah digunakan pengguna lain.");
             }
         }
 
         $targetRole = ($role !== null && in_array($role, ['admin', 'client'])) ? $role : $currentUser['role'];
-        $newQuotaGb = (float) $storageLimitGb;
+        $newQuotaGb = (float)$storageLimitGb;
 
         if ($targetRole === 'client') {
-            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float) ($currentUser['storage_limit_gb'] ?? 0) : 0;
+            $oldQuotaGb = ($currentUser['role'] === 'client') ? (float)$currentUser['storage_limit_gb'] : 0;
             $availableGb = self::getAdminAvailableStorageGb($masterLimitGb);
             $netDifference = $newQuotaGb - $oldQuotaGb;
 
@@ -211,50 +202,34 @@ class UserModel
             }
         }
 
-        if (!empty($username)) {
-            $users[$targetIndex]['username'] = trim($username);
-        }
-        $users[$targetIndex]['storage_limit_gb'] = $newQuotaGb;
-        $users[$targetIndex]['role'] = $targetRole;
-        if ($rootFolderId !== null) {
-            $users[$targetIndex]['root_folder_id'] = trim($rootFolderId);
-        }
-        if (!empty($password)) {
-            $users[$targetIndex]['password'] = password_hash(trim($password), PASSWORD_BCRYPT);
+        if ($currentUser['role'] === 'admin' && $targetRole !== 'admin') {
+            $stmt = self::getPdo()->query("SELECT COUNT(*) FROM portal_users WHERE role = 'admin'");
+            $adminCount = (int)$stmt->fetchColumn();
+            if ($adminCount <= 1) {
+                throw new Exception("Minimal satu akun administrator harus tetap ada.");
+            }
         }
 
-        // Ensure at least one admin remains
-        $adminCount = 0;
-        foreach ($users as $u) {
-            if (($u['role'] ?? '') === 'admin')
-                $adminCount++;
-        }
-        if ($adminCount === 0) {
-            throw new Exception("Minimal satu akun administrator harus tetap ada.");
-        }
+        $newUsername = !empty($username) ? trim($username) : $currentUser['username'];
+        $newRootFolder = ($rootFolderId !== null) ? trim($rootFolderId) : $currentUser['root_folder_id'];
+        $newPassword = !empty($password) ? password_hash(trim($password), PASSWORD_BCRYPT) : $currentUser['password'];
 
-        self::saveAllUsers($users);
+        $stmt = self::getPdo()->prepare("
+            UPDATE portal_users
+            SET username = ?, password = ?, role = ?, storage_limit_gb = ?, root_folder_id = ?, updated_at = NOW()
+            WHERE id = ?
+        ");
+        $stmt->execute([$newUsername, $newPassword, $targetRole, $newQuotaGb, $newRootFolder, $id]);
     }
 
     public static function updateUserPassword($userId, $oldPassword, $newPassword)
     {
-        $users = self::getAllUsers();
-        $targetIndex = null;
-
-        foreach ($users as $index => $user) {
-            if ($user['id'] === $userId) {
-                $targetIndex = $index;
-                break;
-            }
-        }
-
-        if ($targetIndex === null) {
+        self::ensureTable();
+        $user = self::getUserById($userId);
+        if (!$user) {
             throw new Exception("User tidak ditemukan.");
         }
 
-        $user = $users[$targetIndex];
-
-        // Support both hashed and plain text legacy passwords
         $isHashed = password_get_info($user['password'])['algoName'] !== 'unknown';
         $oldPasswordValid = $isHashed
             ? password_verify($oldPassword, $user['password'])
@@ -267,8 +242,9 @@ class UserModel
             throw new Exception("Password baru tidak boleh kosong.");
         }
 
-        $users[$targetIndex]['password'] = password_hash(trim($newPassword), PASSWORD_BCRYPT);
-        self::saveAllUsers($users);
+        $hashedPassword = password_hash(trim($newPassword), PASSWORD_BCRYPT);
+        $stmt = self::getPdo()->prepare("UPDATE portal_users SET password = ?, updated_at = NOW() WHERE id = ?");
+        $stmt->execute([$hashedPassword, $userId]);
         return true;
     }
 }

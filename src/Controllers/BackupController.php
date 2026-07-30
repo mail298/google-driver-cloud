@@ -23,7 +23,7 @@ class BackupController
         }
 
         // 1. Generate SQL Dump of all database tables
-        $tables = ['files', 'folders', 'connected_accounts', 'storage_accounts', 'api_keys'];
+        $tables = ['portal_users', 'files', 'folders', 'connected_accounts', 'storage_accounts', 'api_keys'];
         $sqlDump = "-- 9Drive System Backup\n-- Generated at: " . date('Y-m-d H:i:s') . "\n\n";
         $sqlDump .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
 
