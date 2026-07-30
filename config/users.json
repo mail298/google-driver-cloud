@@ -18,7 +18,7 @@
     {
         "id": "user-6a6986212dd67",
         "username": "Ricke",
-        "password": "$2y$10$HoxeF7ph0IffhLN5gXwsdujw25r99rJPMRluvdcP09loiNRRXU\/Zy",
+        "password": "$2y$10$HoxeF7ph0IffhLN5gXwsdujw25r99rJPMRluvdcP09loiNRRXU/Zy",
         "role": "client",
         "storage_limit_gb": 80,
         "root_folder_id": "1k77k2gGr8UbIv33qJoIecziAYCi6c8yY"
@@ -29,12 +29,12 @@
         "password": "$2y$10$CRcDHnAUuSeozAHU3dGDRePYzdu20TlTthLFzcd.wWmsPNuFC2ofO",
         "role": "client",
         "storage_limit_gb": 15,
-        "root_folder_id": "1KweUSbFzYHY8NuAOzVhsnuE4drKTZ6Zf"
+        "root_folder_id": "1sn1wvMv2iwoUOCptMly7eXb9DRGH8TDh"
     },
     {
         "id": "user-6a6986e44fed3",
         "username": "clienB",
-        "password": "$2y$10$Uj\/pnVZXpbR3lDr1mVaWg..IWHO3YPK8WSb2CveLG3X8RjdGKGAhy",
+        "password": "$2y$10$Uj/pnVZXpbR3lDr1mVaWg..IWHO3YPK8WSb2CveLG3X8RjdGKGAhy",
         "role": "client",
         "storage_limit_gb": 10,
         "root_folder_id": "1vud0X8N1-SXsD3Hcdc_B7LlpWUuRCoi9"
@@ -42,7 +42,7 @@
     {
         "id": "user-6a69a8fb240c8",
         "username": "ecko",
-        "password": "$2y$10$jslzqDhIVkUqFD2ppItlRupfNMkt31gkeGA.Exk9Odx0Vp1tc\/Yr2",
+        "password": "$2y$10$jslzqDhIVkUqFD2ppItlRupfNMkt31gkeGA.Exk9Odx0Vp1tc/Yr2",
         "role": "client",
         "storage_limit_gb": 10,
         "root_folder_id": "1UbPJUlWCjnrGMJ5y1EsrMf83GFNcAY2p"
