@@ -41,33 +41,32 @@ class AdminController
         $userUsageMap = [];
 
         $allFolders = [];
+
+        // Aggregate file statistics across ALL active files (not just gateway user)
+        $stmt = $pdo->query("
+            SELECT
+                SUM(CASE WHEN mime_type LIKE 'image/%' THEN size_bytes ELSE 0 END) AS photo_bytes,
+                SUM(CASE WHEN mime_type LIKE 'video/%' THEN size_bytes ELSE 0 END) AS video_bytes,
+                SUM(CASE WHEN mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' THEN size_bytes ELSE 0 END) AS document_bytes
+            FROM files WHERE status = 'active'
+        ");
+        $row = $stmt->fetch();
+        $photoSize    = (float) ($row['photo_bytes']    ?? 0);
+        $videoSize    = (float) ($row['video_bytes']    ?? 0);
+        $documentSize = (float) ($row['document_bytes'] ?? 0);
+        $totalUsedBytes = $photoSize + $videoSize + $documentSize;
+
+        // Usage map per user
+        $stmt = $pdo->query("SELECT user_id, SUM(size_bytes) as used_bytes, COUNT(*) as file_count FROM files WHERE status = 'active' GROUP BY user_id");
+        while ($row = $stmt->fetch()) {
+            $userUsageMap[$row['user_id']] = [
+                'used_bytes' => (float) $row['used_bytes'],
+                'file_count' => (int) $row['file_count']
+            ];
+        }
+
+        // Fetch detected folders for Admin selection dropdown (from gateway user)
         if ($userId) {
-            // Aggregate file statistics by user
-            $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type LIKE 'image/%'");
-            $stmt->execute([$userId]);
-            $photoSize = (float) ($stmt->fetch()['total'] ?? 0);
-
-            $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type LIKE 'video/%'");
-            $stmt->execute([$userId]);
-            $videoSize = (float) ($stmt->fetch()['total'] ?? 0);
-
-            $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%'");
-            $stmt->execute([$userId]);
-            $documentSize = (float) ($stmt->fetch()['total'] ?? 0);
-
-            $totalUsedBytes = $photoSize + $videoSize + $documentSize;
-
-            // Usage map for files in system
-            $stmt = $pdo->prepare("SELECT user_id, SUM(size_bytes) as used_bytes, COUNT(*) as file_count FROM files WHERE status = 'active' GROUP BY user_id");
-            $stmt->execute();
-            while ($row = $stmt->fetch()) {
-                $userUsageMap[$row['user_id']] = [
-                    'used_bytes' => (float) $row['used_bytes'],
-                    'file_count' => (int) $row['file_count']
-                ];
-            }
-
-            // Fetch detected folders for Admin selection dropdown
             $stmt = $pdo->prepare("SELECT id, name, provider_folder_id FROM folders WHERE user_id = ? AND deleted_at IS NULL ORDER BY name ASC");
             $stmt->execute([$userId]);
             $allFolders = $stmt->fetchAll();

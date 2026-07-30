@@ -107,26 +107,21 @@ class DashboardController {
             }
         }
 
-        // Calculate storage details
+        // Calculate storage details (single aggregated query for efficiency)
         $limitBytes = $limitGb * 1024 * 1024 * 1024;
 
-        // Photo size (image/*)
-        $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type LIKE 'image/%'");
+        $stmt = $pdo->prepare("
+            SELECT
+                SUM(CASE WHEN mime_type LIKE 'image/%' THEN size_bytes ELSE 0 END) AS photo_bytes,
+                SUM(CASE WHEN mime_type LIKE 'video/%' THEN size_bytes ELSE 0 END) AS video_bytes,
+                SUM(CASE WHEN mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' THEN size_bytes ELSE 0 END) AS document_bytes
+            FROM files WHERE user_id = ? AND status = 'active'
+        ");
         $stmt->execute([$userId]);
         $row = $stmt->fetch();
-        $photoSize = (float)($row['total'] ?? 0);
-
-        // Video size (video/*)
-        $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type LIKE 'video/%'");
-        $stmt->execute([$userId]);
-        $row = $stmt->fetch();
-        $videoSize = (float)($row['total'] ?? 0);
-
-        // Document size (others)
-        $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total FROM files WHERE user_id = ? AND status = 'active' AND mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%'");
-        $stmt->execute([$userId]);
-        $row = $stmt->fetch();
-        $documentSize = (float)($row['total'] ?? 0);
+        $photoSize    = (float)($row['photo_bytes']    ?? 0);
+        $videoSize    = (float)($row['video_bytes']    ?? 0);
+        $documentSize = (float)($row['document_bytes'] ?? 0);
 
         $totalUsedBytes = $photoSize + $videoSize + $documentSize;
         $storagePercent = min(100, round(($totalUsedBytes / $limitBytes) * 100, 2));
