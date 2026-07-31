@@ -16,7 +16,7 @@ import { createAuditLog } from '../../utils/audit.js'
 
 export const uploadRouter = Router()
 
-type UploadMeta = { fieldName: string; fileName: string; mimeType: string; sizeBytes: bigint; folderId?: string }
+type UploadMeta = { fieldName: string; fileName: string; mimeType: string; sizeBytes: bigint; folderId?: string; providerParentId?: string }
 type RoutingMode = 'most_available' | 'round_robin' | 'priority'
 
 function logUpload(message: string, metadata?: Record<string, unknown>) {
@@ -131,12 +131,13 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
       return res.status(status).json({ code, message })
     }
 
-    const parseBatchMeta = (value: string) => JSON.parse(value).map((item: { fieldName: string; fileName: string; mimeType: string; sizeBytes: string | number; folderId?: string }) => ({
+    const parseBatchMeta = (value: string) => JSON.parse(value).map((item: { fieldName: string; fileName: string; mimeType: string; sizeBytes: string | number; folderId?: string; providerParentId?: string }) => ({
       fieldName: item.fieldName,
       fileName: item.fileName,
       mimeType: item.mimeType,
       sizeBytes: BigInt(item.sizeBytes),
       folderId: item.folderId,
+      providerParentId: item.providerParentId,
     })) as UploadMeta[]
 
     const metaForFile = (fieldName: string, info: { filename: string; mimeType: string }) => {
@@ -221,6 +222,8 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
               if (folderRecord?.providerFolderId) {
                 targetParentId = folderRecord.providerFolderId
               }
+            } else if (meta.providerParentId) {
+              targetParentId = meta.providerParentId
             }
             const uploaded = await drive.files.create({
               requestBody: { name: fileName, parents: [targetParentId] },
