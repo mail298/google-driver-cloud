@@ -369,10 +369,8 @@
         <div class="login-wrapper">
             <!-- Brand Header -->
             <div class="brand-header">
-                <div class="brand-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-                    </svg>
+                <div class="brand-icon" style="background: transparent; box-shadow: none;">
+                    <img src="/assets/image/logo.png" alt="Logo" class="logo-img" style="height: 48px; width: auto; object-fit: contain;">
                 </div>
                 <h1 class="brand-title">Drive Portal</h1>
                 <p class="brand-subtitle">Secure Cloud Storage Gateway</p>

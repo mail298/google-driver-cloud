@@ -829,9 +829,7 @@
     <header class="admin-header">
         <div class="brand-row">
             <div class="brand-logo">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>
-                </svg>
+                <img src="/assets/image/logo.png" alt="Logo" class="logo-img" style="height: 24px; width: auto; object-fit: contain;">
             </div>
             <div class="brand-text-wrap">
                 <div class="brand-title">Drive Portal</div>

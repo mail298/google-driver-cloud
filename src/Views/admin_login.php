@@ -316,8 +316,8 @@
     <div class="login-wrapper">
         <!-- Brand Header -->
         <div class="brand-header">
-            <div class="brand-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <div class="brand-icon" style="background: transparent; box-shadow: none;">
+                <img src="/assets/image/logo.png" alt="Logo" class="logo-img" style="height: 48px; width: auto; object-fit: contain;">
             </div>
             <h1 class="brand-title">Master Control</h1>
             <div class="brand-subtitle">Administrator Access Portal</div>

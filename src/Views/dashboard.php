@@ -869,15 +869,7 @@
         <aside class="app-sidebar">
             <div>
                 <a href="/" class="sidebar-logo">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
-                        class="lucide lucide-hard-drive">
-                        <rect width="20" height="8" x="2" y="14" rx="2" />
-                        <path d="M6 18h.01" />
-                        <path d="M10 18h.01" />
-                        <path d="M2 10V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4" />
-                        <path d="M12 2v8" />
-                    </svg>
+                    <img src="/assets/image/logo.png" alt="Logo" class="logo-img" style="height: 28px; width: auto; object-fit: contain; margin-right: 4px;">
                     <h1>Drive Portal</h1>
                 </a>
 
