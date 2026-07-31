@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>403 - Akses Ditolak (IP Not Whitelisted)</title>
+    <link rel="icon" type="image/png" href="/assets/image/favicon/favicon-clouds.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -118,7 +119,7 @@
 <body>
     <div class="error-card">
         <!-- Gantilah atribut 'src' di bawah dengan lokasi file gambar kamu -->
-        <img src="../image/403/forbidden-403.png" alt="Akses Ditolak" class="error-image">
+        <img src="/assets/image/403/forbidden-403.png" alt="Akses Ditolak" class="error-image">
 
         <h1>403 - Akses Ditolak</h1>
         <p>Halaman Admin dilindungi oleh Kebijakan Admin IP Whitelist. Alamat IP Anda tidak memiliki izin untuk
