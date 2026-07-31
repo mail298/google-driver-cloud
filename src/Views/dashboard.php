@@ -2110,6 +2110,8 @@
         const STORAGE_LIMIT_BYTES = <?= json_encode((float)($limitBytes ?? 0)) ?>;
         const STORAGE_USED_BYTES = <?= json_encode((float)($totalUsedBytes ?? 0)) ?>;
         const STORAGE_LIMIT_GB = <?= json_encode((float)($limitGb ?? 15)) ?>;
+        const UPLOAD_DIRECT_URL = <?= json_encode($uploadDirectUrl ?? '') ?>;
+        const UPLOAD_DIRECT_THRESHOLD_BYTES = <?= json_encode((float)($uploadDirectThresholdBytes ?? 90 * 1024 * 1024)) ?>;
     </script>
     <script src="/assets/js/portal.js?v=<?= filemtime(__DIR__ . '/../../public/assets/js/portal.js') ?>"></script>
 </body>

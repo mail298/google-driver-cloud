@@ -71,6 +71,37 @@ class AuthController {
         }
     }
 
+    public static function uploadToken() {
+        self::checkClient();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
+            exit;
+        }
+
+        $user = $_SESSION['user'] ?? null;
+        $userId = is_array($user) ? ($user['id'] ?? null) : null;
+        if (!$userId) {
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
+            exit;
+        }
+
+        $token = bin2hex(random_bytes(32));
+        $dir = UploadController::uploadTokenDir();
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        file_put_contents($dir . '/' . hash('sha256', $token), json_encode([
+            'user_id' => $userId,
+            'exp' => time() + 600
+        ]), LOCK_EX);
+
+        echo json_encode(['success' => true, 'token' => $token]);
+        exit;
+    }
+
     public static function login() {
         self::startSession();
 

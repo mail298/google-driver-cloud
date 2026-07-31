@@ -74,6 +74,9 @@ switch ($requestUri) {
     case '/upload':
         UploadController::upload();
         break;
+    case '/upload-token':
+        AuthController::uploadToken();
+        break;
     case '/download':
         DownloadProxyController::download();
         break;

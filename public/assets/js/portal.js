@@ -313,6 +313,48 @@ function renderGDriveWidget() {
     itemListEl.innerHTML = html;
 }
 
+let cachedUploadToken = null;
+let cachedUploadTokenAt = 0;
+
+function getUploadTokenSync() {
+    const now = Date.now();
+    if (cachedUploadToken && now - cachedUploadTokenAt < 8 * 60 * 1000) {
+        return cachedUploadToken;
+    }
+    try {
+        const req = new XMLHttpRequest();
+        req.open('POST', '/upload-token', false);
+        req.setRequestHeader('Content-Type', 'application/json');
+        req.send('{}');
+        if (req.status === 200) {
+            const resp = JSON.parse(req.responseText);
+            if (resp.success && resp.token) {
+                cachedUploadToken = resp.token;
+                cachedUploadTokenAt = now;
+                return resp.token;
+            }
+        }
+    } catch (e) { }
+    return null;
+}
+
+function getUploadEndpoint(fileSizeBytes) {
+    if (typeof UPLOAD_DIRECT_URL === 'undefined' || !UPLOAD_DIRECT_URL) {
+        return '/upload';
+    }
+    const threshold = (typeof UPLOAD_DIRECT_THRESHOLD_BYTES !== 'undefined' && UPLOAD_DIRECT_THRESHOLD_BYTES > 0)
+        ? UPLOAD_DIRECT_THRESHOLD_BYTES
+        : 90 * 1024 * 1024;
+    if (fileSizeBytes < threshold) {
+        return '/upload';
+    }
+    const token = getUploadTokenSync();
+    if (!token) {
+        return '/upload';
+    }
+    return UPLOAD_DIRECT_URL + '/upload?upload_token=' + encodeURIComponent(token);
+}
+
 function processGDriveQueueItem(idx) {
     if (idx >= gdriveQueue.length) {
         isGDriveUploading = false;
@@ -338,7 +380,7 @@ function processGDriveQueueItem(idx) {
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/upload', true);
+    xhr.open('POST', getUploadEndpoint(item.file.size), true);
 
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
@@ -708,7 +750,7 @@ function uploadFileObject(file, onProgress, onComplete) {
     }
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/upload', true);
+    xhr.open('POST', getUploadEndpoint(file.size), true);
 
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable && onProgress) {

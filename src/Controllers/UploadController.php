@@ -3,6 +3,31 @@
 
 class UploadController
 {
+    public static function uploadTokenDir()
+    {
+        return sys_get_temp_dir() . '/portal_upload_tokens';
+    }
+
+    public static function consumeUploadToken($token)
+    {
+        if (!is_string($token) || strlen($token) < 32) {
+            return null;
+        }
+        $path = self::uploadTokenDir() . '/' . hash('sha256', $token);
+        if (!is_file($path)) {
+            return null;
+        }
+        $data = json_decode((string) file_get_contents($path), true);
+        @unlink($path);
+        if (!is_array($data) || empty($data['user_id']) || empty($data['exp'])) {
+            return null;
+        }
+        if ((int) $data['exp'] < time()) {
+            return null;
+        }
+        return $data;
+    }
+
     public static function upload()
     {
         @set_time_limit(0);
@@ -10,7 +35,22 @@ class UploadController
         @ini_set('max_execution_time', '0');
         @ini_set('max_input_time', '-1');
 
-        AuthController::checkClient();
+        $handoffToken = $_POST['upload_token'] ?? $_GET['upload_token'] ?? null;
+        if ($handoffToken) {
+            require_once dirname(__DIR__) . '/Models/UserModel.php';
+            $tokenData = self::consumeUploadToken($handoffToken);
+            if (!$tokenData || !($tokenUser = UserModel::getUserById($tokenData['user_id']))) {
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'Token unggahan tidak valid atau kedaluwarsa.']);
+                exit;
+            }
+            AuthController::startSession();
+            $_SESSION['user'] = $tokenUser;
+            $_SESSION['user_role'] = 'client';
+            $_SESSION['username'] = $tokenUser['username'];
+        } else {
+            AuthController::checkClient();
+        }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');

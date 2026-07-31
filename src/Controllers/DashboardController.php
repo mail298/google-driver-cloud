@@ -126,6 +126,9 @@ class DashboardController {
         $totalUsedBytes = $photoSize + $videoSize + $documentSize;
         $storagePercent = min(100, round(($totalUsedBytes / $limitBytes) * 100, 2));
 
+        $uploadDirectUrl = (string) Config::get('UPLOAD_DIRECT_URL', '');
+        $uploadDirectThresholdBytes = (int) Config::get('UPLOAD_DIRECT_THRESHOLD_BYTES', 90 * 1024 * 1024);
+
         require_once dirname(__DIR__) . '/Views/dashboard.php';
     }
 
