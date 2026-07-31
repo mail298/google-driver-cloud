@@ -280,6 +280,7 @@
             align-items: center;
             justify-content: center;
             gap: 14px;
+            flex-wrap: wrap;
             margin-top: 20px;
         }
 
@@ -290,6 +291,17 @@
             font-size: 10px;
             color: #4e5f74;
             font-weight: 600;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 28px 20px;
+                border-radius: 20px;
+            }
+            .security-badges {
+                gap: 10px 14px;
+            }
         }
 
         .attempt-indicator {
