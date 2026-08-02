@@ -511,6 +511,8 @@ async function uploadItemInChunks(item) {
     }
 }
 
+let isReloadScheduled = false;
+
 async function processGDriveQueueItem() {
     const nextIdx = gdriveQueue.findIndex(item => item.status === 'waiting');
 
@@ -519,10 +521,11 @@ async function processGDriveQueueItem() {
         renderGDriveWidget();
         const hasCompleted = gdriveQueue.some(i => i.status === 'completed');
         const isStillUploading = gdriveQueue.some(i => i.status === 'uploading');
-        if (!isStillUploading && hasCompleted) {
+        if (!isStillUploading && hasCompleted && !isReloadScheduled) {
+            isReloadScheduled = true;
             setTimeout(function () {
                 window.location.reload();
-            }, 1200);
+            }, 2500);
         }
         return;
     }
