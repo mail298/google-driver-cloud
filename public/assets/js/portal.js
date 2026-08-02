@@ -1260,8 +1260,7 @@ function openBatchMoveModal() {
 
     if (nameEl) nameEl.innerText = selected.length + ' item terpilih';
 
-    const selectedFolderIds = selected.filter(i => i.type === 'folder').map(i => i.id);
-    loadMoveTargetFolders(selectedFolderIds).then(() => {
+    loadMoveTargetFolders([]).then(() => {
         if (selectEl) selectEl.value = '';
     });
     if (modal) modal.classList.add('active');
