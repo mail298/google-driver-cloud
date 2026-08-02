@@ -124,6 +124,8 @@ class UploadController
                 echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
                 exit;
             }
+            // Immediately release session file lock so PHP does not block concurrent uploads or requests
+            session_write_close();
 
             $limitGb = (float) ($currentUser['storage_limit_gb'] ?? 15);
             $limitBytes = $limitGb * 1024 * 1024 * 1024;
@@ -260,11 +262,8 @@ class UploadController
                             error_log('File record save failed: ' . $e->getMessage());
                         }
 
-                        // Automatically move uploaded file to client's designated Google Drive folder
-                        $providerFileId = $uploadedFile['providerFileId'] ?? '';
-                        if (!empty($providerParentId) && !empty($providerFileId)) {
-                            PortalModel::moveGoogleDriveItem($pdo, $userId, $providerFileId, $providerParentId);
-                        }
+                        // Gateway API already uploaded the file into $providerParentId via filesMeta.
+                        // Skip redundant Google Drive move API call to save 2-3s of network latency per upload.
                     }
 
                     $msg = 'File berhasil diunggah.';
