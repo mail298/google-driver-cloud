@@ -274,24 +274,63 @@ function renderGDriveWidget() {
     const completed = gdriveQueue.filter(i => i.status === 'completed').length;
     const isFinished = (completed === total && total > 0);
 
+    const currentlyUploading = gdriveQueue.find(i => i.status === 'uploading');
+
     if (titleEl) {
         titleEl.textContent = isFinished ? completed + ' upload selesai' : 'Mengupload ' + total + ' item';
     }
     if (statusTextEl) {
-        statusTextEl.textContent = isFinished ? 'Semua pengunggahan selesai' : 'Menyelesaikan upload...';
+        if (isFinished) {
+            statusTextEl.textContent = 'Semua pengunggahan selesai';
+        } else if (currentlyUploading && currentlyUploading.phase === 'processing') {
+            statusTextEl.textContent = '⚡ Memproses & menyinkronkan ke Google Drive...';
+        } else if (currentlyUploading) {
+            statusTextEl.textContent = 'Mengirim berkas ke server (' + (currentlyUploading.progress || 0) + '%)...';
+        } else {
+            statusTextEl.textContent = 'Menyiapkan pengunggahan...';
+        }
     }
 
     let html = '';
     gdriveQueue.forEach((item) => {
         let statusIcon = '';
+        let subTextHtml = '';
+
         if (item.status === 'waiting') {
-            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #64748b;"></div>';
+            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #64748b;" title="Menunggu antrean"></div>';
+            subTextHtml = '<div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Menunggu antrean...</div>';
         } else if (item.status === 'uploading') {
-            statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); border-top: 3px solid #3b82f6; animation: spinRing 0.8s linear infinite;"></div>';
+            const isProcessing = (item.phase === 'processing' || item.progress >= 100);
+            if (isProcessing) {
+                statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(245, 158, 11, 0.2); border-top: 3px solid #f59e0b; animation: spinRing 0.8s linear infinite;" title="Memproses ke Google Drive"></div>';
+                subTextHtml = '<div style="font-size: 11.5px; color: #f59e0b; margin-top: 3px; font-weight: 600; display: flex; align-items: center; gap: 4px;">'
+                    + '<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f59e0b; animation: pulseGlow 1s infinite alternate;"></span>'
+                    + 'Transfer 100% • Memproses & menyimpan ke Google Drive...'
+                    + '</div>';
+            } else {
+                statusIcon = '<div style="display:flex; align-items:center; gap:6px;">'
+                    + '<span style="font-size:12px; font-weight:700; color:#60a5fa;">' + (item.progress || 0) + '%</span>'
+                    + '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); border-top: 3px solid #3b82f6; animation: spinRing 0.8s linear infinite;"></div>'
+                    + '</div>';
+
+                const loadedStr = formatFileSize(item.loadedBytes || 0);
+                const totalStr = formatFileSize(item.totalBytes || item.size || 0);
+                subTextHtml = '<div style="margin-top: 4px;">'
+                    + '<div style="background: rgba(255,255,255,0.1); height: 5px; border-radius: 10px; overflow: hidden; margin-bottom: 3px;">'
+                    + '<div style="background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: ' + (item.progress || 0) + '%; transition: width 0.2s ease;"></div>'
+                    + '</div>'
+                    + '<div style="font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between;">'
+                    + '<span>Mengirim ke server... ' + (item.progress || 0) + '%</span>'
+                    + '<span>' + loadedStr + ' / ' + totalStr + '</span>'
+                    + '</div>'
+                    + '</div>';
+            }
         } else if (item.status === 'completed') {
             statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px rgba(16,185,129,0.3);">✓</div>';
+            subTextHtml = '<div style="font-size: 11.5px; color: #34d399; margin-top: 2px; font-weight: 500;">✓ Berhasil disimpan (' + formatFileSize(item.size || 0) + ')</div>';
         } else if (item.status === 'failed') {
             statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #ef4444; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">✕</div>';
+            subTextHtml = '<div style="font-size: 11.5px; color: #f87171; margin-top: 2px; line-height: 1.3;" title="' + escapeHtml(item.error || 'Gagal mengunggah') + '">' + escapeHtml(item.error || 'Gagal mengunggah') + '</div>';
         }
 
         let fileIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>';
@@ -301,15 +340,13 @@ function renderGDriveWidget() {
 
         const versionHtml = item.versionText ? '<span style="font-size: 11.5px; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; margin-right: 8px; font-weight: 600;">' + escapeHtml(item.versionText) + '</span>' : '';
 
-        html += '<div style="display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: #0f172a;">';
-        html += '<div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">' + fileIcon + '</div>';
+        html += '<div style="display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); background: #0f172a;">';
+        html += '<div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 2px;">' + fileIcon + '</div>';
         html += '<div style="flex: 1; min-width: 0;">';
         html += '<div style="font-size: 13px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
-        if (item.status === 'failed' && item.error) {
-            html += '<div style="font-size: 11.5px; color: #f87171; margin-top: 2px; line-height: 1.3;" title="' + escapeHtml(item.error) + '">' + escapeHtml(item.error) + '</div>';
-        }
+        html += subTextHtml;
         html += '</div>';
-        html += '<div style="display: flex; align-items: center; flex-shrink: 0;">';
+        html += '<div style="display: flex; align-items: center; flex-shrink: 0; margin-top: 2px;">';
         html += versionHtml;
         html += statusIcon;
         html += '</div>';
@@ -394,6 +431,10 @@ async function processGDriveQueueItem() {
     isGDriveUploading = true;
     const item = gdriveQueue[nextIdx];
     item.status = 'uploading';
+    item.progress = 0;
+    item.loadedBytes = 0;
+    item.totalBytes = item.file.size;
+    item.phase = 'uploading';
     renderGDriveWidget();
 
     const formData = new FormData();
@@ -415,7 +456,14 @@ async function processGDriveQueueItem() {
 
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
+            item.loadedBytes = e.loaded;
+            item.totalBytes = e.total;
             item.progress = Math.round((e.loaded / e.total) * 100);
+            if (e.loaded >= e.total) {
+                item.phase = 'processing';
+            } else {
+                item.phase = 'uploading';
+            }
             renderGDriveWidget();
         }
     };
