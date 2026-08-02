@@ -191,6 +191,13 @@ class UploadController
 
         $receivedChunks = glob($tempDir . '/chunk_*');
         if (count($receivedChunks) < $totalChunks) {
+            if ($chunkIndex === $totalChunks - 1) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Potongan berkas tidak lengkap (hanya menerima ' . count($receivedChunks) . ' dari ' . $totalChunks . ' potongan).'
+                ]);
+                exit;
+            }
             echo json_encode([
                 'success' => true,
                 'chunkIndex' => $chunkIndex,
@@ -401,6 +408,7 @@ class UploadController
 
                 echo json_encode([
                     'success' => true,
+                    'completed' => true,
                     'isDuplicate' => $isDuplicateDetected,
                     'replaced' => $replaced,
                     'message' => $msg,

@@ -490,7 +490,7 @@ async function uploadItemInChunks(item) {
             return;
         }
 
-        if (chunkResult.completed || i === totalChunks - 1) {
+        if (chunkResult.completed) {
             item.status = 'completed';
             item.progress = 100;
             item.loadedBytes = totalSize;
