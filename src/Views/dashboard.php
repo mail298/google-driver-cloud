@@ -715,13 +715,26 @@
 
             .app-header {
                 width: 100% !important;
-                padding: 14px 16px !important;
+                padding: 12px 14px !important;
                 box-sizing: border-box !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+
+            .search-container {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .user-area {
+                width: 100% !important;
+                justify-content: space-between !important;
             }
 
             .view-area {
                 width: 100% !important;
-                padding: 14px 16px !important;
+                padding: 12px 14px !important;
                 box-sizing: border-box !important;
             }
 
@@ -729,17 +742,84 @@
                 display: none !important;
             }
 
-            .items-grid {
+            .items-grid,
+            .items-grid-modern {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px !important;
+                gap: 10px !important;
                 width: 100% !important;
                 box-sizing: border-box !important;
             }
 
-            .item-card {
+            .item-card,
+            .item-card-modern {
                 width: 100% !important;
                 box-sizing: border-box !important;
+                padding: 10px !important;
+                border-radius: 14px !important;
+            }
+
+            /* Compact Folder Cards on Mobile */
+            .item-card-folder .card-thumb-box {
+                display: none !important;
+            }
+
+            .item-card-folder {
+                justify-content: center !important;
+            }
+
+            .item-card-folder .card-header-modern {
+                margin-bottom: 4px !important;
+            }
+
+            .tab-buttons {
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+
+            .btn-tab {
+                width: 100% !important;
+                justify-content: center !important;
+                padding: 10px 12px !important;
+                font-size: 12.5px !important;
+            }
+
+            .view-mode-bar {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .view-mode-bar > div:last-child {
+                justify-content: space-between !important;
+                width: 100% !important;
+            }
+
+            .breadcrumbs {
+                flex-wrap: wrap !important;
+                font-size: 13px !important;
+            }
+
+            #bulk-action-bar {
+                bottom: 12px !important;
+                left: 12px !important;
+                right: 12px !important;
+                padding: 10px 12px !important;
+                gap: 6px !important;
+                border-radius: 14px !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+            }
+
+            #bulk-action-bar span {
+                font-size: 12px !important;
+            }
+
+            #bulk-action-bar button {
+                padding: 6px 10px !important;
+                font-size: 11.5px !important;
             }
         }
 
