@@ -773,17 +773,19 @@
                 min-width: 0 !important;
             }
 
-            /* Compact Folder Cards on Mobile */
-            .item-card-folder .card-thumb-box {
-                display: none !important;
-            }
-
-            .item-card-folder {
+            /* Full Equal Height Folder Cards on Mobile */
+            .card-thumb-box {
+                aspect-ratio: 4/3 !important;
+                width: 100% !important;
+                display: flex !important;
+                align-items: center !important;
                 justify-content: center !important;
+                margin-bottom: 8px !important;
+                border-radius: 10px !important;
             }
 
             .item-card-folder .card-header-modern {
-                margin-bottom: 4px !important;
+                margin-bottom: 8px !important;
             }
 
             /* Mobile Table List View Optimization */
