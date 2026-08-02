@@ -244,8 +244,8 @@ function startGDriveUpload(files, options) {
     const body = document.getElementById('gdrive-widget-body');
     if (body) body.style.display = 'block';
 
-    gdriveQueue = files.map((file, idx) => ({
-        id: idx,
+    const newItems = Array.from(files).map((file, idx) => ({
+        id: gdriveQueue.length + idx,
         file: file,
         name: file.name,
         size: file.size,
@@ -255,9 +255,12 @@ function startGDriveUpload(files, options) {
         versionText: options.versionText || (options.isReplace ? 'Versi 2' : '')
     }));
 
+    // Append new items to existing queue instead of replacing
+    gdriveQueue = gdriveQueue.concat(newItems);
+
     renderGDriveWidget();
     if (!isGDriveUploading) {
-        processGDriveQueueItem(0);
+        processGDriveQueueItem();
     }
 }
 
@@ -355,18 +358,24 @@ function getUploadEndpoint(fileSizeBytes) {
     return UPLOAD_DIRECT_URL + '/upload?upload_token=' + encodeURIComponent(token);
 }
 
-function processGDriveQueueItem(idx) {
-    if (idx >= gdriveQueue.length) {
+function processGDriveQueueItem() {
+    const nextIdx = gdriveQueue.findIndex(item => item.status === 'waiting');
+
+    if (nextIdx === -1) {
         isGDriveUploading = false;
         renderGDriveWidget();
-        setTimeout(function () {
-            window.location.reload();
-        }, 1200);
+        const hasCompleted = gdriveQueue.some(i => i.status === 'completed');
+        const isStillUploading = gdriveQueue.some(i => i.status === 'uploading');
+        if (!isStillUploading && hasCompleted) {
+            setTimeout(function () {
+                window.location.reload();
+            }, 1200);
+        }
         return;
     }
 
     isGDriveUploading = true;
-    const item = gdriveQueue[idx];
+    const item = gdriveQueue[nextIdx];
     item.status = 'uploading';
     renderGDriveWidget();
 
@@ -380,6 +389,8 @@ function processGDriveQueueItem(idx) {
     }
 
     const xhr = new XMLHttpRequest();
+    item.xhr = xhr;
+
     xhr.open('POST', getUploadEndpoint(item.file.size), true);
 
     xhr.upload.onprogress = function (e) {
@@ -395,7 +406,6 @@ function processGDriveQueueItem(idx) {
                 const response = JSON.parse(xhr.responseText);
                 if (response.success) {
                     item.status = 'completed';
-                    // Update in-memory file names list dynamically
                     if (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) {
                         if (!EXISTING_FILE_NAMES.includes(item.file.name)) {
                             EXISTING_FILE_NAMES.push(item.file.name);
@@ -417,13 +427,13 @@ function processGDriveQueueItem(idx) {
             item.status = 'failed';
         }
         renderGDriveWidget();
-        processGDriveQueueItem(idx + 1);
+        processGDriveQueueItem();
     };
 
     xhr.onerror = function () {
         item.status = 'failed';
         renderGDriveWidget();
-        processGDriveQueueItem(idx + 1);
+        processGDriveQueueItem();
     };
 
     xhr.send(formData);
@@ -453,6 +463,11 @@ function closeUploadWidget() {
 }
 
 function cancelUploadWidgetQueue() {
+    gdriveQueue.forEach(item => {
+        if (item.status === 'uploading' && item.xhr) {
+            try { item.xhr.abort(); } catch (e) {}
+        }
+    });
     gdriveQueue = [];
     isGDriveUploading = false;
     closeUploadWidget();
