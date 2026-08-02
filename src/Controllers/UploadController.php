@@ -207,7 +207,8 @@ class UploadController
             curl_setopt($ch, CURLOPT_TIMEOUT, 0); // No timeout for large video uploads
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $apiKey
+                'Authorization: Bearer ' . $apiKey,
+                'Expect:'
             ]);
 
             $response = curl_exec($ch);
