@@ -1202,6 +1202,7 @@ function loadMoveTargetFolders(disabledIds) {
 
             const folders = data.folders || [];
             const disabledSet = new Set(disabledIds || []);
+            const activeFolderId = (typeof CURRENT_FOLDER_ID !== 'undefined') ? CURRENT_FOLDER_ID : null;
 
             selectEl.innerHTML = '';
             const rootOpt = document.createElement('option');
@@ -1210,6 +1211,9 @@ function loadMoveTargetFolders(disabledIds) {
             selectEl.appendChild(rootOpt);
 
             folders.forEach(f => {
+                if (activeFolderId && (f.id === activeFolderId || (f.provider_folder_id && f.provider_folder_id === activeFolderId))) {
+                    return;
+                }
                 const opt = document.createElement('option');
                 opt.value = f.id;
                 opt.textContent = '\u{1F4C1} ' + f.name;
