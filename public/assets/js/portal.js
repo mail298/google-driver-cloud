@@ -283,9 +283,9 @@ function renderGDriveWidget() {
         if (isFinished) {
             statusTextEl.textContent = 'Semua pengunggahan selesai';
         } else if (currentlyUploading && currentlyUploading.phase === 'processing') {
-            statusTextEl.textContent = '⚡ Memproses & menyinkronkan ke Google Drive...';
+            statusTextEl.textContent = 'Memproses berkas...';
         } else if (currentlyUploading) {
-            statusTextEl.textContent = 'Mengirim berkas ke server (' + (currentlyUploading.progress || 0) + '%)...';
+            statusTextEl.textContent = 'Mengunggah berkas (' + (currentlyUploading.progress || 0) + '%)...';
         } else {
             statusTextEl.textContent = 'Menyiapkan pengunggahan...';
         }
@@ -302,10 +302,9 @@ function renderGDriveWidget() {
         } else if (item.status === 'uploading') {
             const isProcessing = (item.phase === 'processing' || item.progress >= 100);
             if (isProcessing) {
-                statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(245, 158, 11, 0.2); border-top: 3px solid #f59e0b; animation: spinRing 0.8s linear infinite;" title="Memproses ke Google Drive"></div>';
-                subTextHtml = '<div style="font-size: 11.5px; color: #f59e0b; margin-top: 3px; font-weight: 600; display: flex; align-items: center; gap: 4px;">'
-                    + '<span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f59e0b; animation: pulseGlow 1s infinite alternate;"></span>'
-                    + 'Transfer 100% • Memproses & menyimpan ke Google Drive...'
+                statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(59, 130, 246, 0.2); border-top: 3px solid #3b82f6; animation: spinRing 0.8s linear infinite;" title="Memproses berkas"></div>';
+                subTextHtml = '<div style="font-size: 11.5px; color: #60a5fa; margin-top: 3px; font-weight: 600; display: flex; align-items: center; gap: 4px;">'
+                    + 'Memproses berkas... 100%'
                     + '</div>';
             } else {
                 statusIcon = '<div style="display:flex; align-items:center; gap:6px;">'
@@ -320,14 +319,14 @@ function renderGDriveWidget() {
                     + '<div style="background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: ' + (item.progress || 0) + '%; transition: width 0.2s ease;"></div>'
                     + '</div>'
                     + '<div style="font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between;">'
-                    + '<span>Mengirim ke server... ' + (item.progress || 0) + '%</span>'
+                    + '<span>Mengunggah... ' + (item.progress || 0) + '%</span>'
                     + '<span>' + loadedStr + ' / ' + totalStr + '</span>'
                     + '</div>'
                     + '</div>';
             }
         } else if (item.status === 'completed') {
             statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px rgba(16,185,129,0.3);">✓</div>';
-            subTextHtml = '<div style="font-size: 11.5px; color: #34d399; margin-top: 2px; font-weight: 500;">✓ Berhasil disimpan (' + formatFileSize(item.size || 0) + ')</div>';
+            subTextHtml = '<div style="font-size: 11.5px; color: #34d399; margin-top: 2px; font-weight: 500;">✓ Berhasil diunggah (' + formatFileSize(item.size || 0) + ')</div>';
         } else if (item.status === 'failed') {
             statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #ef4444; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">✕</div>';
             subTextHtml = '<div style="font-size: 11.5px; color: #f87171; margin-top: 2px; line-height: 1.3;" title="' + escapeHtml(item.error || 'Gagal mengunggah') + '">' + escapeHtml(item.error || 'Gagal mengunggah') + '</div>';
