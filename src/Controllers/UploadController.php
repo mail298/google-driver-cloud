@@ -60,9 +60,10 @@ class UploadController
             if (empty($_FILES) && empty($_POST) && $contentLength > 0) {
                 $maxPost = ini_get('post_max_size');
                 $sizeMb = round($contentLength / (1024 * 1024), 1);
+                http_response_code(200);
                 echo json_encode([
                     'success' => false,
-                    'message' => "Ukuran unggahan ({$sizeMb} MB) melebihi batas post_max_size PHP ({$maxPost}). Silakan jalankan PHP server dengan batas 10G."
+                    'message' => "Ukuran berkas ({$sizeMb} MB) melebihi batas post_max_size PHP ({$maxPost}). Silakan atur post_max_size=10G di php.ini atau jalankan server dengan flag -d post_max_size=10G."
                 ]);
                 exit;
             }

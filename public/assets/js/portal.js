@@ -450,7 +450,11 @@ async function processGDriveQueueItem() {
                 const errResp = JSON.parse(xhr.responseText);
                 item.error = errResp.message || ('Server error (' + xhr.status + ')');
             } catch (e) {
-                item.error = 'Server error HTTP (' + xhr.status + ')';
+                if (xhr.status === 413) {
+                    item.error = 'Ukuran berkas melebihi batas server (HTTP 413 Payload Too Large). Tambahkan flag -d upload_max_filesize=10G -d post_max_size=10G pada server PHP.';
+                } else {
+                    item.error = 'Server error HTTP (' + xhr.status + ')';
+                }
             }
         }
         renderGDriveWidget();
