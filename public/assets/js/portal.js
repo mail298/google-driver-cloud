@@ -408,7 +408,7 @@ async function getUploadEndpointAsync(fileSizeBytes) {
 }
 
 async function uploadItemInChunks(item) {
-    const chunkSize = 15 * 1024 * 1024; // 15MB chunks (Cloudflare safe)
+    const chunkSize = 45 * 1024 * 1024; // 45MB chunks (Cloudflare 100MB safe & 3x faster upload speed)
     const totalSize = item.file.size;
     const totalChunks = Math.ceil(totalSize / chunkSize);
     const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
@@ -536,8 +536,8 @@ async function processGDriveQueueItem() {
     item.phase = 'uploading';
     renderGDriveWidget();
 
-    // Route files larger than 15MB through Chunked Upload to bypass Cloudflare 100MB request limit
-    if (item.file.size > 15 * 1024 * 1024) {
+    // Route files larger than 45MB through Chunked Upload to bypass Cloudflare 100MB request limit
+    if (item.file.size > 45 * 1024 * 1024) {
         uploadItemInChunks(item);
         return;
     }
