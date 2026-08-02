@@ -8,7 +8,7 @@ class UploadController
         return sys_get_temp_dir() . '/portal_upload_tokens';
     }
 
-    public static function consumeUploadToken($token)
+    public static function consumeUploadToken($token, $delete = true)
     {
         if (!is_string($token) || strlen($token) < 32) {
             return null;
@@ -18,12 +18,16 @@ class UploadController
             return null;
         }
         $data = json_decode((string) file_get_contents($path), true);
-        @unlink($path);
         if (!is_array($data) || empty($data['user_id']) || empty($data['exp'])) {
+            @unlink($path);
             return null;
         }
         if ((int) $data['exp'] < time()) {
+            @unlink($path);
             return null;
+        }
+        if ($delete) {
+            @unlink($path);
         }
         return $data;
     }
@@ -135,17 +139,19 @@ class UploadController
         $handoffToken = $_POST['upload_token'] ?? $_GET['upload_token'] ?? null;
         if ($handoffToken) {
             require_once dirname(__DIR__) . '/Models/UserModel.php';
-            $tokenData = self::consumeUploadToken($handoffToken);
-            if (!$tokenData || !($tokenUser = UserModel::getUserById($tokenData['user_id']))) {
-                echo json_encode(['success' => false, 'message' => 'Token unggahan tidak valid atau kedaluwarsa.']);
-                exit;
+            $tokenData = self::consumeUploadToken($handoffToken, false);
+            if ($tokenData && ($tokenUser = UserModel::getUserById($tokenData['user_id']))) {
+                AuthController::startSession();
+                $_SESSION['user'] = $tokenUser;
+                $_SESSION['user_role'] = 'client';
+                $_SESSION['username'] = $tokenUser['username'];
             }
-            AuthController::startSession();
-            $_SESSION['user'] = $tokenUser;
-            $_SESSION['user_role'] = 'client';
-            $_SESSION['username'] = $tokenUser['username'];
-        } else {
-            AuthController::checkClient();
+        }
+
+        AuthController::startSession();
+        if (empty($_SESSION['user'])) {
+            echo json_encode(['success' => false, 'message' => 'Sesi tidak valid atau token kedaluwarsa.']);
+            exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
