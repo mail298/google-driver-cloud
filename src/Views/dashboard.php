@@ -848,21 +848,43 @@
 
             #bulk-action-bar {
                 bottom: 12px !important;
-                left: 12px !important;
-                right: 12px !important;
-                padding: 10px 12px !important;
+                left: 50% !important;
+                right: auto !important;
+                transform: translateX(-50%) translateY(100px) !important;
+                width: calc(100% - 24px) !important;
+                max-width: 440px !important;
+                padding: 8px 10px !important;
                 gap: 6px !important;
                 border-radius: 14px !important;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8) !important;
+                box-sizing: border-box !important;
+                justify-content: center !important;
+                flex-wrap: nowrap !important;
             }
 
-            #bulk-action-bar span {
-                font-size: 12px !important;
+            #bulk-action-bar.active {
+                transform: translateX(-50%) translateY(0) !important;
             }
 
-            #bulk-action-bar button {
-                padding: 6px 10px !important;
-                font-size: 11.5px !important;
+            #bulk-action-bar .bulk-info {
+                display: none !important;
+            }
+
+            #bulk-action-bar button,
+            #bulk-action-bar .btn-bulk-move,
+            #bulk-action-bar .btn-bulk-delete,
+            #bulk-action-bar .btn-bulk-cancel {
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                gap: 4px !important;
+                white-space: nowrap !important;
+                flex: 1 !important;
+                justify-content: center !important;
+            }
+
+            #bulk-action-bar button svg {
+                width: 14px !important;
+                height: 14px !important;
             }
         }
 
