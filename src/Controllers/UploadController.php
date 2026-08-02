@@ -35,6 +35,20 @@ class UploadController
         @ini_set('max_execution_time', '0');
         @ini_set('max_input_time', '-1');
 
+        // Allow cross-origin direct uploads (e.g. portal on clouds.wn-cdn.net -> upload.wn-cdn.net)
+        $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        if ($origin) {
+            header('Access-Control-Allow-Origin: ' . $origin);
+            header('Access-Control-Allow-Credentials: true');
+        }
+        header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Accept, X-Requested-With');
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+            exit;
+        }
+
         $handoffToken = $_POST['upload_token'] ?? $_GET['upload_token'] ?? null;
         if ($handoffToken) {
             require_once dirname(__DIR__) . '/Models/UserModel.php';
