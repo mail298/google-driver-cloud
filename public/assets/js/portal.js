@@ -282,8 +282,8 @@ function renderGDriveWidget() {
     if (statusTextEl) {
         if (isFinished) {
             statusTextEl.textContent = 'Semua pengunggahan selesai';
-        } else if (currentlyUploading && currentlyUploading.phase === 'processing') {
-            statusTextEl.textContent = 'Memproses berkas...';
+        } else if (currentlyUploading && currentlyUploading.progress >= 100) {
+            statusTextEl.textContent = 'Pengunggahan selesai (100%)...';
         } else if (currentlyUploading) {
             statusTextEl.textContent = 'Mengunggah berkas (' + (currentlyUploading.progress || 0) + '%)...';
         } else {
@@ -300,12 +300,9 @@ function renderGDriveWidget() {
             statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #64748b;" title="Menunggu antrean"></div>';
             subTextHtml = '<div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Menunggu antrean...</div>';
         } else if (item.status === 'uploading') {
-            const isProcessing = (item.phase === 'processing' || item.progress >= 100);
-            if (isProcessing) {
-                statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(59, 130, 246, 0.2); border-top: 3px solid #3b82f6; animation: spinRing 0.8s linear infinite;" title="Memproses berkas"></div>';
-                subTextHtml = '<div style="font-size: 11.5px; color: #60a5fa; margin-top: 3px; font-weight: 600; display: flex; align-items: center; gap: 4px;">'
-                    + 'Memproses berkas... 100%'
-                    + '</div>';
+            if (item.progress >= 100) {
+                statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px rgba(16,185,129,0.3);">✓</div>';
+                subTextHtml = '<div style="font-size: 11.5px; color: #34d399; margin-top: 2px; font-weight: 500;">✓ Berhasil diunggah (100%)</div>';
             } else {
                 statusIcon = '<div style="display:flex; align-items:center; gap:6px;">'
                     + '<span style="font-size:12px; font-weight:700; color:#60a5fa;">' + (item.progress || 0) + '%</span>'
