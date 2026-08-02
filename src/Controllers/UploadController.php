@@ -169,8 +169,16 @@ class UploadController
                 $providerParentId = $clientRootFolderId;
             }
 
-            // 1. Prepare filesMeta
-            $mimeType = !empty($file['type']) ? $file['type'] : 'application/octet-stream';
+            // 1. Prepare filesMeta & auto-detect APK / binary MIME types
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $mimeType = !empty($file['type']) ? $file['type'] : '';
+            if ($ext === 'apk' && (empty($mimeType) || $mimeType === 'application/octet-stream')) {
+                $mimeType = 'application/vnd.android.package-archive';
+            }
+            if (empty($mimeType)) {
+                $mimeType = 'application/octet-stream';
+            }
+
             $filesMeta = [
                 [
                     'fieldName' => 'file-0',
