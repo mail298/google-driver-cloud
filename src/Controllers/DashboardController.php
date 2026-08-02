@@ -131,7 +131,8 @@ class DashboardController {
         $storagePercent = min(100, round(($totalUsedBytes / $limitBytes) * 100, 2));
 
         $uploadDirectUrl = (string) Config::get('UPLOAD_DIRECT_URL', '');
-        $uploadDirectThresholdBytes = (int) Config::get('UPLOAD_DIRECT_THRESHOLD_BYTES', 90 * 1024 * 1024);
+        // Lower threshold to 10MB so files above 10MB bypass PHP and go directly to CDN
+        $uploadDirectThresholdBytes = (int) Config::get('UPLOAD_DIRECT_THRESHOLD_BYTES', 10 * 1024 * 1024);
 
         require_once dirname(__DIR__) . '/Views/dashboard.php';
     }

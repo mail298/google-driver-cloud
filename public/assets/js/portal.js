@@ -318,47 +318,61 @@ function renderGDriveWidget() {
 
 let cachedUploadToken = null;
 let cachedUploadTokenAt = 0;
+let cachedUploadTokenPromise = null;
 
-function getUploadTokenSync() {
+async function getUploadToken() {
     const now = Date.now();
     if (cachedUploadToken && now - cachedUploadTokenAt < 8 * 60 * 1000) {
         return cachedUploadToken;
     }
-    try {
-        const req = new XMLHttpRequest();
-        req.open('POST', '/upload-token', false);
-        req.setRequestHeader('Content-Type', 'application/json');
-        req.send('{}');
-        if (req.status === 200) {
-            const resp = JSON.parse(req.responseText);
+    // Coalesce concurrent token requests into one
+    if (cachedUploadTokenPromise) {
+        return cachedUploadTokenPromise;
+    }
+    cachedUploadTokenPromise = fetch('/upload-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}'
+    })
+        .then(r => r.json())
+        .then(resp => {
             if (resp.success && resp.token) {
                 cachedUploadToken = resp.token;
-                cachedUploadTokenAt = now;
+                cachedUploadTokenAt = Date.now();
                 return resp.token;
             }
-        }
-    } catch (e) { }
-    return null;
+            return null;
+        })
+        .catch(() => null)
+        .finally(() => { cachedUploadTokenPromise = null; });
+    return cachedUploadTokenPromise;
 }
 
-function getUploadEndpoint(fileSizeBytes) {
+// Pre-warm token when page loads so first upload is instant
+(function prewarmUploadToken() {
+    if (typeof UPLOAD_DIRECT_URL !== 'undefined' && UPLOAD_DIRECT_URL) {
+        getUploadToken().catch(() => { });
+    }
+})();
+
+async function getUploadEndpointAsync(fileSizeBytes) {
     if (typeof UPLOAD_DIRECT_URL === 'undefined' || !UPLOAD_DIRECT_URL) {
         return '/upload';
     }
     const threshold = (typeof UPLOAD_DIRECT_THRESHOLD_BYTES !== 'undefined' && UPLOAD_DIRECT_THRESHOLD_BYTES > 0)
         ? UPLOAD_DIRECT_THRESHOLD_BYTES
-        : 90 * 1024 * 1024;
+        : 10 * 1024 * 1024;
     if (fileSizeBytes < threshold) {
         return '/upload';
     }
-    const token = getUploadTokenSync();
+    const token = await getUploadToken();
     if (!token) {
         return '/upload';
     }
     return UPLOAD_DIRECT_URL + '/upload?upload_token=' + encodeURIComponent(token);
 }
 
-function processGDriveQueueItem() {
+async function processGDriveQueueItem() {
     const nextIdx = gdriveQueue.findIndex(item => item.status === 'waiting');
 
     if (nextIdx === -1) {
@@ -388,10 +402,13 @@ function processGDriveQueueItem() {
         formData.append('replace', '1');
     }
 
+    // Resolve endpoint asynchronously (gets token via async fetch, not sync XHR)
+    const endpoint = await getUploadEndpointAsync(item.file.size);
+
     const xhr = new XMLHttpRequest();
     item.xhr = xhr;
 
-    xhr.open('POST', getUploadEndpoint(item.file.size), true);
+    xhr.open('POST', endpoint, true);
 
     xhr.upload.onprogress = function (e) {
         if (e.lengthComputable) {
@@ -465,7 +482,7 @@ function closeUploadWidget() {
 function cancelUploadWidgetQueue() {
     gdriveQueue.forEach(item => {
         if (item.status === 'uploading' && item.xhr) {
-            try { item.xhr.abort(); } catch (e) {}
+            try { item.xhr.abort(); } catch (e) { }
         }
     });
     gdriveQueue = [];
@@ -1372,9 +1389,9 @@ let draggedBatchItems = [];
 
 function initDragAndDropMove() {
     const draggables = document.querySelectorAll('.item-card-modern[draggable="true"], .portal-table tbody tr[draggable="true"]');
-    
+
     draggables.forEach(el => {
-        el.addEventListener('dragstart', function(e) {
+        el.addEventListener('dragstart', function (e) {
             if (!e.dataTransfer) return;
 
             const type = el.getAttribute('data-type');
@@ -1395,12 +1412,12 @@ function initDragAndDropMove() {
 
             e.dataTransfer.effectAllowed = 'move';
             e.dataTransfer.setData('text/plain', JSON.stringify(draggedBatchItems));
-            
+
             el.classList.add('is-dragging');
             e.stopPropagation();
         });
 
-        el.addEventListener('dragend', function(e) {
+        el.addEventListener('dragend', function (e) {
             el.classList.remove('is-dragging');
             document.querySelectorAll('.drop-target-hover').forEach(t => t.classList.remove('drop-target-hover'));
             draggedMoveItem = null;
@@ -1410,7 +1427,7 @@ function initDragAndDropMove() {
 
     const dropTargets = document.querySelectorAll('.drop-target-folder, .drop-target-crumb');
     dropTargets.forEach(target => {
-        target.addEventListener('dragover', function(e) {
+        target.addEventListener('dragover', function (e) {
             if (!draggedMoveItem && draggedBatchItems.length === 0) return;
 
             const targetFolderId = target.getAttribute('data-id') !== null ? target.getAttribute('data-id') : target.getAttribute('data-folder-id');
@@ -1429,11 +1446,11 @@ function initDragAndDropMove() {
             target.classList.add('drop-target-hover');
         });
 
-        target.addEventListener('dragleave', function(e) {
+        target.addEventListener('dragleave', function (e) {
             target.classList.remove('drop-target-hover');
         });
 
-        target.addEventListener('drop', function(e) {
+        target.addEventListener('drop', function (e) {
             target.classList.remove('drop-target-hover');
             if (!draggedMoveItem && draggedBatchItems.length === 0) return;
 
@@ -1464,17 +1481,17 @@ function executeDragMove(items, targetFolderId) {
             method: 'POST',
             body: formData
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
-            }
-        })
-        .catch(err => {
-            alert('Gagal terhubung ke server.');
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
+                }
+            })
+            .catch(err => {
+                alert('Gagal terhubung ke server.');
+            });
     } else {
         const formData = new FormData();
         formData.append('items', JSON.stringify(items));
@@ -1484,17 +1501,17 @@ function executeDragMove(items, targetFolderId) {
             method: 'POST',
             body: formData
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                window.location.reload();
-            } else {
-                alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
-            }
-        })
-        .catch(err => {
-            alert('Gagal terhubung ke server.');
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
+                }
+            })
+            .catch(err => {
+                alert('Gagal terhubung ke server.');
+            });
     }
 }
 
@@ -2001,12 +2018,12 @@ function checkAutoOnboardingPopup() {
 
 // Auto-trigger when page completes loading
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         checkAutoOnboardingPopup();
         initDragAndDropMove();
     });
 } else {
-    setTimeout(function() {
+    setTimeout(function () {
         checkAutoOnboardingPopup();
         initDragAndDropMove();
     }, 300);

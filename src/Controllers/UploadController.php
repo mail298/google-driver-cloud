@@ -56,10 +56,10 @@ class UploadController
             header('Content-Type: application/json');
 
             // Detect post_max_size overflow (when $_POST and $_FILES are empty but Content-Length > 0)
-            $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+            $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
             if (empty($_FILES) && empty($_POST) && $contentLength > 0) {
                 $maxPost = ini_get('post_max_size');
-                $sizeMb  = round($contentLength / (1024 * 1024), 1);
+                $sizeMb = round($contentLength / (1024 * 1024), 1);
                 echo json_encode([
                     'success' => false,
                     'message' => "Ukuran unggahan ({$sizeMb} MB) melebihi batas post_max_size PHP ({$maxPost}). Silakan jalankan PHP server dengan batas 10G."
@@ -264,7 +264,7 @@ class UploadController
                                 $uploadedFile['providerFileId'] ?? '',
                                 $uploadedFile['name'] ?? $file['name'],
                                 $uploadedFile['mimeType'] ?? $mimeType,
-                                (int)($uploadedFile['sizeBytes'] ?? $file['size']),
+                                (int) ($uploadedFile['sizeBytes'] ?? $file['size']),
                             ]);
                         } catch (Exception $e) {
                             error_log('File record save failed: ' . $e->getMessage());
