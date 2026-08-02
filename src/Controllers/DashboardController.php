@@ -136,6 +136,41 @@ class DashboardController {
         require_once dirname(__DIR__) . '/Views/dashboard.php';
     }
 
+    public static function listFoldersJson() {
+        AuthController::checkClient();
+
+        $pdo = Config::getPDO();
+        $currentUser = $_SESSION['user'] ?? null;
+        $userId = $currentUser['id'] ?? null;
+
+        if (!$userId) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'folders' => []]);
+            exit;
+        }
+
+        $folders = PortalModel::getAllFolders($pdo, $userId);
+        $clientRootId = (!empty($currentUser) && !empty($currentUser['root_folder_id']))
+            ? PortalModel::extractFolderId($currentUser['root_folder_id'])
+            : '';
+
+        $result = [];
+        foreach ($folders as $f) {
+            if ($f['name'] === 'Folder Klien') continue;
+            if ($clientRootId !== '' && ($f['id'] === $clientRootId || ($f['provider_folder_id'] ?? '') === $clientRootId)) continue;
+            $result[] = [
+                'id' => $f['id'],
+                'name' => $f['name'],
+                'parent_id' => $f['parent_id'],
+                'provider_folder_id' => $f['provider_folder_id'] ?? null,
+            ];
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'folders' => $result]);
+        exit;
+    }
+
     public static function createFolder() {
         AuthController::checkClient();
 

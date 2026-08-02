@@ -1192,6 +1192,40 @@ function cmActionDelete() {
 let currentMoveItem = { type: '', id: '', name: '' };
 let isBatchMoveMode = false;
 
+function loadMoveTargetFolders(disabledIds) {
+    return fetch('/folders')
+        .then(res => res.json())
+        .then(data => {
+            const selectEl = document.getElementById('move-target-folder');
+            if (!selectEl) return [];
+            if (!data.success) return [];
+
+            const folders = data.folders || [];
+            const disabledSet = new Set(disabledIds || []);
+
+            selectEl.innerHTML = '';
+            const rootOpt = document.createElement('option');
+            rootOpt.value = '';
+            rootOpt.textContent = '\u{1F4C1} Root / Utama';
+            selectEl.appendChild(rootOpt);
+
+            folders.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.id;
+                opt.textContent = '\u{1F4C1} ' + f.name;
+                if (disabledSet.has(f.id)) {
+                    opt.disabled = true;
+                }
+                selectEl.appendChild(opt);
+            });
+            selectEl.value = '';
+            return folders;
+        })
+        .catch(() => {
+            return [];
+        });
+}
+
 function openMoveModal(type, id, name) {
     isBatchMoveMode = false;
     currentMoveItem = { type, id, name };
@@ -1200,18 +1234,11 @@ function openMoveModal(type, id, name) {
     const selectEl = document.getElementById('move-target-folder');
 
     if (nameEl) nameEl.innerText = name;
-    if (selectEl) {
-        Array.from(selectEl.options).forEach(opt => {
-            if (type === 'folder' && opt.value === id) {
-                opt.style.display = 'none';
-                opt.disabled = true;
-            } else {
-                opt.style.display = '';
-                opt.disabled = false;
-            }
-        });
-        selectEl.value = '';
-    }
+
+    const disabledIds = (type === 'folder') ? [id] : [];
+    loadMoveTargetFolders(disabledIds).then(() => {
+        if (selectEl) selectEl.value = '';
+    });
     if (modal) modal.classList.add('active');
 }
 
@@ -1230,19 +1257,9 @@ function openBatchMoveModal() {
     if (nameEl) nameEl.innerText = selected.length + ' item terpilih';
 
     const selectedFolderIds = selected.filter(i => i.type === 'folder').map(i => i.id);
-
-    if (selectEl) {
-        Array.from(selectEl.options).forEach(opt => {
-            if (selectedFolderIds.includes(opt.value)) {
-                opt.style.display = 'none';
-                opt.disabled = true;
-            } else {
-                opt.style.display = '';
-                opt.disabled = false;
-            }
-        });
-        selectEl.value = '';
-    }
+    loadMoveTargetFolders(selectedFolderIds).then(() => {
+        if (selectEl) selectEl.value = '';
+    });
     if (modal) modal.classList.add('active');
 }
 

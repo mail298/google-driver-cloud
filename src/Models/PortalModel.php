@@ -200,6 +200,15 @@ class PortalModel
         return $stmt->fetchAll();
     }
 
+    public static function encryptText($plaintext, $secret)
+    {
+        $key = hash('sha256', $secret, true);
+        $iv = openssl_random_pseudo_bytes(12);
+        $tag = '';
+        $encrypted = openssl_encrypt($plaintext, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
+        return base64_encode($iv) . ':' . base64_encode($tag) . ':' . base64_encode($encrypted);
+    }
+
     public static function decryptText($payload, $secret)
     {
         $parts = explode(':', $payload);
@@ -273,7 +282,13 @@ class PortalModel
         $accessToken = !empty($acc['access_token_encrypted']) ? self::decryptText($acc['access_token_encrypted'], $encryptionKey) : null;
         $refreshToken = !empty($acc['refresh_token_encrypted']) ? self::decryptText($acc['refresh_token_encrypted'], $encryptionKey) : null;
 
-        if ($accessToken) {
+        $tokenExpired = true;
+        if (!empty($acc['token_expires_at'])) {
+            $expiresAt = strtotime($acc['token_expires_at']);
+            $tokenExpired = $expiresAt === false || $expiresAt <= (time() + 120);
+        }
+
+        if ($accessToken && !$tokenExpired) {
             $result = ['token' => $accessToken, 'connected_account_id' => $acc['id']];
             self::cacheStore($cacheKey, $result, 1500);
             return $result;
@@ -295,6 +310,10 @@ class PortalModel
             $data = json_decode($res, true);
             if (isset($data['access_token'])) {
                 $result = ['token' => $data['access_token'], 'connected_account_id' => $acc['id']];
+                $newExpiresAt = isset($data['expires_in']) ? date('Y-m-d H:i:s', time() + (int)$data['expires_in']) : null;
+                $encryptedNew = self::encryptText($data['access_token'], $encryptionKey);
+                $stmt = $pdo->prepare("UPDATE connected_accounts SET access_token_encrypted = ?, token_expires_at = ?, updated_at = NOW() WHERE id = ?");
+                $stmt->execute([$encryptedNew, $newExpiresAt, $acc['id']]);
                 self::cacheStore($cacheKey, $result, 1500);
                 return $result;
             }
