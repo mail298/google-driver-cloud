@@ -1188,10 +1188,12 @@ function cmActionDelete() {
     }
 }
 
-// Move Item Modal Logic
+// Move Item Modal Logic (Single & Batch)
 let currentMoveItem = { type: '', id: '', name: '' };
+let isBatchMoveMode = false;
 
 function openMoveModal(type, id, name) {
+    isBatchMoveMode = false;
     currentMoveItem = { type, id, name };
     const modal = document.getElementById('move-modal');
     const nameEl = document.getElementById('move-item-name');
@@ -1201,6 +1203,37 @@ function openMoveModal(type, id, name) {
     if (selectEl) {
         Array.from(selectEl.options).forEach(opt => {
             if (type === 'folder' && opt.value === id) {
+                opt.style.display = 'none';
+                opt.disabled = true;
+            } else {
+                opt.style.display = '';
+                opt.disabled = false;
+            }
+        });
+        selectEl.value = '';
+    }
+    if (modal) modal.classList.add('active');
+}
+
+function openBatchMoveModal() {
+    const selected = getSelectedItems();
+    if (selected.length === 0) {
+        alert('Pilih setidaknya satu berkas atau folder untuk dipindahkan.');
+        return;
+    }
+
+    isBatchMoveMode = true;
+    const modal = document.getElementById('move-modal');
+    const nameEl = document.getElementById('move-item-name');
+    const selectEl = document.getElementById('move-target-folder');
+
+    if (nameEl) nameEl.innerText = selected.length + ' item terpilih';
+
+    const selectedFolderIds = selected.filter(i => i.type === 'folder').map(i => i.id);
+
+    if (selectEl) {
+        Array.from(selectEl.options).forEach(opt => {
+            if (selectedFolderIds.includes(opt.value)) {
                 opt.style.display = 'none';
                 opt.disabled = true;
             } else {
@@ -1236,30 +1269,197 @@ function submitMoveItem() {
     isMoveSubmitting = true;
 
     const targetFolderId = targetFolderSelect.value;
-    const formData = new FormData();
-    formData.append('type', currentMoveItem.type);
-    formData.append('id', currentMoveItem.id);
-    formData.append('targetFolderId', targetFolderId);
 
-    fetch('/move-item', {
-        method: 'POST',
-        body: formData
-    })
+    if (isBatchMoveMode) {
+        const selectedItems = getSelectedItems();
+        if (selectedItems.length === 0) {
+            alert('Tidak ada item yang dipilih.');
+            if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+            isMoveSubmitting = false;
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('items', JSON.stringify(selectedItems));
+        formData.append('targetFolderId', targetFolderId);
+
+        fetch('/batch-move', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
+                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                    isMoveSubmitting = false;
+                }
+            })
+            .catch(err => {
+                alert('Gagal terhubung ke server.');
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                isMoveSubmitting = false;
+            });
+    } else {
+        const formData = new FormData();
+        formData.append('type', currentMoveItem.type);
+        formData.append('id', currentMoveItem.id);
+        formData.append('targetFolderId', targetFolderId);
+
+        fetch('/move-item', {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
+                    if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                    isMoveSubmitting = false;
+                }
+            })
+            .catch(err => {
+                alert('Gagal terhubung ke server.');
+                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                isMoveSubmitting = false;
+            });
+    }
+}
+
+// Drag & Drop Items to Move into Folder Logic
+let draggedMoveItem = null;
+let draggedBatchItems = [];
+
+function initDragAndDropMove() {
+    const draggables = document.querySelectorAll('.item-card-modern[draggable="true"], .portal-table tbody tr[draggable="true"]');
+    
+    draggables.forEach(el => {
+        el.addEventListener('dragstart', function(e) {
+            if (!e.dataTransfer) return;
+
+            const type = el.getAttribute('data-type');
+            const id = el.getAttribute('data-id');
+            const name = el.getAttribute('data-name');
+            if (!type || !id) return;
+
+            draggedMoveItem = { type, id, name };
+
+            const selected = getSelectedItems();
+            const isItemInSelected = selected.some(s => s.id === id);
+
+            if (selected.length > 0 && isItemInSelected) {
+                draggedBatchItems = selected;
+            } else {
+                draggedBatchItems = [draggedMoveItem];
+            }
+
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', JSON.stringify(draggedBatchItems));
+            
+            el.classList.add('is-dragging');
+            e.stopPropagation();
+        });
+
+        el.addEventListener('dragend', function(e) {
+            el.classList.remove('is-dragging');
+            document.querySelectorAll('.drop-target-hover').forEach(t => t.classList.remove('drop-target-hover'));
+            draggedMoveItem = null;
+            draggedBatchItems = [];
+        });
+    });
+
+    const dropTargets = document.querySelectorAll('.drop-target-folder, .drop-target-crumb');
+    dropTargets.forEach(target => {
+        target.addEventListener('dragover', function(e) {
+            if (!draggedMoveItem && draggedBatchItems.length === 0) return;
+
+            const targetFolderId = target.getAttribute('data-id') !== null ? target.getAttribute('data-id') : target.getAttribute('data-folder-id');
+
+            if (draggedMoveItem && draggedMoveItem.type === 'folder' && draggedMoveItem.id === targetFolderId) {
+                return;
+            }
+
+            if (draggedBatchItems.some(i => i.type === 'folder' && i.id === targetFolderId)) {
+                return;
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+            target.classList.add('drop-target-hover');
+        });
+
+        target.addEventListener('dragleave', function(e) {
+            target.classList.remove('drop-target-hover');
+        });
+
+        target.addEventListener('drop', function(e) {
+            target.classList.remove('drop-target-hover');
+            if (!draggedMoveItem && draggedBatchItems.length === 0) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            const targetFolderId = target.getAttribute('data-id') !== null ? target.getAttribute('data-id') : target.getAttribute('data-folder-id');
+
+            const itemsToMove = draggedBatchItems.length > 0 ? draggedBatchItems : [draggedMoveItem];
+            const validItems = itemsToMove.filter(i => !(i.type === 'folder' && i.id === targetFolderId));
+            if (validItems.length === 0) return;
+
+            executeDragMove(validItems, targetFolderId);
+        });
+    });
+}
+
+function executeDragMove(items, targetFolderId) {
+    if (!items || items.length === 0) return;
+
+    if (items.length === 1) {
+        const formData = new FormData();
+        formData.append('type', items[0].type);
+        formData.append('id', items[0].id);
+        formData.append('targetFolderId', targetFolderId || '');
+
+        fetch('/move-item', {
+            method: 'POST',
+            body: formData
+        })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
                 window.location.reload();
             } else {
                 alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
-                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
-                isMoveSubmitting = false;
             }
         })
         .catch(err => {
             alert('Gagal terhubung ke server.');
-            if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
-            isMoveSubmitting = false;
         });
+    } else {
+        const formData = new FormData();
+        formData.append('items', JSON.stringify(items));
+        formData.append('targetFolderId', targetFolderId || '');
+
+        fetch('/batch-move', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Gagal memindahkan item: ' + (data.message || 'Terjadi kesalahan.'));
+            }
+        })
+        .catch(err => {
+            alert('Gagal terhubung ke server.');
+        });
+    }
 }
 
 // Details Modal Logic
@@ -1746,9 +1946,15 @@ function checkAutoOnboardingPopup() {
 
 // Auto-trigger when page completes loading
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAutoOnboardingPopup);
+    document.addEventListener('DOMContentLoaded', function() {
+        checkAutoOnboardingPopup();
+        initDragAndDropMove();
+    });
 } else {
-    setTimeout(checkAutoOnboardingPopup, 300);
+    setTimeout(function() {
+        checkAutoOnboardingPopup();
+        initDragAndDropMove();
+    }, 300);
 }
 
 // Accidental Refresh & Page Close Warning Listener during Active Uploads

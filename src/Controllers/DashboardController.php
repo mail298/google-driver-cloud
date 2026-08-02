@@ -40,6 +40,10 @@ class DashboardController {
         $effectiveRootDbId = null;
         if ($clientRootFolderId !== '') {
             try {
+                // Ensure assigned root folder in DB is owned by current user
+                $stmtSync = $pdo->prepare("UPDATE folders SET user_id = ? WHERE provider_folder_id = ? OR id = ?");
+                $stmtSync->execute([$userId, $clientRootFolderId, $clientRootFolderId]);
+
                 // Move files that have no folder assigned into the root folder
                 $stmtFix = $pdo->prepare("UPDATE files SET folder_id = ? WHERE user_id = ? AND (folder_id IS NULL OR folder_id = '')");
                 $stmtFix->execute([$clientRootFolderId, $userId]);
@@ -52,7 +56,7 @@ class DashboardController {
                 // Auto-create folder record in DB so client files/folders are isolated to this root
                 try {
                     $connectedAccountId = PortalModel::getFirstConnectedAccountId($pdo, $gatewayUserId);
-                    $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE provider_folder_id = VALUES(provider_folder_id), deleted_at = NULL, updated_at = NOW()");
+                    $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), provider_folder_id = VALUES(provider_folder_id), deleted_at = NULL, updated_at = NOW()");
                     $stmt->execute([$clientRootFolderId, $userId, $connectedAccountId, $clientRootFolderId]);
                     $effectiveRootDbId = $clientRootFolderId;
                 } catch (Exception $e) {
@@ -381,6 +385,33 @@ class DashboardController {
                 }
 
                 echo json_encode(['success' => true, 'count' => $deletedCount]);
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            }
+            exit;
+        }
+    }
+
+    public static function batchMove() {
+        AuthController::checkClient();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $pdo = Config::getPDO();
+            $currentUser = $_SESSION['user'] ?? null;
+            $userId = $currentUser['id'] ?? null;
+
+            $rawItems = $_POST['items'] ?? '[]';
+            $items = json_decode($rawItems, true);
+            $targetFolderId = $_POST['targetFolderId'] ?? null;
+
+            if (!$userId || !is_array($items) || empty($items)) {
+                echo json_encode(['success' => false, 'message' => 'Tidak ada item yang dipilih.']);
+                exit;
+            }
+
+            try {
+                $count = PortalModel::batchMoveItems($pdo, $userId, $items, $targetFolderId);
+                echo json_encode(['success' => true, 'count' => $count]);
             } catch (Exception $e) {
                 echo json_encode(['success' => false, 'message' => $e->getMessage()]);
             }

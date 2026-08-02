@@ -59,6 +59,9 @@ switch ($requestUri) {
     case '/move-item':
         DashboardController::moveItem();
         break;
+    case '/batch-move':
+        DashboardController::batchMove();
+        break;
     case '/batch-delete':
         DashboardController::batchDelete();
         break;

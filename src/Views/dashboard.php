@@ -796,6 +796,38 @@
                 padding: 6px 10px !important;
             }
         }
+
+        /* Drag & Drop Move Styles */
+        .item-card-modern[draggable="true"],
+        .portal-table tbody tr[draggable="true"] {
+            cursor: grab;
+        }
+        .item-card-modern[draggable="true"]:active,
+        .portal-table tbody tr[draggable="true"]:active {
+            cursor: grabbing;
+        }
+        .is-dragging {
+            opacity: 0.45 !important;
+            border: 2px dashed #3b82f6 !important;
+        }
+        .drop-target-hover {
+            border-color: #3b82f6 !important;
+            background: rgba(59, 130, 246, 0.25) !important;
+            box-shadow: 0 0 22px rgba(59, 130, 246, 0.5) !important;
+            transform: scale(1.02);
+            transition: all 0.15s ease-in-out;
+        }
+        .drop-target-crumb {
+            transition: all 0.15s ease-in-out;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+        .drop-target-crumb.drop-target-hover {
+            background: rgba(59, 130, 246, 0.35) !important;
+            color: #60a5fa !important;
+            font-weight: 800 !important;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+        }
     </style>
 </head>
 
@@ -1151,10 +1183,10 @@
                 <div class="view-mode-bar">
                     <?php if (empty($searchQuery)): ?>
                         <div class="breadcrumbs" style="margin-bottom: 0;">
-                            <a href="/">Utama</a>
+                            <a href="/" class="drop-target-crumb" data-folder-id="">Utama</a>
                             <?php foreach ($breadcrumbs as $crumb): ?>
                                 <span>/</span>
-                                <a href="/?folderId=<?= $crumb['id'] ?>"><?= htmlspecialchars($crumb['name']) ?></a>
+                                <a href="/?folderId=<?= $crumb['id'] ?>" class="drop-target-crumb" data-folder-id="<?= $crumb['id'] ?>"><?= htmlspecialchars($crumb['name']) ?></a>
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
@@ -1228,7 +1260,7 @@
                                 'sizeFormatted' => 'Folder Dokumen'
                             ]), ENT_QUOTES, 'UTF-8');
                             ?>
-                            <div class="item-card-modern" onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'">
+                            <div class="item-card-modern item-card-folder drop-target-folder" draggable="true" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'">
                                 <div class="card-header-modern">
                                     <div class="card-header-left">
                                         <input type="checkbox" class="item-checkbox" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="event.stopPropagation(); updateSelectionState();" style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px; margin-right: 6px;">
@@ -1303,7 +1335,7 @@
                                 'providerFileId' => $file['provider_file_id'] ?? ''
                             ]), ENT_QUOTES, 'UTF-8');
                             ?>
-                            <div class="item-card-modern"
+                            <div class="item-card-modern item-card-file" draggable="true" data-type="file" data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>"
                                 onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')">
                                 <div class="card-header-modern">
                                     <div class="card-header-left">
@@ -1393,7 +1425,7 @@
                                         'sizeFormatted' => 'Folder Dokumen'
                                     ]), ENT_QUOTES, 'UTF-8');
                                     ?>
-                                    <tr onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'"
+                                    <tr class="drop-target-folder" draggable="true" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'"
                                         style="cursor: pointer;">
                                         <td onclick="event.stopPropagation();"><input type="checkbox" class="item-checkbox" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="updateSelectionState()" style="accent-color: #3b82f6; cursor:pointer;"></td>
                                         <td>
@@ -1458,7 +1490,7 @@
                                         'sizeFormatted' => formatBytes($file['size_bytes'])
                                     ]), ENT_QUOTES, 'UTF-8');
                                     ?>
-                                    <tr onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')"
+                                    <tr draggable="true" data-type="file" data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>" onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')"
                                         style="cursor: pointer;">
                                         <td onclick="event.stopPropagation();"><input type="checkbox" class="item-checkbox" data-type="file" data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>" onclick="updateSelectionState()" style="accent-color: #3b82f6; cursor:pointer;"></td>
                                         <td>
@@ -1820,7 +1852,12 @@
             <select id="move-target-folder" class="input-box"
                 style="margin-bottom: 20px; width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 10px; color: #fff; outline: none; font-size: 13.5px;">
                 <option value="">📁 Root / Utama</option>
-                <?php foreach ($allFoldersList ?? $folders as $f): ?>
+                <?php 
+                $clientRootId = (!empty($currentUser) && !empty($currentUser['root_folder_id'])) ? PortalModel::extractFolderId($currentUser['root_folder_id']) : '';
+                foreach ($allFoldersList ?? $folders as $f): 
+                    if ($f['name'] === 'Folder Klien') continue;
+                    if ($clientRootId !== '' && ($f['id'] === $clientRootId || ($f['provider_folder_id'] ?? '') === $clientRootId)) continue;
+                ?>
                     <option value="<?= $f['id'] ?>">📁 <?= htmlspecialchars($f['name']) ?></option>
                 <?php endforeach; ?>
             </select>
@@ -1975,6 +2012,10 @@
                 <span>Unduh ZIP</span>
             </button>
             -->
+            <button type="button" class="btn-bulk-move" onclick="openBatchMoveModal()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                <span>Pindahkan Terpilih</span>
+            </button>
             <button type="button" class="btn-bulk-delete" onclick="openBulkDeleteModal()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                 <span>Hapus Terpilih</span>

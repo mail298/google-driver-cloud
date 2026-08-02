@@ -130,12 +130,10 @@ class PortalModel
 
     public static function getFolders($pdo, $userId, $parentId)
     {
-        $gatewayUserId = self::getUserIdFromApiKey($pdo);
-
         if ($parentId === null) {
             // At root level: exclude the Folder Klien container (it's a root wrapper, not a user folder)
-            $stmt = $pdo->prepare("SELECT * FROM folders WHERE (user_id = ? OR user_id = ?) AND parent_id IS NULL AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
-            $stmt->execute([$userId, $gatewayUserId]);
+            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND parent_id IS NULL AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
+            $stmt->execute([$userId]);
         } else {
             $cleanParentId = self::extractFolderId($parentId);
             $parentFolder = self::getFolder($pdo, $userId, $cleanParentId);
@@ -147,10 +145,10 @@ class PortalModel
             ])));
 
             $placeholders = implode(',', array_fill(0, count($parentIds), '?'));
-            $params = array_merge([$userId, $gatewayUserId], $parentIds);
+            $params = array_merge([$userId], $parentIds);
 
             // Inside a folder: show direct children, excluding any Folder Klien wrappers
-            $stmt = $pdo->prepare("SELECT * FROM folders WHERE (user_id = ? OR user_id = ?) AND parent_id IN ($placeholders) AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
+            $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND parent_id IN ($placeholders) AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
             $stmt->execute($params);
         }
         return $stmt->fetchAll();
@@ -158,9 +156,8 @@ class PortalModel
 
     public static function getAllFolders($pdo, $userId)
     {
-        $gatewayUserId = self::getUserIdFromApiKey($pdo);
-        $stmt = $pdo->prepare("SELECT * FROM folders WHERE (user_id = ? OR user_id = ?) AND deleted_at IS NULL ORDER BY name ASC");
-        $stmt->execute([$userId, $gatewayUserId]);
+        $stmt = $pdo->prepare("SELECT * FROM folders WHERE user_id = ? AND name != 'Folder Klien' AND deleted_at IS NULL ORDER BY name ASC");
+        $stmt->execute([$userId]);
         return $stmt->fetchAll();
     }
 
@@ -169,24 +166,21 @@ class PortalModel
         if (!$folderId)
             return null;
         $cleanId = self::extractFolderId($folderId);
-        $gatewayUserId = self::getUserIdFromApiKey($pdo);
 
         $stmt = $pdo->prepare("
             SELECT * FROM folders 
-            WHERE (user_id = ? OR user_id = ?) AND (id = ? OR provider_folder_id = ?) AND deleted_at IS NULL 
+            WHERE user_id = ? AND (id = ? OR provider_folder_id = ?) AND deleted_at IS NULL 
             LIMIT 1
         ");
-        $stmt->execute([$userId, $gatewayUserId, $cleanId, $cleanId]);
+        $stmt->execute([$userId, $cleanId, $cleanId]);
         return $stmt->fetch();
     }
 
     public static function getFiles($pdo, $userId, $folderId)
     {
-        $gatewayUserId = self::getUserIdFromApiKey($pdo);
-
         if ($folderId === null) {
-            $stmt = $pdo->prepare("SELECT * FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id IS NULL AND status = 'active' ORDER BY name ASC");
-            $stmt->execute([$userId, $gatewayUserId]);
+            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND folder_id IS NULL AND status = 'active' ORDER BY name ASC");
+            $stmt->execute([$userId]);
         } else {
             $cleanFolderId = self::extractFolderId($folderId);
             $targetFolder = self::getFolder($pdo, $userId, $cleanFolderId);
@@ -198,9 +192,9 @@ class PortalModel
             ])));
 
             $placeholders = implode(',', array_fill(0, count($folderIds), '?'));
-            $params = array_merge([$userId, $gatewayUserId], $folderIds);
+            $params = array_merge([$userId], $folderIds);
 
-            $stmt = $pdo->prepare("SELECT * FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id IN ($placeholders) AND status = 'active' ORDER BY name ASC");
+            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND folder_id IN ($placeholders) AND status = 'active' ORDER BY name ASC");
             $stmt->execute($params);
         }
         return $stmt->fetchAll();
@@ -524,8 +518,14 @@ class PortalModel
 
     public static function moveItem($pdo, $userId, $type, $id, $targetFolderId)
     {
-        if ($targetFolderId === '')
-            $targetFolderId = null;
+        if (empty($targetFolderId)) {
+            $user = UserModel::getUserById($userId);
+            if ($user && !empty($user['root_folder_id'])) {
+                $targetFolderId = self::extractFolderId($user['root_folder_id']);
+            } else {
+                $targetFolderId = null;
+            }
+        }
 
         if ($type === 'folder') {
             $folder = self::getFolder($pdo, $userId, $id);
@@ -602,5 +602,47 @@ class PortalModel
         } catch (Exception $e) {
             return false;
         }
+    }
+
+    public static function batchMoveItems($pdo, $userId, $items, $targetFolderId)
+    {
+        if (empty($targetFolderId)) {
+            $user = UserModel::getUserById($userId);
+            if ($user && !empty($user['root_folder_id'])) {
+                $targetFolderId = self::extractFolderId($user['root_folder_id']);
+            } else {
+                $targetFolderId = null;
+            }
+        }
+
+        $targetFolder = null;
+        if ($targetFolderId !== null) {
+            $targetFolder = self::getFolder($pdo, $userId, $targetFolderId);
+            if (!$targetFolder) return 0;
+        }
+
+        $movedCount = 0;
+        if (!is_array($items)) return 0;
+
+        foreach ($items as $item) {
+            $type = $item['type'] ?? 'file';
+            $id = $item['id'] ?? '';
+            if (empty($id)) continue;
+
+            // Prevent moving a folder into itself
+            if ($type === 'folder') {
+                if ($id === $targetFolderId) continue;
+                if ($targetFolder && ($targetFolder['id'] === $id || ($targetFolder['provider_folder_id'] ?? '') === $id)) continue;
+            }
+
+            try {
+                if (self::moveItem($pdo, $userId, $type, $id, $targetFolderId)) {
+                    $movedCount++;
+                }
+            } catch (Exception $e) {
+                // Continue with remaining items
+            }
+        }
+        return $movedCount;
     }
 }
