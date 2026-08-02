@@ -305,6 +305,9 @@ function renderGDriveWidget() {
         html += '<div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center;">' + fileIcon + '</div>';
         html += '<div style="flex: 1; min-width: 0;">';
         html += '<div style="font-size: 13px; font-weight: 600; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="' + escapeHtml(item.name) + '">' + escapeHtml(item.name) + '</div>';
+        if (item.status === 'failed' && item.error) {
+            html += '<div style="font-size: 11.5px; color: #f87171; margin-top: 2px; line-height: 1.3;" title="' + escapeHtml(item.error) + '">' + escapeHtml(item.error) + '</div>';
+        }
         html += '</div>';
         html += '<div style="display: flex; align-items: center; flex-shrink: 0;">';
         html += versionHtml;
@@ -439,9 +442,16 @@ async function processGDriveQueueItem() {
                 }
             } catch (e) {
                 item.status = 'failed';
+                item.error = 'Respon server tidak valid';
             }
         } else {
             item.status = 'failed';
+            try {
+                const errResp = JSON.parse(xhr.responseText);
+                item.error = errResp.message || ('Server error (' + xhr.status + ')');
+            } catch (e) {
+                item.error = 'Server error HTTP (' + xhr.status + ')';
+            }
         }
         renderGDriveWidget();
         processGDriveQueueItem();
@@ -449,6 +459,7 @@ async function processGDriveQueueItem() {
 
     xhr.onerror = function () {
         item.status = 'failed';
+        item.error = 'Gagal terhubung ke server/CDN (Koneksi terputus)';
         renderGDriveWidget();
         processGDriveQueueItem();
     };
