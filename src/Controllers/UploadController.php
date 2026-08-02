@@ -118,200 +118,294 @@ class UploadController
 
             $replaceDuplicate = !empty($_POST['replace']) && ($_POST['replace'] === '1' || $_POST['replace'] === 'true');
 
-            $gatewayUrl = Config::get('GATEWAY_API_URL', 'http://localhost:4000');
-            $apiKey = Config::get('GATEWAY_API_KEY');
+            self::processUploadedFile($file, $folderId, $replaceDuplicate);
+            exit;
+        }
+    }
 
-            // Enforce storage quota limits per user (from session, not API key)
-            require_once dirname(__DIR__) . '/Models/PortalModel.php';
+    public static function uploadChunk()
+    {
+        @set_time_limit(0);
+        @ini_set('memory_limit', '-1');
+        @ini_set('max_execution_time', '0');
+        @ini_set('max_input_time', '-1');
+
+        header('Content-Type: application/json');
+
+        $handoffToken = $_POST['upload_token'] ?? $_GET['upload_token'] ?? null;
+        if ($handoffToken) {
             require_once dirname(__DIR__) . '/Models/UserModel.php';
-            $pdo = Config::getPDO();
-
-            $currentUser = $_SESSION['user'] ?? null;
-            if ($currentUser && isset($currentUser['id'])) {
-                $refreshed = UserModel::getUserById($currentUser['id']);
-                if ($refreshed) {
-                    $_SESSION['user'] = $refreshed;
-                    $currentUser = $refreshed;
-                }
-            }
-            $userId = $currentUser['id'] ?? null;
-            if (!$userId) {
-                echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
+            $tokenData = self::consumeUploadToken($handoffToken);
+            if (!$tokenData || !($tokenUser = UserModel::getUserById($tokenData['user_id']))) {
+                echo json_encode(['success' => false, 'message' => 'Token unggahan tidak valid atau kedaluwarsa.']);
                 exit;
             }
-            // Immediately release session file lock so PHP does not block concurrent uploads or requests
-            session_write_close();
+            AuthController::startSession();
+            $_SESSION['user'] = $tokenUser;
+            $_SESSION['user_role'] = 'client';
+            $_SESSION['username'] = $tokenUser['username'];
+        } else {
+            AuthController::checkClient();
+        }
 
-            $limitGb = (float) ($currentUser['storage_limit_gb'] ?? 15);
-            $limitBytes = $limitGb * 1024 * 1024 * 1024;
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+            exit;
+        }
 
-            $totalUsedBytes = 0;
-            $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total_size FROM files WHERE user_id = ? AND status = 'active'");
-            $stmt->execute([$userId]);
-            $row = $stmt->fetch();
-            $totalUsedBytes = (float) ($row['total_size'] ?? 0);
+        $uploadId = preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['uploadId'] ?? '');
+        $chunkIndex = (int) ($_POST['chunkIndex'] ?? 0);
+        $totalChunks = (int) ($_POST['totalChunks'] ?? 1);
+        $fileName = trim($_POST['fileName'] ?? 'file');
+        $folderId = $_POST['folderId'] ?? null;
+        if ($folderId === '') $folderId = null;
+        $replace = !empty($_POST['replace']) && ($_POST['replace'] === '1' || $_POST['replace'] === 'true');
 
-            if ($totalUsedBytes + $file['size'] > $limitBytes) {
-                echo json_encode([
-                    'success' => false,
-                    'message' => 'Pengunggahan ditolak: Ukuran berkas melebihi sisa kuota storage Anda (' . $limitGb . ' GB). Silakan hubungi Administrator.'
-                ]);
-                exit;
-            }
+        if (!$uploadId || empty($_FILES['chunk'])) {
+            echo json_encode(['success' => false, 'message' => 'Data chunk tidak valid.']);
+            exit;
+        }
 
-            // Resolve API key owner for gateway upload
-            if (empty($apiKey)) {
-                $apiKey = PortalModel::getActiveApiKey($pdo);
-            }
+        $chunkFile = $_FILES['chunk'];
+        if (isset($chunkFile['error']) && $chunkFile['error'] !== UPLOAD_ERR_OK) {
+            echo json_encode(['success' => false, 'message' => 'Gagal mengunggah potongan berkas ke server (Code: ' . $chunkFile['error'] . ').']);
+            exit;
+        }
 
-            // Resolve Google Drive parent folder ID & enforce client root folder isolation
-            $providerParentId = null;
-            $clientRootFolderId = (!empty($currentUser) && !empty($currentUser['root_folder_id'])) ? PortalModel::extractFolderId($currentUser['root_folder_id']) : null;
+        $tempDir = sys_get_temp_dir() . '/portal_chunks/' . $uploadId;
+        if (!is_dir($tempDir)) {
+            @mkdir($tempDir, 0777, true);
+        }
 
-            if ($folderId) {
-                $folder = PortalModel::getFolder($pdo, $userId, $folderId);
-                if ($folder && !empty($folder['provider_folder_id'])) {
-                    $providerParentId = $folder['provider_folder_id'];
-                } else {
-                    $providerParentId = PortalModel::extractFolderId($folderId);
-                }
-            } else if ($clientRootFolderId) {
-                $folderId = $clientRootFolderId;
-                $providerParentId = $clientRootFolderId;
-            }
+        $chunkPath = $tempDir . '/chunk_' . sprintf('%05d', $chunkIndex);
+        if (!move_uploaded_file($chunkFile['tmp_name'], $chunkPath)) {
+            echo json_encode(['success' => false, 'message' => 'Gagal menyimpan potongan berkas ' . $chunkIndex]);
+            exit;
+        }
 
-            if (empty($providerParentId) && $clientRootFolderId) {
-                $providerParentId = $clientRootFolderId;
-            }
-
-            // 1. Prepare filesMeta & auto-detect APK / binary MIME types
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $mimeType = !empty($file['type']) ? $file['type'] : '';
-            if ($ext === 'apk' && (empty($mimeType) || $mimeType === 'application/octet-stream')) {
-                $mimeType = 'application/vnd.android.package-archive';
-            }
-            if (empty($mimeType)) {
-                $mimeType = 'application/octet-stream';
-            }
-
-            $filesMeta = [
-                [
-                    'fieldName' => 'file-0',
-                    'fileName' => $file['name'],
-                    'mimeType' => $mimeType,
-                    'sizeBytes' => (string) $file['size'],
-                ]
-            ];
-            if ($providerParentId) {
-                $filesMeta[0]['providerParentId'] = $providerParentId;
-            }
-
-            // 2. Prepare post fields for cURL
-            $postFields = [
-                'filesMeta' => json_encode($filesMeta),
-                'file-0' => new CURLFile($file['tmp_name'], $mimeType, $file['name'])
-            ];
-
-            // 3. Make cURL request to Gateway API with unlimited timeout for large 500MB+ files
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, rtrim($gatewayUrl, '/') . '/api/v1/uploads');
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 0); // No timeout for large video uploads
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $apiKey,
-                'Expect:'
+        $receivedChunks = glob($tempDir . '/chunk_*');
+        if (count($receivedChunks) < $totalChunks) {
+            echo json_encode([
+                'success' => true,
+                'chunkIndex' => $chunkIndex,
+                'totalChunks' => $totalChunks,
+                'completed' => false
             ]);
+            exit;
+        }
 
-            $response = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curlError = curl_error($ch);
-            curl_close($ch);
+        // All chunks received, assemble the final file
+        sort($receivedChunks);
+        $safeName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $fileName);
+        $assembledPath = sys_get_temp_dir() . '/assembled_' . $uploadId . '_' . $safeName;
+        $out = fopen($assembledPath, 'wb');
+        foreach ($receivedChunks as $cFile) {
+            $in = fopen($cFile, 'rb');
+            if ($in) {
+                stream_copy_to_stream($in, $out);
+                fclose($in);
+            }
+            @unlink($cFile);
+        }
+        fclose($out);
+        @rmdir($tempDir);
 
-            header('Content-Type: application/json');
-            if ($response === false) {
-                echo json_encode(['success' => false, 'message' => 'Gateway request failed: ' . $curlError]);
+        $assembledFile = [
+            'name' => $fileName,
+            'tmp_name' => $assembledPath,
+            'size' => filesize($assembledPath),
+            'type' => mime_content_type($assembledPath) ?: 'application/octet-stream',
+            'error' => UPLOAD_ERR_OK
+        ];
+
+        self::processUploadedFile($assembledFile, $folderId, $replace);
+        @unlink($assembledPath);
+        exit;
+    }
+
+    public static function processUploadedFile($file, $folderId = null, $replaceDuplicate = false)
+    {
+        $gatewayUrl = Config::get('GATEWAY_API_URL', 'http://localhost:4000');
+        $apiKey = Config::get('GATEWAY_API_KEY');
+
+        require_once dirname(__DIR__) . '/Models/PortalModel.php';
+        require_once dirname(__DIR__) . '/Models/UserModel.php';
+        $pdo = Config::getPDO();
+
+        $currentUser = $_SESSION['user'] ?? null;
+        if ($currentUser && isset($currentUser['id'])) {
+            $refreshed = UserModel::getUserById($currentUser['id']);
+            if ($refreshed) {
+                $_SESSION['user'] = $refreshed;
+                $currentUser = $refreshed;
+            }
+        }
+        $userId = $currentUser['id'] ?? null;
+        if (!$userId) {
+            echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
+            exit;
+        }
+        session_write_close();
+
+        $limitGb = (float) ($currentUser['storage_limit_gb'] ?? 15);
+        $limitBytes = $limitGb * 1024 * 1024 * 1024;
+
+        $totalUsedBytes = 0;
+        $stmt = $pdo->prepare("SELECT SUM(size_bytes) as total_size FROM files WHERE user_id = ? AND status = 'active'");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        $totalUsedBytes = (float) ($row['total_size'] ?? 0);
+
+        if ($totalUsedBytes + $file['size'] > $limitBytes) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Pengunggahan ditolak: Ukuran berkas melebihi sisa kuota storage Anda (' . $limitGb . ' GB). Silakan hubungi Administrator.'
+            ]);
+            exit;
+        }
+
+        if (empty($apiKey)) {
+            $apiKey = PortalModel::getActiveApiKey($pdo);
+        }
+
+        $providerParentId = null;
+        $clientRootFolderId = (!empty($currentUser) && !empty($currentUser['root_folder_id'])) ? PortalModel::extractFolderId($currentUser['root_folder_id']) : null;
+
+        if ($folderId) {
+            $folder = PortalModel::getFolder($pdo, $userId, $folderId);
+            if ($folder && !empty($folder['provider_folder_id'])) {
+                $providerParentId = $folder['provider_folder_id'];
             } else {
-                $responseData = json_decode($response, true);
-                if ($httpCode >= 200 && $httpCode < 300) {
-                    $uploadedFile = $responseData['file'] ?? ($responseData['files'][0] ?? null);
-                    $isDuplicateDetected = false;
-                    $replaced = false;
+                $providerParentId = PortalModel::extractFolderId($folderId);
+            }
+        } else if ($clientRootFolderId) {
+            $folderId = $clientRootFolderId;
+            $providerParentId = $clientRootFolderId;
+        }
 
-                    if ($uploadedFile && !empty($uploadedFile['id'])) {
-                        $fileNameToMatch = $uploadedFile['name'] ?? $file['name'];
-                        $targetDbFolderId = !empty($folderId) ? $folderId : $clientRootFolderId;
+        if (empty($providerParentId) && $clientRootFolderId) {
+            $providerParentId = $clientRootFolderId;
+        }
 
-                        try {
-                            // Check if a file with the same name already exists in this folder
-                            if ($targetDbFolderId !== null) {
-                                $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id = ? AND name = ? AND status = 'active'");
-                                $stmtExist->execute([$userId, PortalModel::getUserIdFromApiKey($pdo), $targetDbFolderId, $fileNameToMatch]);
-                            } else {
-                                $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id IS NULL AND name = ? AND status = 'active'");
-                                $stmtExist->execute([$userId, PortalModel::getUserIdFromApiKey($pdo), $fileNameToMatch]);
-                            }
-                            $existingFiles = $stmtExist->fetchAll();
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $mimeType = !empty($file['type']) ? $file['type'] : '';
+        if ($ext === 'apk' && (empty($mimeType) || $mimeType === 'application/octet-stream')) {
+            $mimeType = 'application/vnd.android.package-archive';
+        }
+        if (empty($mimeType)) {
+            $mimeType = 'application/octet-stream';
+        }
 
-                            if (!empty($existingFiles)) {
-                                $isDuplicateDetected = true;
-                            }
+        $filesMeta = [
+            [
+                'fieldName' => 'file-0',
+                'fileName' => $file['name'],
+                'mimeType' => $mimeType,
+                'sizeBytes' => (string) $file['size'],
+            ]
+        ];
+        if ($providerParentId) {
+            $filesMeta[0]['providerParentId'] = $providerParentId;
+        }
 
-                            if ($replaceDuplicate && !empty($existingFiles)) {
-                                foreach ($existingFiles as $ef) {
-                                    $stmtDel = $pdo->prepare("DELETE FROM files WHERE id = ?");
-                                    $stmtDel->execute([$ef['id']]);
-                                    if (!empty($ef['provider_file_id'])) {
-                                        PortalModel::trashGoogleDriveItem($pdo, $userId, $ef['provider_file_id']);
-                                    }
-                                }
-                                $replaced = true;
-                            }
+        $postFields = [
+            'filesMeta' => json_encode($filesMeta),
+            'file-0' => new CURLFile($file['tmp_name'], $mimeType, $file['name'])
+        ];
 
-                            $stmt = $pdo->prepare("INSERT IGNORE INTO files (id, user_id, folder_id, connected_account_id, provider, provider_file_id, name, mime_type, size_bytes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())");
-                            $stmt->execute([
-                                $uploadedFile['id'],
-                                $userId,
-                                $targetDbFolderId,
-                                $uploadedFile['connectedAccountId'] ?? '',
-                                $uploadedFile['provider'] ?? 'google_drive',
-                                $uploadedFile['providerFileId'] ?? '',
-                                $uploadedFile['name'] ?? $file['name'],
-                                $uploadedFile['mimeType'] ?? $mimeType,
-                                (int) ($uploadedFile['sizeBytes'] ?? $file['size']),
-                            ]);
-                        } catch (Exception $e) {
-                            error_log('File record save failed: ' . $e->getMessage());
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, rtrim($gatewayUrl, '/') . '/api/v1/uploads');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 0);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $apiKey,
+            'Expect:'
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        curl_close($ch);
+
+        header('Content-Type: application/json');
+        if ($response === false) {
+            echo json_encode(['success' => false, 'message' => 'Gateway request failed: ' . $curlError]);
+        } else {
+            $responseData = json_decode($response, true);
+            if ($httpCode >= 200 && $httpCode < 300) {
+                $uploadedFile = $responseData['file'] ?? ($responseData['files'][0] ?? null);
+                $isDuplicateDetected = false;
+                $replaced = false;
+
+                if ($uploadedFile && !empty($uploadedFile['id'])) {
+                    $fileNameToMatch = $uploadedFile['name'] ?? $file['name'];
+                    $targetDbFolderId = !empty($folderId) ? $folderId : $clientRootFolderId;
+
+                    try {
+                        if ($targetDbFolderId !== null) {
+                            $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id = ? AND name = ? AND status = 'active'");
+                            $stmtExist->execute([$userId, PortalModel::getUserIdFromApiKey($pdo), $targetDbFolderId, $fileNameToMatch]);
+                        } else {
+                            $stmtExist = $pdo->prepare("SELECT id, provider_file_id FROM files WHERE (user_id = ? OR user_id = ?) AND folder_id IS NULL AND name = ? AND status = 'active'");
+                            $stmtExist->execute([$userId, PortalModel::getUserIdFromApiKey($pdo), $fileNameToMatch]);
+                        }
+                        $existingFiles = $stmtExist->fetchAll();
+
+                        if (!empty($existingFiles)) {
+                            $isDuplicateDetected = true;
                         }
 
-                        // Gateway API already uploaded the file into $providerParentId via filesMeta.
-                        // Skip redundant Google Drive move API call to save 2-3s of network latency per upload.
-                    }
+                        if ($replaceDuplicate && !empty($existingFiles)) {
+                            foreach ($existingFiles as $ef) {
+                                $stmtDel = $pdo->prepare("DELETE FROM files WHERE id = ?");
+                                $stmtDel->execute([$ef['id']]);
+                                if (!empty($ef['provider_file_id'])) {
+                                    PortalModel::trashGoogleDriveItem($pdo, $userId, $ef['provider_file_id']);
+                                }
+                            }
+                            $replaced = true;
+                        }
 
-                    $msg = 'File berhasil diunggah.';
-                    if ($replaced) {
-                        $msg = 'Berkas "' . $file['name'] . '" sudah ada dan telah diganti dengan versi baru.';
-                    } elseif ($isDuplicateDetected) {
-                        $msg = 'Informasi: Berkas dengan nama "' . $file['name'] . '" sudah ada di folder ini.';
+                        $stmt = $pdo->prepare("INSERT IGNORE INTO files (id, user_id, folder_id, connected_account_id, provider, provider_file_id, name, mime_type, size_bytes, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())");
+                        $stmt->execute([
+                            $uploadedFile['id'],
+                            $userId,
+                            $targetDbFolderId,
+                            $uploadedFile['connectedAccountId'] ?? '',
+                            $uploadedFile['provider'] ?? 'google_drive',
+                            $uploadedFile['providerFileId'] ?? '',
+                            $uploadedFile['name'] ?? $file['name'],
+                            $uploadedFile['mimeType'] ?? $mimeType,
+                            (int) ($uploadedFile['sizeBytes'] ?? $file['size']),
+                        ]);
+                    } catch (Exception $e) {
+                        error_log('File record save failed: ' . $e->getMessage());
                     }
-
-                    echo json_encode([
-                        'success' => true,
-                        'isDuplicate' => $isDuplicateDetected,
-                        'replaced' => $replaced,
-                        'message' => $msg,
-                        'data' => $responseData
-                    ]);
-                } else {
-                    echo json_encode([
-                        'success' => false,
-                        'message' => $responseData['message'] ?? 'Gateway returned error code: ' . $httpCode
-                    ]);
                 }
+
+                $msg = 'File berhasil diunggah.';
+                if ($replaced) {
+                    $msg = 'Berkas "' . $file['name'] . '" sudah ada dan telah diganti dengan versi baru.';
+                } elseif ($isDuplicateDetected) {
+                    $msg = 'Informasi: Berkas dengan nama "' . $file['name'] . '" sudah ada di folder ini.';
+                }
+
+                echo json_encode([
+                    'success' => true,
+                    'isDuplicate' => $isDuplicateDetected,
+                    'replaced' => $replaced,
+                    'message' => $msg,
+                    'data' => $responseData
+                ]);
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => $responseData['message'] ?? 'Gateway returned error code: ' . $httpCode
+                ]);
             }
-            exit;
         }
     }
 }

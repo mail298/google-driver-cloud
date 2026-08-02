@@ -407,6 +407,110 @@ async function getUploadEndpointAsync(fileSizeBytes) {
     return UPLOAD_DIRECT_URL + '/upload?upload_token=' + encodeURIComponent(token);
 }
 
+async function uploadItemInChunks(item) {
+    const chunkSize = 15 * 1024 * 1024; // 15MB chunks (Cloudflare safe)
+    const totalSize = item.file.size;
+    const totalChunks = Math.ceil(totalSize / chunkSize);
+    const uploadId = 'up_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+
+    let token = '';
+    if (typeof UPLOAD_DIRECT_URL !== 'undefined' && UPLOAD_DIRECT_URL) {
+        token = await getUploadToken();
+    }
+
+    for (let i = 0; i < totalChunks; i++) {
+        if (item.status === 'cancelled' || item.status === 'failed') return;
+
+        const start = i * chunkSize;
+        const end = Math.min(totalSize, start + chunkSize);
+        const chunkBlob = item.file.slice(start, end);
+
+        const formData = new FormData();
+        formData.append('chunk', chunkBlob, item.file.name);
+        formData.append('uploadId', uploadId);
+        formData.append('chunkIndex', i);
+        formData.append('totalChunks', totalChunks);
+        formData.append('fileName', item.file.name);
+        if (typeof CURRENT_FOLDER_ID !== 'undefined' && CURRENT_FOLDER_ID) {
+            formData.append('folderId', CURRENT_FOLDER_ID);
+        }
+        if (item.isReplace) {
+            formData.append('replace', '1');
+        }
+        if (token) {
+            formData.append('upload_token', token);
+        }
+
+        const chunkResult = await new Promise((resolve) => {
+            const xhr = new XMLHttpRequest();
+            item.xhr = xhr;
+            xhr.open('POST', '/upload-chunk', true);
+
+            xhr.upload.onprogress = function (e) {
+                if (e.lengthComputable) {
+                    const currentChunkLoaded = e.loaded;
+                    const accumulatedLoaded = start + currentChunkLoaded;
+                    item.loadedBytes = Math.min(accumulatedLoaded, totalSize);
+                    item.totalBytes = totalSize;
+                    item.progress = Math.round((item.loadedBytes / totalSize) * 100);
+                    renderGDriveWidget();
+                }
+            };
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    try {
+                        const resp = JSON.parse(xhr.responseText);
+                        resolve(resp);
+                    } catch (err) {
+                        resolve({ success: false, message: 'Respon server tidak valid' });
+                    }
+                } else {
+                    let errMsg = 'Server error HTTP (' + xhr.status + ')';
+                    try {
+                        const errObj = JSON.parse(xhr.responseText);
+                        if (errObj.message) errMsg = errObj.message;
+                    } catch (e) { }
+                    resolve({ success: false, message: errMsg });
+                }
+            };
+
+            xhr.onerror = function () {
+                resolve({ success: false, message: 'Gagal terhubung ke server (Koneksi terputus)' });
+            };
+
+            xhr.send(formData);
+        });
+
+        if (!chunkResult.success) {
+            item.status = 'failed';
+            item.error = chunkResult.message || 'Gagal mengunggah potongan berkas';
+            renderGDriveWidget();
+            processGDriveQueueItem();
+            return;
+        }
+
+        if (chunkResult.completed || i === totalChunks - 1) {
+            item.status = 'completed';
+            item.progress = 100;
+            item.loadedBytes = totalSize;
+            if (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) {
+                if (!EXISTING_FILE_NAMES.includes(item.file.name)) {
+                    EXISTING_FILE_NAMES.push(item.file.name);
+                }
+            }
+            if (chunkResult.replaced && typeof showToast === 'function') {
+                showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
+            } else if (chunkResult.isDuplicate && typeof showToast === 'function') {
+                showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
+            }
+            renderGDriveWidget();
+            processGDriveQueueItem();
+            return;
+        }
+    }
+}
+
 async function processGDriveQueueItem() {
     const nextIdx = gdriveQueue.findIndex(item => item.status === 'waiting');
 
@@ -431,6 +535,12 @@ async function processGDriveQueueItem() {
     item.totalBytes = item.file.size;
     item.phase = 'uploading';
     renderGDriveWidget();
+
+    // Route files larger than 15MB through Chunked Upload to bypass Cloudflare 100MB request limit
+    if (item.file.size > 15 * 1024 * 1024) {
+        uploadItemInChunks(item);
+        return;
+    }
 
     const formData = new FormData();
     formData.append('file', item.file);

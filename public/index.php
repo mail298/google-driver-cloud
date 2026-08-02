@@ -80,6 +80,9 @@ switch ($requestUri) {
     case '/upload':
         UploadController::upload();
         break;
+    case '/upload-chunk':
+        UploadController::uploadChunk();
+        break;
     case '/upload-token':
         AuthController::uploadToken();
         break;
