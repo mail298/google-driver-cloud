@@ -742,10 +742,13 @@
                 display: none !important;
             }
 
+            #grid-view-container[style*="display: none"] {
+                display: none !important;
+            }
+
             .items-grid,
             .items-grid-modern {
-                display: grid !important;
-                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
                 gap: 10px !important;
                 width: 100% !important;
                 box-sizing: border-box !important;
@@ -757,6 +760,17 @@
                 box-sizing: border-box !important;
                 padding: 10px !important;
                 border-radius: 14px !important;
+                min-width: 0 !important;
+            }
+
+            .item-card-modern .card-header-left {
+                gap: 5px !important;
+                min-width: 0 !important;
+            }
+
+            .item-card-modern .card-title-modern {
+                font-size: 12px !important;
+                min-width: 0 !important;
             }
 
             /* Compact Folder Cards on Mobile */
@@ -770,6 +784,33 @@
 
             .item-card-folder .card-header-modern {
                 margin-bottom: 4px !important;
+            }
+
+            /* Mobile Table List View Optimization */
+            .portal-table-container {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 14px !important;
+            }
+
+            .portal-table th:nth-child(3),
+            .portal-table td:nth-child(3),
+            .portal-table th:nth-child(4),
+            .portal-table td:nth-child(4) {
+                display: none !important;
+            }
+
+            .portal-table th,
+            .portal-table td {
+                padding: 10px 8px !important;
+                font-size: 12.5px !important;
+            }
+
+            .portal-table td:nth-child(2) {
+                max-width: 150px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .tab-buttons {
