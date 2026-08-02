@@ -27,8 +27,13 @@
         }
 
         @keyframes spinRing {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Modern Item Card Styling (Matching Frontend Design) */
@@ -271,11 +276,13 @@
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
         }
+
         .portal-toast.show {
             opacity: 1;
             transform: translateY(0);
             pointer-events: auto;
         }
+
         .toast-content {
             background: #0f172a;
             border: 1px solid rgba(59, 130, 246, 0.4);
@@ -289,6 +296,7 @@
             font-size: 13.5px;
             font-weight: 600;
         }
+
         .toast-content.success {
             border-color: rgba(16, 185, 129, 0.5);
             color: #6ee7b7;
@@ -340,7 +348,7 @@
             border: 1px solid rgba(59, 130, 246, 0.4);
             border-radius: 18px;
             padding: 10px 18px;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.7);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -739,10 +747,11 @@
         @media (max-width: 640px) {
             #upload-queue-modal.modal-overlay {
                 align-items: flex-end;
-                background: rgba(0,0,0,0.5);
+                background: rgba(0, 0, 0, 0.5);
                 backdrop-filter: blur(4px);
                 -webkit-backdrop-filter: blur(4px);
             }
+
             #upload-queue-modal .modal-card {
                 max-width: 100% !important;
                 width: 100% !important;
@@ -752,10 +761,12 @@
                 transform: translateY(0);
                 margin-top: auto;
             }
+
             .upload-queue-item {
                 padding: 10px 6px !important;
                 gap: 10px !important;
             }
+
             .upload-queue-item .queue-thumb {
                 width: 36px;
                 height: 36px;
@@ -764,18 +775,21 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background: rgba(255,255,255,0.04);
+                background: rgba(255, 255, 255, 0.04);
                 overflow: hidden;
             }
+
             .upload-queue-item .queue-thumb img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
             }
+
             .upload-queue-item input[type="checkbox"] {
                 width: 20px !important;
                 height: 20px !important;
             }
+
             .upload-queue-item .queue-item-name {
                 font-size: 13px;
                 font-weight: 600;
@@ -784,13 +798,16 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+
             .upload-queue-item .queue-item-size {
                 font-size: 11px;
                 color: #64748b;
             }
+
             .upload-queue-toolbar {
                 gap: 6px !important;
             }
+
             .upload-queue-toolbar button {
                 font-size: 11px !important;
                 padding: 6px 10px !important;
@@ -802,14 +819,17 @@
         .portal-table tbody tr[draggable="true"] {
             cursor: grab;
         }
+
         .item-card-modern[draggable="true"]:active,
         .portal-table tbody tr[draggable="true"]:active {
             cursor: grabbing;
         }
+
         .is-dragging {
             opacity: 0.45 !important;
             border: 2px dashed #3b82f6 !important;
         }
+
         .drop-target-hover {
             border-color: #3b82f6 !important;
             background: rgba(59, 130, 246, 0.25) !important;
@@ -817,11 +837,13 @@
             transform: scale(1.02);
             transition: all 0.15s ease-in-out;
         }
+
         .drop-target-crumb {
             transition: all 0.15s ease-in-out;
             padding: 2px 6px;
             border-radius: 6px;
         }
+
         .drop-target-crumb.drop-target-hover {
             background: rgba(59, 130, 246, 0.35) !important;
             color: #60a5fa !important;
@@ -901,7 +923,8 @@
         <aside class="app-sidebar">
             <div>
                 <a href="/" class="sidebar-logo">
-                    <img src="/assets/image/logo.png" alt="Logo" class="logo-img" style="height: 28px; width: auto; object-fit: contain; margin-right: 4px;">
+                    <img src="/assets/image/logo.png" alt="Logo" class="logo-img"
+                        style="height: 28px; width: auto; object-fit: contain; margin-right: 4px;">
                     <h1>Drive Portal</h1>
                 </a>
 
@@ -942,7 +965,8 @@
                         </a>
                     </li>
                     <li class="sidebar-menu-item">
-                        <a href="javascript:void(0)" onclick="openOnboardingModalManually()" class="sidebar-menu-link" style="color: #fbbf24;">
+                        <a href="javascript:void(0)" onclick="openOnboardingModalManually()" class="sidebar-menu-link"
+                            style="color: #fbbf24;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round">
@@ -953,12 +977,15 @@
                         </a>
                     </li>
                     <li class="sidebar-menu-item">
-                        <a href="/client/backup/csv" class="sidebar-menu-link" style="color: #60a5fa;" title="Unduh laporan inventaris seluruh berkas dalam format CSV">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                <polyline points="14 2 14 8 20 8"/>
-                                <line x1="16" y1="13" x2="8" y2="13"/>
-                                <line x1="16" y1="17" x2="8" y2="17"/>
+                        <a href="/client/backup/csv" class="sidebar-menu-link" style="color: #60a5fa;"
+                            title="Unduh laporan inventaris seluruh berkas dalam format CSV">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
                             </svg>
                             <span>Laporan Berkas (CSV)</span>
                         </a>
@@ -1027,40 +1054,59 @@
 
             <!-- Security Session Widget -->
             <?php
-                $sesTimeout = (int) Config::get('SESSION_TIMEOUT_MINUTES', 60);
-                $sesRemaining = SecurityModel::getSessionRemainingSeconds();
-                $sesMins = floor($sesRemaining / 60);
-                $sesSecs = $sesRemaining % 60;
+            $sesTimeout = (int) Config::get('SESSION_TIMEOUT_MINUTES', 60);
+            $sesRemaining = SecurityModel::getSessionRemainingSeconds();
+            $sesMins = floor($sesRemaining / 60);
+            $sesSecs = $sesRemaining % 60;
             ?>
-            <div style="margin-top: 16px; padding: 12px 14px; background: rgba(10,15,29,0.7); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px;">
+            <div
+                style="margin-top: 16px; padding: 12px 14px; background: rgba(10,15,29,0.7); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px;">
                 <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 8px;">
-                    <span style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.7); animation: sessPulse 2s infinite; flex-shrink:0;"></span>
-                    <span style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Sesi Aktif</span>
+                    <span
+                        style="width: 7px; height: 7px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.7); animation: sessPulse 2s infinite; flex-shrink:0;"></span>
+                    <span
+                        style="font-size: 10.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.4px;">Sesi
+                        Aktif</span>
                 </div>
-                <div style="font-size: 12px; font-weight: 600; color: #94a3b8;"><?= htmlspecialchars($currentUser['username'] ?? '–') ?></div>
+                <div style="font-size: 12px; font-weight: 600; color: #94a3b8;">
+                    <?= htmlspecialchars($currentUser['username'] ?? '–') ?>
+                </div>
                 <?php if ($sesTimeout > 0): ?>
-                    <div id="dash-session-timer" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748b; margin-top: 4px;">
+                    <div id="dash-session-timer"
+                        style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #64748b; margin-top: 4px;">
                         Berakhir dalam <?= $sesMins ?>m <?= str_pad($sesSecs, 2, '0', STR_PAD_LEFT) ?>s
                     </div>
                     <script>
-                    (function(){
-                        var el = document.getElementById('dash-session-timer');
-                        var rem = <?= $sesRemaining ?>;
-                        setInterval(function() {
-                            if (rem <= 0) { el.textContent = 'Sesi habis'; el.style.color='#ef4444'; return; }
-                            rem--;
-                            var m = Math.floor(rem/60), s = rem%60;
-                            el.textContent = 'Berakhir dalam ' + m + 'm ' + String(s).padStart(2,'0') + 's';
-                            if (rem < 120) el.style.color = '#ef4444';
-                            else if (rem < 300) el.style.color = '#f59e0b';
-                        }, 1000);
-                    })();
+                        (function () {
+                            var el = document.getElementById('dash-session-timer');
+                            var rem = <?= $sesRemaining ?>;
+                            setInterval(function () {
+                                if (rem <= 0) { el.textContent = 'Sesi habis'; el.style.color = '#ef4444'; return; }
+                                rem--;
+                                var m = Math.floor(rem / 60), s = rem % 60;
+                                el.textContent = 'Berakhir dalam ' + m + 'm ' + String(s).padStart(2, '0') + 's';
+                                if (rem < 120) el.style.color = '#ef4444';
+                                else if (rem < 300) el.style.color = '#f59e0b';
+                            }, 1000);
+                        })();
                     </script>
                 <?php else: ?>
                     <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Tidak ada batas waktu</div>
                 <?php endif; ?>
             </div>
-            <style>@keyframes sessPulse { 0%,100%{opacity:1} 50%{opacity:0.4} }</style>
+            <style>
+                @keyframes sessPulse {
+
+                    0%,
+                    100% {
+                        opacity: 1
+                    }
+
+                    50% {
+                        opacity: 0.4
+                    }
+                }
+            </style>
         </aside>
 
         <!-- Right Content Area -->
@@ -1068,12 +1114,20 @@
 
             <!-- Quota Alert Banner -->
             <?php if ($storagePercent >= 85): ?>
-            <div style="display: flex; align-items: center; gap: 10px; padding: 11px 16px; margin-bottom: 14px; border-radius: 14px;
+                <div style="display: flex; align-items: center; gap: 10px; padding: 11px 16px; margin-bottom: 14px; border-radius: 14px;
                 <?= $storagePercent >= 95 ? 'background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5;' : 'background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); color: #fde68a;' ?>;
                 font-size: 13px; font-weight: 600;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
-                <span><?= $storagePercent >= 95 ? '⚠️ Kuota hampir penuh!' : '📊 Storage hampir penuh' ?> — <?= $storagePercent ?>% terpakai (<?= formatBytes($totalUsedBytes) ?> / <?= $limitGb ?> GB). Segera hubungi administrator.</span>
-            </div>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" x2="12" y1="9" y2="13" />
+                        <line x1="12" x2="12.01" y1="17" y2="17" />
+                    </svg>
+                    <span><?= $storagePercent >= 95 ? '⚠️ Kuota hampir penuh!' : '📊 Storage hampir penuh' ?> —
+                        <?= $storagePercent ?>% terpakai (<?= formatBytes($totalUsedBytes) ?> / <?= $limitGb ?> GB). Segera
+                        hubungi administrator.</span>
+                </div>
             <?php endif; ?>
 
             <!-- Top Header Search -->
@@ -1186,7 +1240,8 @@
                             <a href="/" class="drop-target-crumb" data-folder-id="">Utama</a>
                             <?php foreach ($breadcrumbs as $crumb): ?>
                                 <span>/</span>
-                                <a href="/?folderId=<?= $crumb['id'] ?>" class="drop-target-crumb" data-folder-id="<?= $crumb['id'] ?>"><?= htmlspecialchars($crumb['name']) ?></a>
+                                <a href="/?folderId=<?= $crumb['id'] ?>" class="drop-target-crumb"
+                                    data-folder-id="<?= $crumb['id'] ?>"><?= htmlspecialchars($crumb['name']) ?></a>
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
@@ -1197,8 +1252,10 @@
 
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <?php if (!empty($folders) || !empty($files)): ?>
-                            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #94a3b8; cursor: pointer; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--card-border); user-select: none;">
-                                <input type="checkbox" id="master-select-all-checkbox" onclick="toggleSelectAll(this)" style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px;">
+                            <label
+                                style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #94a3b8; cursor: pointer; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px; border: 1px solid var(--card-border); user-select: none;">
+                                <input type="checkbox" id="master-select-all-checkbox" onclick="toggleSelectAll(this)"
+                                    style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px;">
                                 <span>Pilih Semua</span>
                             </label>
                         <?php endif; ?>
@@ -1214,8 +1271,8 @@
                                     <rect width="7" height="7" x="3" y="14" rx="1.5" />
                                 </svg>
                             </button>
-                            <button type="button" class="btn-view-mode" id="view-mode-list" onclick="setViewMode('list')"
-                                title="Tampilan Tabel">
+                            <button type="button" class="btn-view-mode" id="view-mode-list"
+                                onclick="setViewMode('list')" title="Tampilan Tabel">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                                     fill="none" stroke="currentColor" stroke-width="2.5">
                                     <line x1="8" x2="21" y1="6" y2="6" />
@@ -1260,10 +1317,16 @@
                                 'sizeFormatted' => 'Folder Dokumen'
                             ]), ENT_QUOTES, 'UTF-8');
                             ?>
-                            <div class="item-card-modern item-card-folder drop-target-folder" draggable="true" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'">
+                            <div class="item-card-modern item-card-folder drop-target-folder" draggable="true"
+                                data-type="folder" data-id="<?= $folder['id'] ?>"
+                                data-name="<?= htmlspecialchars($folder['name']) ?>"
+                                onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'">
                                 <div class="card-header-modern">
                                     <div class="card-header-left">
-                                        <input type="checkbox" class="item-checkbox" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="event.stopPropagation(); updateSelectionState();" style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px; margin-right: 6px;">
+                                        <input type="checkbox" class="item-checkbox" data-type="folder"
+                                            data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>"
+                                            onclick="event.stopPropagation(); updateSelectionState();"
+                                            style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px; margin-right: 6px;">
                                         <div class="card-icon-badge badge-folder">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                                 fill="currentColor">
@@ -1335,11 +1398,15 @@
                                 'providerFileId' => $file['provider_file_id'] ?? ''
                             ]), ENT_QUOTES, 'UTF-8');
                             ?>
-                            <div class="item-card-modern item-card-file" draggable="true" data-type="file" data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>"
+                            <div class="item-card-modern item-card-file" draggable="true" data-type="file"
+                                data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>"
                                 onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')">
                                 <div class="card-header-modern">
                                     <div class="card-header-left">
-                                        <input type="checkbox" class="item-checkbox" data-type="file" data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>" onclick="event.stopPropagation(); updateSelectionState();" style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px; margin-right: 6px;">
+                                        <input type="checkbox" class="item-checkbox" data-type="file"
+                                            data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>"
+                                            onclick="event.stopPropagation(); updateSelectionState();"
+                                            style="accent-color: #3b82f6; cursor:pointer; width: 16px; height: 16px; margin-right: 6px;">
                                         <div class="card-icon-badge <?= $badgeClass ?>">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                                                 fill="none" stroke="currentColor" stroke-width="2.5">
@@ -1373,7 +1440,8 @@
                                                 <rect width="18" height="18" x="3" y="3" rx="2" />
                                                 <circle cx="9" cy="9" r="2" />
                                                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                                            </svg></div>
+                                            </svg>
+                                        </div>
                                     <?php elseif ($isVideo): ?>
                                         <video src="/download?id=<?= $file['id'] ?>&inline=1"
                                             style="width:100%; height:100%; object-fit:cover;"></video>
@@ -1403,7 +1471,8 @@
                         <table class="portal-table">
                             <thead>
                                 <tr>
-                                    <th width="40"><input type="checkbox" id="select-all-checkbox" onclick="toggleSelectAll(this)" style="accent-color: #3b82f6; cursor:pointer;">
+                                    <th width="40"><input type="checkbox" id="select-all-checkbox"
+                                            onclick="toggleSelectAll(this)" style="accent-color: #3b82f6; cursor:pointer;">
                                     </th>
                                     <th>Nama Berkas</th>
                                     <th>Folder Lokasi</th>
@@ -1425,9 +1494,15 @@
                                         'sizeFormatted' => 'Folder Dokumen'
                                     ]), ENT_QUOTES, 'UTF-8');
                                     ?>
-                                    <tr class="drop-target-folder" draggable="true" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'"
+                                    <tr class="drop-target-folder" draggable="true" data-type="folder"
+                                        data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>"
+                                        onclick="window.location.href='/?folderId=<?= $folder['id'] ?>'"
                                         style="cursor: pointer;">
-                                        <td onclick="event.stopPropagation();"><input type="checkbox" class="item-checkbox" data-type="folder" data-id="<?= $folder['id'] ?>" data-name="<?= htmlspecialchars($folder['name']) ?>" onclick="updateSelectionState()" style="accent-color: #3b82f6; cursor:pointer;"></td>
+                                        <td onclick="event.stopPropagation();"><input type="checkbox" class="item-checkbox"
+                                                data-type="folder" data-id="<?= $folder['id'] ?>"
+                                                data-name="<?= htmlspecialchars($folder['name']) ?>"
+                                                onclick="updateSelectionState()" style="accent-color: #3b82f6; cursor:pointer;">
+                                        </td>
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <div class="card-icon-badge badge-folder">
@@ -1490,9 +1565,15 @@
                                         'sizeFormatted' => formatBytes($file['size_bytes'])
                                     ]), ENT_QUOTES, 'UTF-8');
                                     ?>
-                                    <tr draggable="true" data-type="file" data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>" onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')"
+                                    <tr draggable="true" data-type="file" data-id="<?= $file['id'] ?>"
+                                        data-name="<?= htmlspecialchars($file['name']) ?>"
+                                        onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')"
                                         style="cursor: pointer;">
-                                        <td onclick="event.stopPropagation();"><input type="checkbox" class="item-checkbox" data-type="file" data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>" onclick="updateSelectionState()" style="accent-color: #3b82f6; cursor:pointer;"></td>
+                                        <td onclick="event.stopPropagation();"><input type="checkbox" class="item-checkbox"
+                                                data-type="file" data-id="<?= $file['id'] ?>"
+                                                data-name="<?= htmlspecialchars($file['name']) ?>"
+                                                onclick="updateSelectionState()" style="accent-color: #3b82f6; cursor:pointer;">
+                                        </td>
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <?php if ($isImage): ?>
@@ -1583,29 +1664,55 @@
     <div class="modal-overlay" id="upload-queue-modal" style="backdrop-filter: blur(8px);">
         <div class="modal-card"
             style="max-width: 620px; width: 94%; max-height: 82vh; display: flex; flex-direction: column; background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 24px; padding: 24px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-shrink: 0;">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; width: 40px; height: 40px; color: #60a5fa; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(59,130,246,0.2);">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    <div
+                        style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; width: 40px; height: 40px; color: #60a5fa; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(59,130,246,0.2);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" x2="12" y1="3" y2="15" />
+                        </svg>
                     </div>
                     <div>
-                        <h3 style="margin:0; font-size:18px; font-weight:800; color:#fff; line-height:1.2; letter-spacing: -0.2px;">Unggah Berkas</h3>
-                        <span id="queue-header-count" style="font-size:12px; color:#94a3b8; font-weight: 500;">Tidak ada berkas</span>
+                        <h3
+                            style="margin:0; font-size:18px; font-weight:800; color:#fff; line-height:1.2; letter-spacing: -0.2px;">
+                            Unggah Berkas</h3>
+                        <span id="queue-header-count" style="font-size:12px; color:#94a3b8; font-weight: 500;">Tidak ada
+                            berkas</span>
                     </div>
                 </div>
-                <button type="button" onclick="closeUploadQueue()" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#94a3b8; width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition: all 0.2s ease;">&times;</button>
+                <button type="button" onclick="closeUploadQueue()"
+                    style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); color:#94a3b8; width:34px; height:34px; border-radius:10px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition: all 0.2s ease;">&times;</button>
             </div>
-            <div class="upload-queue-toolbar" style="display:flex; gap:8px; margin-bottom:12px; flex-shrink:0; flex-wrap:wrap;">
-                <button type="button" onclick="triggerFileInput()" style="display:flex; align-items:center; gap:6px; background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.25); color:#60a5fa; padding:8px 14px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:700; transition: all 0.2s ease;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+            <div class="upload-queue-toolbar"
+                style="display:flex; gap:8px; margin-bottom:12px; flex-shrink:0; flex-wrap:wrap;">
+                <button type="button" onclick="triggerFileInput()"
+                    style="display:flex; align-items:center; gap:6px; background:rgba(59, 130, 246, 0.1); border:1px solid rgba(59, 130, 246, 0.25); color:#60a5fa; padding:8px 14px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:700; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" x2="12" y1="5" y2="19" />
+                        <line x1="5" x2="19" y1="12" y2="12" />
+                    </svg>
                     + Tambah Berkas
                 </button>
-                <button type="button" onclick="selectAllQueueItems()" style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); border:1px solid var(--card-border); color:#e2e8f0; padding:8px 14px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; transition: all 0.2s ease;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <button type="button" onclick="selectAllQueueItems()"
+                    style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); border:1px solid var(--card-border); color:#e2e8f0; padding:8px 14px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
                     Pilih Semua
                 </button>
-                <button type="button" onclick="deselectAllQueueItems()" style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); border:1px solid var(--card-border); color:#e2e8f0; padding:8px 14px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; transition: all 0.2s ease;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+                <button type="button" onclick="deselectAllQueueItems()"
+                    style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.05); border:1px solid var(--card-border); color:#e2e8f0; padding:8px 14px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:600; transition: all 0.2s ease;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" x2="6" y1="6" y2="18" />
+                        <line x1="6" x2="18" y1="6" y2="18" />
+                    </svg>
                     Hapus Semua
                 </button>
             </div>
@@ -1613,10 +1720,14 @@
                 style="flex: 1; overflow-y: auto; margin-bottom: 12px; min-height: 100px; max-height: 320px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 8px;">
             </div>
             <div id="upload-queue-summary" style="flex-shrink: 0; display: none;">
-                <div class="progress-bar-bg" style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
-                    <div class="progress-bar-fill" id="queue-progress-fill" style="background: linear-gradient(90deg, #3b82f6, #10b981); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                <div class="progress-bar-bg"
+                    style="background: rgba(255,255,255,0.08); height: 6px; border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
+                    <div class="progress-bar-fill" id="queue-progress-fill"
+                        style="background: linear-gradient(90deg, #3b82f6, #10b981); height: 100%; width: 0%; transition: width 0.3s ease;">
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 12px;">
+                <div
+                    style="display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 12px;">
                     <span id="queue-status-text">0 / 0 selesai</span>
                     <span id="queue-percent-text" style="font-weight: 700; color: #60a5fa;">0%</span>
                 </div>
@@ -1637,18 +1748,28 @@
         <div class="modal-card"
             style="max-width: 480px; width: 92%; background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 20px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 10px; color: #fbbf24; display: flex; align-items: center; justify-content: center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                <div
+                    style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 10px; color: #fbbf24; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" x2="12" y1="8" y2="12" />
+                        <line x1="12" x2="12.01" y1="16" y2="16" />
+                    </svg>
                 </div>
                 <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Batas Unggah Tercapai</h3>
             </div>
             <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 8px; line-height: 1.5;">
-                Total ukuran berkas yang dipilih melebihi batas maksimal <strong id="batch-max-size" style="color: #fbbf24;">5 GB</strong> per sesi unggah.
+                Total ukuran berkas yang dipilih melebihi batas maksimal <strong id="batch-max-size"
+                    style="color: #fbbf24;">5 GB</strong> per sesi unggah.
             </p>
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; margin-bottom: 4px;">
+            <div
+                style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+                <div
+                    style="display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8; margin-bottom: 4px;">
                     <span>Total ukuran dipilih:</span>
-                    <span id="batch-total-size" style="color: #fca5a5; font-weight: 700; font-family: monospace;">0 B</span>
+                    <span id="batch-total-size" style="color: #fca5a5; font-weight: 700; font-family: monospace;">0
+                        B</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 13px; color: #94a3b8;">
                     <span>Batas maksimal:</span>
@@ -1656,7 +1777,8 @@
                 </div>
             </div>
             <p style="font-size: 12px; color: #94a3b8; margin-bottom: 16px;">
-                Pilihan berkas Anda tidak dihapus — cukup <strong>hapus centang</strong> beberapa berkas untuk mengurangi total ukuran, lalu klik "Upload Terpilih".
+                Pilihan berkas Anda tidak dihapus — cukup <strong>hapus centang</strong> beberapa berkas untuk
+                mengurangi total ukuran, lalu klik "Upload Terpilih".
             </p>
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button type="button" onclick="closeBatchSizePopup()"
@@ -1666,32 +1788,48 @@
     </div>
 
     <!-- Storage Quota Exceeded Popup Modal -->
-    <div class="modal-overlay" id="quota-popup-modal" style="display: none; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;">
-        <div class="modal-card" style="max-width: 460px; width: 92%; background: #0f172a; border: 1.5px solid rgba(239, 68, 68, 0.4); border-radius: 24px; padding: 26px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75); font-family: 'Plus Jakarta Sans', sans-serif;">
+    <div class="modal-overlay" id="quota-popup-modal"
+        style="display: none; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="modal-card"
+            style="max-width: 460px; width: 92%; background: #0f172a; border: 1.5px solid rgba(239, 68, 68, 0.4); border-radius: 24px; padding: 26px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75); font-family: 'Plus Jakarta Sans', sans-serif;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 14px; padding: 10px; color: #f87171; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                <div
+                    style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 14px; padding: 10px; color: #f87171; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" x2="12" y1="8" y2="12" />
+                        <line x1="12" x2="12.01" y1="16" y2="16" />
+                    </svg>
                 </div>
                 <div>
-                    <h3 style="margin: 0; font-size: 19px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">Ruang Penyimpanan Tidak Cukup</h3>
-                    <span style="font-size: 11.5px; color: #fca5a5; font-weight: 600;">Kapasitas Storage Ditetapkan Admin</span>
+                    <h3
+                        style="margin: 0; font-size: 19px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">
+                        Ruang Penyimpanan Tidak Cukup</h3>
+                    <span style="font-size: 11.5px; color: #fca5a5; font-weight: 600;">Kapasitas Storage Ditetapkan
+                        Admin</span>
                 </div>
             </div>
 
-            <div id="quota-info-box" style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 14px; font-size: 12.5px; color: #fca5a5; display: flex; flex-direction: column; gap: 4px;">
+            <div id="quota-info-box"
+                style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 14px; font-size: 12.5px; color: #fca5a5; display: flex; flex-direction: column; gap: 4px;">
                 <!-- Dynamically populated via JS -->
             </div>
 
-            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">Berkas yang Melebihi Kapasitas:</p>
-            <div id="quota-failed-list" style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; margin-bottom: 18px; max-height: 160px; overflow-y: auto; font-size: 12.5px; color: #fca5a5;">
+            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">Berkas yang Melebihi
+                Kapasitas:</p>
+            <div id="quota-failed-list"
+                style="background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; margin-bottom: 18px; max-height: 160px; overflow-y: auto; font-size: 12.5px; color: #fca5a5;">
             </div>
 
             <p style="font-size: 12px; color: #94a3b8; margin-bottom: 20px; line-height: 1.45;">
-                Anda dapat menghapus beberapa berkas lama atau menghubungi Administrator untuk meningkatkan batas kapasitas penyimpanan akun Anda.
+                Anda dapat menghapus beberapa berkas lama atau menghubungi Administrator untuk meningkatkan batas
+                kapasitas penyimpanan akun Anda.
             </p>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="closeQuotaPopup()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);">Mengerti</button>
+                <button type="button" onclick="closeQuotaPopup()"
+                    style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);">Mengerti</button>
             </div>
         </div>
     </div>
@@ -1852,12 +1990,14 @@
             <select id="move-target-folder" class="input-box"
                 style="margin-bottom: 20px; width: 100%; box-sizing: border-box; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--card-border); padding: 10px 14px; border-radius: 10px; color: #fff; outline: none; font-size: 13.5px;">
                 <option value="">📁 Root / Utama</option>
-                <?php 
+                <?php
                 $clientRootId = (!empty($currentUser) && !empty($currentUser['root_folder_id'])) ? PortalModel::extractFolderId($currentUser['root_folder_id']) : '';
-                foreach ($allFoldersList ?? $folders as $f): 
-                    if ($f['name'] === 'Folder Klien') continue;
-                    if ($clientRootId !== '' && ($f['id'] === $clientRootId || ($f['provider_folder_id'] ?? '') === $clientRootId)) continue;
-                ?>
+                foreach ($allFoldersList ?? $folders as $f):
+                    if ($f['name'] === 'Folder Klien')
+                        continue;
+                    if ($clientRootId !== '' && ($f['id'] === $clientRootId || ($f['provider_folder_id'] ?? '') === $clientRootId))
+                        continue;
+                    ?>
                     <option value="<?= $f['id'] ?>">📁 <?= htmlspecialchars($f['name']) ?></option>
                 <?php endforeach; ?>
             </select>
@@ -2012,12 +2152,22 @@
                 <span>Unduh ZIP</span>
             </button>
             -->
-            <button type="button" class="btn-bulk-move" onclick="openBatchMoveModal()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+            <button type="button" class="btn-bulk-move" onclick="openBatchMoveModal()"
+                style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path
+                        d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />
+                </svg>
                 <span>Pindahkan Terpilih</span>
             </button>
             <button type="button" class="btn-bulk-delete" onclick="openBulkDeleteModal()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
                 <span>Hapus Terpilih</span>
             </button>
             <button type="button" class="btn-bulk-cancel" onclick="deselectAllItems()">
@@ -2028,116 +2178,171 @@
 
     <!-- Bulk Delete Confirmation Modal -->
     <div class="modal-overlay" id="bulk-delete-modal">
-        <div class="modal-card" style="max-width: 440px; width: 92%; background: #0f172a; border: 1px solid var(--card-border); border-radius: 20px; padding: 24px;">
+        <div class="modal-card"
+            style="max-width: 440px; width: 92%; background: #0f172a; border: 1px solid var(--card-border); border-radius: 20px; padding: 24px;">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 10px; color: #f87171; display: flex; align-items: center; justify-content: center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                <div
+                    style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 10px; color: #f87171; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                    </svg>
                 </div>
                 <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Konfirmasi Hapus Terpilih</h3>
             </div>
-            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 8px; line-height: 1.5;">Apakah Anda yakin ingin menghapus <span id="bulk-delete-count" style="font-weight: 700; color: #f87171;">0</span> item terpilih?</p>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 8px; line-height: 1.5;">Apakah Anda yakin ingin
+                menghapus <span id="bulk-delete-count" style="font-weight: 700; color: #f87171;">0</span> item terpilih?
+            </p>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button type="button" onclick="closeBulkDeleteModal()" style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer;">Batal</button>
-                <button type="button" onclick="submitBulkDelete()" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Ya, Hapus Terpilih</button>
+                <button type="button" onclick="closeBulkDeleteModal()"
+                    style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer;">Batal</button>
+                <button type="button" onclick="submitBulkDelete()"
+                    style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #fff; border: none; padding: 9px 18px; border-radius: 8px; font-weight: 700; cursor:pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);">Ya,
+                    Hapus Terpilih</button>
             </div>
         </div>
     </div>
 
     <!-- Delete All Confirmation Modal -->
     <div class="modal-overlay" id="delete-all-modal">
-        <div class="modal-card" style="max-width: 460px; width: 92%; background: #0f172a; border: 1px solid rgba(239,68,68,0.4); border-radius: 20px; padding: 24px; box-shadow: 0 20px 50px rgba(239,68,68,0.2);">
+        <div class="modal-card"
+            style="max-width: 460px; width: 92%; background: #0f172a; border: 1px solid rgba(239,68,68,0.4); border-radius: 20px; padding: 24px; box-shadow: 0 20px 50px rgba(239,68,68,0.2);">
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 12px; padding: 10px; color: #ef4444; display: flex; align-items: center; justify-content: center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+                <div
+                    style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 12px; padding: 10px; color: #ef4444; display: flex; align-items: center; justify-content: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <path
+                            d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        <line x1="12" x2="12" y1="9" y2="13" />
+                        <line x1="12" x2="12.01" y1="17" y2="17" />
+                    </svg>
                 </div>
                 <div>
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">⚠️ Hapus SELURUH Data Portal</h3>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">⚠️ Hapus SELURUH Data Portal
+                    </h3>
                     <span style="font-size: 11.5px; color: #fca5a5; font-weight: 600;">PERINGATAN BAHAYA</span>
                 </div>
             </div>
-            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5;">Apakah Anda yakin ingin <strong style="color: #ef4444;">MENGHAPUS SELURUH BERKAS & FOLDER</strong> milik Anda?</p>
-            <div style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #fca5a5; margin-bottom: 20px;">
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 12px; line-height: 1.5;">Apakah Anda yakin ingin
+                <strong style="color: #ef4444;">MENGHAPUS SELURUH BERKAS & FOLDER</strong> milik Anda?
+            </p>
+            <div
+                style="background: rgba(239, 68, 68, 0.08); border: 1px dashed rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: #fca5a5; margin-bottom: 20px;">
                 Tindakan ini akan mengosongkan seluruh ruang penyimpanan Anda dan tidak dapat dibatalkan.
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="closeDeleteAllModal()" style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer;">Batal</button>
-                <button type="button" id="btn-submit-delete-all" onclick="submitDeleteAllFiles()" style="background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%); color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-weight: 800; cursor:pointer; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);">Ya, Hapus Semua Data</button>
+                <button type="button" onclick="closeDeleteAllModal()"
+                    style="background: rgba(255,255,255,0.05); color: #e2e8f0; border: 1px solid var(--card-border); padding: 9px 18px; border-radius: 8px; cursor:pointer;">Batal</button>
+                <button type="button" id="btn-submit-delete-all" onclick="submitDeleteAllFiles()"
+                    style="background: linear-gradient(135deg, #dc2626 0%, #7f1d1d 100%); color: #fff; border: none; padding: 9px 20px; border-radius: 8px; font-weight: 800; cursor:pointer; box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);">Ya,
+                    Hapus Semua Data</button>
             </div>
         </div>
     </div>
 
     <!-- Google Drive Style Duplicate File Option Modal ("Opsi upload") -->
-    <div class="modal-overlay" id="gdrive-duplicate-modal" style="display: none; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
-        <div class="modal-card" style="max-width: 440px; width: 90%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
-            <h3 style="margin: 0 0 14px 0; font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">Opsi Upload Berkas</h3>
+    <div class="modal-overlay" id="gdrive-duplicate-modal"
+        style="display: none; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="modal-card"
+            style="max-width: 440px; width: 90%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
+            <h3
+                style="margin: 0 0 14px 0; font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">
+                Opsi Upload Berkas</h3>
             <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 20px; line-height: 1.5;">
-                Berkas <strong id="duplicate-filename-text" style="color: #60a5fa;">file.png</strong> sudah ada di lokasi ini. Apakah Anda ingin mengganti file yang ada dengan versi baru atau menyimpan kedua file?
+                Berkas <strong id="duplicate-filename-text" style="color: #60a5fa;">file.png</strong> sudah ada di
+                lokasi ini. Apakah Anda ingin mengganti file yang ada dengan versi baru atau menyimpan kedua file?
             </p>
             <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px;">
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
-                    <input type="radio" name="duplicate_option" value="replace" checked style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
+                <label
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
+                    <input type="radio" name="duplicate_option" value="replace" checked
+                        style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
                     <span>Ganti file yang ada (Versi Baru)</span>
                 </label>
-                <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
-                    <input type="radio" name="duplicate_option" value="keep_both" style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
+                <label
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
+                    <input type="radio" name="duplicate_option" value="keep_both"
+                        style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
                     <span>Simpan kedua file (Duplikat)</span>
                 </label>
             </div>
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
-                <button type="button" onclick="cancelDuplicateUpload()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 9px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Batal</button>
-                <button type="button" onclick="confirmDuplicateUpload()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; border: none; padding: 9px 24px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);">Upload</button>
+                <button type="button" onclick="cancelDuplicateUpload()"
+                    style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 9px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Batal</button>
+                <button type="button" onclick="confirmDuplicateUpload()"
+                    style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; border: none; padding: 9px 24px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);">Upload</button>
             </div>
         </div>
     </div>
 
     <!-- Google Drive Style Floating Upload Panel (Bottom-Right Widget) -->
-    <div id="gdrive-upload-widget" style="display: none; position: fixed; bottom: 0; right: 24px; z-index: 9999; width: 350px; background: #0f172a; color: #f8fafc; border-radius: 16px 16px 0 0; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; transition: transform 0.25s ease;">
+    <div id="gdrive-upload-widget"
+        style="display: none; position: fixed; bottom: 0; right: 24px; z-index: 9999; width: 350px; background: #0f172a; color: #f8fafc; border-radius: 16px 16px 0 0; box-shadow: 0 10px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.12); font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; transition: transform 0.25s ease;">
         <!-- Widget Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: #1e293b; border-bottom: 1px solid rgba(255,255,255,0.08);">
-            <span id="gdrive-widget-title" style="font-size: 14.5px; font-weight: 700; color: #f8fafc;">Mengupload 1 item</span>
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: #1e293b; border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <span id="gdrive-widget-title" style="font-size: 14.5px; font-weight: 700; color: #f8fafc;">Mengupload 1
+                item</span>
             <div style="display: flex; align-items: center; gap: 6px;">
-                <button type="button" onclick="toggleUploadWidgetCollapse()" id="btn-widget-toggle" style="background: transparent; border: none; color: #94a3b8; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                <button type="button" onclick="toggleUploadWidgetCollapse()" id="btn-widget-toggle"
+                    style="background: transparent; border: none; color: #94a3b8; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.5">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
                 </button>
-                <button type="button" onclick="closeUploadWidget()" style="background: transparent; border: none; color: #94a3b8; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px;">&times;</button>
+                <button type="button" onclick="closeUploadWidget()"
+                    style="background: transparent; border: none; color: #94a3b8; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px;">&times;</button>
             </div>
         </div>
         <!-- Widget Body Container -->
         <div id="gdrive-widget-body">
             <!-- Subheader status line -->
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: rgba(255,255,255,0.03); font-size: 12.5px; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: rgba(255,255,255,0.03); font-size: 12.5px; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.06);">
                 <span id="gdrive-widget-status-text">Menyelesaikan upload...</span>
-                <button type="button" id="gdrive-widget-cancel-btn" onclick="cancelUploadWidgetQueue()" style="background: transparent; border: none; color: #60a5fa; font-weight: 700; font-size: 12.5px; cursor: pointer; padding: 0;">Batal</button>
+                <button type="button" id="gdrive-widget-cancel-btn" onclick="cancelUploadWidgetQueue()"
+                    style="background: transparent; border: none; color: #60a5fa; font-weight: 700; font-size: 12.5px; cursor: pointer; padding: 0;">Batal</button>
             </div>
             <!-- Item List -->
-            <div id="gdrive-widget-item-list" style="max-height: 220px; overflow-y: auto; padding: 4px 0; background: #0f172a;">
+            <div id="gdrive-widget-item-list"
+                style="max-height: 220px; overflow-y: auto; padding: 4px 0; background: #0f172a;">
                 <!-- Dynamic Upload Rows -->
             </div>
         </div>
     </div>
 
     <!-- Welcome & Feature Announcement Onboarding Modal -->
-    <div class="modal-overlay" id="onboarding-guide-modal" style="display: none; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
-        <div class="modal-card" style="max-width: 460px; width: 92%; background: #111827; color: #f8fafc; border-radius: 20px; padding: 26px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65); border: 1.5px solid #f59e0b; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; animate: fadeIn 0.3s ease;">
+    <div class="modal-overlay" id="onboarding-guide-modal"
+        style="display: none; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(8px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="modal-card"
+            style="max-width: 460px; width: 92%; background: #111827; color: #f8fafc; border-radius: 20px; padding: 26px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65); border: 1.5px solid #f59e0b; font-family: 'Plus Jakarta Sans', sans-serif; position: relative; animate: fadeIn 0.3s ease;">
             <!-- Close Button -->
-            <button type="button" onclick="closeOnboardingModal()" style="position: absolute; top: 16px; right: 16px; background: rgba(255, 255, 255, 0.05); border: none; color: #9ca3af; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">&times;</button>
-            
+            <button type="button" onclick="closeOnboardingModal()"
+                style="position: absolute; top: 16px; right: 16px; background: rgba(255, 255, 255, 0.05); border: none; color: #9ca3af; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">&times;</button>
+
             <!-- Slide Content Container -->
             <div id="onboarding-slide-container" style="min-height: 140px;">
                 <!-- Dynamically populated via portal.js -->
             </div>
 
             <!-- Slide Dots Indicator & Navigation Buttons -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
                 <div id="onboarding-dots" style="display: flex; gap: 6px;">
                     <!-- Dots injected via JS -->
                 </div>
 
                 <div style="display: flex; gap: 10px;">
-                    <button type="button" id="btn-onboarding-prev" onclick="prevOnboardingSlide()" style="background: rgba(255, 255, 255, 0.08); color: #e5e7eb; border: 1px solid rgba(255, 255, 255, 0.15); padding: 8px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                    <button type="button" id="btn-onboarding-prev" onclick="prevOnboardingSlide()"
+                        style="background: rgba(255, 255, 255, 0.08); color: #e5e7eb; border: 1px solid rgba(255, 255, 255, 0.15); padding: 8px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
                         &larr; Previous
                     </button>
-                    <button type="button" id="btn-onboarding-next" onclick="nextOnboardingSlide()" style="background: #f59e0b; color: #0f172a; border: none; padding: 8px 22px; border-radius: 10px; font-size: 13.5px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); transition: all 0.2s ease;">
+                    <button type="button" id="btn-onboarding-next" onclick="nextOnboardingSlide()"
+                        style="background: #f59e0b; color: #0f172a; border: none; padding: 8px 22px; border-radius: 10px; font-size: 13.5px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35); transition: all 0.2s ease;">
                         Mengerti
                     </button>
                 </div>
@@ -2147,12 +2352,14 @@
 
     <script>
         const CURRENT_FOLDER_ID = <?= json_encode($folderId) ?>;
-        const EXISTING_FILE_NAMES = <?= json_encode(array_values(array_map(function($f) { return $f['name']; }, $files ?? []))) ?>;
-        const STORAGE_LIMIT_BYTES = <?= json_encode((float)($limitBytes ?? 0)) ?>;
-        const STORAGE_USED_BYTES = <?= json_encode((float)($totalUsedBytes ?? 0)) ?>;
-        const STORAGE_LIMIT_GB = <?= json_encode((float)($limitGb ?? 15)) ?>;
+        const EXISTING_FILE_NAMES = <?= json_encode(array_values(array_map(function ($f) {
+            return $f['name'];
+        }, $files ?? []))) ?>;
+        const STORAGE_LIMIT_BYTES = <?= json_encode((float) ($limitBytes ?? 0)) ?>;
+        const STORAGE_USED_BYTES = <?= json_encode((float) ($totalUsedBytes ?? 0)) ?>;
+        const STORAGE_LIMIT_GB = <?= json_encode((float) ($limitGb ?? 15)) ?>;
         const UPLOAD_DIRECT_URL = <?= json_encode($uploadDirectUrl ?? '') ?>;
-        const UPLOAD_DIRECT_THRESHOLD_BYTES = <?= json_encode((float)($uploadDirectThresholdBytes ?? 90 * 1024 * 1024)) ?>;
+        const UPLOAD_DIRECT_THRESHOLD_BYTES = <?= json_encode((float) ($uploadDirectThresholdBytes ?? 90 * 1024 * 1024)) ?>;
     </script>
     <script src="/assets/js/portal.js?v=<?= filemtime(__DIR__ . '/../../public/assets/js/portal.js') ?>"></script>
 </body>

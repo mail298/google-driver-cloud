@@ -1647,24 +1647,43 @@ function submitDelete() {
 // Bulk Selection & Batch Delete Logic
 function getSelectedItems() {
     const checkboxes = document.querySelectorAll('.item-checkbox:checked');
-    const items = [];
+    const itemsMap = new Map();
     checkboxes.forEach(cb => {
-        items.push({
-            type: cb.getAttribute('data-type'),
-            id: cb.getAttribute('data-id'),
-            name: cb.getAttribute('data-name')
-        });
+        const id = cb.getAttribute('data-id');
+        if (id && !itemsMap.has(id)) {
+            itemsMap.set(id, {
+                type: cb.getAttribute('data-type'),
+                id: id,
+                name: cb.getAttribute('data-name')
+            });
+        }
     });
-    return items;
+    return Array.from(itemsMap.values());
 }
 
-function updateSelectionState() {
+function updateSelectionState(changedCb) {
+    const cb = changedCb || (window.event ? window.event.target : null);
+    if (cb && cb.getAttribute) {
+        const itemId = cb.getAttribute('data-id');
+        if (itemId) {
+            const isChecked = cb.checked;
+            document.querySelectorAll(`.item-checkbox[data-id="${itemId}"]`).forEach(otherCb => {
+                otherCb.checked = isChecked;
+            });
+        }
+    }
+
     const selected = getSelectedItems();
-    const allCheckboxes = document.querySelectorAll('.item-checkbox');
+    const allUniqueIds = new Set();
+    document.querySelectorAll('.item-checkbox').forEach(c => {
+        const id = c.getAttribute('data-id');
+        if (id) allUniqueIds.add(id);
+    });
+
     const masterCbs = document.querySelectorAll('#select-all-checkbox, #master-select-all-checkbox');
 
     masterCbs.forEach(masterCb => {
-        if (allCheckboxes.length > 0 && selected.length === allCheckboxes.length) {
+        if (allUniqueIds.size > 0 && selected.length === allUniqueIds.size) {
             masterCb.checked = true;
             masterCb.indeterminate = false;
         } else if (selected.length > 0) {
