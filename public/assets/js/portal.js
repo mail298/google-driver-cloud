@@ -282,10 +282,9 @@ function renderGDriveWidget() {
     if (statusTextEl) {
         if (isFinished) {
             statusTextEl.textContent = 'Semua pengunggahan selesai';
-        } else if (currentlyUploading && currentlyUploading.progress >= 100) {
-            statusTextEl.textContent = 'Pengunggahan selesai (100%)...';
         } else if (currentlyUploading) {
-            statusTextEl.textContent = 'Mengunggah berkas (' + (currentlyUploading.progress || 0) + '%)...';
+            const pct = currentlyUploading.progress || 0;
+            statusTextEl.textContent = 'Mengunggah berkas... ' + pct + '%';
         } else {
             statusTextEl.textContent = 'Menyiapkan pengunggahan...';
         }
@@ -316,7 +315,7 @@ function renderGDriveWidget() {
                     + '<div style="background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: ' + (item.progress || 0) + '%; transition: width 0.2s ease;"></div>'
                     + '</div>'
                     + '<div style="font-size: 11px; color: #94a3b8; display: flex; justify-content: space-between;">'
-                    + '<span>Mengunggah... ' + (item.progress || 0) + '%</span>'
+                    + '<span>Proses upload: ' + (item.progress || 0) + '%</span>'
                     + '<span>' + loadedStr + ' / ' + totalStr + '</span>'
                     + '</div>'
                     + '</div>';
