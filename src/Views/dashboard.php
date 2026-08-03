@@ -1574,10 +1574,10 @@
                                              </svg>
                                          </div>
                                      <?php elseif ($isVideo): ?>
-                                         <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5);">
-                                             <video src="/download?id=<?= $file['id'] ?>&inline=1" preload="none"
+                                         <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0f172a;">
+                                             <video src="/download?id=<?= $file['id'] ?>&inline=1#t=0.1" preload="metadata"
                                                  style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; pointer-events:none;"></video>
-                                             <div style="position:relative; z-index:2; width:38px; height:38px; border-radius:50%; background:rgba(168,85,247,0.25); border:1px solid rgba(168,85,247,0.5); display:flex; align-items:center; justify-content:center; color:#c084fc; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                                             <div style="position:relative; z-index:2; width:40px; height:40px; border-radius:50%; background:rgba(168,85,247,0.35); border:1.5px solid rgba(192,132,252,0.6); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 14px rgba(0,0,0,0.5); backdrop-filter:blur(4px);">
                                                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px;">
                                                      <polygon points="5 3 19 12 5 21 5 3"/>
                                                  </svg>
