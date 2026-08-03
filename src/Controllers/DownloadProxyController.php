@@ -320,17 +320,6 @@ class DownloadProxyController
         $fileSize = (int) ($file['size_bytes'] ?? 0);
 
         // ─────────────────────────────────────────────────────────────────
-        // GOOGLE IMAGE CDN FAST ENGINE (lh3.googleusercontent.com)
-        // Direct Google Edge Image CDN for Landing Pages (<5ms Instant Load)
-        // ─────────────────────────────────────────────────────────────────
-        if ($isImage && !empty($file['provider_file_id']) && $isInline) {
-            header('Location: https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=s0', true, 302);
-            header('Cache-Control: public, max-age=31536000, immutable');
-            header('Cloudflare-CDN-Cache-Control: max-age=31536000');
-            exit;
-        }
-
-        // ─────────────────────────────────────────────────────────────────
         // HTTP 304 Not Modified — 0ms cache hit for returning visitors
         // ─────────────────────────────────────────────────────────────────
         $etag = '"' . md5($file['id'] . '_' . ($file['updated_at'] ?? '') . '_' . $file['size_bytes']) . '"';
@@ -344,7 +333,7 @@ class DownloadProxyController
 
         // ─────────────────────────────────────────────────────────────────
         // LOCAL DISK CACHE: Check if file is already cached on disk
-        // Cache-eligible: images, video, audio under 50MB
+        // Cache-eligible: images, video, audio under 30MB
         // ─────────────────────────────────────────────────────────────────
         if (self::isCacheEligible($mime, $fileSize)) {
             $cachePath = self::getCachePath($file['id'], $etag);
@@ -382,10 +371,10 @@ class DownloadProxyController
 
         // ─────────────────────────────────────────────────────────────────
         // LOCAL DISK CACHE: Download to disk first, then serve (cache-miss)
-        // On the first request for a cacheable file, we download it to
-        // local storage and then serve it from disk. Next requests: instant.
+        // On the first request for a cacheable file, we fetch it server-side to
+        // local storage and serve it under current domain — no external 302 redirect.
         // ─────────────────────────────────────────────────────────────────
-        if (self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id']) && $accessToken && !isset($_SERVER['HTTP_RANGE'])) {
+        if (self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id']) && !isset($_SERVER['HTTP_RANGE'])) {
             $cachePath = self::getCachePath($file['id'], $etag);
             $tmpPath = $cachePath . '.tmp';
 
@@ -394,7 +383,19 @@ class DownloadProxyController
                 self::runEviction();
             }
 
-            if (self::fetchToFile($upstreamUrl, $curlHeaders, $tmpPath)) {
+            $fetched = false;
+            // For images, attempt server-side fetch from Google LH3 CDN first
+            if ($isImage) {
+                $lh3Url = 'https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=s0';
+                $fetched = self::fetchToFile($lh3Url, [], $tmpPath);
+            }
+
+            // Fallback to Google Drive API with OAuth token if LH3 fetch fails or for non-images
+            if (!$fetched && $accessToken) {
+                $fetched = self::fetchToFile($upstreamUrl, $curlHeaders, $tmpPath);
+            }
+
+            if ($fetched) {
                 rename($tmpPath, $cachePath);
                 $cachedSize = filesize($cachePath);
                 self::serveFromDisk($cachePath, $mime, $file['name'], $etag, $cachedSize, $isInline);
