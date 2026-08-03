@@ -1118,13 +1118,7 @@ function processDroppedFiles(files) {
 }
 
 // File Preview Handling
-// Track current previewed file for Salin Link button
-let previewCurrentId = null;
-let previewCurrentMime = null;
-
 function previewFile(id, name, mimeType) {
-    previewCurrentId = id;
-    previewCurrentMime = mimeType;
     const modal = document.getElementById('preview-modal');
     const title = document.getElementById('preview-title');
     const content = document.getElementById('preview-content');
@@ -1141,7 +1135,11 @@ function previewFile(id, name, mimeType) {
     if (mimeType.startsWith('image/')) {
         content.innerHTML = `<img src="${previewUrl}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain;">`;
     } else if (mimeType.startsWith('video/')) {
-        content.innerHTML = `<video src="${previewUrl}" controls autoplay playsinline style="width: 100%; max-height: 65vh; border-radius: 12px; object-fit: contain; background: #000; outline: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"></video>`;
+        content.innerHTML = `
+            <div style="position: relative; width: 100%; height: 380px; max-height: 60vh; border-radius: 12px; overflow: hidden; background: #000;">
+                <iframe src="/embed/${encodeURIComponent(id)}" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
+            </div>`;
     } else if (mimeType.startsWith('audio/')) {
         content.innerHTML = `<audio src="${previewUrl}" controls autoplay style="width: 90%; max-width: 480px; outline: none;"></audio>`;
     } else if (mimeType === 'application/pdf' || name.toLowerCase().endsWith('.pdf')) {
@@ -1168,26 +1166,6 @@ function closePreviewModal() {
     const content = document.getElementById('preview-content');
     if (content) content.innerHTML = '';
     if (modal) modal.classList.remove('active');
-}
-
-/**
- * copyPreviewLink — menyalin direct link dari file yang sedang ditampilkan di modal pratinjau.
- * Gambar / video / audio / PDF → inline=1 (langsung tampil di browser).
- * File lainnya → link download biasa.
- */
-function copyPreviewLink() {
-    if (!previewCurrentId) return;
-    const isInline = previewCurrentMime &&
-        (previewCurrentMime.startsWith('image/') ||
-         previewCurrentMime.startsWith('video/') ||
-         previewCurrentMime.startsWith('audio/') ||
-         previewCurrentMime === 'application/pdf');
-    const link = window.location.origin + '/download?id=' + encodeURIComponent(previewCurrentId) + (isInline ? '&inline=1' : '');
-    copyToClipboard(link).then(() => {
-        showToast('🔗 Tautan berhasil disalin ke clipboard!');
-    }).catch(() => {
-        prompt('Salin tautan:', link);
-    });
 }
 
 // Mobile Sidebar Toggle
@@ -1402,24 +1380,14 @@ function copyToClipboard(text) {
 
 function cmActionCopyLink() {
     closeContextMenu();
-    if (!activeContextItem) return;
-
-    let link;
-    if (activeContextItem.type === 'folder') {
-        // Salin link ke folder
-        link = window.location.origin + '/?folderId=' + encodeURIComponent(activeContextItem.id);
-    } else {
-        // Salin direct link ke file — inline=1 agar gambar/video langsung tampil di browser tanpa download dialog
-        const mime = activeContextItem.mimeType || '';
-        const isInline = mime.startsWith('image/') || mime.startsWith('video/') || mime.startsWith('audio/') || mime === 'application/pdf';
-        link = window.location.origin + '/download?id=' + encodeURIComponent(activeContextItem.id) + (isInline ? '&inline=1' : '');
+    if (activeContextItem) {
+        const link = window.location.origin + (activeContextItem.type === 'file' ? `/share?id=${encodeURIComponent(activeContextItem.id)}` : `/?folderId=${encodeURIComponent(activeContextItem.id)}`);
+        copyToClipboard(link).then(() => {
+            showToast('Tautan berhasil disalin');
+        }).catch(() => {
+            prompt('Salin tautan:', link);
+        });
     }
-
-    copyToClipboard(link).then(() => {
-        showToast('🔗 Tautan berhasil disalin ke clipboard!');
-    }).catch(() => {
-        prompt('Salin tautan:', link);
-    });
 }
 
 function cmActionInvite() {
@@ -2267,7 +2235,7 @@ window.addEventListener('beforeunload', function (e) {
 function openVideoEmbedModal(fileId, fileName) {
     const modal = document.getElementById('video-embed-modal');
     const nameEl = document.getElementById('embed-video-name');
-    const videoEl = document.getElementById('embed-player-video');
+    const iframeEl = document.getElementById('embed-player-iframe');
     const codeEl = document.getElementById('embed-iframe-code');
     const hlsEl = document.getElementById('embed-hls-url');
 
@@ -2276,14 +2244,10 @@ function openVideoEmbedModal(fileId, fileName) {
     const origin = window.location.origin;
     const embedUrl = origin + '/embed/' + encodeURIComponent(fileId);
     const hlsUrl = origin + '/stream/' + encodeURIComponent(fileId) + '/master.m3u8';
-    const streamUrl = origin + '/download?id=' + encodeURIComponent(fileId) + '&inline=1';
     const iframeCode = `<iframe src="${embedUrl}" width="100%" height="450" frameborder="0" allowfullscreen></iframe>`;
 
     if (nameEl) nameEl.textContent = fileName || 'Video Stream';
-    if (videoEl) {
-        videoEl.src = streamUrl;
-        videoEl.load();
-    }
+    if (iframeEl) iframeEl.src = embedUrl;
     if (codeEl) codeEl.value = iframeCode;
     if (hlsEl) hlsEl.value = hlsUrl;
 
@@ -2296,11 +2260,8 @@ function openVideoEmbedModal(fileId, fileName) {
 
 function closeVideoEmbedModal() {
     const modal = document.getElementById('video-embed-modal');
-    const videoEl = document.getElementById('embed-player-video');
-    if (videoEl) {
-        videoEl.pause();
-        videoEl.src = '';
-    }
+    const iframeEl = document.getElementById('embed-player-iframe');
+    if (iframeEl) iframeEl.src = '';
     if (modal) {
         modal.style.display = 'none';
         modal.classList.remove('active');

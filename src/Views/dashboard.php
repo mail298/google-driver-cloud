@@ -2456,10 +2456,10 @@
             </div>
 
             <!-- Embedded Player Preview -->
-            <div
-                style="display: flex; justify-content: center; align-items: center; width: 100%; min-height: 180px; max-height: 55vh; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
-                <video id="embed-player-video" src="" controls playsinline
-                    style="width: 100%; max-height: 55vh; border-radius: 12px; object-fit: contain; background: #000; outline: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"></video>
+            <div style="position: relative; width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
+                <iframe id="embed-player-iframe" src="" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
+                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
             </div>
 
             <!-- Code & Link Inputs -->
