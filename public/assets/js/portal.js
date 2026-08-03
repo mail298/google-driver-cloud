@@ -1135,7 +1135,7 @@ function previewFile(id, name, mimeType) {
     if (mimeType.startsWith('image/')) {
         content.innerHTML = `<img src="${previewUrl}" style="max-width: 100%; max-height: 480px; border-radius: 8px; object-fit: contain;">`;
     } else if (mimeType.startsWith('video/')) {
-        content.innerHTML = `<video src="${previewUrl}" controls autoplay style="max-width: 100%; max-height: 480px; border-radius: 8px; outline: none;"></video>`;
+        content.innerHTML = `<iframe src="/embed/${encodeURIComponent(id)}" style="width: 100%; height: 480px; border: none; border-radius: 12px; background: #000;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
     } else if (mimeType.startsWith('audio/')) {
         content.innerHTML = `<audio src="${previewUrl}" controls autoplay style="width: 90%; max-width: 480px; outline: none;"></audio>`;
     } else if (mimeType === 'application/pdf' || name.toLowerCase().endsWith('.pdf')) {

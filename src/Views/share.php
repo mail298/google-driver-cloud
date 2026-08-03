@@ -232,7 +232,7 @@
             <img src="/download?id=<?= $file['id'] ?>&inline=1" alt="<?= htmlspecialchars($file['name']) ?>"
                 class="share-full-img">
         <?php elseif ($isVideo): ?>
-            <video src="/download?id=<?= $file['id'] ?>&inline=1" controls class="share-full-video" autoplay></video>
+            <iframe src="/embed/<?= htmlspecialchars($file['id']) ?>" style="width: 100%; height: 100%; min-height: 480px; border: none; background: #000; border-radius: 12px;" allow="autoplay; fullscreen" allowfullscreen></iframe>
         <?php elseif ($isPdf): ?>
             <iframe src="/download?id=<?= $file['id'] ?>&inline=1" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
         <?php else: ?>
