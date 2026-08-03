@@ -1720,7 +1720,7 @@
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <?php if ($isImage): ?>
-                                                    <img src="/download?id=<?= $file['id'] ?>&inline=1" loading="lazy"
+                                                    <img src="/download?id=<?= $file['id'] ?>&thumb=1" loading="lazy"
                                                         decoding="async"
                                                         style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;">
                                                 <?php else: ?>
