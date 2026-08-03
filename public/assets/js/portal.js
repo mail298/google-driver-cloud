@@ -2078,24 +2078,29 @@ function submitBulkDelete() {
 // Onboarding Guide Feature Announcement Tour Popup Modal
 const onboardingSlides = [
     {
-        title: '1. Unggah Berkas & Buat Folder',
-        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Unggah Berkas</strong>: Klik tombol <strong>↑ Unggah File</strong> atau seret (drag & drop) file langsung ke area mana saja di layar.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Buat Folder</strong>: Klik <strong>📁 Folder Baru</strong>. Tombol dilengkapi sistem terkunci otomatis (anti-duplikat).</div></div></div>',
+        title: '1. Unggah Berkas Chunking & Folder',
+        desc: '<div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#cbd5e1; line-height:1.5;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Upload Berkas Besar (Hingga 5GB+)</strong>: Klik <strong>↑ Unggah File</strong> atau seret file ke layar. Berkas dipotong otomatis menjadi <i>chunk 45MB</i> untuk melewati limit Cloudflare 100MB tanpa freeze.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Manajemen Folder</strong>: Klik <strong>📁 Folder Baru</strong> untuk mengelompokkan berkas. Dilengkapi sistem anti-duplikat otomatis.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Widget Upload Real-time</strong>: Pantau progress unggah, kecepatan, dan sisa waktu di pojok kanan bawah.</div></div></div>',
         iconColor: '#f59e0b'
     },
     {
-        title: '2. Link Gambar CDN Landing Page',
-        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div>Klik opsi <strong>⋮ (titik tiga)</strong> pada gambar &rarr; Pilih <strong>Copy Link</strong>.</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Tautan kustom domain tersalin (contoh: <code>clouds.wn-cdn.net/share?id=...</code>).</div></div><div style="display:flex; gap:6px;"><span>•</span><div>Pasang langsung pada tag HTML <code>&lt;img src="..."&gt;</code> atau CSS Background Landing Page secara cepat tanpa mengekspos domain Google.</div></div></div>',
+        title: '2. Stream & Embed Video CDN',
+        desc: '<div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#cbd5e1; line-height:1.5;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Ambil Kode Embed</strong>: Klik titik tiga <strong>⋮</strong> pada video &rarr; Pilih <strong>Stream & Embed Video (HLS)</strong>.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Pasang di Landing Page</strong>: Salin kode Iframe HTML dan tempelkan ke WordPress, Elementor, atau HTML Landing Page Anda.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Performa Instan (~0ms)</strong>: Video menggunakan <i>4MB Incremental Chunking</i> dengan kecepatan startup <30ms, bebas iklan, tanpa watermark, dan terlindungi Anti-Hotlink.</div></div></div>',
         iconColor: '#3b82f6'
     },
     {
-        title: '3. Pencarian & Opsi Berkas',
-        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Pencarian</strong>: Ketik nama berkas di kolom atas untuk menyaring berkas secara instan.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Opsi Berkas (⋮)</strong>: Klik item untuk Pratinjau (Preview), Unduh, Ubah Nama, Pindahkan, atau Detail Ukuran.</div></div></div>',
+        title: '3. Tautan Gambar CDN White-Label',
+        desc: '<div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#cbd5e1; line-height:1.5;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Copy Link 1-Klik</strong>: Klik titik tiga <strong>⋮</strong> pada gambar &rarr; Pilih <strong>Copy Link</strong> untuk menyalin URL kustom <code>clouds.wn-cdn.net/share?id=...</code></div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Integrasi HTML & CSS</strong>: Tempelkan langsung ke tag <code>&lt;img src="..."&gt;</code> atau CSS <code>background-image</code> pada website Anda.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Privasi & Kecepatan High-Speed</strong>: Gambar dimuat instan via ETag 304 Caching tanpa pernah membocorkan domain/akun Google Drive asli Anda.</div></div></div>',
         iconColor: '#10b981'
     },
     {
-        title: '4. Hapus Massal & Pengaturan Akun',
-        desc: '<div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Hapus Banyak Berkas</strong>: Centang beberapa berkas &rarr; Klik tombol merah <strong>Hapus Terpilih</strong> di baris bawah.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Pengaturan Akun</strong>: Klik <strong>Pengaturan Akun</strong> di sidebar kiri untuk ubah password, atau <strong>Panduan Fitur</strong> untuk membuka petunjuk ini lagi.</div></div></div>',
-        iconColor: '#a78bfa'
+        title: '4. Pencarian & Navigasi Berkas',
+        desc: '<div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#cbd5e1; line-height:1.5;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Kolom Pencarian Fast Filter</strong>: Ketik nama berkas di kolom pencarian atas untuk menyaring data di layar secara langsung.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Pratinjau Berkas (Preview)</strong>: Klik dua kali atau pilih <strong>Preview</strong> untuk membaca PDF, melihat foto, atau memutar media.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Ubah Nama & Pindahkan</strong>: Gunakan opsi <strong>Rename</strong> atau <strong>Move to Folder</strong> untuk merapikan lokasi penyimpanan.</div></div></div>',
+        iconColor: '#8b5cf6'
+    },
+    {
+        title: '5. Aksi Massal & Keamanan Akun',
+        desc: '<div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#cbd5e1; line-height:1.5;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Seleksi Massal (Bulk Action)</strong>: Centang beberapa berkas sekaligus &rarr; Gunakan baris tombol di bawah untuk <strong>Pindahkan Terpilih</strong> atau <strong>Hapus Terpilih</strong>.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Keamanan Akun</strong>: Klik menu <strong>Pengaturan Akun</strong> di sidebar kiri untuk mengubah password akun Anda kapan saja.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Pemantau Kuota Storage</strong>: Cek grafik kuota penyimpanan real-time di sidebar kiri untuk memantau kapasitas tersisa.</div></div></div>',
+        iconColor: '#ec4899'
     }
 ];
 
