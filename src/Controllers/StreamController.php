@@ -3,16 +3,24 @@
 
 class StreamController
 {
+    private static function resolveFileId()
+    {
+        if (!empty($_GET['id'])) {
+            return trim($_GET['id']);
+        }
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        if (preg_match('/^\/(?:embed|stream)\/([^\/]+)/i', $uri, $m)) {
+            return trim($m[1]);
+        }
+        return null;
+    }
+
     /**
      * Render the embeddable video player page (/embed/{id})
      */
     public static function embed()
     {
-        $fileId = $_GET['id'] ?? ($_SERVER['PATH_INFO'] ?? null);
-        if ($fileId) {
-            $fileId = preg_replace('/^\/embed\//', '', $fileId);
-            $fileId = trim(explode('?', $fileId)[0], '/');
-        }
+        $fileId = self::resolveFileId();
 
         if (!$fileId) {
             http_response_code(404);
@@ -52,11 +60,7 @@ class StreamController
      */
     public static function masterPlaylist()
     {
-        $fileId = $_GET['id'] ?? null;
-        if (!$fileId && !empty($_SERVER['PATH_INFO'])) {
-            preg_match('/\/stream\/([^\/]+)\/master\.m3u8/', $_SERVER['PATH_INFO'], $matches);
-            $fileId = $matches[1] ?? null;
-        }
+        $fileId = self::resolveFileId();
 
         if (!$fileId) {
             http_response_code(404);
@@ -109,15 +113,12 @@ class StreamController
      */
     public static function streamSegment()
     {
-        $fileId = $_GET['id'] ?? null;
-        $segmentIdx = isset($_GET['segment']) ? (int) $_GET['segment'] : 0;
+        $fileId = self::resolveFileId();
+        $segmentIdx = 0;
 
-        if (!empty($_SERVER['PATH_INFO'])) {
-            preg_match('/\/stream\/([^\/]+)\/segment\/(\d+)/', $_SERVER['PATH_INFO'], $matches);
-            if (!empty($matches[1])) {
-                $fileId = $matches[1];
-                $segmentIdx = (int) ($matches[2] ?? 0);
-            }
+        $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+        if (preg_match('/\/segment\/(\d+)/i', $uri, $m)) {
+            $segmentIdx = (int) $m[1];
         }
 
         if (!$fileId) {
