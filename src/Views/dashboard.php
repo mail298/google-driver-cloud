@@ -1790,7 +1790,14 @@
                 <!-- Dynamic content loaded via JS -->
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <button id="preview-copylink-btn" onclick="copyPreviewLink()"
+                    style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.07); color: #94a3b8; border: 1px solid rgba(255,255,255,0.12); padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.2s, color 0.2s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.13)'; this.style.color='#fff';"
+                    onmouseout="this.style.background='rgba(255,255,255,0.07)'; this.style.color='#94a3b8';">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    Salin Link
+                </button>
                 <a id="preview-download-btn" href="#" class="btn-action btn-primary"
                     style="text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 14px rgba(16,185,129,0.3);">Unduh
                     Berkas</a>

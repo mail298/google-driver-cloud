@@ -1118,7 +1118,13 @@ function processDroppedFiles(files) {
 }
 
 // File Preview Handling
+// Track current previewed file for Salin Link button
+let previewCurrentId = null;
+let previewCurrentMime = null;
+
 function previewFile(id, name, mimeType) {
+    previewCurrentId = id;
+    previewCurrentMime = mimeType;
     const modal = document.getElementById('preview-modal');
     const title = document.getElementById('preview-title');
     const content = document.getElementById('preview-content');
@@ -1162,6 +1168,26 @@ function closePreviewModal() {
     const content = document.getElementById('preview-content');
     if (content) content.innerHTML = '';
     if (modal) modal.classList.remove('active');
+}
+
+/**
+ * copyPreviewLink — menyalin direct link dari file yang sedang ditampilkan di modal pratinjau.
+ * Gambar / video / audio / PDF → inline=1 (langsung tampil di browser).
+ * File lainnya → link download biasa.
+ */
+function copyPreviewLink() {
+    if (!previewCurrentId) return;
+    const isInline = previewCurrentMime &&
+        (previewCurrentMime.startsWith('image/') ||
+         previewCurrentMime.startsWith('video/') ||
+         previewCurrentMime.startsWith('audio/') ||
+         previewCurrentMime === 'application/pdf');
+    const link = window.location.origin + '/download?id=' + encodeURIComponent(previewCurrentId) + (isInline ? '&inline=1' : '');
+    copyToClipboard(link).then(() => {
+        showToast('🔗 Tautan berhasil disalin ke clipboard!');
+    }).catch(() => {
+        prompt('Salin tautan:', link);
+    });
 }
 
 // Mobile Sidebar Toggle
@@ -1376,14 +1402,24 @@ function copyToClipboard(text) {
 
 function cmActionCopyLink() {
     closeContextMenu();
-    if (activeContextItem) {
-        const link = window.location.origin + (activeContextItem.type === 'file' ? `/share?id=${encodeURIComponent(activeContextItem.id)}` : `/?folderId=${encodeURIComponent(activeContextItem.id)}`);
-        copyToClipboard(link).then(() => {
-            showToast('Tautan berhasil disalin');
-        }).catch(() => {
-            prompt('Salin tautan:', link);
-        });
+    if (!activeContextItem) return;
+
+    let link;
+    if (activeContextItem.type === 'folder') {
+        // Salin link ke folder
+        link = window.location.origin + '/?folderId=' + encodeURIComponent(activeContextItem.id);
+    } else {
+        // Salin direct link ke file — inline=1 agar gambar/video langsung tampil di browser tanpa download dialog
+        const mime = activeContextItem.mimeType || '';
+        const isInline = mime.startsWith('image/') || mime.startsWith('video/') || mime.startsWith('audio/') || mime === 'application/pdf';
+        link = window.location.origin + '/download?id=' + encodeURIComponent(activeContextItem.id) + (isInline ? '&inline=1' : '');
     }
+
+    copyToClipboard(link).then(() => {
+        showToast('🔗 Tautan berhasil disalin ke clipboard!');
+    }).catch(() => {
+        prompt('Salin tautan:', link);
+    });
 }
 
 function cmActionInvite() {
