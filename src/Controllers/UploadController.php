@@ -78,6 +78,7 @@ class UploadController
             if (empty($_FILES) && empty($_POST) && $contentLength > 0) {
                 $maxPost = ini_get('post_max_size');
                 $sizeMb = round($contentLength / (1024 * 1024), 1);
+                LoggerService::error("Upload failed: post_max_size overflow. Content length {$sizeMb} MB exceeds post_max_size {$maxPost}.");
                 http_response_code(200);
                 echo json_encode([
                     'success' => false,
@@ -87,6 +88,7 @@ class UploadController
             }
 
             if (!isset($_FILES['file'])) {
+                LoggerService::error("Upload failed: No file parameter in request.");
                 echo json_encode(['success' => false, 'message' => 'Tidak ada berkas yang diunggah.']);
                 exit;
             }
@@ -112,6 +114,7 @@ class UploadController
                         $errorMsg = "Gagal menulis berkas ke disk server.";
                         break;
                 }
+                LoggerService::error("Upload error (Code {$file['error']}): {$errorMsg}");
                 echo json_encode(['success' => false, 'message' => $errorMsg]);
                 exit;
             }

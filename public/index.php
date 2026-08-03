@@ -7,6 +7,7 @@ if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|svg|ico|woff|woff2|ttf)$/', $_SERV
 }
 
 require_once dirname(__DIR__) . '/config/database.php';
+require_once dirname(__DIR__) . '/src/Services/LoggerService.php';
 require_once dirname(__DIR__) . '/src/Models/SecurityModel.php';
 require_once dirname(__DIR__) . '/src/Models/IpWhitelistModel.php';
 require_once dirname(__DIR__) . '/src/Controllers/AuthController.php';
@@ -19,6 +20,15 @@ require_once dirname(__DIR__) . '/src/Controllers/SettingsController.php';
 require_once dirname(__DIR__) . '/src/Controllers/BackupController.php';
 require_once dirname(__DIR__) . '/src/Controllers/ClientBackupController.php';
 require_once dirname(__DIR__) . '/src/Controllers/StreamController.php';
+
+// Global uncaught exception and error logger (writes JSON debug error log)
+set_exception_handler(function (\Throwable $ex) {
+    LoggerService::exception($ex);
+    if (!headers_sent()) {
+        http_response_code(500);
+    }
+    echo "500 - Internal Server Error";
+});
 
 // Apply global security headers to all responses
 SecurityModel::sendSecurityHeaders();

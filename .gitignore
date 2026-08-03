@@ -3,6 +3,8 @@
 .env.local
 .env.*.local
 
-# Cache files
+# Cache & Log files
 storage/cache/files/*.cache
-storage/cache/files/*.cache
+storage/logs/*.json
+*.log
+

@@ -23,6 +23,7 @@ class StreamController
         $fileId = self::resolveFileId();
 
         if (!$fileId) {
+            LoggerService::error("Stream embed failed: Video ID not found in request.");
             http_response_code(404);
             die("ID Video tidak ditemukan.");
         }
@@ -33,6 +34,7 @@ class StreamController
         $file = $stmt->fetch();
 
         if (!$file) {
+            LoggerService::error("Stream embed failed: File not found or deleted for ID '{$fileId}'.");
             http_response_code(404);
             die("Video tidak ditemukan atau telah dihapus.");
         }
@@ -42,12 +44,15 @@ class StreamController
         $isVideo = strpos($mime, 'video/') === 0 || in_array(pathinfo($file['name'], PATHINFO_EXTENSION), ['mp4', 'mkv', 'mov', 'avi', 'webm', 'ts', 'm3u8', 'flv']);
 
         if (!$isVideo && !$isAudio) {
+            LoggerService::error("Stream embed failed: File '{$file['name']}' is neither video nor audio.");
             http_response_code(400);
             die("Berkas ini bukan berupa video atau audio.");
         }
 
         // Domain Whitelist / Hotlink Protection check
         if (!self::checkReferrerAllowed($file)) {
+            $referer = $_SERVER['HTTP_REFERER'] ?? 'Unknown';
+            LoggerService::warning("Stream hotlink blocked: Referer '{$referer}' is not allowed for file '{$file['id']}'.");
             http_response_code(403);
             die("Akses pemutaran video ditolak: Domain ini tidak diizinkan (Hotlink Protected).");
         }

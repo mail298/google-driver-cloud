@@ -201,6 +201,33 @@ docker compose down -v
 
 ---
 
+## 🚀 CDN & Media Delivery Architecture
+
+- **Google Image Edge CDN (`lh3.googleusercontent.com`)**: Gambar dan pratinjau dikirimkan langsung dari Google Edge CDN tanpa membebankan bandwidth server lokal.
+- **Adaptive Video & Audio Streaming (HLS & HTTP 206)**: Dukungan streaming video adaptif HLS master playlist (`.m3u8`) serta HTTP 206 Partial Content dengan penguraian chunk 4MB untuk *instant video startup*.
+- **Direct Upload CDN**: Upload file berukuran besar melampaui `UPLOAD_DIRECT_THRESHOLD_BYTES` dialihkan langsung ke endpoint CDN (`UPLOAD_DIRECT_URL`) untuk menghindari kendala `post_max_size` PHP.
+- **Local Disk Cache**: Aset media hingga 30MB disimpankan ke `storage/cache/files` dengan strategi *eviction* otomatis hingga batas 1GB.
+
+---
+
+## 📊 JSON Debug Logging System
+
+Sistem mencatat setiap error dan event debug ke dalam berkas `storage/logs/debug.json` dalam format JSON yang terstruktur per baris (*JSON Lines*):
+
+```json
+{
+  "id": "log_66b2a1f09c8a1",
+  "username": "client",
+  "debug_error": "Download failed: File not found or access denied for ID '123'",
+  "timestamp": "2026-08-03T15:18:00+07:00",
+  "level": "ERROR",
+  "ip": "127.0.0.1",
+  "request_uri": "/download?id=123"
+}
+```
+
+---
+
 ## 📁 Struktur Direktori Project
 
 ```
@@ -209,14 +236,17 @@ cliend/
 │   └── users.json            # Penyimpanan data pengguna portal
 ├── public/
 │   ├── assets/               # CSS, JS (portal.js), dan aset visual
-│   └── index.php             # Front controller & routing utama
+│   └── index.php             # Front controller, routing, & exception handler
 ├── src/
 │   ├── Controllers/
 │   │   ├── AdminController.php         # Manajemen admin & pengguna
-│   │   ├── AuthController.php          # Otentikasi & sesi
+│   │   ├── AuthController.php          # Otentikasi, sesi, & rate limiting
 │   │   ├── DashboardController.php     # Tampilan dashboard & kuota
-│   │   ├── DownloadProxyController.php # Proxy download berkas
-│   │   └── UploadController.php        # Handler upload ke gateway
+│   │   ├── DownloadProxyController.php # Proxy download & CDN image engine
+│   │   ├── StreamController.php        # Streaming video HLS & embed player
+│   │   └── UploadController.php        # Handler upload ke gateway & CDN
+│   ├── Services/
+│   │   └── LoggerService.php           # Service logging debug berformat JSON
 │   ├── Models/
 │   │   ├── IpWhitelistModel.php        # Model IP Whitelist
 │   │   ├── PortalModel.php             # Operasi database & token GDrive
@@ -225,7 +255,11 @@ cliend/
 │   └── Views/
 │       ├── admin.php                   # Tampilan Dashboard Admin
 │       ├── dashboard.php               # Tampilan Dashboard Client
+│       ├── embed.php                   # Pemutar Video Embed
 │       └── login.php                   # Tampilan Halaman Login
+├── storage/
+│   ├── cache/                # Cache berkas media lokal (SSD)
+│   └── logs/                 # Berkas log JSON (debug.json)
 ├── .env.example              # Template konfigurasi environment
 ├── .env                      # File variabel lingkungan aktif
 └── README.md                 # Dokumentasi resmi project

@@ -4,6 +4,7 @@
 require_once dirname(__DIR__) . '/Models/UserModel.php';
 require_once dirname(__DIR__) . '/Models/IpWhitelistModel.php';
 require_once dirname(__DIR__) . '/Models/SecurityModel.php';
+require_once dirname(__DIR__) . '/Services/LoggerService.php';
 
 class AuthController {
     public static function startSession() {
@@ -144,6 +145,7 @@ class AuthController {
                     $lockoutRemaining = SecurityModel::getLockoutRemainingSeconds($identifier);
                     $minutesLeft = ceil($lockoutRemaining / 60);
                     $error = "Terlalu banyak percobaan login yang gagal. Coba lagi dalam {$minutesLeft} menit.";
+                    LoggerService::error("Login locked out for user '{$username}' from IP '{$clientIp}'.", ['username' => $username]);
                 } else {
                     $user = UserModel::getUserByUsername($username);
 
@@ -161,6 +163,7 @@ class AuthController {
                         if ($user['role'] === 'admin' && !IpWhitelistModel::isIpAllowed()) {
                             $ip = $clientIp;
                             $error = "Akses Admin ditolak: IP Anda ({$ip}) tidak terdaftar dalam Admin IP Whitelist.";
+                            LoggerService::error("Admin access denied by IP whitelist for user '{$username}' from IP '{$ip}'.", ['username' => $username]);
                         } else {
                             // Clear rate limit on successful login
                             SecurityModel::clearLoginAttempts($identifier);
@@ -192,6 +195,7 @@ class AuthController {
                             $minutesLeft = ceil($lockoutRemaining / 60);
                             $error = "Akun terkunci. Terlalu banyak percobaan gagal. Coba lagi dalam {$minutesLeft} menit.";
                         }
+                        LoggerService::error("Failed login attempt for username '{$username}' from IP '{$clientIp}'. Error: {$error}", ['username' => $username]);
                     }
                 }
             }

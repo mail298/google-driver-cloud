@@ -31,10 +31,10 @@ class DownloadProxyController
         return self::getCacheDir() . '/' . $safe . '_' . $hash . '.cache';
     }
 
-    private const CACHE_TTL          = 604800;   // 7 days per-file TTL
+    private const CACHE_TTL = 604800;   // 7 days per-file TTL
     private const CACHE_MAX_TOTAL_MB = 1000;     // max total cache dir size (1GB)
     private const CACHE_MAX_BYTES = 31457280;   // 30 MB max per-file disk cache (larger files stream live instantly via 206 Range)
-    private const PROXY_BUF_SIZE  = 524288;     // 512 KB streaming buffer
+    private const PROXY_BUF_SIZE = 524288;     // 512 KB streaming buffer
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -58,8 +58,9 @@ class DownloadProxyController
     private static function runEviction()
     {
         $cacheDir = self::getCacheDir();
-        $files    = glob($cacheDir . '/*.cache');
-        if (empty($files)) return;
+        $files = glob($cacheDir . '/*.cache');
+        if (empty($files))
+            return;
 
         // Phase 1: purge TTL-expired files
         foreach ($files as $f) {
@@ -71,22 +72,25 @@ class DownloadProxyController
         // Phase 2: if still over 80% limit, evict oldest (by last access time)
         $targetBytes = self::CACHE_MAX_TOTAL_MB * 1048576 * 0.8;
         $files = glob($cacheDir . '/*.cache');
-        if (empty($files)) return;
+        if (empty($files))
+            return;
 
         $total = 0;
-        $meta  = [];
+        $meta = [];
         foreach ($files as $f) {
-            $sz    = filesize($f);
+            $sz = filesize($f);
             $total += $sz;
             $meta[] = ['path' => $f, 'size' => $sz, 'atime' => fileatime($f)];
         }
 
-        if ($total <= $targetBytes) return;
+        if ($total <= $targetBytes)
+            return;
 
         // Sort by oldest access time first
         usort($meta, fn($a, $b) => $a['atime'] <=> $b['atime']);
         foreach ($meta as $entry) {
-            if ($total <= $targetBytes) break;
+            if ($total <= $targetBytes)
+                break;
             @unlink($entry['path']);
             $total -= $entry['size'];
         }
@@ -97,11 +101,12 @@ class DownloadProxyController
     private static function decryptText($value, $encryptionKey)
     {
         $parts = explode(':', $value);
-        if (count($parts) < 3) return null;
-        $iv        = base64_decode($parts[0]);
-        $tag       = base64_decode($parts[1]);
+        if (count($parts) < 3)
+            return null;
+        $iv = base64_decode($parts[0]);
+        $tag = base64_decode($parts[1]);
         $encrypted = base64_decode($parts[2]);
-        $key       = hash('sha256', $encryptionKey, true);
+        $key = hash('sha256', $encryptionKey, true);
         return openssl_decrypt($encrypted, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
     }
 
@@ -111,10 +116,10 @@ class DownloadProxyController
         curl_setopt($ch, CURLOPT_URL, 'https://oauth2.googleapis.com/token');
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-            'client_id'     => $clientId,
+            'client_id' => $clientId,
             'client_secret' => $clientSecret,
             'refresh_token' => $refreshToken,
-            'grant_type'    => 'refresh_token',
+            'grant_type' => 'refresh_token',
         ]));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($ch);
@@ -134,11 +139,14 @@ class DownloadProxyController
      */
     private static function isCacheEligible($mime, $fileSize)
     {
-        if (empty($mime)) return false;
-        if ($fileSize > self::CACHE_MAX_BYTES) return false; // too large, stream live
+        if (empty($mime))
+            return false;
+        if ($fileSize > self::CACHE_MAX_BYTES)
+            return false; // too large, stream live
         $cacheable = ['image/', 'video/', 'audio/'];
         foreach ($cacheable as $prefix) {
-            if (strpos($mime, $prefix) === 0) return true;
+            if (strpos($mime, $prefix) === 0)
+                return true;
         }
         return false;
     }
@@ -150,7 +158,8 @@ class DownloadProxyController
     private static function fetchToFile($url, $headers, $destPath)
     {
         $fp = fopen($destPath, 'wb');
-        if (!$fp) return false;
+        if (!$fp)
+            return false;
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -184,18 +193,20 @@ class DownloadProxyController
 
         // Range request support for video seek
         $rangeStart = 0;
-        $rangeEnd   = $fileSize - 1;
-        $isPartial  = false;
+        $rangeEnd = $fileSize - 1;
+        $isPartial = false;
 
         if (isset($_SERVER['HTTP_RANGE'])) {
             preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $m);
-            $rangeStart = ($m[1] !== '') ? (int)$m[1] : 0;
-            $rangeEnd   = ($m[2] !== '') ? (int)$m[2] : $rangeEnd;
-            $rangeEnd   = min($rangeEnd, $fileSize - 1);
-            $isPartial  = true;
+            $rangeStart = ($m[1] !== '') ? (int) $m[1] : 0;
+            $rangeEnd = ($m[2] !== '') ? (int) $m[2] : $rangeEnd;
+            $rangeEnd = min($rangeEnd, $fileSize - 1);
+            $isPartial = true;
         }
 
-        while (ob_get_level()) { ob_end_clean(); }
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
 
         if ($isPartial) {
             http_response_code(206);
@@ -215,7 +226,10 @@ class DownloadProxyController
         @set_time_limit(0);
 
         $fp = fopen($path, 'rb');
-        if (!$fp) { http_response_code(500); exit; }
+        if (!$fp) {
+            http_response_code(500);
+            exit;
+        }
 
         if ($isPartial) {
             fseek($fp, $rangeStart);
@@ -239,7 +253,8 @@ class DownloadProxyController
 
     private static function getCachedAccessToken($account, $clientId, $clientSecret, $encryptionKey)
     {
-        if (!$account) return null;
+        if (!$account)
+            return null;
 
         $cacheFile = sys_get_temp_dir() . '/gdrive_token_' . md5($account['id'] ?? 'default') . '.json';
         if (is_file($cacheFile)) {
@@ -280,6 +295,7 @@ class DownloadProxyController
         }
 
         if (!$fileId) {
+            LoggerService::error("Download failed: File ID is required.");
             http_response_code(400);
             die("File ID is required.");
         }
@@ -292,15 +308,16 @@ class DownloadProxyController
         $file = $stmt->fetch();
 
         if (!$file) {
+            LoggerService::error("Download failed: File not found or access denied for ID '{$fileId}'.");
             http_response_code(404);
             die("File not found or access denied.");
         }
 
-        $mime            = $file['mime_type'] ?: 'application/octet-stream';
-        $isImage         = strpos($mime, 'image/') === 0;
-        $isVideoOrAudio  = strpos($mime, 'video/') === 0 || strpos($mime, 'audio/') === 0;
-        $isInline        = isset($_GET['inline']) || isset($_GET['cdn']) || $isImage || $isVideoOrAudio;
-        $fileSize        = (int)($file['size_bytes'] ?? 0);
+        $mime = $file['mime_type'] ?: 'application/octet-stream';
+        $isImage = strpos($mime, 'image/') === 0;
+        $isVideoOrAudio = strpos($mime, 'video/') === 0 || strpos($mime, 'audio/') === 0;
+        $isInline = isset($_GET['inline']) || isset($_GET['cdn']) || $isImage || $isVideoOrAudio;
+        $fileSize = (int) ($file['size_bytes'] ?? 0);
 
         // ─────────────────────────────────────────────────────────────────
         // GOOGLE IMAGE CDN FAST ENGINE (lh3.googleusercontent.com)
@@ -350,13 +367,13 @@ class DownloadProxyController
             $account = $stmt->fetch();
         }
         if (!$account) {
-            $stmt    = $pdo->query("SELECT * FROM connected_accounts WHERE provider = 'google_drive' AND status = 'connected' ORDER BY created_at DESC LIMIT 1");
+            $stmt = $pdo->query("SELECT * FROM connected_accounts WHERE provider = 'google_drive' AND status = 'connected' ORDER BY created_at DESC LIMIT 1");
             $account = $stmt->fetch();
         }
 
         $encryptionKey = Config::get('TOKEN_ENCRYPTION_KEY', 'change-this-encryption-key-32bytes!');
-        $clientId      = Config::get('GOOGLE_CLIENT_ID');
-        $clientSecret  = Config::get('GOOGLE_CLIENT_SECRET');
+        $clientId = Config::get('GOOGLE_CLIENT_ID');
+        $clientSecret = Config::get('GOOGLE_CLIENT_SECRET');
 
         $accessToken = self::getCachedAccessToken($account, $clientId, $clientSecret, $encryptionKey);
 
@@ -370,7 +387,7 @@ class DownloadProxyController
         // ─────────────────────────────────────────────────────────────────
         if (self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id']) && $accessToken && !isset($_SERVER['HTTP_RANGE'])) {
             $cachePath = self::getCachePath($file['id'], $etag);
-            $tmpPath   = $cachePath . '.tmp';
+            $tmpPath = $cachePath . '.tmp';
 
             // Guard: run eviction if disk cache is at or over the total size limit
             if (self::getCacheDirSizeMB() >= self::CACHE_MAX_TOTAL_MB) {
@@ -391,13 +408,13 @@ class DownloadProxyController
         // FALLBACK: Live proxy stream (docs, archives, large files, Range)
         // ─────────────────────────────────────────────────────────────────
         $rangeStart = 0;
-        $rangeEnd   = $fileSize > 0 ? $fileSize - 1 : 0;
-        $isPartial  = false;
+        $rangeEnd = $fileSize > 0 ? $fileSize - 1 : 0;
+        $isPartial = false;
 
         if ($fileSize > 0 && isset($_SERVER['HTTP_RANGE'])) {
             preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $matches);
-            $rangeStart = ($matches[1] !== '') ? (int)$matches[1] : 0;
-            $reqEnd     = ($matches[2] !== '') ? (int)$matches[2] : null;
+            $rangeStart = ($matches[1] !== '') ? (int) $matches[1] : 0;
+            $reqEnd = ($matches[2] !== '') ? (int) $matches[2] : null;
 
             // Fast Video CDN Trick: Cap open-ended video range requests to 4MB chunks for 0ms instant startup
             if ($isInline && $reqEnd === null) {
@@ -406,15 +423,17 @@ class DownloadProxyController
                 $rangeEnd = $reqEnd !== null ? min($reqEnd, $fileSize - 1) : ($fileSize - 1);
             }
 
-            $isPartial  = true;
+            $isPartial = true;
         } elseif ($isInline && $fileSize > 4194304) {
             // Force 206 Partial Content for inline video requests to trigger instant metadata loading
             $rangeStart = 0;
-            $rangeEnd   = min(4194303, $fileSize - 1);
-            $isPartial  = true;
+            $rangeEnd = min(4194303, $fileSize - 1);
+            $isPartial = true;
         }
 
-        while (ob_get_level()) { ob_end_clean(); }
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
 
         $disposition = $isInline ? 'inline' : 'attachment';
 
@@ -450,7 +469,8 @@ class DownloadProxyController
         curl_setopt($ch, CURLOPT_BUFFERSIZE, self::PROXY_BUF_SIZE);
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) {
             echo $chunk;
-            if (ob_get_level() > 0) ob_flush();
+            if (ob_get_level() > 0)
+                ob_flush();
             flush();
             return strlen($chunk);
         });
@@ -464,8 +484,8 @@ class DownloadProxyController
 
     private static function encryptText($value, $encryptionKey)
     {
-        $iv        = openssl_random_pseudo_bytes(12);
-        $key       = hash('sha256', $encryptionKey, true);
+        $iv = openssl_random_pseudo_bytes(12);
+        $key = hash('sha256', $encryptionKey, true);
         $encrypted = openssl_encrypt($value, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
         return base64_encode($iv) . ':' . base64_encode($tag) . ':' . base64_encode($encrypted);
     }
