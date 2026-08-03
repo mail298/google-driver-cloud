@@ -32,9 +32,9 @@ class DownloadProxyController
     }
 
     private const CACHE_TTL          = 604800;    // 7 days per-file TTL
-    private const CACHE_MAX_TOTAL_MB = 500;       // max total cache dir size (MB)
-    private const CACHE_MAX_BYTES = 52428800; // 50 MB max per-file cache
-    private const PROXY_BUF_SIZE  = 524288;  // 512 KB streaming buffer
+    private const CACHE_MAX_TOTAL_MB = 5000;      // max total cache dir size (5GB)
+    private const CACHE_MAX_BYTES = 262144000; // 250 MB max per-file cache
+    private const PROXY_BUF_SIZE  = 2097152;  // 2 MB streaming buffer
 
     // ─────────────────────────────────────────────────────────────────────
 
@@ -234,6 +234,38 @@ class DownloadProxyController
         exit;
     }
 
+    private static function getCachedAccessToken($account, $clientId, $clientSecret, $encryptionKey)
+    {
+        if (!$account) return null;
+
+        $cacheFile = sys_get_temp_dir() . '/gdrive_token_' . md5($account['id'] ?? 'default') . '.json';
+        if (is_file($cacheFile)) {
+            $data = json_decode((string) file_get_contents($cacheFile), true);
+            if (is_array($data) && !empty($data['token']) && !empty($data['expires_at']) && $data['expires_at'] > time()) {
+                return $data['token'];
+            }
+        }
+
+        $accessToken = !empty($account['access_token_encrypted']) ? self::decryptText($account['access_token_encrypted'], $encryptionKey) : null;
+        $refreshToken = !empty($account['refresh_token_encrypted']) ? self::decryptText($account['refresh_token_encrypted'], $encryptionKey) : null;
+
+        if ($clientId && $clientSecret && $refreshToken) {
+            $newToken = self::refreshAccessToken($clientId, $clientSecret, $refreshToken);
+            if ($newToken) {
+                $accessToken = $newToken;
+            }
+        }
+
+        if ($accessToken) {
+            @file_put_contents($cacheFile, json_encode([
+                'token' => $accessToken,
+                'expires_at' => time() + 3000
+            ]));
+        }
+
+        return $accessToken;
+    }
+
     public static function download()
     {
         $fileId = $_GET['id'] ?? null;
@@ -300,20 +332,10 @@ class DownloadProxyController
         }
 
         $encryptionKey = Config::get('TOKEN_ENCRYPTION_KEY', 'change-this-encryption-key-32bytes!');
-        $accessToken   = $account ? self::decryptText($account['access_token_encrypted'], $encryptionKey) : null;
         $clientId      = Config::get('GOOGLE_CLIENT_ID');
         $clientSecret  = Config::get('GOOGLE_CLIENT_SECRET');
 
-        // Auto-refresh token before streaming headers are sent
-        if ($account && !empty($account['refresh_token_encrypted'])) {
-            $refreshToken = self::decryptText($account['refresh_token_encrypted'], $encryptionKey);
-            if ($clientId && $clientSecret && $refreshToken) {
-                $newToken = self::refreshAccessToken($clientId, $clientSecret, $refreshToken);
-                if ($newToken) {
-                    $accessToken = $newToken;
-                }
-            }
-        }
+        $accessToken = self::getCachedAccessToken($account, $clientId, $clientSecret, $encryptionKey);
 
         $upstreamUrl = "https://www.googleapis.com/drive/v3/files/" . $file['provider_file_id'] . "?alt=media&supportsAllDrives=true";
         $curlHeaders = $accessToken ? ["Authorization: Bearer $accessToken"] : [];

@@ -237,18 +237,24 @@
     const hlsUrl = "/stream/" + encodeURIComponent(fileId) + "/master.m3u8";
     const mp4Url = "/download?id=" + encodeURIComponent(fileId) + "&inline=1";
 
-    // Initialize Hls.js adaptive player or native HLS/MP4 fallback
+    // Initialize Hls.js adaptive player with high performance pre-fetching
+    const mp4DirectUrl = "/download?id=" + encodeURIComponent(fileId) + "&inline=1";
+
     if (Hls.isSupported()) {
         const hls = new Hls({
-            maxBufferLength: 30,
-            enableWorker: true
+            maxBufferLength: 60,
+            maxMaxBufferLength: 180,
+            maxBufferSize: 60 * 1000 * 1000,
+            enableWorker: true,
+            fragLoadingTimeOut: 20000,
+            manifestLoadingTimeOut: 20000
         });
         hls.loadSource(hlsUrl);
         hls.attachMedia(video);
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = hlsUrl;
     } else {
-        video.src = mp4Url;
+        video.src = mp4DirectUrl;
     }
 
     function togglePlay() {
