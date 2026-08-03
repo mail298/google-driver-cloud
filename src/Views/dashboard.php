@@ -2440,8 +2440,10 @@
             </div>
 
             <!-- Embedded Player Preview -->
-            <div style="width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="position: relative; width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
                 <iframe id="embed-player-iframe" src="" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
+                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
             </div>
 
             <!-- Code & Link Inputs -->

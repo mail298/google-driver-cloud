@@ -232,7 +232,11 @@
             <img src="/download?id=<?= $file['id'] ?>&inline=1" alt="<?= htmlspecialchars($file['name']) ?>"
                 class="share-full-img">
         <?php elseif ($isVideo): ?>
-            <iframe src="/embed/<?= htmlspecialchars($file['id']) ?>" style="width: 100%; height: 100%; min-height: 480px; border: none; background: #000; border-radius: 12px;" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            <div style="position: relative; width: 100%; height: 100%; min-height: 480px; border-radius: 12px; overflow: hidden; background: #000;">
+                <iframe src="/embed/<?= htmlspecialchars($file['id']) ?>" style="width: 100%; height: 100%; min-height: 480px; border: none; background: #000;" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
+                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
+            </div>
         <?php elseif ($isPdf): ?>
             <iframe src="/download?id=<?= $file['id'] ?>&inline=1" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
         <?php else: ?>
