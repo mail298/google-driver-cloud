@@ -320,6 +320,47 @@ class DownloadProxyController
         $fileSize = (int) ($file['size_bytes'] ?? 0);
 
         // ─────────────────────────────────────────────────────────────────
+        // THUMBNAIL CACHE PROXY (thumb=1)
+        // Instant 10-15KB image preview proxy for images and videos from Google LH3
+        // ─────────────────────────────────────────────────────────────────
+        $isThumb = isset($_GET['thumb']) || isset($_GET['thumbnail']);
+        if ($isThumb && !empty($file['provider_file_id'])) {
+            $thumbEtag = '"thumb_' . md5($file['id'] . '_' . ($file['updated_at'] ?? '')) . '"';
+            if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $thumbEtag) {
+                header('HTTP/1.1 304 Not Modified');
+                header('Cache-Control: public, max-age=31536000, immutable');
+                header('Cloudflare-CDN-Cache-Control: max-age=31536000');
+                header('ETag: ' . $thumbEtag);
+                exit;
+            }
+
+            $cachePath = self::getCacheDir() . '/thumb_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $file['id']) . '.jpg';
+            if (file_exists($cachePath) && (time() - filemtime($cachePath)) < self::CACHE_TTL) {
+                header('Content-Type: image/jpeg');
+                header('Cache-Control: public, max-age=31536000, immutable');
+                header('Cloudflare-CDN-Cache-Control: max-age=31536000');
+                header('ETag: ' . $thumbEtag);
+                header('Content-Length: ' . filesize($cachePath));
+                readfile($cachePath);
+                exit;
+            }
+
+            // Fetch thumbnail from Google LH3 CDN (works for images AND video poster frames!)
+            $lh3ThumbUrl = 'https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=w400';
+            $tmpPath = $cachePath . '.tmp';
+            if (self::fetchToFile($lh3ThumbUrl, [], $tmpPath)) {
+                rename($tmpPath, $cachePath);
+                header('Content-Type: image/jpeg');
+                header('Cache-Control: public, max-age=31536000, immutable');
+                header('Cloudflare-CDN-Cache-Control: max-age=31536000');
+                header('ETag: ' . $thumbEtag);
+                header('Content-Length: ' . filesize($cachePath));
+                readfile($cachePath);
+                exit;
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────
         // HTTP 304 Not Modified — 0ms cache hit for returning visitors
         // ─────────────────────────────────────────────────────────────────
         $etag = '"' . md5($file['id'] . '_' . ($file['updated_at'] ?? '') . '_' . $file['size_bytes']) . '"';

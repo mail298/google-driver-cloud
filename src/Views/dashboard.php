@@ -1561,7 +1561,7 @@
                                 </div>
                                 <div class="card-thumb-box">
                                     <?php if ($isImage): ?>
-                                        <img src="/download?id=<?= $file['id'] ?>&inline=1"
+                                        <img src="/download?id=<?= $file['id'] ?>&thumb=1"
                                             alt="<?= htmlspecialchars($file['name']) ?>" class="card-thumb-img" loading="lazy"
                                             decoding="async"
                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -1575,14 +1575,19 @@
                                             </svg>
                                         </div>
                                     <?php elseif ($isVideo): ?>
-                                        <div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(15,23,42,0.95) 100%); border: 1px dashed rgba(168,85,247,0.25);">
-                                             <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 18px rgba(168,85,247,0.4);">
-                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-left:3px;">
-                                                     <polygon points="5 3 19 12 5 21 5 3" />
-                                                 </svg>
-                                             </div>
-                                             <span style="margin-top: 8px; font-size: 11px; font-weight: 700; color: #c084fc; letter-spacing: 0.5px; text-transform: uppercase;">Video MP4</span>
-                                         </div>
+                                        <div
+                                            style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0f172a; overflow:hidden;">
+                                            <img src="/download?id=<?= $file['id'] ?>&thumb=1"
+                                                alt="<?= htmlspecialchars($file['name']) ?>" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;" loading="lazy"
+                                                decoding="async" onerror="this.style.display='none';">
+                                            <div
+                                                style="position:relative; z-index:2; width:44px; height:44px; border-radius:50%; background:rgba(168,85,247,0.45); border:1.5px solid rgba(192,132,252,0.8); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 18px rgba(0,0,0,0.5); backdrop-filter:blur(4px);">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                                    fill="currentColor" style="margin-left:3px;">
+                                                    <polygon points="5 3 19 12 5 21 5 3" />
+                                                </svg>
+                                            </div>
+                                        </div>
                                     <?php else: ?>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="1.5" style="color: #60a5fa;">
