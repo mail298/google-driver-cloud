@@ -193,18 +193,6 @@
 </head>
 <body>
 
-<?php if (!empty($file['provider_file_id'])): ?>
-    <!-- Fast Engine (Instant <0.2s Startup Speed) - 100% White-Label Shielded -->
-    <div class="player-container" id="playerContainer" style="position: relative; width:100%; height:100%; background:#000; overflow:hidden;">
-        <iframe src="https://drive.google.com/file/d/<?= htmlspecialchars($file['provider_file_id']) ?>/preview" 
-                style="width:100%; height:calc(100% + 56px); margin-top:-52px; border:none;" 
-                allow="autoplay; fullscreen" 
-                allowfullscreen>
-        </iframe>
-        <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
-        <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
-    </div>
-<?php else: ?>
 <div class="player-container paused" id="playerContainer">
     <div class="video-title-badge"><?= htmlspecialchars($file['name']) ?></div>
     
@@ -212,7 +200,7 @@
         <i class="fa-solid fa-play"></i>
     </div>
 
-    <video id="videoPlayer" src="/download?id=<?= htmlspecialchars($file['id']) ?>&inline=1" playsinline preload="auto" autoplay></video>
+    <video id="videoPlayer" src="/download?id=<?= htmlspecialchars($file['id']) ?>&inline=1" poster="/download?id=<?= htmlspecialchars($file['id']) ?>&thumb=1" playsinline preload="metadata"></video>
 
     <div class="controls-overlay">
         <div class="progress-container" id="progressContainer">
@@ -241,7 +229,6 @@
         </div>
     </div>
 </div>
-<?php endif; ?>
 
 <script>
     const container = document.getElementById('playerContainer');
