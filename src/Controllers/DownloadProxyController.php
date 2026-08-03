@@ -270,6 +270,13 @@ class DownloadProxyController
     {
         $fileId = $_GET['id'] ?? null;
         if (!$fileId) {
+            $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+            if (preg_match('/^\/(?:embed|stream|download)\/([^\/]+)/i', $uri, $m)) {
+                $fileId = trim($m[1]);
+            }
+        }
+
+        if (!$fileId) {
             http_response_code(400);
             die("File ID is required.");
         }

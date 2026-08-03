@@ -82,6 +82,13 @@ class StreamController
             die("Hotlink protected.");
         }
 
+        // If accessed directly in a desktop browser address bar (HTML request), redirect to full embed player
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        if (strpos($accept, 'text/html') !== false && strpos($accept, 'application/vnd.apple.mpegurl') === false) {
+            header("Location: /embed/" . urlencode($file['id']));
+            exit;
+        }
+
         $fileSize = (int) ($file['size_bytes'] ?? 0);
         $segmentDuration = 6; // 6 seconds per segment
         $estimatedDuration = $fileSize > 0 ? max(10, round($fileSize / (312500))) : 300;
