@@ -118,12 +118,33 @@ Salah satu keunggulan utama portal ini adalah kemampuan menyajikan gambar secara
    ```
 
 ### Keuntungan Tautan CDN White-Label:
-- **100% White-Label**: Domain Google Drive (`lh3.googleusercontent.com`) disembunyikan sepenuhnya dari penjelajah web / network inspector.
-- **Smart Browser Caching**: Mendukung header `ETag 304 Not Modified` dan `Cache-Control: immutable`, sehingga gambar yang sudah pernah dibuka akan dimuat secara instan (0 milidetik).
+- **100% White-Label**: Bebas dari domain/logo Google Drive.
+- **Responsif & Cepat**: Didukung oleh sistem caching cerdas browser dan Cloudflare CDN.
+- **Proteksi Data**: URL asli tempat berkas disimpan terlindungi aman di sisi server.
 
 ---
 
-## 6. Fitur Seleksi & Penghapusan Massal (Bulk Action)
+## 6. Penggunaan Video Stream & Embed Code (BunnyStream & Cloudflare Stream Style)
+
+Portal ini dilengkapi fitur **Self-Hosted Video CDN** untuk menyajikan video *Landing Page* tanpa watermark, tanpa iklan, dan dengan *startup speed* super instan (~0ms).
+
+### Cara Mengambil Kode Embed Video:
+1. Klik titik tiga **`⋮`** pada berkas video yang diinginkan.
+2. Pilih menu **`Stream & Embed Video (HLS)`**.
+3. Salin salah satu opsi sesuai kebutuhan Anda:
+   - **Kode Embed Iframe HTML (Untuk Landing Page/Website)**:
+     ```html
+     <iframe src="https://clouds.wn-cdn.net/embed/ID_VIDEO" width="100%" height="450" frameborder="0" allowfullscreen></iframe>
+     ```
+   - **Tautan Stream HLS (`.m3u8`)**:
+     ```text
+     https://clouds.wn-cdn.net/stream/ID_VIDEO/master.m3u8
+     ```
+4. Tempelkan kode Iframe tersebut pada Editor HTML, Elementor, atau WordPress Landing Page Anda. Video akan langsung tampil dengan player profesional dan kontrol lengkap (kecepatan, Picture-in-Picture, dan Layar Penuh).
+
+---
+
+## 7. Fitur Seleksi & Penghapusan Massal (Bulk Action)
 
 Anda dapat mengelola banyak berkas sekaligus tanpa harus menghapus satu per satu.
 
