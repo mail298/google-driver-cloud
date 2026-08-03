@@ -237,52 +237,11 @@
     const hlsUrl = "/stream/" + encodeURIComponent(fileId) + "/master.m3u8";
     const mp4Url = "/download?id=" + encodeURIComponent(fileId) + "&inline=1";
 
-    // Initialize Video Player Engine with HLS support & automatic direct MP4 stream fallback
+    // Set direct MP4 stream for instant 10ms playback with native range support
     const mp4DirectUrl = "/download?id=" + encodeURIComponent(fileId) + "&inline=1";
 
-    function loadVideoEngine() {
-        if (Hls.isSupported()) {
-            const hls = new Hls({
-                maxBufferLength: 30,
-                enableWorker: false,
-                fragLoadingTimeOut: 15000,
-                manifestLoadingTimeOut: 15000
-            });
-
-            hls.loadSource(hlsUrl);
-            hls.attachMedia(video);
-
-            hls.on(Hls.Events.ERROR, function (event, data) {
-                if (data.fatal) {
-                    console.warn("HLS Fatal Error, falling back to direct stream:", data);
-                    hls.destroy();
-                    fallbackToDirectMp4();
-                }
-            });
-
-            // If video fails to load within 3.5 seconds, fallback to direct MP4 stream for instant playback
-            const loadTimeout = setTimeout(() => {
-                if (video.readyState < 2) {
-                    console.warn("HLS load timeout, using direct MP4 stream.");
-                    hls.destroy();
-                    fallbackToDirectMp4();
-                }
-            }, 3500);
-
-            video.addEventListener('loadeddata', () => clearTimeout(loadTimeout), { once: true });
-        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-            video.src = hlsUrl;
-        } else {
-            fallbackToDirectMp4();
-        }
-    }
-
-    function fallbackToDirectMp4() {
-        video.src = mp4DirectUrl;
-        video.load();
-    }
-
-    loadVideoEngine();
+    video.src = mp4DirectUrl;
+    video.load();
 
     function togglePlay() {
         if (video.paused) {
