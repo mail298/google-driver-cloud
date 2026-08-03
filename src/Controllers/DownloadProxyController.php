@@ -35,7 +35,7 @@ class DownloadProxyController
      * Fire a non-blocking background request that downloads the full file to
      * the local disk cache. Uses a lockfile so the warmer only runs once.
      */
-    private static function spawnCacheWarm($fileId)
+    public static function spawnCacheWarm($fileId)
     {
         $lock = self::getCacheDir() . '/warm_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $fileId) . '.lck';
         // Only spawn once per file; refresh lock after 1 hour
@@ -48,13 +48,13 @@ class DownloadProxyController
         $warmUrl = 'http://127.0.0.1/download?id=' . rawurlencode($fileId) . '&warm=1';
 
         // Non-blocking: nohup + &  (curl is present in the PHP image)
-        $cmd = 'curl -s --max-time 600 "' . $warmUrl . '" >/dev/null 2>&1 &';
+        $cmd = 'curl -s --max-time 3600 "' . $warmUrl . '" >/dev/null 2>&1 &';
         @exec($cmd);
     }
 
     private const CACHE_TTL = 604800;   // 7 days per-file TTL
-    private const CACHE_MAX_TOTAL_MB = 1000;     // max total cache dir size (1GB)
-    private const CACHE_MAX_BYTES = 157286400;   // 150 MB max per-file disk cache (covers most video; larger files stream live)
+    private const CACHE_MAX_TOTAL_MB = 8000;     // max total cache dir size (8GB)
+    private const CACHE_MAX_BYTES = 2147483648;   // 2GB max per-file disk cache (covers large videos; even bigger files stream live)
     private const PROXY_BUF_SIZE = 524288;     // 512 KB streaming buffer
 
     // ─────────────────────────────────────────────────────────────────────
@@ -191,7 +191,7 @@ class DownloadProxyController
         curl_setopt($ch, CURLOPT_BUFFERSIZE, self::PROXY_BUF_SIZE);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+        curl_setopt($ch, CURLOPT_TIMEOUT, self::CACHE_TTL);
         curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);

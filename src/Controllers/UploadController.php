@@ -380,6 +380,20 @@ class UploadController
         $outcome = self::processUploadedFileAsync($assembledFile, $job['folderId'], (bool) $job['replace']);
         $outcome['status'] = ($outcome['success'] ?? false) ? 'done' : 'error';
 
+        // Kick off a background cache warm so the freshly uploaded file is
+        // served from local disk (fast) instead of a slow live Google stream
+        // through the tunnel on first playback.
+        if (!empty($outcome['success'])) {
+            $upFile = $outcome['data']['file'] ?? ($outcome['data']['files'][0] ?? null);
+            if (!empty($upFile['id'])) {
+                $upMime = $upFile['mimeType'] ?? $job['fileName'];
+                $isMedia = strpos((string) $upMime, 'video/') === 0 || strpos((string) $upMime, 'image/') === 0 || strpos((string) $upMime, 'audio/') === 0;
+                if ($isMedia) {
+                    DownloadProxyController::spawnCacheWarm($upFile['id']);
+                }
+            }
+        }
+
         $job = array_merge($job, $outcome);
         $job['finished_at'] = time();
         file_put_contents($jobPath, json_encode($job), LOCK_EX);
