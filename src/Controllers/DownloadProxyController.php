@@ -303,12 +303,24 @@ class DownloadProxyController
         $fileSize        = (int)($file['size_bytes'] ?? 0);
 
         // ─────────────────────────────────────────────────────────────────
+        // GOOGLE IMAGE CDN FAST ENGINE (lh3.googleusercontent.com)
+        // Direct Google Edge CDN for images (<5ms Instant Load)
+        // ─────────────────────────────────────────────────────────────────
+        if ($isImage && !empty($file['provider_file_id']) && (isset($_GET['fast']) || isset($_GET['cdn_direct']))) {
+            header('Location: https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=s0', true, 302);
+            header('Cache-Control: public, max-age=31536000, immutable');
+            header('Cloudflare-CDN-Cache-Control: max-age=31536000');
+            exit;
+        }
+
+        // ─────────────────────────────────────────────────────────────────
         // HTTP 304 Not Modified — 0ms cache hit for returning visitors
         // ─────────────────────────────────────────────────────────────────
         $etag = '"' . md5($file['id'] . '_' . ($file['updated_at'] ?? '') . '_' . $file['size_bytes']) . '"';
         if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag) {
             header('HTTP/1.1 304 Not Modified');
-            header('Cache-Control: public, max-age=86400');
+            header('Cache-Control: public, max-age=31536000, immutable');
+            header('Cloudflare-CDN-Cache-Control: max-age=31536000');
             header('ETag: ' . $etag);
             exit;
         }
