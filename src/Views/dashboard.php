@@ -1560,23 +1560,30 @@
                                     </button>
                                 </div>
                                 <div class="card-thumb-box">
-                                    <?php if ($isImage): ?>
-                                        <img src="/download?id=<?= $file['id'] ?>&inline=1"
-                                            alt="<?= htmlspecialchars($file['name']) ?>" class="card-thumb-img" loading="lazy"
-                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <div
-                                            style="display:none; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8;">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
-                                                fill="none" stroke="currentColor" stroke-width="1.5">
-                                                <rect width="18" height="18" x="3" y="3" rx="2" />
-                                                <circle cx="9" cy="9" r="2" />
-                                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                                            </svg>
-                                        </div>
-                                    <?php elseif ($isVideo): ?>
-                                        <video src="/download?id=<?= $file['id'] ?>&inline=1"
-                                            style="width:100%; height:100%; object-fit:cover;"></video>
-                                    <?php else: ?>
+                                     <?php if ($isImage): ?>
+                                         <img src="/download?id=<?= $file['id'] ?>&inline=1"
+                                             alt="<?= htmlspecialchars($file['name']) ?>" class="card-thumb-img" loading="lazy" decoding="async"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                         <div
+                                             style="display:none; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8;">
+                                             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+                                                 fill="none" stroke="currentColor" stroke-width="1.5">
+                                                 <rect width="18" height="18" x="3" y="3" rx="2" />
+                                                 <circle cx="9" cy="9" r="2" />
+                                                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                             </svg>
+                                         </div>
+                                     <?php elseif ($isVideo): ?>
+                                         <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5);">
+                                             <video src="/download?id=<?= $file['id'] ?>&inline=1" preload="none"
+                                                 style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; pointer-events:none;"></video>
+                                             <div style="position:relative; z-index:2; width:38px; height:38px; border-radius:50%; background:rgba(168,85,247,0.25); border:1px solid rgba(168,85,247,0.5); display:flex; align-items:center; justify-content:center; color:#c084fc; box-shadow:0 4px 12px rgba(0,0,0,0.3);">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px;">
+                                                     <polygon points="5 3 19 12 5 21 5 3"/>
+                                                 </svg>
+                                             </div>
+                                         </div>
+                                     <?php else: ?>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="1.5" style="color: #60a5fa;">
                                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -1708,7 +1715,7 @@
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <?php if ($isImage): ?>
-                                                    <img src="/download?id=<?= $file['id'] ?>&inline=1"
+                                                    <img src="/download?id=<?= $file['id'] ?>&inline=1" loading="lazy" decoding="async"
                                                         style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;">
                                                 <?php else: ?>
                                                     <div class="card-icon-badge <?= $badgeClass ?>"><?= $kindBadge ?></div>
