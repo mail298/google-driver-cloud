@@ -31,6 +31,27 @@ class DownloadProxyController
         return self::getCacheDir() . '/' . $safe . '_' . $hash . '.cache';
     }
 
+    /**
+     * Fire a non-blocking background request that downloads the full file to
+     * the local disk cache. Uses a lockfile so the warmer only runs once.
+     */
+    private static function spawnCacheWarm($fileId)
+    {
+        $lock = self::getCacheDir() . '/warm_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $fileId) . '.lck';
+        // Only spawn once per file; refresh lock after 1 hour
+        if (file_exists($lock) && (time() - filemtime($lock)) < 3600) {
+            return;
+        }
+        @touch($lock);
+
+        // Call itself inside the container — fast and avoids the public tunnel.
+        $warmUrl = 'http://127.0.0.1/download?id=' . rawurlencode($fileId) . '&warm=1';
+
+        // Non-blocking: nohup + &  (curl is present in the PHP image)
+        $cmd = 'curl -s --max-time 600 "' . $warmUrl . '" >/dev/null 2>&1 &';
+        @exec($cmd);
+    }
+
     private const CACHE_TTL = 604800;   // 7 days per-file TTL
     private const CACHE_MAX_TOTAL_MB = 1000;     // max total cache dir size (1GB)
     private const CACHE_MAX_BYTES = 157286400;   // 150 MB max per-file disk cache (covers most video; larger files stream live)
@@ -411,47 +432,80 @@ class DownloadProxyController
         $curlHeaders = $accessToken ? ["Authorization: Bearer $accessToken"] : [];
 
         // ─────────────────────────────────────────────────────────────────
-        // LOCAL DISK CACHE: Download to disk first, then serve (cache-miss).
-        // Video players always send a Range header, so we cache on EVERY request
-        // (including partial ranges) — otherwise a video would be re-fetched from
-        // Google on every range request and playback would feel slow.
+        // BACKGROUND CACHE WARMER (internal warm=1 request)
+        // Called in background to download the FULL file to local disk cache
+        // without streaming. The player never waits on this — it starts
+        // playback live and the cache is filled for the NEXT request.
+        // ─────────────────────────────────────────────────────────────────
+        if (isset($_GET['warm']) && self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id'])) {
+            $cachePath = self::getCachePath($file['id'], $etag);
+            $warming = $cachePath . '.warming';
+            if (!file_exists($cachePath) && !file_exists($warming)) {
+                touch($warming);
+                $tmpPath = $cachePath . '.tmp';
+                if (self::getCacheDirSizeMB() >= self::CACHE_MAX_TOTAL_MB) {
+                    self::runEviction();
+                }
+                $fetched = false;
+                if ($isImage) {
+                    $lh3Url = 'https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=s0';
+                    $fetched = self::fetchToFile($lh3Url, [], $tmpPath);
+                }
+                if (!$fetched && $accessToken) {
+                    $fetched = self::fetchToFile($upstreamUrl, $curlHeaders, $tmpPath);
+                }
+                if ($fetched) {
+                    rename($tmpPath, $cachePath);
+                } else {
+                    @unlink($tmpPath);
+                }
+                @unlink($warming);
+            }
+            http_response_code(204);
+            exit;
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // LOCAL DISK CACHE: cache-miss handling.
+        //  * Images / full downloads : fetch to disk first, then serve (small & fast).
+        //  * Video/audio streaming   : serve LIVE immediately for instant playback,
+        //    and spawn a background warmer so subsequent requests hit disk.
         // ─────────────────────────────────────────────────────────────────
         if (self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id'])) {
             $cachePath = self::getCachePath($file['id'], $etag);
 
-            // Serve from cache first (also for range requests) — 0ms local file
+            // Cache hit — serve from disk (also for Range requests) : 0ms local file
             if (file_exists($cachePath) && (time() - filemtime($cachePath)) < self::CACHE_TTL) {
                 $cachedSize = filesize($cachePath);
                 self::serveFromDisk($cachePath, $mime, $file['name'], $etag, $cachedSize, $isInline);
                 return;
             }
 
-            // Guard: run eviction if disk cache is at or over the total size limit
-            if (self::getCacheDirSizeMB() >= self::CACHE_MAX_TOTAL_MB) {
-                self::runEviction();
-            }
+            $isStreamingRequest = ($isVideoOrAudio && ($isInline || isset($_SERVER['HTTP_RANGE'])));
 
-            $tmpPath = $cachePath . '.tmp';
-            $fetched = false;
-            // For images, attempt server-side fetch from Google LH3 CDN first
-            if ($isImage) {
-                $lh3Url = 'https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=s0';
-                $fetched = self::fetchToFile($lh3Url, [], $tmpPath);
+            // Streaming media on cache-miss: start playback now, warm in background
+            if ($isStreamingRequest) {
+                self::spawnCacheWarm($file['id']);
+                // fall through to live proxy stream below
+            } else {
+                // Images & direct full downloads: fetch entire file to disk then serve
+                $tmpPath = $cachePath . '.tmp';
+                $fetched = false;
+                if ($isImage) {
+                    $lh3Url = 'https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=s0';
+                    $fetched = self::fetchToFile($lh3Url, [], $tmpPath);
+                }
+                if (!$fetched && $accessToken) {
+                    $fetched = self::fetchToFile($upstreamUrl, $curlHeaders, $tmpPath);
+                }
+                if ($fetched) {
+                    rename($tmpPath, $cachePath);
+                    $cachedSize = filesize($cachePath);
+                    self::serveFromDisk($cachePath, $mime, $file['name'], $etag, $cachedSize, $isInline);
+                    return;
+                }
+                @unlink($tmpPath);
             }
-
-            // Fallback to Google Drive API with OAuth token if LH3 fetch fails or for non-images
-            if (!$fetched && $accessToken) {
-                $fetched = self::fetchToFile($upstreamUrl, $curlHeaders, $tmpPath);
-            }
-
-            if ($fetched) {
-                rename($tmpPath, $cachePath);
-                $cachedSize = filesize($cachePath);
-                self::serveFromDisk($cachePath, $mime, $file['name'], $etag, $cachedSize, $isInline);
-                return;
-            }
-            // Cache write failed — fall through to live stream below
-            @unlink($tmpPath);
         }
 
         // ─────────────────────────────────────────────────────────────────
