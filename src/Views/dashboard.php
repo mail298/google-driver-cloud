@@ -2263,6 +2263,13 @@
             <kbd
                 style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; color:#94a3b8;">Ctrl+L</kbd>
         </button>
+        <button type="button" class="cm-item" id="cm-btn-embed" onclick="cmActionEmbedVideo()" style="display:none; color: #60a5fa;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span style="flex:1; font-weight:700;">Stream & Embed Video (HLS)</span>
+        </button>
         <button type="button" class="cm-item" onclick="cmActionInvite()">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
@@ -2418,7 +2425,56 @@
                 <button type="button" onclick="cancelDuplicateUpload()"
                     style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 9px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Batal</button>
                 <button type="button" onclick="confirmDuplicateUpload()"
-                    style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; border: none; padding: 9px 24px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);">Upload</button>
+                    style="background: #3b82f6; color: #fff; border: none; padding: 9px 20px; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 10px; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">Unggah</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Stream & Embed Code Modal (BunnyStream / Cloudflare Stream Style) -->
+    <div class="modal-overlay" id="video-embed-modal"
+        style="display: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;">
+        <div class="modal-card"
+            style="max-width: 680px; width: 94%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div
+                        style="background: rgba(13, 110, 253, 0.15); border: 1px solid rgba(13, 110, 253, 0.3); border-radius: 12px; width: 36px; height: 36px; color: #60a5fa; display: flex; align-items: center; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #fff;">Stream & Embed Video (HLS)</h3>
+                        <span id="embed-video-name" style="font-size: 12px; color: #94a3b8;">video.mp4</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeVideoEmbedModal()"
+                    style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+
+            <!-- Embedded Player Preview -->
+            <div style="width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
+                <iframe id="embed-player-iframe" src="" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+            </div>
+
+            <!-- Code & Link Inputs -->
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div>
+                    <label style="font-size: 11.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">1. Kode Embed Iframe HTML (Landing Page)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="embed-iframe-code" readonly style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #60a5fa; padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 12px;" onclick="this.select()">
+                        <button type="button" onclick="copyInputText('embed-iframe-code', 'Kode Iframe')" style="background: #0d6efd; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">Copy</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-size: 11.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">2. Tautan Playlist Stream HLS (.m3u8)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="embed-hls-url" readonly style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #34d399; padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 12px;" onclick="this.select()">
+                        <button type="button" onclick="copyInputText('embed-hls-url', 'Link HLS')" style="background: #059669; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">Copy</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

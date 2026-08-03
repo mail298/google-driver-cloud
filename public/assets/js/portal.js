@@ -1230,19 +1230,24 @@ function openContextMenu(e, item) {
     if (size) size.innerText = item.sizeFormatted || '-';
     if (folder) folder.innerText = '📁 ' + (item.folderName || 'Root');
 
-    // Show/hide preview & download for folders
+    // Show/hide preview, download & video embed buttons
     const previewBtn = document.getElementById('cm-btn-preview');
     const downloadBtn = document.getElementById('cm-btn-download');
     const copyLinkBtn = document.getElementById('cm-btn-copylink');
+    const embedBtn = document.getElementById('cm-btn-embed');
+
+    const isVideo = item.kindBadge === 'VID' || item.badgeClass === 'badge-video' || (item.mimeType && item.mimeType.indexOf('video/') === 0);
 
     if (item.type === 'folder') {
         if (previewBtn) previewBtn.style.display = 'none';
         if (downloadBtn) downloadBtn.style.display = 'none';
         if (copyLinkBtn) copyLinkBtn.style.display = 'none';
+        if (embedBtn) embedBtn.style.display = 'none';
     } else {
         if (previewBtn) previewBtn.style.display = 'flex';
         if (downloadBtn) downloadBtn.style.display = 'flex';
         if (copyLinkBtn) copyLinkBtn.style.display = 'flex';
+        if (embedBtn) embedBtn.style.display = isVideo ? 'flex' : 'none';
     }
 
     popup.classList.add('active');
@@ -1298,6 +1303,13 @@ function cmActionRename() {
     closeContextMenu();
     if (activeContextItem) {
         openRenameModal(activeContextItem.type, activeContextItem.id, activeContextItem.name);
+    }
+}
+
+function cmActionEmbedVideo() {
+    closeContextMenu();
+    if (activeContextItem && activeContextItem.id) {
+        openVideoEmbedModal(activeContextItem.id, activeContextItem.name);
     }
 }
 
@@ -2209,4 +2221,55 @@ window.addEventListener('beforeunload', function (e) {
         return confirmationMessage;
     }
 });
+
+// Video Stream & Embed Modal Helper Functions (BunnyStream / Cloudflare Stream Style)
+function openVideoEmbedModal(fileId, fileName) {
+    const modal = document.getElementById('video-embed-modal');
+    const nameEl = document.getElementById('embed-video-name');
+    const iframeEl = document.getElementById('embed-player-iframe');
+    const codeEl = document.getElementById('embed-iframe-code');
+    const hlsEl = document.getElementById('embed-hls-url');
+
+    if (!modal || !fileId) return;
+
+    const origin = window.location.origin;
+    const embedUrl = origin + '/embed/' + encodeURIComponent(fileId);
+    const hlsUrl = origin + '/stream/' + encodeURIComponent(fileId) + '/master.m3u8';
+    const iframeCode = `<iframe src="${embedUrl}" width="100%" height="450" frameborder="0" allowfullscreen></iframe>`;
+
+    if (nameEl) nameEl.textContent = fileName || 'Video Stream';
+    if (iframeEl) iframeEl.src = embedUrl;
+    if (codeEl) codeEl.value = iframeCode;
+    if (hlsEl) hlsEl.value = hlsUrl;
+
+    modal.style.display = 'flex';
+}
+
+function closeVideoEmbedModal() {
+    const modal = document.getElementById('video-embed-modal');
+    const iframeEl = document.getElementById('embed-player-iframe');
+    if (iframeEl) iframeEl.src = '';
+    if (modal) modal.style.display = 'none';
+}
+
+function copyInputText(inputId, labelName) {
+    const input = document.getElementById(inputId);
+    if (!input || !input.value) return;
+
+    input.select();
+    navigator.clipboard.writeText(input.value)
+        .then(() => {
+            if (typeof showToast === 'function') {
+                showToast(labelName + ' berhasil disalin ke clipboard!', 'success');
+            } else {
+                alert(labelName + ' berhasil disalin!');
+            }
+        })
+        .catch(() => {
+            document.execCommand('copy');
+            if (typeof showToast === 'function') {
+                showToast(labelName + ' berhasil disalin!', 'success');
+            }
+        });
+}
 

@@ -18,12 +18,26 @@ require_once dirname(__DIR__) . '/src/Controllers/AdminController.php';
 require_once dirname(__DIR__) . '/src/Controllers/SettingsController.php';
 require_once dirname(__DIR__) . '/src/Controllers/BackupController.php';
 require_once dirname(__DIR__) . '/src/Controllers/ClientBackupController.php';
+require_once dirname(__DIR__) . '/src/Controllers/StreamController.php';
 
 // Apply global security headers to all responses
 SecurityModel::sendSecurityHeaders();
 
 // Simple Router
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+if (strpos($requestUri, '/embed/') === 0 || $requestUri === '/embed') {
+    StreamController::embed();
+    exit;
+}
+if (preg_match('/^\/stream\/[^\/]+\/master\.m3u8$/', $requestUri)) {
+    StreamController::masterPlaylist();
+    exit;
+}
+if (preg_match('/^\/stream\/[^\/]+\/segment\/\d+$/', $requestUri)) {
+    StreamController::streamSegment();
+    exit;
+}
 
 switch ($requestUri) {
     case '/':
