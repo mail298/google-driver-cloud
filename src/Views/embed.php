@@ -190,7 +190,7 @@
         <i class="fa-solid fa-play"></i>
     </div>
 
-    <video id="videoPlayer" playsinline preload="metadata"></video>
+    <video id="videoPlayer" src="/download?id=<?= htmlspecialchars($file['id']) ?>&inline=1" playsinline preload="auto" autoplay></video>
 
     <div class="controls-overlay">
         <div class="progress-container" id="progressContainer">

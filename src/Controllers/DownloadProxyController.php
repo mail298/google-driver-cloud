@@ -31,10 +31,10 @@ class DownloadProxyController
         return self::getCacheDir() . '/' . $safe . '_' . $hash . '.cache';
     }
 
-    private const CACHE_TTL          = 604800;    // 7 days per-file TTL
-    private const CACHE_MAX_TOTAL_MB = 10000;     // max total cache dir size (10GB)
-    private const CACHE_MAX_BYTES = 1073741824; // 1 GB max per-file cache
-    private const PROXY_BUF_SIZE  = 2097152;  // 2 MB streaming buffer
+    private const CACHE_TTL          = 604800;   // 7 days per-file TTL
+    private const CACHE_MAX_TOTAL_MB = 1000;     // max total cache dir size (1GB)
+    private const CACHE_MAX_BYTES = 31457280;   // 30 MB max per-file disk cache (larger files stream live instantly via 206 Range)
+    private const PROXY_BUF_SIZE  = 524288;     // 512 KB streaming buffer
 
     // ─────────────────────────────────────────────────────────────────────
 
