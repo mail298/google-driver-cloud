@@ -1776,23 +1776,23 @@
     <!-- File Preview Modal -->
     <div class="modal-overlay" id="preview-modal">
         <div class="modal-card"
-            style="max-width: 800px; width: 90%; background: #0f172a; border: 1px solid var(--card-border); border-radius: 20px; padding: 24px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            style="max-width: 800px; width: 94%; background: #0f172a; border: 1px solid var(--card-border); border-radius: 20px; padding: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.7);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
                 <h3 id="preview-title"
-                    style="margin: 0; font-size: 18px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80%;">
+                    style="margin: 0; font-size: 16px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%;">
                     Pratinjau Berkas</h3>
                 <button class="btn-logout" onclick="closePreviewModal()"
-                    style="padding: 6px 12px; border-radius: 8px; cursor:pointer;">Tutup</button>
+                    style="padding: 6px 14px; border-radius: 8px; cursor:pointer; font-weight:700; font-size:13px;">Tutup</button>
             </div>
 
             <div id="preview-content"
-                style="display: flex; justify-content: center; align-items: center; min-height: 280px; background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--card-border);">
+                style="display: flex; justify-content: center; align-items: center; min-height: 180px; max-height: 70vh; background: rgba(0,0,0,0.5); border-radius: 14px; overflow: hidden; margin-bottom: 16px; border: 1px solid var(--card-border);">
                 <!-- Dynamic content loaded via JS -->
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 12px;">
                 <a id="preview-download-btn" href="#" class="btn-action btn-primary"
-                    style="text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 20px; border-radius: 8px; font-weight: 700;">Unduh
+                    style="text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 14px rgba(16,185,129,0.3);">Unduh
                     Berkas</a>
             </div>
         </div>

@@ -178,7 +178,17 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .player-container:hover .video-title-badge { opacity: 1; }
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 640px) {
+            .big-play-btn { width: 56px; height: 56px; font-size: 22px; }
+            .controls-overlay { padding: 8px 12px; gap: 6px; }
+            .controls-row { flex-wrap: wrap; gap: 6px; }
+            .controls-left, .controls-right { gap: 8px; }
+            .btn-icon { font-size: 14px; }
+            .time-display { font-size: 11px; }
+            .custom-select { font-size: 11px; padding: 2px 4px; }
+            .video-title-badge { font-size: 11px; padding: 4px 10px; top: 10px; left: 10px; }
+        }
     </style>
 </head>
 <body>

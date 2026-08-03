@@ -1133,14 +1133,9 @@ function previewFile(id, name, mimeType) {
     const previewUrl = `/download?id=${id}&inline=1`;
 
     if (mimeType.startsWith('image/')) {
-        content.innerHTML = `<img src="${previewUrl}" style="max-width: 100%; max-height: 480px; border-radius: 8px; object-fit: contain;">`;
+        content.innerHTML = `<img src="${previewUrl}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain;">`;
     } else if (mimeType.startsWith('video/')) {
-        content.innerHTML = `
-            <div style="position: relative; width: 100%; height: 380px; max-height: 60vh; border-radius: 12px; overflow: hidden; background: #000;">
-                <iframe src="/embed/${encodeURIComponent(id)}" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen" allowfullscreen></iframe>
-                <!-- Click shield to block any popout icon -->
-                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
-            </div>`;
+        content.innerHTML = `<video src="${previewUrl}" controls autoplay playsinline style="width: 100%; max-height: 65vh; border-radius: 12px; object-fit: contain; background: #000; outline: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"></video>`;
     } else if (mimeType.startsWith('audio/')) {
         content.innerHTML = `<audio src="${previewUrl}" controls autoplay style="width: 90%; max-width: 480px; outline: none;"></audio>`;
     } else if (mimeType === 'application/pdf' || name.toLowerCase().endsWith('.pdf')) {
