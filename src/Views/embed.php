@@ -286,7 +286,12 @@
 
     function togglePlay() {
         if (video.paused) {
-            video.play();
+            const playPromise = video.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(err => {
+                    console.log("Autoplay / Play interaction deferred:", err);
+                });
+            }
         } else {
             video.pause();
         }
