@@ -384,8 +384,20 @@ class DownloadProxyController
         if ($fileSize > 0 && isset($_SERVER['HTTP_RANGE'])) {
             preg_match('/bytes=(\d*)-(\d*)/', $_SERVER['HTTP_RANGE'], $matches);
             $rangeStart = ($matches[1] !== '') ? (int)$matches[1] : 0;
-            $rangeEnd   = ($matches[2] !== '') ? (int)$matches[2] : $rangeEnd;
-            $rangeEnd   = min($rangeEnd, $fileSize - 1);
+            $reqEnd     = ($matches[2] !== '') ? (int)$matches[2] : null;
+
+            // Fast Video CDN Trick: Cap open-ended video range requests to 4MB chunks for 0ms instant startup
+            if ($isInline && $reqEnd === null) {
+                $rangeEnd = min($rangeStart + 4194303, $fileSize - 1);
+            } else {
+                $rangeEnd = $reqEnd !== null ? min($reqEnd, $fileSize - 1) : ($fileSize - 1);
+            }
+
+            $isPartial  = true;
+        } elseif ($isInline && $fileSize > 4194304) {
+            // Force 206 Partial Content for inline video requests to trigger instant metadata loading
+            $rangeStart = 0;
+            $rangeEnd   = min(4194303, $fileSize - 1);
             $isPartial  = true;
         }
 
@@ -404,7 +416,8 @@ class DownloadProxyController
         header('Content-Type: ' . $mime);
         header('Content-Disposition: ' . $disposition . '; filename="' . rawurlencode($file['name']) . '"');
         header('Accept-Ranges: bytes');
-        header('Cache-Control: public, max-age=86400');
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Cloudflare-CDN-Cache-Control: max-age=31536000');
         header('ETag: ' . $etag);
         header('X-Cache: MISS');
 
