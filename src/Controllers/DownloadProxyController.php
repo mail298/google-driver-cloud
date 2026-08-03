@@ -466,10 +466,10 @@ class DownloadProxyController
             }
 
             $isPartial = true;
-        } elseif ($isInline && $fileSize > 4194304) {
-            // Force 206 Partial Content for inline video requests to trigger instant metadata loading
+        } elseif ($isInline && $isVideoOrAudio) {
+            // Force 206 Partial Content for all inline video/audio requests to trigger instant metadata & playback
             $rangeStart = 0;
-            $rangeEnd = min(4194303, $fileSize - 1);
+            $rangeEnd = $fileSize > 0 ? min(4194303, $fileSize - 1) : 4194303;
             $isPartial = true;
         }
 
