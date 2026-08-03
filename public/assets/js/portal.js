@@ -2243,33 +2243,66 @@ function openVideoEmbedModal(fileId, fileName) {
     if (hlsEl) hlsEl.value = hlsUrl;
 
     modal.style.display = 'flex';
+    modal.classList.add('active');
+    modal.style.opacity = '1';
+    modal.style.pointerEvents = 'auto';
+    modal.style.visibility = 'visible';
 }
 
 function closeVideoEmbedModal() {
     const modal = document.getElementById('video-embed-modal');
     const iframeEl = document.getElementById('embed-player-iframe');
     if (iframeEl) iframeEl.src = '';
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+        modal.style.opacity = '0';
+        modal.style.pointerEvents = 'none';
+        modal.style.visibility = 'hidden';
+    }
 }
 
 function copyInputText(inputId, labelName) {
     const input = document.getElementById(inputId);
     if (!input || !input.value) return;
 
+    input.focus();
     input.select();
-    navigator.clipboard.writeText(input.value)
-        .then(() => {
-            if (typeof showToast === 'function') {
-                showToast(labelName + ' berhasil disalin ke clipboard!', 'success');
-            } else {
-                alert(labelName + ' berhasil disalin!');
-            }
-        })
-        .catch(() => {
-            document.execCommand('copy');
-            if (typeof showToast === 'function') {
-                showToast(labelName + ' berhasil disalin!', 'success');
-            }
-        });
+    if (input.setSelectionRange) {
+        input.setSelectionRange(0, 99999);
+    }
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(input.value)
+            .then(() => {
+                showCopyToast(labelName + ' berhasil disalin ke clipboard!');
+            })
+            .catch(() => {
+                fallbackCopyText(input, labelName);
+            });
+    } else {
+        fallbackCopyText(input, labelName);
+    }
+}
+
+function fallbackCopyText(input, labelName) {
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopyToast(labelName + ' berhasil disalin!');
+        } else {
+            prompt('Tekan Ctrl+C untuk menyalin ' + labelName + ':', input.value);
+        }
+    } catch (err) {
+        prompt('Tekan Ctrl+C untuk menyalin ' + labelName + ':', input.value);
+    }
+}
+
+function showCopyToast(msg) {
+    if (typeof showToast === 'function') {
+        showToast(msg, 'success');
+    } else {
+        alert(msg);
+    }
 }
 
