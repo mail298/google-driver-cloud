@@ -57,6 +57,13 @@ class StreamController
             die("Akses pemutaran video ditolak: Domain ini tidak diizinkan (Hotlink Protected).");
         }
 
+        // Allow embedding in external landing pages & websites (CORS & frame options)
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
+        if (function_exists('header_remove')) {
+            header_remove('X-Frame-Options');
+        }
+
         require_once dirname(__DIR__) . '/Views/embed.php';
     }
 
