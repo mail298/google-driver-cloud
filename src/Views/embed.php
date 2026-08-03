@@ -180,34 +180,42 @@
         }
         /* Mobile Responsive Adjustments */
         @media (max-width: 640px) {
+            .player-container { background: #000; }
+            video {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                max-height: 100%;
+            }
             .big-play-btn { width: 56px; height: 56px; font-size: 22px; }
-            .controls-overlay { padding: 8px 12px; gap: 6px; }
-            .controls-row { flex-wrap: wrap; gap: 6px; }
-            .controls-left, .controls-right { gap: 8px; }
-            .btn-icon { font-size: 14px; }
+            .controls-overlay {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+            .controls-row {
+                flex-wrap: nowrap;
+                gap: 6px;
+                width: 100%;
+            }
+            .controls-left, .controls-right { gap: 10px; }
+            .btn-icon { font-size: 15px; min-width: 28px; }
             .time-display { font-size: 11px; }
             .custom-select { font-size: 11px; padding: 2px 4px; }
             .video-title-badge { font-size: 11px; padding: 4px 10px; top: 10px; left: 10px; }
-            .gd-frame-wrap iframe { margin-top: -40px; height: calc(100% + 44px); }
+            .progress-container { height: 5px; }
+            .progress-container:active { height: 8px; }
+        }
+
+        /* Safe-area-aware fullscreen on mobile */
+        @media (display-mode: fullscreen) {
+            .controls-overlay {
+                padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            }
         }
     </style>
 </head>
 <body>
 
-<?php if (!empty($file['provider_file_id'])): ?>
-    <!-- Fast Engine (Instant <0.2s Startup Speed) - 100% White-Label Shielded -->
-    <div class="player-container" id="playerContainer" style="position: relative; width:100%; height:100%; background:#000; overflow:hidden;">
-        <div class="gd-frame-wrap" style="position: relative; width:100%; height:100%; background:#000; overflow:hidden;">
-        <iframe src="https://drive.google.com/file/d/<?= htmlspecialchars($file['provider_file_id']) ?>/preview" 
-                style="width:100%; height:calc(100% + 56px); margin-top:-52px; border:none;" 
-                allow="autoplay; fullscreen" 
-                allowfullscreen>
-        </iframe>
-        <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
-        <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
-    </div>
-    </div>
-<?php else: ?>
 <div class="player-container paused" id="playerContainer">
     <div class="video-title-badge"><?= htmlspecialchars($file['name']) ?></div>
     
@@ -244,7 +252,6 @@
         </div>
     </div>
 </div>
-<?php endif; ?>
 
 <script>
     const container = document.getElementById('playerContainer');
