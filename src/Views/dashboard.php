@@ -995,6 +995,45 @@
             font-weight: 800 !important;
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
         }
+
+        /* Mobile-responsive video players (Stream & Embed previews) */
+        @media (max-width: 640px) {
+            #video-embed-modal.modal-overlay {
+                align-items: center;
+            }
+
+            #video-embed-modal .modal-card {
+                max-width: 100% !important;
+                width: 100% !important;
+                max-height: 92vh !important;
+                overflow-y: auto;
+                border-radius: 18px !important;
+                padding: 14px !important;
+            }
+
+            #video-embed-modal .modal-card .embed-player-preview {
+                height: auto !important;
+                aspect-ratio: 16 / 9;
+                max-height: 46vh;
+            }
+
+            #video-embed-modal .embed-player-preview iframe {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            #preview-content .inline-video-preview {
+                width: 100% !important;
+                height: auto !important;
+                max-height: 50vh !important;
+                aspect-ratio: 16 / 9;
+            }
+
+            #preview-content .inline-video-preview iframe {
+                width: 100% !important;
+                height: 100% !important;
+            }
+        }
     </style>
 </head>
 
@@ -2456,7 +2495,7 @@
             </div>
 
             <!-- Embedded Player Preview -->
-            <div style="position: relative; width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
+            <div class="embed-player-preview" style="position: relative; width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
                 <iframe id="embed-player-iframe" src="" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
                 <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
                 <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>

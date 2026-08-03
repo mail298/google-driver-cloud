@@ -1136,7 +1136,7 @@ function previewFile(id, name, mimeType) {
         content.innerHTML = `<img src="${previewUrl}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain;">`;
     } else if (mimeType.startsWith('video/')) {
         content.innerHTML = `
-            <div style="position: relative; width: 100%; height: 380px; max-height: 60vh; border-radius: 12px; overflow: hidden; background: #000;">
+            <div class="inline-video-preview" style="position: relative; width: 100%; height: 380px; max-height: 60vh; border-radius: 12px; overflow: hidden; background: #000;">
                 <iframe src="/embed/${encodeURIComponent(id)}" style="width: 100%; height: 100%; border: none;" allow="autoplay; fullscreen" allowfullscreen></iframe>
                 <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
             </div>`;
