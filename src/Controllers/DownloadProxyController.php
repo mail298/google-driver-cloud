@@ -155,6 +155,9 @@ class DownloadProxyController
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        curl_setopt($ch, CURLOPT_TCP_NODELAY, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_BUFFERSIZE, self::PROXY_BUF_SIZE);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_FILE, $fp);
@@ -415,6 +418,9 @@ class DownloadProxyController
         curl_setopt($ch, CURLOPT_URL, $upstreamUrl);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        curl_setopt($ch, CURLOPT_TCP_NODELAY, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_BUFFERSIZE, self::PROXY_BUF_SIZE);
         curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) {
             echo $chunk;
@@ -425,7 +431,6 @@ class DownloadProxyController
         if (!empty($curlHeaders)) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $curlHeaders);
         }
-
         curl_exec($ch);
         curl_close($ch);
         exit;

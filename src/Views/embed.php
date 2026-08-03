@@ -316,14 +316,26 @@
 
     // Time & Progress Update
     function formatTime(seconds) {
-        if (isNaN(seconds)) return "00:00";
+        if (isNaN(seconds) || !isFinite(seconds)) return "00:00";
         const m = Math.floor(seconds / 60);
         const s = Math.floor(seconds % 60);
         return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
     }
 
+    function updateDurationDisplay() {
+        if (video.duration && !isNaN(video.duration)) {
+            const percent = (video.currentTime / video.duration) * 100 || 0;
+            progressFilled.style.width = percent + '%';
+            timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+        }
+    }
+
+    video.addEventListener('loadedmetadata', updateDurationDisplay);
+    video.addEventListener('durationchange', updateDurationDisplay);
+    video.addEventListener('canplay', updateDurationDisplay);
+
     video.addEventListener('timeupdate', () => {
-        const percent = (video.currentTime / video.duration) * 100;
+        const percent = (video.currentTime / video.duration) * 100 || 0;
         progressFilled.style.width = percent + '%';
         timeDisplay.textContent = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
     });
