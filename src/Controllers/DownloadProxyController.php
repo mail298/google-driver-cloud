@@ -304,9 +304,9 @@ class DownloadProxyController
 
         // ─────────────────────────────────────────────────────────────────
         // GOOGLE IMAGE CDN FAST ENGINE (lh3.googleusercontent.com)
-        // Direct Google Edge CDN for images (<5ms Instant Load)
+        // Direct Google Edge Image CDN for Landing Pages (<5ms Instant Load)
         // ─────────────────────────────────────────────────────────────────
-        if ($isImage && !empty($file['provider_file_id']) && (isset($_GET['fast']) || isset($_GET['cdn_direct']))) {
+        if ($isImage && !empty($file['provider_file_id']) && $isInline) {
             header('Location: https://lh3.googleusercontent.com/d/' . $file['provider_file_id'] . '=s0', true, 302);
             header('Cache-Control: public, max-age=31536000, immutable');
             header('Cloudflare-CDN-Cache-Control: max-age=31536000');
