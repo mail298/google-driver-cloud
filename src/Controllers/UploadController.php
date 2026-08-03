@@ -226,20 +226,181 @@ class UploadController
         fclose($out);
         @rmdir($tempDir);
 
-        $assembledFile = [
-            'name' => $fileName,
-            'tmp_name' => $assembledPath,
-            'size' => filesize($assembledPath),
-            'type' => mime_content_type($assembledPath) ?: 'application/octet-stream',
-            'error' => UPLOAD_ERR_OK
-        ];
+        $userId = !empty($_SESSION['user']['id']) ? $_SESSION['user']['id'] : null;
 
-        self::processUploadedFile($assembledFile, $folderId, $replace);
-        @unlink($assembledPath);
+        // Register a finalize job and kick it off in a background process.
+        // Uploading a large file (e.g. 500MB) to Google Drive takes longer than
+        // Cloudflare's 100s proxy timeout, which would otherwise abort the last
+        // chunk request with error 524. Running it in a background request
+        // (internal, no Cloudflare in front) keeps the browser request fast.
+        $jobId = self::registerFinalizeJob($uploadId, $assembledPath, $fileName, $folderId, $replace, $userId);
+        self::spawnFinalize($jobId);
+
+        echo json_encode([
+            'success' => true,
+            'chunkIndex' => $chunkIndex,
+            'totalChunks' => $totalChunks,
+            'completed' => true,
+            'finalizing' => true,
+            'jobId' => $jobId
+        ]);
         exit;
     }
 
-    public static function processUploadedFile($file, $folderId = null, $replaceDuplicate = false)
+    // ─────────────────────────────────────────────────────────────────────
+    // ASYNC FINALIZE JOBS (for files too big to finalize inside a single
+    // browser request — avoids Cloudflare 524 on the last chunk).
+    // ─────────────────────────────────────────────────────────────────────
+
+    private static function finalizeJobDir()
+    {
+        $dir = sys_get_temp_dir() . '/portal_finalize';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0777, true);
+        }
+        return $dir;
+    }
+
+    private static function registerFinalizeJob($uploadId, $assembledPath, $fileName, $folderId, $replace, $userId)
+    {
+        $jobId = 'fz_' . substr(md5($uploadId . microtime(true)), 0, 10);
+        $data = [
+            'jobId' => $jobId,
+            'uploadId' => $uploadId,
+            'assembledPath' => $assembledPath,
+            'fileName' => $fileName,
+            'folderId' => $folderId,
+            'replace' => $replace,
+            'userId' => $userId,
+            'status' => 'pending',
+            'message' => '',
+            'isDuplicate' => false,
+            'replaced' => false,
+            'created_at' => time(),
+        ];
+        file_put_contents(self::finalizeJobDir() . '/' . $jobId . '.json', json_encode($data), LOCK_EX);
+        return $jobId;
+    }
+
+    private static function spawnFinalize($jobId)
+    {
+        $lock = self::finalizeJobDir() . '/' . $jobId . '.lck';
+        if (file_exists($lock)) {
+            return;
+        }
+        @touch($lock);
+
+        // Internal request — fast and not throttled by Cloudflare's 100s limit.
+        $cmd = 'curl -s --max-time 3600 "http://127.0.0.1/finalize?jobId=' . rawurlencode($jobId) . '" >/dev/null 2>&1 &';
+        @exec($cmd);
+    }
+
+    public static function finalizeJobStatus($jobId)
+    {
+        $path = self::finalizeJobDir() . '/' . preg_replace('/[^a-zA-Z0-9_-]/', '', $jobId) . '.json';
+        if (!is_file($path)) {
+            return null;
+        }
+        return json_decode((string) file_get_contents($path), true);
+    }
+
+    public static function finalizeStatus()
+    {
+        header('Content-Type: application/json');
+
+        $jobId = preg_replace('/[^a-zA-Z0-9_-]/', '', $_GET['jobId'] ?? '');
+        if (!$jobId) {
+            echo json_encode(['success' => false, 'message' => 'Job ID diperlukan.']);
+            exit;
+        }
+
+        $job = self::finalizeJobStatus($jobId);
+        if (!$job) {
+            echo json_encode(['success' => false, 'message' => 'Job tidak ditemukan.']);
+            exit;
+        }
+
+        echo json_encode([
+            'success' => true,
+            'jobId' => $jobId,
+            'status' => $job['status'] ?? 'unknown',
+            'message' => $job['message'] ?? '',
+            'isDuplicate' => (bool) ($job['isDuplicate'] ?? false),
+            'replaced' => (bool) ($job['replaced'] ?? false),
+        ]);
+        exit;
+    }
+
+    public static function finalize()
+    {
+        @set_time_limit(0);
+        @ini_set('memory_limit', '-1');
+        @ini_set('max_execution_time', '0');
+        @ini_set('max_input_time', '-1');
+
+        header('Content-Type: application/json');
+
+        $jobId = preg_replace('/[^a-zA-Z0-9_-]/', '', $_GET['jobId'] ?? '');
+        $jobPath = self::finalizeJobDir() . '/' . $jobId . '.json';
+        if (!$jobId || !is_file($jobPath)) {
+            echo json_encode(['success' => false, 'message' => 'Job tidak ditemukan.']);
+            exit;
+        }
+
+        $job = json_decode((string) file_get_contents($jobPath), true);
+        if ($job['status'] === 'processing') {
+            echo json_encode(['success' => false, 'message' => 'Job sudah diproses.']);
+            exit;
+        }
+
+        $job['status'] = 'processing';
+        $job['started_at'] = time();
+        file_put_contents($jobPath, json_encode($job), LOCK_EX);
+
+        // Rebuild a minimal session for the async worker
+        if (!empty($job['userId'])) {
+            require_once dirname(__DIR__) . '/Models/UserModel.php';
+            $jobUser = UserModel::getUserById($job['userId']);
+            if ($jobUser) {
+                AuthController::startSession();
+                $_SESSION['user'] = $jobUser;
+                $_SESSION['user_role'] = 'client';
+                $_SESSION['username'] = $jobUser['username'];
+            }
+        }
+
+        $assembledFile = [
+            'name' => $job['fileName'],
+            'tmp_name' => $job['assembledPath'],
+            'size' => is_file($job['assembledPath']) ? filesize($job['assembledPath']) : 0,
+            'type' => is_file($job['assembledPath']) ? (mime_content_type($job['assembledPath']) ?: 'application/octet-stream') : 'application/octet-stream',
+            'error' => UPLOAD_ERR_OK,
+        ];
+
+        $outcome = self::processUploadedFileAsync($assembledFile, $job['folderId'], (bool) $job['replace']);
+        $outcome['status'] = ($outcome['success'] ?? false) ? 'done' : 'error';
+
+        $job = array_merge($job, $outcome);
+        $job['finished_at'] = time();
+        file_put_contents($jobPath, json_encode($job), LOCK_EX);
+
+        @unlink($job['assembledPath']);
+        @unlink(self::finalizeJobDir() . '/' . $jobId . '.lck');
+
+        echo json_encode(['success' => true, 'jobId' => $jobId, 'status' => 'done']);
+        exit;
+    }
+
+    /**
+     * Same as processUploadedFile but returns structured result instead of
+     * printing JSON, so it can be used by the async finalize worker.
+     */
+    private static function processUploadedFileAsync($file, $folderId = null, $replaceDuplicate = false)
+    {
+        return self::processUploadedFile($file, $folderId, $replaceDuplicate, true);
+    }
+
+    public static function processUploadedFile($file, $folderId = null, $replaceDuplicate = false, $returnResult = false)
     {
         $gatewayUrl = Config::get('GATEWAY_API_URL', 'http://localhost:4000');
         $apiKey = Config::get('GATEWAY_API_KEY');
@@ -348,7 +509,9 @@ class UploadController
 
         header('Content-Type: application/json');
         if ($response === false) {
-            echo json_encode(['success' => false, 'message' => 'Gateway request failed: ' . $curlError]);
+            $result = ['success' => false, 'message' => 'Gateway request failed: ' . $curlError];
+            if ($returnResult) return $result;
+            echo json_encode($result);
         } else {
             $responseData = json_decode($response, true);
             if ($httpCode >= 200 && $httpCode < 300) {
@@ -409,19 +572,23 @@ class UploadController
                     $msg = 'Informasi: Berkas dengan nama "' . $file['name'] . '" sudah ada di folder ini.';
                 }
 
-                echo json_encode([
+                $result = [
                     'success' => true,
                     'completed' => true,
                     'isDuplicate' => $isDuplicateDetected,
                     'replaced' => $replaced,
                     'message' => $msg,
                     'data' => $responseData
-                ]);
+                ];
+                if ($returnResult) return $result;
+                echo json_encode($result);
             } else {
-                echo json_encode([
+                $result = [
                     'success' => false,
                     'message' => $responseData['message'] ?? 'Gateway returned error code: ' . $httpCode
-                ]);
+                ];
+                if ($returnResult) return $result;
+                echo json_encode($result);
             }
         }
     }

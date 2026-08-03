@@ -107,6 +107,12 @@ switch ($requestUri) {
     case '/upload-chunk':
         UploadController::uploadChunk();
         break;
+    case '/finalize':
+        UploadController::finalize();
+        break;
+    case '/finalize-status':
+        UploadController::finalizeStatus();
+        break;
     case '/upload-token':
         AuthController::uploadToken();
         break;

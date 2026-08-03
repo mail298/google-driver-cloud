@@ -275,6 +275,7 @@ function renderGDriveWidget() {
     const isFinished = (completed === total && total > 0);
 
     const currentlyUploading = gdriveQueue.find(i => i.status === 'uploading');
+    const currentlyFinalizing = gdriveQueue.find(i => i.status === 'finalizing');
 
     if (titleEl) {
         titleEl.textContent = isFinished ? completed + ' upload selesai' : 'Mengupload ' + total + ' item';
@@ -282,6 +283,8 @@ function renderGDriveWidget() {
     if (statusTextEl) {
         if (isFinished) {
             statusTextEl.textContent = 'Semua pengunggahan selesai';
+        } else if (currentlyFinalizing) {
+            statusTextEl.textContent = 'Menyimpan ke Google Drive...';
         } else if (currentlyUploading) {
             const pct = currentlyUploading.progress || 0;
             statusTextEl.textContent = 'Mengunggah berkas... ' + pct + '%';
@@ -298,6 +301,12 @@ function renderGDriveWidget() {
         if (item.status === 'waiting') {
             statusIcon = '<div style="width: 18px; height: 18px; border-radius: 50%; border: 2px solid #64748b;" title="Menunggu antrean"></div>';
             subTextHtml = '<div style="font-size: 11.5px; color: #94a3b8; margin-top: 2px;">Menunggu antrean...</div>';
+        } else if (item.status === 'finalizing') {
+            statusIcon = '<div style="display:flex; align-items:center; gap:6px;">'
+                + '<span style="font-size:12px; font-weight:700; color:#fbbf24;">Memproses</span>'
+                + '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); border-top: 3px solid #fbbf24; animation: spinRing 0.8s linear infinite;"></div>'
+                + '</div>';
+            subTextHtml = '<div style="font-size: 11.5px; color: #fbbf24; margin-top: 2px;">Mengunggah ke Google Drive... mohon tunggu</div>';
         } else if (item.status === 'uploading') {
             if (item.progress >= 100) {
                 statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px rgba(16,185,129,0.3);">✓</div>';
@@ -490,6 +499,17 @@ async function uploadItemInChunks(item) {
             return;
         }
 
+        if (chunkResult.finalizing && chunkResult.jobId) {
+            item.status = 'finalizing';
+            item.progress = 100;
+            item.loadedBytes = totalSize;
+            item.finalizeJobId = chunkResult.jobId;
+            renderGDriveWidget();
+            pollFinalizeStatus(item);
+            processGDriveQueueItem();
+            return;
+        }
+
         if (chunkResult.completed) {
             item.status = 'completed';
             item.progress = 100;
@@ -511,6 +531,61 @@ async function uploadItemInChunks(item) {
     }
 }
 
+async function pollFinalizeStatus(item) {
+    let attempts = 0;
+    while (item.status === 'finalizing') {
+        if (item.status === 'cancelled') return;
+
+        await new Promise(r => setTimeout(r, 4000));
+        attempts++;
+
+        try {
+            const resp = await fetch('/finalize-status?jobId=' + encodeURIComponent(item.finalizeJobId));
+            const data = await resp.json();
+            if (!data.success) {
+                item.status = 'failed';
+                item.error = data.message || 'Gagal menyimpan ke Google Drive';
+                renderGDriveWidget();
+                processGDriveQueueItem();
+                return;
+            }
+            if (data.status === 'done' || data.status === 'completed') {
+                item.status = 'completed';
+                item.progress = 100;
+                if (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) {
+                    if (!EXISTING_FILE_NAMES.includes(item.file.name)) {
+                        EXISTING_FILE_NAMES.push(item.file.name);
+                    }
+                }
+                if (data.replaced && typeof showToast === 'function') {
+                    showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
+                } else if (data.isDuplicate && typeof showToast === 'function') {
+                    showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
+                }
+                renderGDriveWidget();
+                processGDriveQueueItem();
+                return;
+            }
+            if (data.status === 'error') {
+                item.status = 'failed';
+                item.error = data.message || 'Gagal menyimpan ke Google Drive';
+                renderGDriveWidget();
+                processGDriveQueueItem();
+                return;
+            }
+            if (attempts >= 150) { // ~10 menit, abort after long wait
+                item.status = 'failed';
+                item.error = 'Waktu proses penyimpanan habis, coba lagi nanti.';
+                renderGDriveWidget();
+                processGDriveQueueItem();
+                return;
+            }
+        } catch (e) {
+            // network hiccup — keep polling
+        }
+    }
+}
+
 let isReloadScheduled = false;
 
 async function processGDriveQueueItem() {
@@ -520,7 +595,7 @@ async function processGDriveQueueItem() {
         isGDriveUploading = false;
         renderGDriveWidget();
         const hasCompleted = gdriveQueue.some(i => i.status === 'completed');
-        const isStillUploading = gdriveQueue.some(i => i.status === 'uploading');
+        const isStillUploading = gdriveQueue.some(i => i.status === 'uploading' || i.status === 'finalizing');
         if (!isStillUploading && hasCompleted && !isReloadScheduled) {
             isReloadScheduled = true;
             setTimeout(function () {
