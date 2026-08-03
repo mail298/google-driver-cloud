@@ -161,13 +161,6 @@ class DownloadProxyController
         if (!$fp)
             return false;
 
-        $defaultHeaders = [
-            'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-            'Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-            'Accept-Language: en-US,en;q=0.9',
-        ];
-        $finalHeaders = array_merge($defaultHeaders, $headers);
-
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
@@ -175,7 +168,7 @@ class DownloadProxyController
         curl_setopt($ch, CURLOPT_TCP_NODELAY, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_BUFFERSIZE, self::PROXY_BUF_SIZE);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $finalHeaders);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_FILE, $fp);
         curl_setopt($ch, CURLOPT_TIMEOUT, 120);
         curl_exec($ch);

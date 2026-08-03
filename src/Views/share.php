@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($file['name']) ?> - Share</title>
+    <title><?= htmlspecialchars($file['name']) ?> -  Share</title>
     <link rel="icon" type="image/png" href="/assets/image/favicon/favicon-clouds.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -215,8 +215,7 @@
             </div>
         </div>
         <div class="share-header-right">
-            <a href="/download?id=<?= $file['id'] ?>&inline=1" target="_blank" class="btn-download-icon"
-                title="Unduh / Buka Berkas">
+            <a href="/download?id=<?= $file['id'] ?>" class="btn-download-icon" title="Unduh / Buka Berkas">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -233,19 +232,13 @@
             <img src="/download?id=<?= $file['id'] ?>&inline=1" alt="<?= htmlspecialchars($file['name']) ?>"
                 class="share-full-img">
         <?php elseif ($isVideo): ?>
-            <div
-                style="position: relative; width: 100%; max-width: 960px; height: 100%; max-height: calc(100vh - 120px); aspect-ratio: 16/9; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 16px 50px rgba(0, 0, 0, 0.7);">
-                <iframe src="/embed/<?= htmlspecialchars($file['id']) ?>"
-                    style="width: 100%; height: 100%; border: none; background: #000;" allow="autoplay; fullscreen"
-                    allowfullscreen></iframe>
+            <div style="position: relative; width: 100%; height: 100%; min-height: 480px; border-radius: 12px; overflow: hidden; background: #000;">
+                <iframe src="/embed/<?= htmlspecialchars($file['id']) ?>" style="width: 100%; height: 100%; min-height: 480px; border: none; background: #000;" allow="autoplay; fullscreen" allowfullscreen></iframe>
                 <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
-                <div
-                    style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;">
-                </div>
+                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
             </div>
         <?php elseif ($isPdf): ?>
-            <iframe src="/download?id=<?= $file['id'] ?>&inline=1"
-                style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
+            <iframe src="/download?id=<?= $file['id'] ?>&inline=1" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
         <?php else: ?>
             <div class="share-generic-card">
                 <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
