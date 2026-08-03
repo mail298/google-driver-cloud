@@ -32,8 +32,8 @@ class DownloadProxyController
     }
 
     private const CACHE_TTL          = 604800;    // 7 days per-file TTL
-    private const CACHE_MAX_TOTAL_MB = 5000;      // max total cache dir size (5GB)
-    private const CACHE_MAX_BYTES = 262144000; // 250 MB max per-file cache
+    private const CACHE_MAX_TOTAL_MB = 10000;     // max total cache dir size (10GB)
+    private const CACHE_MAX_BYTES = 1073741824; // 1 GB max per-file cache
     private const PROXY_BUF_SIZE  = 2097152;  // 2 MB streaming buffer
 
     // ─────────────────────────────────────────────────────────────────────
@@ -296,10 +296,11 @@ class DownloadProxyController
             die("File not found or access denied.");
         }
 
-        $mime     = $file['mime_type'] ?: 'application/octet-stream';
-        $isImage  = strpos($mime, 'image/') === 0;
-        $isInline = isset($_GET['inline']) || isset($_GET['cdn']) || $isImage;
-        $fileSize = (int)($file['size_bytes'] ?? 0);
+        $mime            = $file['mime_type'] ?: 'application/octet-stream';
+        $isImage         = strpos($mime, 'image/') === 0;
+        $isVideoOrAudio  = strpos($mime, 'video/') === 0 || strpos($mime, 'audio/') === 0;
+        $isInline        = isset($_GET['inline']) || isset($_GET['cdn']) || $isImage || $isVideoOrAudio;
+        $fileSize        = (int)($file['size_bytes'] ?? 0);
 
         // ─────────────────────────────────────────────────────────────────
         // HTTP 304 Not Modified — 0ms cache hit for returning visitors
