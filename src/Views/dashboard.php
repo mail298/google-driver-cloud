@@ -2427,30 +2427,28 @@
     <div class="modal-overlay" id="video-embed-modal"
         style="display: none; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;">
         <div class="modal-card"
-            style="max-width: 680px; width: 94%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
+            style="max-width: 680px; width: 94%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 18px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
                     <div
-                        style="background: rgba(13, 110, 253, 0.15); border: 1px solid rgba(13, 110, 253, 0.3); border-radius: 12px; width: 36px; height: 36px; color: #60a5fa; display: flex; align-items: center; justify-content: center;">
+                        style="background: rgba(13, 110, 253, 0.15); border: 1px solid rgba(13, 110, 253, 0.3); border-radius: 12px; width: 36px; height: 36px; color: #60a5fa; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2">
                             <polygon points="5 3 19 12 5 21 5 3" />
                         </svg>
                     </div>
-                    <div>
-                        <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #fff;">Stream & Embed Video (HLS)</h3>
-                        <span id="embed-video-name" style="font-size: 12px; color: #94a3b8;">video.mp4</span>
+                    <div style="min-width: 0; flex: 1;">
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Stream & Embed Video (HLS)</h3>
+                        <span id="embed-video-name" style="font-size: 11.5px; color: #94a3b8; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">video.mp4</span>
                     </div>
                 </div>
                 <button type="button" onclick="closeVideoEmbedModal()"
-                    style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;">&times;</button>
+                    style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 10px;">&times;</button>
             </div>
 
             <!-- Embedded Player Preview -->
-            <div style="position: relative; width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
-                <iframe id="embed-player-iframe" src="" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
-                <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
-                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
+            <div style="display: flex; justify-content: center; align-items: center; width: 100%; min-height: 180px; max-height: 55vh; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <video id="embed-player-video" src="" controls playsinline style="width: 100%; max-height: 55vh; border-radius: 12px; object-fit: contain; background: #000; outline: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"></video>
             </div>
 
             <!-- Code & Link Inputs -->

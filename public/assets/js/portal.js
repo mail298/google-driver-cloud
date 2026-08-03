@@ -2231,7 +2231,7 @@ window.addEventListener('beforeunload', function (e) {
 function openVideoEmbedModal(fileId, fileName) {
     const modal = document.getElementById('video-embed-modal');
     const nameEl = document.getElementById('embed-video-name');
-    const iframeEl = document.getElementById('embed-player-iframe');
+    const videoEl = document.getElementById('embed-player-video');
     const codeEl = document.getElementById('embed-iframe-code');
     const hlsEl = document.getElementById('embed-hls-url');
 
@@ -2240,10 +2240,14 @@ function openVideoEmbedModal(fileId, fileName) {
     const origin = window.location.origin;
     const embedUrl = origin + '/embed/' + encodeURIComponent(fileId);
     const hlsUrl = origin + '/stream/' + encodeURIComponent(fileId) + '/master.m3u8';
+    const streamUrl = origin + '/download?id=' + encodeURIComponent(fileId) + '&inline=1';
     const iframeCode = `<iframe src="${embedUrl}" width="100%" height="450" frameborder="0" allowfullscreen></iframe>`;
 
     if (nameEl) nameEl.textContent = fileName || 'Video Stream';
-    if (iframeEl) iframeEl.src = embedUrl;
+    if (videoEl) {
+        videoEl.src = streamUrl;
+        videoEl.load();
+    }
     if (codeEl) codeEl.value = iframeCode;
     if (hlsEl) hlsEl.value = hlsUrl;
 
@@ -2256,8 +2260,11 @@ function openVideoEmbedModal(fileId, fileName) {
 
 function closeVideoEmbedModal() {
     const modal = document.getElementById('video-embed-modal');
-    const iframeEl = document.getElementById('embed-player-iframe');
-    if (iframeEl) iframeEl.src = '';
+    const videoEl = document.getElementById('embed-player-video');
+    if (videoEl) {
+        videoEl.pause();
+        videoEl.src = '';
+    }
     if (modal) {
         modal.style.display = 'none';
         modal.classList.remove('active');
