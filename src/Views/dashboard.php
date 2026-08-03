@@ -836,7 +836,7 @@
                 margin-bottom: 12px !important;
             }
 
-            .view-mode-bar > div:last-child {
+            .view-mode-bar>div:last-child {
                 justify-content: space-between !important;
                 width: 100% !important;
             }
@@ -1560,30 +1560,30 @@
                                     </button>
                                 </div>
                                 <div class="card-thumb-box">
-                                     <?php if ($isImage): ?>
-                                         <img src="/download?id=<?= $file['id'] ?>&inline=1"
-                                             alt="<?= htmlspecialchars($file['name']) ?>" class="card-thumb-img" loading="lazy" decoding="async"
-                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                         <div
-                                             style="display:none; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8;">
-                                             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
-                                                 fill="none" stroke="currentColor" stroke-width="1.5">
-                                                 <rect width="18" height="18" x="3" y="3" rx="2" />
-                                                 <circle cx="9" cy="9" r="2" />
-                                                 <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                                             </svg>
-                                         </div>
-                                     <?php elseif ($isVideo): ?>
-                                         <div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0f172a;">
-                                             <video src="/download?id=<?= $file['id'] ?>&inline=1#t=0.1" preload="metadata"
-                                                 style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; pointer-events:none;"></video>
-                                             <div style="position:relative; z-index:2; width:40px; height:40px; border-radius:50%; background:rgba(168,85,247,0.35); border:1.5px solid rgba(192,132,252,0.6); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 14px rgba(0,0,0,0.5); backdrop-filter:blur(4px);">
-                                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-left:2px;">
-                                                     <polygon points="5 3 19 12 5 21 5 3"/>
+                                    <?php if ($isImage): ?>
+                                        <img src="/download?id=<?= $file['id'] ?>&inline=1"
+                                            alt="<?= htmlspecialchars($file['name']) ?>" class="card-thumb-img" loading="lazy"
+                                            decoding="async"
+                                            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div
+                                            style="display:none; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <rect width="18" height="18" x="3" y="3" rx="2" />
+                                                <circle cx="9" cy="9" r="2" />
+                                                <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                            </svg>
+                                        </div>
+                                    <?php elseif ($isVideo): ?>
+                                        <div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(135deg, rgba(168,85,247,0.12) 0%, rgba(15,23,42,0.95) 100%); border: 1px dashed rgba(168,85,247,0.25);">
+                                             <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 18px rgba(168,85,247,0.4);">
+                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-left:3px;">
+                                                     <polygon points="5 3 19 12 5 21 5 3" />
                                                  </svg>
                                              </div>
+                                             <span style="margin-top: 8px; font-size: 11px; font-weight: 700; color: #c084fc; letter-spacing: 0.5px; text-transform: uppercase;">Video MP4</span>
                                          </div>
-                                     <?php else: ?>
+                                    <?php else: ?>
                                         <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="1.5" style="color: #60a5fa;">
                                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -1715,7 +1715,8 @@
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <?php if ($isImage): ?>
-                                                    <img src="/download?id=<?= $file['id'] ?>&inline=1" loading="lazy" decoding="async"
+                                                    <img src="/download?id=<?= $file['id'] ?>&inline=1" loading="lazy"
+                                                        decoding="async"
                                                         style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;">
                                                 <?php else: ?>
                                                     <div class="card-icon-badge <?= $badgeClass ?>"><?= $kindBadge ?></div>
@@ -1790,14 +1791,7 @@
                 <!-- Dynamic content loaded via JS -->
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <button id="preview-copylink-btn" onclick="copyPreviewLink()"
-                    style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.07); color: #94a3b8; border: 1px solid rgba(255,255,255,0.12); padding: 10px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: background 0.2s, color 0.2s;"
-                    onmouseover="this.style.background='rgba(255,255,255,0.13)'; this.style.color='#fff';"
-                    onmouseout="this.style.background='rgba(255,255,255,0.07)'; this.style.color='#94a3b8';">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                    Salin Link
-                </button>
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
                 <a id="preview-download-btn" href="#" class="btn-action btn-primary"
                     style="text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 13.5px; box-shadow: 0 4px 14px rgba(16,185,129,0.3);">Unduh
                     Berkas</a>
@@ -2263,7 +2257,8 @@
             <kbd
                 style="font-size:10px; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px; color:#94a3b8;">Ctrl+L</kbd>
         </button>
-        <button type="button" class="cm-item" id="cm-btn-embed" onclick="cmActionEmbedVideo()" style="display:none; color: #60a5fa;">
+        <button type="button" class="cm-item" id="cm-btn-embed" onclick="cmActionEmbedVideo()"
+            style="display:none; color: #60a5fa;">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
                 <polygon points="5 3 19 12 5 21 5 3" />
@@ -2445,8 +2440,10 @@
                         </svg>
                     </div>
                     <div style="min-width: 0; flex: 1;">
-                        <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Stream & Embed Video (HLS)</h3>
-                        <span id="embed-video-name" style="font-size: 11.5px; color: #94a3b8; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">video.mp4</span>
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 800; color: #fff;">Stream & Embed Video
+                            (HLS)</h3>
+                        <span id="embed-video-name"
+                            style="font-size: 11.5px; color: #94a3b8; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">video.mp4</span>
                     </div>
                 </div>
                 <button type="button" onclick="closeVideoEmbedModal()"
@@ -2454,25 +2451,37 @@
             </div>
 
             <!-- Embedded Player Preview -->
-            <div style="display: flex; justify-content: center; align-items: center; width: 100%; min-height: 180px; max-height: 55vh; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
-                <video id="embed-player-video" src="" controls playsinline style="width: 100%; max-height: 55vh; border-radius: 12px; object-fit: contain; background: #000; outline: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"></video>
+            <div
+                style="display: flex; justify-content: center; align-items: center; width: 100%; min-height: 180px; max-height: 55vh; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1);">
+                <video id="embed-player-video" src="" controls playsinline
+                    style="width: 100%; max-height: 55vh; border-radius: 12px; object-fit: contain; background: #000; outline: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"></video>
             </div>
 
             <!-- Code & Link Inputs -->
             <div style="display: flex; flex-direction: column; gap: 14px;">
                 <div>
-                    <label style="font-size: 11.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">1. Kode Embed Iframe HTML (Landing Page)</label>
+                    <label
+                        style="font-size: 11.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">1.
+                        Kode Embed Iframe HTML (Landing Page)</label>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="embed-iframe-code" readonly style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #60a5fa; padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 12px;" onclick="this.select()">
-                        <button type="button" onclick="copyInputText('embed-iframe-code', 'Kode Iframe')" style="background: #0d6efd; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">Copy</button>
+                        <input type="text" id="embed-iframe-code" readonly
+                            style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #60a5fa; padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 12px;"
+                            onclick="this.select()">
+                        <button type="button" onclick="copyInputText('embed-iframe-code', 'Kode Iframe')"
+                            style="background: #0d6efd; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">Copy</button>
                     </div>
                 </div>
 
                 <div>
-                    <label style="font-size: 11.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">2. Tautan Playlist Stream HLS (.m3u8)</label>
+                    <label
+                        style="font-size: 11.5px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">2.
+                        Tautan Playlist Stream HLS (.m3u8)</label>
                     <div style="display: flex; gap: 8px;">
-                        <input type="text" id="embed-hls-url" readonly style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #34d399; padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 12px;" onclick="this.select()">
-                        <button type="button" onclick="copyInputText('embed-hls-url', 'Link HLS')" style="background: #059669; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">Copy</button>
+                        <input type="text" id="embed-hls-url" readonly
+                            style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); color: #34d399; padding: 8px 12px; border-radius: 8px; font-family: monospace; font-size: 12px;"
+                            onclick="this.select()">
+                        <button type="button" onclick="copyInputText('embed-hls-url', 'Link HLS')"
+                            style="background: #059669; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer;">Copy</button>
                     </div>
                 </div>
             </div>
