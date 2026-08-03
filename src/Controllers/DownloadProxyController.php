@@ -33,7 +33,7 @@ class DownloadProxyController
 
     private const CACHE_TTL = 604800;   // 7 days per-file TTL
     private const CACHE_MAX_TOTAL_MB = 1000;     // max total cache dir size (1GB)
-    private const CACHE_MAX_BYTES = 31457280;   // 30 MB max per-file disk cache (larger files stream live instantly via 206 Range)
+    private const CACHE_MAX_BYTES = 157286400;   // 150 MB max per-file disk cache (covers most video; larger files stream live)
     private const PROXY_BUF_SIZE = 524288;     // 512 KB streaming buffer
 
     // ─────────────────────────────────────────────────────────────────────
@@ -411,19 +411,27 @@ class DownloadProxyController
         $curlHeaders = $accessToken ? ["Authorization: Bearer $accessToken"] : [];
 
         // ─────────────────────────────────────────────────────────────────
-        // LOCAL DISK CACHE: Download to disk first, then serve (cache-miss)
-        // On the first request for a cacheable file, we fetch it server-side to
-        // local storage and serve it under current domain — no external 302 redirect.
+        // LOCAL DISK CACHE: Download to disk first, then serve (cache-miss).
+        // Video players always send a Range header, so we cache on EVERY request
+        // (including partial ranges) — otherwise a video would be re-fetched from
+        // Google on every range request and playback would feel slow.
         // ─────────────────────────────────────────────────────────────────
-        if (self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id']) && !isset($_SERVER['HTTP_RANGE'])) {
+        if (self::isCacheEligible($mime, $fileSize) && !empty($file['provider_file_id'])) {
             $cachePath = self::getCachePath($file['id'], $etag);
-            $tmpPath = $cachePath . '.tmp';
+
+            // Serve from cache first (also for range requests) — 0ms local file
+            if (file_exists($cachePath) && (time() - filemtime($cachePath)) < self::CACHE_TTL) {
+                $cachedSize = filesize($cachePath);
+                self::serveFromDisk($cachePath, $mime, $file['name'], $etag, $cachedSize, $isInline);
+                return;
+            }
 
             // Guard: run eviction if disk cache is at or over the total size limit
             if (self::getCacheDirSizeMB() >= self::CACHE_MAX_TOTAL_MB) {
                 self::runEviction();
             }
 
+            $tmpPath = $cachePath . '.tmp';
             $fetched = false;
             // For images, attempt server-side fetch from Google LH3 CDN first
             if ($isImage) {
