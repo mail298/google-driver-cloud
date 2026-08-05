@@ -183,7 +183,7 @@ function cancelDuplicateUpload() {
     const modal = document.getElementById('gdrive-duplicate-modal');
     if (modal) modal.style.display = 'none';
     if (typeof showToast === 'function') {
-        showToast('Pengunggahan berkas duplikat dibatalkan.', 'info');
+        showToast('Berkas duplikat dilewati (tidak dimasukkan ke dalam antrean).', 'info');
     }
 }
 
@@ -546,8 +546,8 @@ async function uploadItemInChunks(item) {
             }
             if (chunkResult.replaced && typeof showToast === 'function') {
                 showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
-            } else if (typeof showToast === 'function') {
-                showToast('Berkas "' + item.file.name + '" berhasil disimpan', 'success');
+            } else if (chunkResult.isDuplicate && typeof showToast === 'function') {
+                showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
             }
             renderGDriveWidget();
             processGDriveQueueItem();
@@ -584,8 +584,8 @@ async function pollFinalizeStatus(item) {
                 }
                 if (data.replaced && typeof showToast === 'function') {
                     showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
-                } else if (typeof showToast === 'function') {
-                    showToast('Berkas "' + item.file.name + '" berhasil disimpan', 'success');
+                } else if (data.isDuplicate && typeof showToast === 'function') {
+                    showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
                 }
                 renderGDriveWidget();
                 processGDriveQueueItem();
@@ -689,8 +689,8 @@ async function processGDriveQueueItem() {
                     }
                     if (response.replaced && typeof showToast === 'function') {
                         showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
-                    } else if (typeof showToast === 'function') {
-                        showToast('Berkas "' + item.file.name + '" berhasil disimpan', 'success');
+                    } else if (response.isDuplicate && typeof showToast === 'function') {
+                        showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
                     }
                 } else {
                     item.status = 'failed';
