@@ -49,8 +49,8 @@ class DownloadProxyController
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
         $warmUrl = $scheme . '://' . $host . '/download?id=' . rawurlencode($fileId) . '&warm=1';
 
-        // Non-blocking: nohup + &  (curl is present in the PHP image)
-        $cmd = 'curl -s --max-time 3600 "' . $warmUrl . '" >/dev/null 2>&1 &';
+        // Non-blocking background warming via curl
+        $cmd = 'curl -s --max-time 3600 ' . escapeshellarg($warmUrl) . ' >/dev/null 2>&1 &';
         @exec($cmd);
     }
 

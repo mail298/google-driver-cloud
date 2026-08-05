@@ -62,12 +62,15 @@ class UserModel
             if (!$migrated) {
                 $stmtCheck = $pdo->query("SELECT COUNT(*) FROM portal_users");
                 if ((int) $stmtCheck->fetchColumn() === 0) {
+                    $adminPass = Config::get('ADMIN_INITIAL_PASSWORD') ?: bin2hex(random_bytes(8));
+                    $clientPass = Config::get('CLIENT_INITIAL_PASSWORD') ?: bin2hex(random_bytes(8));
+
                     $insertStmt = $pdo->prepare("
                         INSERT INTO portal_users (id, username, password, role, storage_limit_gb, root_folder_id, created_at, updated_at)
                         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
                     ");
-                    $insertStmt->execute(['admin-1', 'admin', password_hash('adminpass', PASSWORD_BCRYPT), 'admin', 100.0, '']);
-                    $insertStmt->execute(['client-1', 'client', password_hash('clientpass', PASSWORD_BCRYPT), 'client', 15.0, '']);
+                    $insertStmt->execute(['admin-1', 'admin', password_hash($adminPass, PASSWORD_BCRYPT), 'admin', 100.0, '']);
+                    $insertStmt->execute(['client-1', 'client', password_hash($clientPass, PASSWORD_BCRYPT), 'client', 15.0, '']);
                 }
             }
         }

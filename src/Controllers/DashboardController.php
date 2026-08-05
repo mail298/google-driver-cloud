@@ -1,21 +1,16 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\DashboardController.php
 
-class DashboardController {
-    public static function index() {
+class DashboardController
+{
+    public static function index()
+    {
         AuthController::checkClient();
-        
+
         $pdo = Config::getPDO();
 
-        // Read user-specific limits and folder restrictions (always refreshed from UserModel)
-        $currentUser = $_SESSION['user'] ?? null;
-        if ($currentUser && isset($currentUser['id'])) {
-            $refreshed = UserModel::getUserById($currentUser['id']);
-            if ($refreshed) {
-                $_SESSION['user'] = $refreshed;
-                $currentUser = $refreshed;
-            }
-        }
+        // Refresh user from UserModel to ensure latest storage limits and folder settings
+        $currentUser = self::refreshSessionUser();
         $userId = $currentUser['id'] ?? null;
         if (!$userId) {
             http_response_code(500);
@@ -23,52 +18,28 @@ class DashboardController {
             exit;
         }
 
-        $limitGb = (float)($currentUser['storage_limit_gb'] ?? 15);
+        $limitGb = (float) ($currentUser['storage_limit_gb'] ?? 15);
         $rawClientRoot = trim($currentUser['root_folder_id'] ?? '');
         $clientRootFolderId = PortalModel::extractFolderId($rawClientRoot);
 
         $folderId = $_GET['folderId'] ?? null;
-        if ($folderId === '') $folderId = null;
+        if ($folderId === '') {
+            $folderId = null;
+        }
 
         // Get API key owner for connected accounts resolution
         $apiKey = Config::get('GATEWAY_API_KEY');
         $gatewayUserId = PortalModel::getUserIdFromApiKey($pdo, $apiKey);
 
         // Ensure client root folder is properly resolved in DB if specified
-        $effectiveRootDbId = null;
-        if ($clientRootFolderId !== '') {
-            try {
-                // Ensure assigned root folder in DB is owned by current user
-                $stmtSync = $pdo->prepare("UPDATE folders SET user_id = ? WHERE provider_folder_id = ? OR id = ?");
-                $stmtSync->execute([$userId, $clientRootFolderId, $clientRootFolderId]);
+        $effectiveRootDbId = self::resolveClientRootFolder($pdo, $userId, $clientRootFolderId, $gatewayUserId);
 
-                // Move files that have no folder assigned into the root folder
-                $stmtFix = $pdo->prepare("UPDATE files SET folder_id = ? WHERE user_id = ? AND (folder_id IS NULL OR folder_id = '')");
-                $stmtFix->execute([$clientRootFolderId, $userId]);
-            } catch (Exception $e) {}
-
-            $rootFolderObj = PortalModel::getFolder($pdo, $userId, $clientRootFolderId);
-            if ($rootFolderObj) {
-                $effectiveRootDbId = $rootFolderObj['id'];
-            } else {
-                // Auto-create folder record in DB so client files/folders are isolated to this root
-                try {
-                    $connectedAccountId = PortalModel::getFirstConnectedAccountId($pdo, $gatewayUserId);
-                    $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), provider_folder_id = VALUES(provider_folder_id), deleted_at = NULL, updated_at = NOW()");
-                    $stmt->execute([$clientRootFolderId, $userId, $connectedAccountId, $clientRootFolderId]);
-                    $effectiveRootDbId = $clientRootFolderId;
-                } catch (Exception $e) {
-                    $effectiveRootDbId = $clientRootFolderId;
-                }
-            }
-        }
-
-        // If client root folder is configured and client opens main root (/), scope to their assigned root folder
+        // Scope to client's assigned root folder if opening main root (/)
         if ($effectiveRootDbId !== null && $folderId === null) {
             $folderId = $effectiveRootDbId;
         }
 
-        // Verify folder belongs to user
+        // Verify folder ownership
         if ($folderId !== null) {
             $folder = PortalModel::getFolder($pdo, $userId, $folderId);
             if (!$folder && $folderId !== $effectiveRootDbId && $folderId !== $clientRootFolderId) {
@@ -79,13 +50,10 @@ class DashboardController {
 
         $searchQuery = trim($_GET['q'] ?? '');
 
-        // Fetch folders and files
+        // Fetch folders and files using PortalModel
         if ($searchQuery !== '') {
-            // If searching, show matching files across all folders
-            $folders = []; // disable folder navigation during search
-            $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND status = 'active' AND name LIKE ? ORDER BY name ASC");
-            $stmt->execute([$userId, '%' . $searchQuery . '%']);
-            $files = $stmt->fetchAll();
+            $folders = [];
+            $files = PortalModel::searchFiles($pdo, $userId, $searchQuery);
             $breadcrumbs = [];
         } else {
             $folders = PortalModel::getFolders($pdo, $userId, $folderId);
@@ -95,47 +63,74 @@ class DashboardController {
 
         $allFoldersList = PortalModel::getAllFolders($pdo, $userId);
 
-        // If restricted to a subfolder, trim breadcrumbs above it
+        // Trim breadcrumbs above client root folder if restricted
         if ($clientRootFolderId !== '' && empty($searchQuery)) {
-            $startIndex = -1;
-            foreach ($breadcrumbs as $index => $crumb) {
-                if ($crumb['id'] === $clientRootFolderId) {
-                    $startIndex = $index;
-                    break;
-                }
-            }
-            if ($startIndex !== -1) {
-                $breadcrumbs = array_slice($breadcrumbs, $startIndex + 1);
-            }
+            $breadcrumbs = self::trimBreadcrumbsAboveRoot($breadcrumbs, $clientRootFolderId);
         }
 
-        // Calculate storage details (single aggregated query for efficiency)
-        $limitBytes = $limitGb * 1024 * 1024 * 1024;
-
-        $stmt = $pdo->prepare("
-            SELECT
-                SUM(CASE WHEN mime_type LIKE 'image/%' THEN size_bytes ELSE 0 END) AS photo_bytes,
-                SUM(CASE WHEN mime_type LIKE 'video/%' THEN size_bytes ELSE 0 END) AS video_bytes,
-                SUM(CASE WHEN mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' THEN size_bytes ELSE 0 END) AS document_bytes
-            FROM files WHERE user_id = ? AND status = 'active'
-        ");
-        $stmt->execute([$userId]);
-        $row = $stmt->fetch();
-        $photoSize    = (float)($row['photo_bytes']    ?? 0);
-        $videoSize    = (float)($row['video_bytes']    ?? 0);
-        $documentSize = (float)($row['document_bytes'] ?? 0);
-
+        // Calculate storage details
+        $stats = PortalModel::getStorageStatsByUser($pdo, $userId);
+        $photoSize = $stats['photo_bytes'];
+        $videoSize = $stats['video_bytes'];
+        $documentSize = $stats['document_bytes'];
         $totalUsedBytes = $photoSize + $videoSize + $documentSize;
+        $limitBytes = $limitGb * 1024 * 1024 * 1024;
         $storagePercent = min(100, round(($totalUsedBytes / $limitBytes) * 100, 2));
 
         $uploadDirectUrl = (string) Config::get('UPLOAD_DIRECT_URL', '');
-        // Lower threshold to 10MB so files above 10MB bypass PHP and go directly to CDN
         $uploadDirectThresholdBytes = (int) Config::get('UPLOAD_DIRECT_THRESHOLD_BYTES', 10 * 1024 * 1024);
 
         require_once dirname(__DIR__) . '/Views/dashboard.php';
     }
 
-    public static function listFoldersJson() {
+    private static function refreshSessionUser(): array
+    {
+        $currentUser = $_SESSION['user'] ?? [];
+        if (!empty($currentUser['id'])) {
+            $refreshed = UserModel::getUserById($currentUser['id']);
+            if ($refreshed) {
+                $_SESSION['user'] = $refreshed;
+                return $refreshed;
+            }
+        }
+        return $currentUser;
+    }
+
+    private static function resolveClientRootFolder($pdo, $userId, string $clientRootFolderId, $gatewayUserId): ?string
+    {
+        if ($clientRootFolderId === '') {
+            return null;
+        }
+
+        PortalModel::syncFolderOwner($pdo, $userId, $clientRootFolderId);
+        PortalModel::assignOrphanFiles($pdo, $userId, $clientRootFolderId);
+
+        $rootFolderObj = PortalModel::getFolder($pdo, $userId, $clientRootFolderId);
+        if ($rootFolderObj) {
+            return $rootFolderObj['id'];
+        }
+
+        PortalModel::autoCreateClientRootFolder($pdo, $userId, $clientRootFolderId, $gatewayUserId);
+        return $clientRootFolderId;
+    }
+
+    private static function trimBreadcrumbsAboveRoot(array $breadcrumbs, string $clientRootFolderId): array
+    {
+        $startIndex = -1;
+        foreach ($breadcrumbs as $index => $crumb) {
+            if ($crumb['id'] === $clientRootFolderId) {
+                $startIndex = $index;
+                break;
+            }
+        }
+        if ($startIndex !== -1) {
+            return array_slice($breadcrumbs, $startIndex + 1);
+        }
+        return $breadcrumbs;
+    }
+
+    public static function listFoldersJson()
+    {
         AuthController::checkClient();
 
         $pdo = Config::getPDO();
@@ -155,8 +150,10 @@ class DashboardController {
 
         $result = [];
         foreach ($folders as $f) {
-            if ($f['name'] === 'Folder Klien') continue;
-            if ($clientRootId !== '' && ($f['id'] === $clientRootId || ($f['provider_folder_id'] ?? '') === $clientRootId)) continue;
+            if ($f['name'] === 'Folder Klien')
+                continue;
+            if ($clientRootId !== '' && ($f['id'] === $clientRootId || ($f['provider_folder_id'] ?? '') === $clientRootId))
+                continue;
             $result[] = [
                 'id' => $f['id'],
                 'name' => $f['name'],
@@ -170,7 +167,8 @@ class DashboardController {
         exit;
     }
 
-    public static function createFolder() {
+    public static function createFolder()
+    {
         AuthController::checkClient();
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -186,7 +184,8 @@ class DashboardController {
 
             $name = trim($_POST['name'] ?? '');
             $parentId = $_POST['parentId'] ?? null;
-            if ($parentId === '') $parentId = null;
+            if ($parentId === '')
+                $parentId = null;
 
             if ($name === '') {
                 header('Content-Type: application/json');
@@ -210,7 +209,8 @@ class DashboardController {
         exit;
     }
 
-    public static function renameFolder() {
+    public static function renameFolder()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
@@ -239,7 +239,8 @@ class DashboardController {
         exit;
     }
 
-    public static function deleteFolder() {
+    public static function deleteFolder()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
@@ -267,7 +268,8 @@ class DashboardController {
         exit;
     }
 
-    public static function renameFile() {
+    public static function renameFile()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
@@ -296,7 +298,8 @@ class DashboardController {
         exit;
     }
 
-    public static function deleteFile() {
+    public static function deleteFile()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
@@ -324,7 +327,8 @@ class DashboardController {
         exit;
     }
 
-    public static function moveItem() {
+    public static function moveItem()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
@@ -354,7 +358,8 @@ class DashboardController {
         exit;
     }
 
-    public static function batchDelete() {
+    public static function batchDelete()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
@@ -374,7 +379,8 @@ class DashboardController {
             foreach ($items as $item) {
                 $type = $item['type'] ?? 'file';
                 $id = $item['id'] ?? '';
-                if (empty($id)) continue;
+                if (empty($id))
+                    continue;
 
                 try {
                     if ($type === 'folder') {
@@ -397,7 +403,8 @@ class DashboardController {
         exit;
     }
 
-    public static function deleteAllFiles() {
+    public static function deleteAllFiles()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
@@ -425,7 +432,8 @@ class DashboardController {
                     try {
                         PortalModel::deleteFile($pdo, $userId, $f['id']);
                         $deletedCount++;
-                    } catch (Exception $e) {}
+                    } catch (Exception $e) {
+                    }
                 }
 
                 // Delete all active sub-folders for user (EXCEPT the assigned root folder)
@@ -443,7 +451,8 @@ class DashboardController {
 
                     try {
                         PortalModel::deleteFolder($pdo, $userId, $f['id']);
-                    } catch (Exception $e) {}
+                    } catch (Exception $e) {
+                    }
                 }
 
                 echo json_encode(['success' => true, 'count' => $deletedCount]);
@@ -458,7 +467,8 @@ class DashboardController {
         exit;
     }
 
-    public static function batchMove() {
+    public static function batchMove()
+    {
         AuthController::checkClient();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');

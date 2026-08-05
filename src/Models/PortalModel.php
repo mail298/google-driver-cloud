@@ -45,16 +45,6 @@ class PortalModel
         } catch (Exception $e) {
         }
 
-        // Fallback 3: Any file record
-        try {
-            $stmt = $pdo->query("SELECT user_id FROM files ORDER BY created_at DESC LIMIT 1");
-            $row = $stmt->fetch();
-            if ($row && !empty($row['user_id'])) {
-                return $row['user_id'];
-            }
-        } catch (Exception $e) {
-        }
-
         return null;
     }
 
@@ -198,6 +188,59 @@ class PortalModel
             $stmt->execute($params);
         }
         return $stmt->fetchAll();
+    }
+
+    public static function searchFiles($pdo, $userId, string $query): array
+    {
+        $stmt = $pdo->prepare("SELECT * FROM files WHERE user_id = ? AND status = 'active' AND name LIKE ? ORDER BY name ASC");
+        $stmt->execute([$userId, '%' . $query . '%']);
+        return $stmt->fetchAll();
+    }
+
+    public static function syncFolderOwner($pdo, $userId, $folderId): void
+    {
+        try {
+            $stmt = $pdo->prepare("UPDATE folders SET user_id = ? WHERE provider_folder_id = ? OR id = ?");
+            $stmt->execute([$userId, $folderId, $folderId]);
+        } catch (Exception $e) {
+        }
+    }
+
+    public static function assignOrphanFiles($pdo, $userId, $folderId): void
+    {
+        try {
+            $stmt = $pdo->prepare("UPDATE files SET folder_id = ? WHERE user_id = ? AND (folder_id IS NULL OR folder_id = '')");
+            $stmt->execute([$folderId, $userId]);
+        } catch (Exception $e) {
+        }
+    }
+
+    public static function autoCreateClientRootFolder($pdo, $userId, $clientRootFolderId, $gatewayUserId): void
+    {
+        try {
+            $connectedAccountId = self::getFirstConnectedAccountId($pdo, $gatewayUserId);
+            $stmt = $pdo->prepare("INSERT INTO folders (id, user_id, parent_id, connected_account_id, provider, provider_folder_id, name, color, created_at, updated_at) VALUES (?, ?, NULL, ?, 'google_drive', ?, 'Folder Klien', 'text-amber-500', NOW(), NOW()) ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), provider_folder_id = VALUES(provider_folder_id), deleted_at = NULL, updated_at = NOW()");
+            $stmt->execute([$clientRootFolderId, $userId, $connectedAccountId, $clientRootFolderId]);
+        } catch (Exception $e) {
+        }
+    }
+
+    public static function getStorageStatsByUser($pdo, $userId): array
+    {
+        $stmt = $pdo->prepare("
+            SELECT
+                SUM(CASE WHEN mime_type LIKE 'image/%' THEN size_bytes ELSE 0 END) AS photo_bytes,
+                SUM(CASE WHEN mime_type LIKE 'video/%' THEN size_bytes ELSE 0 END) AS video_bytes,
+                SUM(CASE WHEN mime_type NOT LIKE 'image/%' AND mime_type NOT LIKE 'video/%' THEN size_bytes ELSE 0 END) AS document_bytes
+            FROM files WHERE user_id = ? AND status = 'active'
+        ");
+        $stmt->execute([$userId]);
+        $row = $stmt->fetch();
+        return [
+            'photo_bytes'    => (float) ($row['photo_bytes'] ?? 0),
+            'video_bytes'    => (float) ($row['video_bytes'] ?? 0),
+            'document_bytes' => (float) ($row['document_bytes'] ?? 0),
+        ];
     }
 
     public static function encryptText($plaintext, $secret)

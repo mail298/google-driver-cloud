@@ -1,8 +1,10 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\AuthController.php
 
-class AuthController {
-    public static function startSession() {
+class AuthController
+{
+    public static function startSession()
+    {
         if (session_status() === PHP_SESSION_NONE) {
             $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on')
                 || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
@@ -18,7 +20,8 @@ class AuthController {
         }
     }
 
-    public static function checkClient() {
+    public static function checkClient()
+    {
         self::startSession();
         SecurityModel::enforceSessionTimeout();
 
@@ -33,7 +36,8 @@ class AuthController {
         }
     }
 
-    public static function checkAdmin() {
+    public static function checkAdmin()
+    {
         self::startSession();
         SecurityModel::enforceSessionTimeout();
 
@@ -56,7 +60,8 @@ class AuthController {
         }
     }
 
-    public static function checkAny() {
+    public static function checkAny()
+    {
         self::startSession();
         SecurityModel::enforceSessionTimeout();
 
@@ -67,7 +72,8 @@ class AuthController {
         }
     }
 
-    public static function uploadToken() {
+    public static function uploadToken()
+    {
         self::checkClient();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -98,7 +104,8 @@ class AuthController {
         exit;
     }
 
-    public static function login() {
+    public static function login()
+    {
         self::startSession();
 
         // If already logged in, redirect to respective dashboard
@@ -199,7 +206,8 @@ class AuthController {
         require_once dirname(__DIR__) . '/Views/login.php';
     }
 
-    public static function logout() {
+    public static function logout()
+    {
         self::startSession();
         session_unset();
         session_destroy();

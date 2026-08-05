@@ -43,35 +43,35 @@ $router->any('/logout', ['AuthController', 'logout']);
 $router->any('/settings/update-password', ['SettingsController', 'updatePassword']);
 
 // File & Folder Operations
-$router->any('/create-folder', ['DashboardController', 'createFolder']);
-$router->any('/rename-folder', ['DashboardController', 'renameFolder']);
-$router->any('/delete-folder', ['DashboardController', 'deleteFolder']);
-$router->any('/rename-file', ['DashboardController', 'renameFile']);
-$router->any('/delete-file', ['DashboardController', 'deleteFile']);
-$router->any('/move-item', ['DashboardController', 'moveItem']);
-$router->any('/folders', ['DashboardController', 'listFoldersJson']);
-$router->any('/batch-move', ['DashboardController', 'batchMove']);
-$router->any('/batch-delete', ['DashboardController', 'batchDelete']);
-$router->any('/delete-all-files', ['DashboardController', 'deleteAllFiles']);
+$router->post('/create-folder', ['DashboardController', 'createFolder']);
+$router->post('/rename-folder', ['DashboardController', 'renameFolder']);
+$router->post('/delete-folder', ['DashboardController', 'deleteFolder']);
+$router->post('/rename-file', ['DashboardController', 'renameFile']);
+$router->post('/delete-file', ['DashboardController', 'deleteFile']);
+$router->post('/move-item', ['DashboardController', 'moveItem']);
+$router->get('/folders', ['DashboardController', 'listFoldersJson']);
+$router->post('/batch-move', ['DashboardController', 'batchMove']);
+$router->post('/batch-delete', ['DashboardController', 'batchDelete']);
+$router->post('/delete-all-files', ['DashboardController', 'deleteAllFiles']);
 
 // Client Backup Routes
-$router->any('/client/backup/zip', ['ClientBackupController', 'downloadUserZip']);
-$router->any('/client/backup/csv', ['ClientBackupController', 'exportMetadataCsv']);
+$router->get('/client/backup/zip', ['ClientBackupController', 'downloadUserZip']);
+$router->get('/client/backup/csv', ['ClientBackupController', 'exportMetadataCsv']);
 
 // Upload & Download Routes
-$router->any('/upload', ['UploadController', 'upload']);
-$router->any('/upload-chunk', ['UploadController', 'uploadChunk']);
-$router->any('/finalize', ['UploadController', 'finalize']);
-$router->any('/finalize-status', ['UploadController', 'finalizeStatus']);
-$router->any('/upload-token', ['AuthController', 'uploadToken']);
-$router->any('/download', ['DownloadProxyController', 'download']);
+$router->post('/upload', ['UploadController', 'upload']);
+$router->post('/upload-chunk', ['UploadController', 'uploadChunk']);
+$router->post('/finalize', ['UploadController', 'finalize']);
+$router->get('/finalize-status', ['UploadController', 'finalizeStatus']);
+$router->post('/upload-token', ['AuthController', 'uploadToken']);
+$router->get('/download', ['DownloadProxyController', 'download']);
 
 // Admin Panel & Backup Routes
 $router->any('/admin', ['AdminController', 'index']);
-$router->any('/admin/backup/export', ['BackupController', 'exportAdminBackup']);
-$router->any('/admin/backup/restore', ['BackupController', 'restoreAdminBackup']);
-$router->any('/admin/users/create', ['AdminController', 'createUser']);
-$router->any('/admin/users/update', ['AdminController', 'updateUser']);
+$router->get('/admin/backup/export', ['BackupController', 'exportAdminBackup']);
+$router->post('/admin/backup/restore', ['BackupController', 'restoreAdminBackup']);
+$router->post('/admin/users/create', ['AdminController', 'createUser']);
+$router->post('/admin/users/update', ['AdminController', 'updateUser']);
 
 $router->post('/admin/users/delete', ['AdminController', 'deleteUser']);
 $router->post('/admin/whitelist/update', ['AdminController', 'updateIpWhitelist']);

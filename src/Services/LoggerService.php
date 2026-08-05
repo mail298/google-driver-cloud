@@ -40,7 +40,7 @@ class LoggerService
      * - ip           : Client IP address
      * - request_uri  : Request URI
      */
-    public static function log($level, $debugError, array $context = [])
+    public static function log($level, $message, array $context = [])
     {
         $id = $context['id'] ?? ('log_' . bin2hex(random_bytes(6)));
         $username = $context['username'] ?? self::getActiveUsername();
@@ -48,7 +48,7 @@ class LoggerService
         $logEntry = [
             'id' => $id,
             'username' => (string)$username,
-            'debug_error' => (string)$debugError,
+            'debug_error' => (string)$message,
             'timestamp' => date('c'),
             'level' => strtoupper((string)$level),
             'ip' => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
@@ -63,24 +63,24 @@ class LoggerService
         @file_put_contents(self::getLogFilePath(), $jsonLine, FILE_APPEND | LOCK_EX);
     }
 
-    public static function error($debugError, array $context = [])
+    public static function error($message, array $context = [])
     {
-        self::log('ERROR', $debugError, $context);
+        self::log('ERROR', $message, $context);
     }
 
-    public static function debug($debugError, array $context = [])
+    public static function debug($message, array $context = [])
     {
-        self::log('DEBUG', $debugError, $context);
+        self::log('DEBUG', $message, $context);
     }
 
-    public static function info($debugError, array $context = [])
+    public static function info($message, array $context = [])
     {
-        self::log('INFO', $debugError, $context);
+        self::log('INFO', $message, $context);
     }
 
-    public static function warning($debugError, array $context = [])
+    public static function warning($message, array $context = [])
     {
-        self::log('WARNING', $debugError, $context);
+        self::log('WARNING', $message, $context);
     }
 
     /**

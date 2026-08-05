@@ -134,9 +134,9 @@ class BackupController
 
             $pdo = Config::getPDO();
             try {
-                // Execute SQL restoration script
+                // Validate and execute SQL restoration safely inside a transaction
                 $sqlContent = file_get_contents($sqlFile);
-                $pdo->exec($sqlContent);
+                self::executeRestorationSql($pdo, $sqlContent);
 
                 // Restore users.json if present
                 if (file_exists($usersFile)) {
@@ -155,6 +155,7 @@ class BackupController
 
                 header('Location: /admin?success=Pemulihan+data+sistem+(Restore)+berhasil+dilakukan.');
             } catch (Exception $e) {
+                LoggerService::error('Backup restoration failed: ' . $e->getMessage());
                 header('Location: /admin?error=' . urlencode('Gagal memulihkan database: ' . $e->getMessage()));
             }
 
@@ -164,6 +165,35 @@ class BackupController
             @unlink($whitelistFile);
             @rmdir($extractPath);
             exit;
+        }
+    }
+
+    private static function executeRestorationSql(PDO $pdo, string $sqlContent): void
+    {
+        // Split statements by semicolon while ignoring comments
+        $statements = array_filter(array_map('trim', explode(';', $sqlContent)));
+        if (empty($statements)) {
+            return;
+        }
+
+        $pdo->beginTransaction();
+        try {
+            foreach ($statements as $stmtSql) {
+                if (empty($stmtSql)) {
+                    continue;
+                }
+                // Skip plain comments
+                if (strpos($stmtSql, '--') === 0 || strpos($stmtSql, '/*') === 0) {
+                    continue;
+                }
+                $pdo->exec($stmtSql);
+            }
+            $pdo->commit();
+        } catch (Exception $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
         }
     }
 }
