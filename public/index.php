@@ -1,27 +1,20 @@
 <?php
-// C:\Users\ADMIN\Desktop\framework\google-drive\cliend\public\index.php
+// c:\Users\ADMIN\Desktop\framework\google-drive\cliend\public\index.php
 
 // Route static files directly if using PHP built-in server
 if (preg_match('/\.(?:png|jpg|jpeg|gif|css|js|svg|ico|woff|woff2|ttf)$/', $_SERVER["REQUEST_URI"])) {
-    return false; // let the built-in server handle the request
+    return false;
 }
 
-require_once dirname(__DIR__) . '/config/database.php';
-require_once dirname(__DIR__) . '/src/Services/LoggerService.php';
-require_once dirname(__DIR__) . '/src/Models/SecurityModel.php';
-require_once dirname(__DIR__) . '/src/Models/IpWhitelistModel.php';
-require_once dirname(__DIR__) . '/src/Controllers/AuthController.php';
-require_once dirname(__DIR__) . '/src/Controllers/DashboardController.php';
-require_once dirname(__DIR__) . '/src/Controllers/UploadController.php';
-require_once dirname(__DIR__) . '/src/Controllers/DownloadProxyController.php';
-require_once dirname(__DIR__) . '/src/Controllers/ShareController.php';
-require_once dirname(__DIR__) . '/src/Controllers/AdminController.php';
-require_once dirname(__DIR__) . '/src/Controllers/SettingsController.php';
-require_once dirname(__DIR__) . '/src/Controllers/BackupController.php';
-require_once dirname(__DIR__) . '/src/Controllers/ClientBackupController.php';
-require_once dirname(__DIR__) . '/src/Controllers/StreamController.php';
+// 1. Initialize Autoloader (supports Composer vendor/autoload or native Autoloader)
+$vendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
+if (file_exists($vendorAutoload)) {
+    require_once $vendorAutoload;
+}
+require_once dirname(__DIR__) . '/src/Core/Autoloader.php';
+App\Core\Autoloader::register();
 
-// Global uncaught exception and error logger (writes JSON debug error log)
+// 2. Global uncaught exception and error logger
 set_exception_handler(function (\Throwable $ex) {
     LoggerService::exception($ex);
     if (!headers_sent()) {
@@ -30,126 +23,60 @@ set_exception_handler(function (\Throwable $ex) {
     echo "500 - Internal Server Error";
 });
 
-// Apply global security headers to all responses
+// 3. Security Headers
 SecurityModel::sendSecurityHeaders();
 
-// Simple Router
+// 4. Initialize Router & Define Routes
+$router = new App\Core\Router();
+
+// HLS & Embed Media Routes
+$router->regex('/^\/embed(?:\/.*)?$/', ['StreamController', 'embed']);
+$router->regex('/^\/stream\/[^\/]+\/master\.m3u8$/', ['StreamController', 'masterPlaylist']);
+$router->regex('/^\/stream\/[^\/]+\/segment\/\d+$/', ['StreamController', 'streamSegment']);
+
+// Core Routes
+$router->any('/', ['DashboardController', 'index']);
+$router->any('/share', ['ShareController', 'viewShare']);
+$router->any('/login', ['AuthController', 'login']);
+$router->any('/logout', ['AuthController', 'logout']);
+$router->any('/settings/update-password', ['SettingsController', 'updatePassword']);
+
+// File & Folder Operations
+$router->any('/create-folder', ['DashboardController', 'createFolder']);
+$router->any('/rename-folder', ['DashboardController', 'renameFolder']);
+$router->any('/delete-folder', ['DashboardController', 'deleteFolder']);
+$router->any('/rename-file', ['DashboardController', 'renameFile']);
+$router->any('/delete-file', ['DashboardController', 'deleteFile']);
+$router->any('/move-item', ['DashboardController', 'moveItem']);
+$router->any('/folders', ['DashboardController', 'listFoldersJson']);
+$router->any('/batch-move', ['DashboardController', 'batchMove']);
+$router->any('/batch-delete', ['DashboardController', 'batchDelete']);
+$router->any('/delete-all-files', ['DashboardController', 'deleteAllFiles']);
+
+// Client Backup Routes
+$router->any('/client/backup/zip', ['ClientBackupController', 'downloadUserZip']);
+$router->any('/client/backup/csv', ['ClientBackupController', 'exportMetadataCsv']);
+
+// Upload & Download Routes
+$router->any('/upload', ['UploadController', 'upload']);
+$router->any('/upload-chunk', ['UploadController', 'uploadChunk']);
+$router->any('/finalize', ['UploadController', 'finalize']);
+$router->any('/finalize-status', ['UploadController', 'finalizeStatus']);
+$router->any('/upload-token', ['AuthController', 'uploadToken']);
+$router->any('/download', ['DownloadProxyController', 'download']);
+
+// Admin Panel & Backup Routes
+$router->any('/admin', ['AdminController', 'index']);
+$router->any('/admin/backup/export', ['BackupController', 'exportAdminBackup']);
+$router->any('/admin/backup/restore', ['BackupController', 'restoreAdminBackup']);
+$router->any('/admin/users/create', ['AdminController', 'createUser']);
+$router->any('/admin/users/update', ['AdminController', 'updateUser']);
+
+$router->post('/admin/users/delete', ['AdminController', 'deleteUser']);
+$router->post('/admin/whitelist/update', ['AdminController', 'updateIpWhitelist']);
+
+// 5. Dispatch Request
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requestMethod = $_SERVER['REQUEST_METHOD'];
 
-if (strpos($requestUri, '/embed/') === 0 || $requestUri === '/embed') {
-    StreamController::embed();
-    exit;
-}
-if (preg_match('/^\/stream\/[^\/]+\/master\.m3u8$/', $requestUri)) {
-    StreamController::masterPlaylist();
-    exit;
-}
-if (preg_match('/^\/stream\/[^\/]+\/segment\/\d+$/', $requestUri)) {
-    StreamController::streamSegment();
-    exit;
-}
-
-switch ($requestUri) {
-    case '/':
-        DashboardController::index();
-        break;
-    case '/share':
-        ShareController::viewShare();
-        break;
-    case '/login':
-        AuthController::login();
-        break;
-    case '/logout':
-        AuthController::logout();
-        break;
-    case '/settings/update-password':
-        SettingsController::updatePassword();
-        break;
-    case '/create-folder':
-        DashboardController::createFolder();
-        break;
-    case '/rename-folder':
-        DashboardController::renameFolder();
-        break;
-    case '/delete-folder':
-        DashboardController::deleteFolder();
-        break;
-    case '/rename-file':
-        DashboardController::renameFile();
-        break;
-    case '/delete-file':
-        DashboardController::deleteFile();
-        break;
-    case '/move-item':
-        DashboardController::moveItem();
-        break;
-    case '/folders':
-        DashboardController::listFoldersJson();
-        break;
-    case '/batch-move':
-        DashboardController::batchMove();
-        break;
-    case '/batch-delete':
-        DashboardController::batchDelete();
-        break;
-    case '/delete-all-files':
-        DashboardController::deleteAllFiles();
-        break;
-    case '/client/backup/zip':
-        ClientBackupController::downloadUserZip();
-        break;
-    case '/client/backup/csv':
-        ClientBackupController::exportMetadataCsv();
-        break;
-    case '/upload':
-        UploadController::upload();
-        break;
-    case '/upload-chunk':
-        UploadController::uploadChunk();
-        break;
-    case '/finalize':
-        UploadController::finalize();
-        break;
-    case '/finalize-status':
-        UploadController::finalizeStatus();
-        break;
-    case '/upload-token':
-        AuthController::uploadToken();
-        break;
-    case '/download':
-        DownloadProxyController::download();
-        break;
-    case '/admin':
-        AdminController::index();
-        break;
-    case '/admin/backup/export':
-        BackupController::exportAdminBackup();
-        break;
-    case '/admin/backup/restore':
-        BackupController::restoreAdminBackup();
-        break;
-    case '/admin/users/create':
-        AdminController::createUser();
-        break;
-    case '/admin/users/update':
-        AdminController::updateUser();
-        break;
-    case '/admin/users/delete':
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            exit;
-        }
-        AdminController::deleteUser();
-        break;
-    case '/admin/whitelist/update':
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            exit;
-        }
-        AdminController::updateIpWhitelist();
-        break;
-    default:
-        http_response_code(404);
-        echo "404 - Page Not Found";
-        break;
-}
+$router->dispatch($requestUri, $requestMethod);
