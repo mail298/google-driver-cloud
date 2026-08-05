@@ -15,6 +15,7 @@ class PortalModel
 
     public static function getUserIdFromApiKey($pdo, $apiKey = null)
     {
+        // Explicitly provided key wins
         if (!empty($apiKey)) {
             $prefix = substr($apiKey, 0, 16);
             $stmt = $pdo->prepare("SELECT user_id FROM api_keys WHERE key_prefix = ? AND status = 'active' LIMIT 1");
@@ -25,7 +26,22 @@ class PortalModel
             }
         }
 
-        // Fallback 1: Any active key in api_keys table
+        // Fallback 1: The configured GATEWAY_API_KEY maps to the gateway user.
+        // This is deterministic and avoids attributing arbitrary users' files
+        // to a client when no key is passed in.
+        $configKey = Config::get('GATEWAY_API_KEY', '');
+        if (!empty($configKey)) {
+            $prefix = substr($configKey, 0, 16);
+            $stmt = $pdo->prepare("SELECT user_id FROM api_keys WHERE key_prefix = ? AND status = 'active' LIMIT 1");
+            $stmt->execute([$prefix]);
+            $row = $stmt->fetch();
+            if ($row && !empty($row['user_id'])) {
+                return $row['user_id'];
+            }
+        }
+
+        // Fallback 2: The gateway user may be the most recent key in the table.
+        // Only used when no GATEWAY_API_KEY is configured at all.
         try {
             $stmt = $pdo->query("SELECT user_id FROM api_keys WHERE status = 'active' ORDER BY created_at DESC LIMIT 1");
             $row = $stmt->fetch();
@@ -35,7 +51,7 @@ class PortalModel
         } catch (Exception $e) {
         }
 
-        // Fallback 2: Any connected account
+        // Fallback 3: Any connected account
         try {
             $stmt = $pdo->query("SELECT user_id FROM connected_accounts WHERE status = 'connected' ORDER BY created_at DESC LIMIT 1");
             $row = $stmt->fetch();

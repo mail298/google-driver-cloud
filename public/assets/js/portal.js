@@ -71,6 +71,7 @@ function submitCreateFolder() {
     if (typeof CURRENT_FOLDER_ID !== 'undefined' && CURRENT_FOLDER_ID) {
         formData.append('parentId', CURRENT_FOLDER_ID);
     }
+    addCsrfToFormData(formData);
 
     fetch('/create-folder', {
         method: 'POST',
@@ -118,6 +119,18 @@ function escapeHtml(str) {
     const div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
+}
+
+function getCsrfToken() {
+    if (typeof CSRF_TOKEN !== 'undefined' && CSRF_TOKEN) return CSRF_TOKEN;
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.getAttribute('content') : '';
+}
+
+function addCsrfToFormData(formData) {
+    const token = getCsrfToken();
+    if (token) formData.append('_csrf_token', token);
+    return formData;
 }
 
 // Upload Queue State & Google Drive Style Upload Workflow
@@ -400,7 +413,10 @@ async function getUploadToken() {
     }
     cachedUploadTokenPromise = fetch('/upload-token', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': getCsrfToken()
+        },
         body: '{}'
     })
         .then(r => r.json())
@@ -1607,6 +1623,7 @@ function submitMoveItem() {
         const formData = new FormData();
         formData.append('items', JSON.stringify(selectedItems));
         formData.append('targetFolderId', targetFolderId);
+        addCsrfToFormData(formData);
 
         fetch('/batch-move', {
             method: 'POST',
@@ -1632,6 +1649,7 @@ function submitMoveItem() {
         formData.append('type', currentMoveItem.type);
         formData.append('id', currentMoveItem.id);
         formData.append('targetFolderId', targetFolderId);
+        addCsrfToFormData(formData);
 
         fetch('/move-item', {
             method: 'POST',
@@ -1748,6 +1766,7 @@ function executeDragMove(items, targetFolderId) {
         formData.append('type', items[0].type);
         formData.append('id', items[0].id);
         formData.append('targetFolderId', targetFolderId || '');
+        addCsrfToFormData(formData);
 
         fetch('/move-item', {
             method: 'POST',
@@ -1768,6 +1787,7 @@ function executeDragMove(items, targetFolderId) {
         const formData = new FormData();
         formData.append('items', JSON.stringify(items));
         formData.append('targetFolderId', targetFolderId || '');
+        addCsrfToFormData(formData);
 
         fetch('/batch-move', {
             method: 'POST',
@@ -1861,6 +1881,7 @@ function submitRename() {
     const formData = new FormData();
     formData.append('id', currentRenameItem.id);
     formData.append('name', newName);
+    addCsrfToFormData(formData);
 
     fetch(endpoint, {
         method: 'POST',
@@ -1924,6 +1945,7 @@ function submitDelete() {
     const endpoint = currentDeleteItem.type === 'folder' ? '/delete-folder' : '/delete-file';
     const formData = new FormData();
     formData.append('id', currentDeleteItem.id);
+    addCsrfToFormData(formData);
 
     fetch(endpoint, {
         method: 'POST',
@@ -2092,7 +2114,8 @@ function submitDeleteAllFiles() {
     isDeleteAllSubmitting = true;
 
     fetch('/delete-all-files', {
-        method: 'POST'
+        method: 'POST',
+        headers: { 'X-CSRF-Token': getCsrfToken() }
     })
         .then(res => res.json())
         .then(data => {
@@ -2140,6 +2163,7 @@ function submitBulkDelete() {
 
     const formData = new FormData();
     formData.append('items', JSON.stringify(selected));
+    addCsrfToFormData(formData);
 
     fetch('/batch-delete', {
         method: 'POST',

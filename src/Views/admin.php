@@ -1204,6 +1204,7 @@
                     <hr class="section-divider" style="margin: 4px 0;">
 
                     <form action="/admin/backup/restore" method="POST" enctype="multipart/form-data" onsubmit="return confirm('APAKAH ANDA YAKIN? Memulihkan data akan menimpa database dan konfigurasi pengguna saat ini!')">
+                        <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrfToken ?? '') ?>">
                         <label class="form-label" style="margin-bottom: 6px;">Pulihkan Data (Restore ZIP)</label>
                         <div style="display: flex; gap: 8px;">
                             <input type="file" name="backup_zip" accept=".zip" required class="input-box" style="padding: 7px 10px; font-size: 12px; flex: 1;">

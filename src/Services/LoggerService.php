@@ -51,7 +51,7 @@ class LoggerService
             'debug_error' => (string)$message,
             'timestamp' => date('c'),
             'level' => strtoupper((string)$level),
-            'ip' => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
+            'ip' => class_exists('IpWhitelistModel') ? IpWhitelistModel::getClientIp() : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1'),
             'request_uri' => $_SERVER['REQUEST_URI'] ?? 'CLI'
         ];
 

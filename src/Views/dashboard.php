@@ -2053,6 +2053,7 @@
             </div>
 
             <form action="/settings/update-password" method="POST">
+                <?= SecurityModel::csrfInputField() ?>
                 <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 14px;">🔒 Ubah Password Akun
                 </div>
 
@@ -2610,6 +2611,7 @@
     </div>
 
     <script>
+        const CSRF_TOKEN = <?= json_encode(SecurityModel::getCsrfToken()) ?>;
         const CURRENT_FOLDER_ID = <?= json_encode($folderId) ?>;
         const EXISTING_FILE_NAMES = <?= json_encode(array_values(array_map(function ($f) {
             return $f['name'];

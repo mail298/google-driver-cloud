@@ -40,6 +40,19 @@ class Router
 
     public function dispatch(string $uri, string $method)
     {
+        // CSRF protection for state-changing POST requests.
+        // Upload paths are exempt: they are already protected by one-time
+        // handoff tokens issued by /upload-token.
+        if ($method === 'POST' && !self::isCsrfExempt($uri)) {
+            $token = $_POST['_csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+            if (!\SecurityModel::validateCsrfToken($token)) {
+                http_response_code(403);
+                header('Content-Type: application/json');
+                echo json_encode(['success' => false, 'message' => 'CSRF token tidak valid. Muat ulang halaman dan coba lagi.']);
+                exit;
+            }
+        }
+
         // 1. Check Exact Regex Match First (e.g., Stream HLS routes, embed)
         foreach ($this->regexRoutes as $route) {
             if (preg_match($route['pattern'], $uri, $matches)) {
@@ -61,6 +74,12 @@ class Router
         http_response_code(404);
         echo "404 - Page Not Found";
         exit;
+    }
+
+    private static function isCsrfExempt(string $uri): bool
+    {
+        $exempt = ['/upload', '/upload-chunk', '/finalize'];
+        return in_array($uri, $exempt, true);
     }
 
     private function executeHandler($handler, array $params = [])
