@@ -8,7 +8,7 @@ services:
       context: .
     restart: unless-stopped
     ports:
-      - "${PORTAL_PORT:-7878}:80"
+      - "127.0.0.1:${PORTAL_PORT:-7878}:80"
     environment:
       # --- Database ---
       DB_HOST: ${DB_HOST:-db}
@@ -60,11 +60,11 @@ services:
     image: mysql:8.4
     restart: unless-stopped
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
       MYSQL_ROOT_PASSWORD: ${DB_PASS:-}
       MYSQL_DATABASE: ${DB_NAME:-9drive}
     ports:
-      - "${DB_EXPOSE_PORT:-3307}:3306"
+      - "127.0.0.1:${DB_EXPOSE_PORT:-3307}:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
