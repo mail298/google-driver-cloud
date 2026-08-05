@@ -2441,30 +2441,16 @@
             style="max-width: 440px; width: 90%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
             <h3
                 style="margin: 0 0 14px 0; font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">
-                Opsi Upload Berkas</h3>
-            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 20px; line-height: 1.5;">
+                Konfirmasi Timpa Berkas</h3>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 24px; line-height: 1.5;">
                 Berkas <strong id="duplicate-filename-text" style="color: #60a5fa;">file.png</strong> sudah ada di
-                lokasi ini. Apakah Anda ingin mengganti file yang ada dengan versi baru atau menyimpan kedua file?
+                lokasi ini. Apakah Anda ingin mengganti / menimpa berkas yang sudah ada dengan versi baru?
             </p>
-            <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px;">
-                <label
-                    style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
-                    <input type="radio" name="duplicate_option" value="replace" checked
-                        style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
-                    <span>Ganti file yang ada (Versi Baru)</span>
-                </label>
-                <label
-                    style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
-                    <input type="radio" name="duplicate_option" value="keep_both"
-                        style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
-                    <span>Simpan kedua file (Duplikat)</span>
-                </label>
-            </div>
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
                 <button type="button" onclick="cancelDuplicateUpload()"
-                    style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 9px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Batal</button>
+                    style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Tidak (Lewati)</button>
                 <button type="button" onclick="confirmDuplicateUpload()"
-                    style="background: #3b82f6; color: #fff; border: none; padding: 9px 20px; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 10px; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">Unggah</button>
+                    style="background: #3b82f6; color: #fff; border: none; padding: 10px 22px; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 10px; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">Ya, Ganti / Timpa</button>
             </div>
         </div>
     </div>
