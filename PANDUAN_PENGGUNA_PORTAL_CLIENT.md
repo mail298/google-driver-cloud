@@ -1,6 +1,6 @@
 # 📘 Panduan Penggunaan Portal Drive Client (User Manual)
 
-Selamat datang di **Drive Portal Client**. Layanan cloud storage modern yang terhubung langsung dengan Google Drive dan disajikan dengan performa super cepat, domain *white-label* kustom, serta antarmuka yang bersih dan responsif.
+Selamat datang di **Drive Portal Client**. Layanan cloud storage modern yang disajikan dengan performa super cepat, domain *white-label* kustom, serta antarmuka yang bersih dan responsif.
 
 Dokumen ini berisi panduan lengkap penggunaan seluruh fitur dan menu yang tersedia pada panel Client.
 
@@ -118,7 +118,7 @@ Salah satu keunggulan utama portal ini adalah kemampuan menyajikan gambar secara
    ```
 
 ### Keuntungan Tautan CDN White-Label:
-- **100% White-Label**: Bebas dari domain/logo Google Drive.
+- **100% White-Label**: Bebas dari domain/logo pihak ketiga.
 - **Responsif & Cepat**: Didukung oleh sistem caching cerdas browser dan Cloudflare CDN.
 - **Proteksi Data**: URL asli tempat berkas disimpan terlindungi aman di sisi server.
 

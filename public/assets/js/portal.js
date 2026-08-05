@@ -284,7 +284,7 @@ function renderGDriveWidget() {
         if (isFinished) {
             statusTextEl.textContent = 'Semua pengunggahan selesai';
         } else if (currentlyFinalizing) {
-            statusTextEl.textContent = 'Menyimpan ke Google Drive...';
+            statusTextEl.textContent = 'Menyimpan ke Cloud Storage...';
         } else if (currentlyUploading) {
             const pct = currentlyUploading.progress || 0;
             statusTextEl.textContent = 'Mengunggah berkas... ' + pct + '%';
@@ -306,7 +306,7 @@ function renderGDriveWidget() {
                 + '<span style="font-size:12px; font-weight:700; color:#fbbf24;">Memproses</span>'
                 + '<div style="width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.15); border-top: 3px solid #fbbf24; animation: spinRing 0.8s linear infinite;"></div>'
                 + '</div>';
-            subTextHtml = '<div style="font-size: 11.5px; color: #fbbf24; margin-top: 2px;">Mengunggah ke Google Drive... mohon tunggu</div>';
+            subTextHtml = '<div style="font-size: 11.5px; color: #fbbf24; margin-top: 2px;">Mengunggah ke Cloud Storage... mohon tunggu</div>';
         } else if (item.status === 'uploading') {
             if (item.progress >= 100) {
                 statusIcon = '<div style="width: 20px; height: 20px; border-radius: 50%; background: #10b981; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-shadow: 0 0 10px rgba(16,185,129,0.3);">✓</div>';
@@ -544,7 +544,7 @@ async function pollFinalizeStatus(item) {
             const data = await resp.json();
             if (!data.success) {
                 item.status = 'failed';
-                item.error = data.message || 'Gagal menyimpan ke Google Drive';
+                item.error = data.message || 'Gagal menyimpan ke Cloud Storage';
                 renderGDriveWidget();
                 processGDriveQueueItem();
                 return;
@@ -568,7 +568,7 @@ async function pollFinalizeStatus(item) {
             }
             if (data.status === 'error') {
                 item.status = 'failed';
-                item.error = data.message || 'Gagal menyimpan ke Google Drive';
+                item.error = data.message || 'Gagal menyimpan ke Cloud Storage';
                 renderGDriveWidget();
                 processGDriveQueueItem();
                 return;
@@ -969,7 +969,7 @@ function processQueueItem(idx) {
                     '</div>' +
                     '<div style="flex: 1;">' +
                     '<div style="font-size: 13.5px; font-weight: 700; color: #34d399;">Pengunggahan Selesai!</div>' +
-                    '<div style="font-size: 11.5px; color: #a7f3d0; margin-top: 1px;">' + completedCount + ' berkas telah tersimpan dengan aman di folder Google Drive Anda.</div>' +
+                    '<div style="font-size: 11.5px; color: #a7f3d0; margin-top: 1px;">' + completedCount + ' berkas telah tersimpan dengan aman di penyimpanan Anda.</div>' +
                     '</div>' +
                     '</div>';
             }
@@ -2168,7 +2168,7 @@ const onboardingSlides = [
     },
     {
         title: '3. Tautan Gambar CDN White-Label',
-        desc: '<div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#cbd5e1; line-height:1.5;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Copy Link 1-Klik</strong>: Klik titik tiga <strong>⋮</strong> pada gambar &rarr; Pilih <strong>Copy Link</strong> untuk menyalin URL kustom <code>clouds.wn-cdn.net/share?id=...</code></div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Integrasi HTML & CSS</strong>: Tempelkan langsung ke tag <code>&lt;img src="..."&gt;</code> atau CSS <code>background-image</code> pada website Anda.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Privasi & Kecepatan High-Speed</strong>: Gambar dimuat instan via ETag 304 Caching tanpa pernah membocorkan domain/akun Google Drive asli Anda.</div></div></div>',
+        desc: '<div style="display:flex; flex-direction:column; gap:9px; font-size:13px; color:#cbd5e1; line-height:1.5;"><div style="display:flex; gap:6px;"><span>•</span><div><strong>Copy Link 1-Klik</strong>: Klik titik tiga <strong>⋮</strong> pada gambar &rarr; Pilih <strong>Copy Link</strong> untuk menyalin URL kustom <code>clouds.wn-cdn.net/share?id=...</code></div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Integrasi HTML & CSS</strong>: Tempelkan langsung ke tag <code>&lt;img src="..."&gt;</code> atau CSS <code>background-image</code> pada website Anda.</div></div><div style="display:flex; gap:6px;"><span>•</span><div><strong>Privasi & Kecepatan High-Speed</strong>: Gambar dimuat instan via ETag 304 Caching tanpa pernah membocorkan domain/server penyimpanan asli Anda.</div></div></div>',
         iconColor: '#10b981'
     },
     {

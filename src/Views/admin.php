@@ -1017,7 +1017,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                             Target Root Folder ID (Opsional)
                         </label>
-                        <input type="text" id="cr_folder" name="root_folder_id" class="input-box" placeholder="Tempel ID atau URL Google Drive...">
+                        <input type="text" id="cr_folder" name="root_folder_id" class="input-box" placeholder="Tempel ID Folder Storage...">
                     </div>
 
                     <button type="submit" id="btn-create" class="btn-primary">

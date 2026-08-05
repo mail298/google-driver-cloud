@@ -45,7 +45,9 @@ class DownloadProxyController
         @touch($lock);
 
         // Call itself inside the container — fast and avoids the public tunnel.
-        $warmUrl = 'http://127.0.0.1/download?id=' . rawurlencode($fileId) . '&warm=1';
+        $host = $_SERVER['HTTP_HOST'] ?? '127.0.0.1';
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+        $warmUrl = $scheme . '://' . $host . '/download?id=' . rawurlencode($fileId) . '&warm=1';
 
         // Non-blocking: nohup + &  (curl is present in the PHP image)
         $cmd = 'curl -s --max-time 3600 "' . $warmUrl . '" >/dev/null 2>&1 &';
@@ -237,10 +239,13 @@ class DownloadProxyController
             header('Content-Length: ' . $fileSize);
         }
 
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
         header('Content-Type: ' . $mime);
         header('Content-Disposition: ' . $disposition . '; filename="' . rawurlencode($fileName) . '"');
         header('Accept-Ranges: bytes');
-        header('Cache-Control: public, max-age=86400');
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Cloudflare-CDN-Cache-Control: max-age=31536000');
         header('ETag: ' . $etag);
         header('X-Cache: HIT'); // useful for debugging — indicates local cache hit
 
@@ -549,6 +554,8 @@ class DownloadProxyController
             header('Content-Length: ' . $fileSize);
         }
 
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
         header('Content-Type: ' . $mime);
         header('Content-Disposition: ' . $disposition . '; filename="' . rawurlencode($file['name']) . '"');
         header('Accept-Ranges: bytes');
