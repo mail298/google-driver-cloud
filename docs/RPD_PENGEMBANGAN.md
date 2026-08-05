@@ -158,6 +158,14 @@ flowchart LR
 ### Tahap 4: Deployment & Kontrol Versi Git
 - Eksekusi `git add .`, `git commit`, `git pull --rebase origin clien-cloud`, dan `git push origin clien-cloud` hingga status repositori `working tree clean`.
 
+### Tahap 5: Penyaringan Berkas Duplikat & Pengunggahan Massal Terpisah
+- **Deskripsi**: Ketika mengunggah banyak gambar/berkas sekaligus (misal 10 file) di mana sebagian berkas sudah ada di folder:
+  - Berkas baru (non-duplikat) disaring dan **langsung diunggah tanpa penundaan**.
+  - Berkas duplikat diisolasi dan menampilkan modal opsi **Ganti (Replace)** atau **Simpan Kedua Berkas (Keep Both dengan auto-rename unik)**.
+  - Membatalkan modal duplikat tidak akan membatalkan berkas baru yang sedang diunggah.
+- **Perubahan Berkas**:
+  - `public/assets/js/portal.js`: Menambahkan logika `processSelectedFiles()` untuk menyaring `cleanFiles` dan `duplicateFiles` secara independen.
+
 ---
 
 ## 🔮 4. Peta Jalan & Panduan Pengembangan Kedepan (Future AI Roadmap)

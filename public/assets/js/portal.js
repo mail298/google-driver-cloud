@@ -130,36 +130,69 @@ let gdriveQueue = [];
 let isGDriveUploading = false;
 let isWidgetCollapsed = false;
 
-// Handle file selection (multi-file)
+// Handle file selection (multi-file) with duplicate filtering
+function processSelectedFiles(fileArray) {
+    if (!fileArray || fileArray.length === 0) return;
+
+    // Quota check before doing anything
+    if (typeof checkStorageQuotaBeforeUpload === 'function' && !checkStorageQuotaBeforeUpload(fileArray)) return;
+
+    const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? EXISTING_FILE_NAMES : [];
+
+    const cleanFiles = fileArray.filter(f => !existingList.includes(f.name));
+    const duplicateFiles = fileArray.filter(f => existingList.includes(f.name));
+
+    // 1. Immediately upload non-duplicate (clean) files
+    if (cleanFiles.length > 0) {
+        startGDriveUpload(cleanFiles, { isReplace: false });
+        if (duplicateFiles.length > 0 && typeof showToast === 'function') {
+            showToast(cleanFiles.length + ' berkas baru mulai diunggah...', 'info');
+        }
+    }
+
+    // 2. Filter duplicate files and prompt user option modal
+    if (duplicateFiles.length > 0) {
+        pendingDuplicateFiles = duplicateFiles;
+
+        const textEl = document.getElementById('duplicate-filename-text');
+        if (textEl) {
+            if (duplicateFiles.length === 1) {
+                textEl.textContent = duplicateFiles[0].name;
+            } else {
+                const names = duplicateFiles.slice(0, 2).map(f => f.name).join(', ');
+                const extra = duplicateFiles.length - 2;
+                textEl.textContent = extra > 0 ? (names + ' dan ' + extra + ' berkas duplikat lainnya') : names;
+            }
+        }
+
+        if (cleanFiles.length === 0 && typeof showToast === 'function') {
+            const firstName = duplicateFiles[0].name;
+            const msg = duplicateFiles.length === 1
+                ? '⚠️ Berkas "' + firstName + '" sudah ada di folder ini.'
+                : '⚠️ ' + duplicateFiles.length + ' berkas yang dipilih sudah ada di folder ini.';
+            showToast(msg, 'warning');
+        }
+
+        const modal = document.getElementById('gdrive-duplicate-modal');
+        if (modal) modal.style.display = 'flex';
+    }
+}
+
 function handleFileSelect(event) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-
     const fileArray = Array.from(files);
     event.target.value = '';
-
-    // Check if any selected file name already exists in current folder
-    const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? EXISTING_FILE_NAMES : [];
-    const duplicate = fileArray.find(f => existingList.includes(f.name));
-
-    if (duplicate) {
-        pendingDuplicateFiles = fileArray;
-        if (typeof showToast === 'function') {
-            showToast('⚠️ Berkas/gambar "' + duplicate.name + '" sudah ada di folder ini.', 'warning');
-        }
-        const textEl = document.getElementById('duplicate-filename-text');
-        if (textEl) textEl.textContent = duplicate.name;
-        const modal = document.getElementById('gdrive-duplicate-modal');
-        if (modal) modal.style.display = 'flex';
-    } else {
-        startGDriveUpload(fileArray, { isReplace: false });
-    }
+    processSelectedFiles(fileArray);
 }
 
 function cancelDuplicateUpload() {
     pendingDuplicateFiles = null;
     const modal = document.getElementById('gdrive-duplicate-modal');
     if (modal) modal.style.display = 'none';
+    if (typeof showToast === 'function') {
+        showToast('Pengunggahan berkas duplikat dibatalkan.', 'info');
+    }
 }
 
 function confirmDuplicateUpload() {
@@ -173,7 +206,7 @@ function confirmDuplicateUpload() {
 
     if (optionValue === 'replace') {
         if (typeof showToast === 'function') {
-            showToast('Mengganti berkas dengan versi baru...', 'info');
+            showToast('Mengganti ' + pendingDuplicateFiles.length + ' berkas dengan versi baru...', 'info');
         }
         startGDriveUpload(pendingDuplicateFiles, { isReplace: true, versionText: 'Versi 2' });
     } else {
@@ -187,7 +220,7 @@ function confirmDuplicateUpload() {
             return file;
         });
         if (typeof showToast === 'function') {
-            showToast('Menyimpan kedua berkas (nama duplikat baru)...', 'info');
+            showToast('Menyimpan ' + pendingDuplicateFiles.length + ' berkas duplikat dengan nama baru...', 'info');
         }
         startGDriveUpload(processedFiles, { isReplace: false });
     }
@@ -1174,22 +1207,7 @@ window.addEventListener('drop', function (e) {
 function processDroppedFiles(files) {
     if (!files || files.length === 0) return;
     const fileArray = Array.from(files);
-
-    const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? EXISTING_FILE_NAMES : [];
-    const duplicate = fileArray.find(f => existingList.includes(f.name));
-
-    if (duplicate) {
-        pendingDuplicateFiles = fileArray;
-        if (typeof showToast === 'function') {
-            showToast('⚠️ Berkas/gambar "' + duplicate.name + '" sudah ada di folder ini.', 'warning');
-        }
-        const textEl = document.getElementById('duplicate-filename-text');
-        if (textEl) textEl.textContent = duplicate.name;
-        const modal = document.getElementById('gdrive-duplicate-modal');
-        if (modal) modal.style.display = 'flex';
-    } else {
-        startGDriveUpload(fileArray, { isReplace: false });
-    }
+    processSelectedFiles(fileArray);
 }
 
 // File Preview Handling
