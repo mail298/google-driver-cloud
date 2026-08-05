@@ -204,6 +204,10 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function renameFolder() {
@@ -229,6 +233,10 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function deleteFolder() {
@@ -253,6 +261,10 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function renameFile() {
@@ -278,6 +290,10 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function deleteFile() {
@@ -302,6 +318,10 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function moveItem() {
@@ -328,6 +348,10 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function batchDelete() {
@@ -367,6 +391,10 @@ class DashboardController {
             echo json_encode(['success' => true, 'count' => $deletedCount]);
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function deleteAllFiles() {
@@ -424,6 +452,10 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 
     public static function batchMove() {
@@ -451,5 +483,9 @@ class DashboardController {
             }
             exit;
         }
+        http_response_code(405);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => false, 'message' => 'Metode request tidak diizinkan.']);
+        exit;
     }
 }

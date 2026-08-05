@@ -324,7 +324,8 @@ class DownloadProxyController
         if (!$fileId) {
             LoggerService::error("Download failed: File ID is required.");
             http_response_code(400);
-            die("File ID is required.");
+            echo "400 - File ID tidak ditemukan.";
+            exit;
         }
 
         $pdo = Config::getPDO();
@@ -337,7 +338,8 @@ class DownloadProxyController
         if (!$file) {
             LoggerService::error("Download failed: File not found or access denied for ID '{$fileId}'.");
             http_response_code(404);
-            die("File not found or access denied.");
+            echo "404 - Berkas tidak ditemukan atau akses ditolak.";
+            exit;
         }
 
         $mime = $file['mime_type'] ?: 'application/octet-stream';

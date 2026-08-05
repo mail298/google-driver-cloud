@@ -23,9 +23,9 @@ class StreamController
         $fileId = self::resolveFileId();
 
         if (!$fileId) {
-            LoggerService::error("Stream embed failed: Video ID not found in request.");
             http_response_code(404);
-            die("ID Video tidak ditemukan.");
+            echo "404 - ID Video tidak ditemukan.";
+            exit;
         }
 
         $pdo = Config::getPDO();
@@ -36,7 +36,8 @@ class StreamController
         if (!$file) {
             LoggerService::error("Stream embed failed: File not found or deleted for ID '{$fileId}'.");
             http_response_code(404);
-            die("Video tidak ditemukan atau telah dihapus.");
+            echo "404 - Video tidak ditemukan atau telah dihapus.";
+            exit;
         }
 
         $mime = strtolower($file['mime_type'] ?? '');
@@ -46,7 +47,8 @@ class StreamController
         if (!$isVideo && !$isAudio) {
             LoggerService::error("Stream embed failed: File '{$file['name']}' is neither video nor audio.");
             http_response_code(400);
-            die("Berkas ini bukan berupa video atau audio.");
+            echo "400 - Berkas ini bukan berupa video atau audio.";
+            exit;
         }
 
         // Domain Whitelist / Hotlink Protection check
@@ -54,7 +56,8 @@ class StreamController
             $referer = $_SERVER['HTTP_REFERER'] ?? 'Unknown';
             LoggerService::warning("Stream hotlink blocked: Referer '{$referer}' is not allowed for file '{$file['id']}'.");
             http_response_code(403);
-            die("Akses pemutaran video ditolak: Domain ini tidak diizinkan (Hotlink Protected).");
+            echo "403 - Akses pemutaran video ditolak: Domain ini tidak diizinkan (Hotlink Protected).";
+            exit;
         }
 
         // Allow embedding in external landing pages & websites (CORS & frame options)
@@ -76,7 +79,8 @@ class StreamController
 
         if (!$fileId) {
             http_response_code(404);
-            die("ID Video tidak ditemukan.");
+            echo "404 - ID Video tidak ditemukan.";
+            exit;
         }
 
         $pdo = Config::getPDO();
@@ -86,12 +90,14 @@ class StreamController
 
         if (!$file) {
             http_response_code(404);
-            die("Video tidak ditemukan.");
+            echo "404 - Video tidak ditemukan.";
+            exit;
         }
 
         if (!self::checkReferrerAllowed($file)) {
             http_response_code(403);
-            die("Hotlink protected.");
+            echo "403 - Hotlink protected.";
+            exit;
         }
 
         // If accessed directly in a desktop browser address bar (HTML request), redirect to full embed player
@@ -144,7 +150,8 @@ class StreamController
 
         if (!$fileId) {
             http_response_code(404);
-            die("Segment not found.");
+            echo "404 - Segment tidak ditemukan.";
+            exit;
         }
 
         $pdo = Config::getPDO();
@@ -154,7 +161,8 @@ class StreamController
 
         if (!$file) {
             http_response_code(404);
-            die("File not found.");
+            echo "404 - Berkas tidak ditemukan.";
+            exit;
         }
 
         $fileSize = (int) ($file['size_bytes'] ?? 0);

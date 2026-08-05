@@ -73,7 +73,9 @@ class BackupController
 
             $zip->close();
         } else {
-            die("Gagal membuat arsip cadangan (ZIP).");
+            http_response_code(500);
+            echo "500 - Gagal membuat arsip cadangan (ZIP).";
+            exit;
         }
 
         // 3. Send file download response

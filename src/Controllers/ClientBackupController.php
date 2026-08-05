@@ -71,7 +71,10 @@ class ClientBackupController
         $currentUser = $_SESSION['user'] ?? null;
         $userId = $currentUser['id'] ?? null;
         if (!$userId) {
-            die("Error: Sesi tidak valid.");
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
+            exit;
         }
 
         $pdo = Config::getPDO();
@@ -112,7 +115,9 @@ class ClientBackupController
         $zip = new ZipArchive();
 
         if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-            die("Gagal memproses pembuat berkas ZIP.");
+            http_response_code(500);
+            echo "500 - Gagal memproses pembuat berkas ZIP.";
+            exit;
         }
 
         // Fetch OAuth credentials to stream files into zip

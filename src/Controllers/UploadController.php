@@ -55,7 +55,6 @@ class UploadController
 
         $handoffToken = $_POST['upload_token'] ?? $_GET['upload_token'] ?? null;
         if ($handoffToken) {
-            require_once dirname(__DIR__) . '/Models/UserModel.php';
             $tokenData = self::consumeUploadToken($handoffToken);
             if (!$tokenData || !($tokenUser = UserModel::getUserById($tokenData['user_id']))) {
                 header('Content-Type: application/json');
@@ -141,7 +140,6 @@ class UploadController
 
         $handoffToken = $_POST['upload_token'] ?? $_GET['upload_token'] ?? null;
         if ($handoffToken) {
-            require_once dirname(__DIR__) . '/Models/UserModel.php';
             $tokenData = self::consumeUploadToken($handoffToken, false);
             if ($tokenData && ($tokenUser = UserModel::getUserById($tokenData['user_id']))) {
                 AuthController::startSession();
@@ -291,7 +289,8 @@ class UploadController
         @touch($lock);
 
         // Internal request — fast and not throttled by Cloudflare's 100s limit.
-        $cmd = 'curl -s --max-time 3600 "http://127.0.0.1/finalize?jobId=' . rawurlencode($jobId) . '" >/dev/null 2>&1 &';
+        $port = (int) Config::get('PORTAL_PORT', 80);
+        $cmd = 'curl -s --max-time 3600 "http://127.0.0.1:' . $port . '/finalize?jobId=' . rawurlencode($jobId) . '" >/dev/null 2>&1 &';
         @exec($cmd);
     }
 
@@ -359,7 +358,6 @@ class UploadController
 
         // Rebuild a minimal session for the async worker
         if (!empty($job['userId'])) {
-            require_once dirname(__DIR__) . '/Models/UserModel.php';
             $jobUser = UserModel::getUserById($job['userId']);
             if ($jobUser) {
                 AuthController::startSession();
@@ -419,8 +417,6 @@ class UploadController
         $gatewayUrl = Config::get('GATEWAY_API_URL', 'http://localhost:4000');
         $apiKey = Config::get('GATEWAY_API_KEY');
 
-        require_once dirname(__DIR__) . '/Models/PortalModel.php';
-        require_once dirname(__DIR__) . '/Models/UserModel.php';
         $pdo = Config::getPDO();
 
         $currentUser = $_SESSION['user'] ?? null;
