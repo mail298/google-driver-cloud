@@ -202,7 +202,7 @@ class StreamController
         $userId = $file['user_id'] ?? null;
         if (!$userId) return true;
 
-        $stmt = $pdo->prepare("SELECT allowed_domains FROM users WHERE id = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT allowed_domains FROM portal_users WHERE id = ? LIMIT 1");
         $stmt->execute([$userId]);
         $user = $stmt->fetch();
 
