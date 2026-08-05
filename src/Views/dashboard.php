@@ -1617,8 +1617,9 @@
                                         <div
                                             style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0f172a; overflow:hidden;">
                                             <img src="/download?id=<?= $file['id'] ?>&thumb=1"
-                                                alt="<?= htmlspecialchars($file['name']) ?>" style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;" loading="lazy"
-                                                decoding="async" onerror="this.style.display='none';">
+                                                alt="<?= htmlspecialchars($file['name']) ?>"
+                                                style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"
+                                                loading="lazy" decoding="async" onerror="this.style.display='none';">
                                             <div
                                                 style="position:relative; z-index:2; width:44px; height:44px; border-radius:50%; background:rgba(168,85,247,0.45); border:1.5px solid rgba(192,132,252,0.8); display:flex; align-items:center; justify-content:center; color:#ffffff; box-shadow:0 4px 18px rgba(0,0,0,0.5); backdrop-filter:blur(4px);">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
@@ -2441,16 +2442,30 @@
             style="max-width: 440px; width: 90%; background: #0f172a; color: #f8fafc; border-radius: 24px; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 1px solid var(--card-border); font-family: 'Plus Jakarta Sans', sans-serif;">
             <h3
                 style="margin: 0 0 14px 0; font-size: 20px; font-weight: 800; color: #fff; font-family: 'Outfit', sans-serif;">
-                Konfirmasi Timpa Berkas</h3>
-            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 24px; line-height: 1.5;">
+                Opsi Upload Berkas</h3>
+            <p style="font-size: 13.5px; color: #cbd5e1; margin-bottom: 20px; line-height: 1.5;">
                 Berkas <strong id="duplicate-filename-text" style="color: #60a5fa;">file.png</strong> sudah ada di
-                lokasi ini. Apakah Anda ingin mengganti / menimpa berkas yang sudah ada dengan versi baru?
+                lokasi ini. Apakah Anda ingin mengganti file yang ada dengan versi baru atau menyimpan kedua file?
             </p>
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px;">
+                <label
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
+                    <input type="radio" name="duplicate_option" value="replace" checked
+                        style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
+                    <span>Ganti file yang ada (Versi Baru)</span>
+                </label>
+                <label
+                    style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #f8fafc; font-weight: 500;">
+                    <input type="radio" name="duplicate_option" value="keep_both"
+                        style="accent-color: #3b82f6; width: 18px; height: 18px; cursor: pointer;">
+                    <span>Simpan kedua file (Duplikat)</span>
+                </label>
+            </div>
             <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
                 <button type="button" onclick="cancelDuplicateUpload()"
-                    style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 10px 22px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Tidak (Lewati)</button>
+                    style="background: rgba(255,255,255,0.06); border: 1px solid var(--card-border); color: #cbd5e1; padding: 9px 20px; font-size: 13.5px; font-weight: 600; cursor: pointer; border-radius: 10px;">Batal</button>
                 <button type="button" onclick="confirmDuplicateUpload()"
-                    style="background: #3b82f6; color: #fff; border: none; padding: 10px 22px; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 10px; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">Ya, Ganti / Timpa</button>
+                    style="background: #3b82f6; color: #fff; border: none; padding: 9px 20px; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 10px; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);">Unggah</button>
             </div>
         </div>
     </div>
@@ -2481,10 +2496,14 @@
             </div>
 
             <!-- Embedded Player Preview -->
-            <div class="embed-player-preview" style="position: relative; width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
-                <iframe id="embed-player-iframe" src="" style="width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+            <div class="embed-player-preview"
+                style="position: relative; width: 100%; height: 320px; border-radius: 14px; overflow: hidden; background: #000; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.1);">
+                <iframe id="embed-player-iframe" src="" style="width: 100%; height: 100%; border: none;"
+                    allowfullscreen></iframe>
                 <!-- White-Label Click Shield: Blocks popout icon from opening Google Drive -->
-                <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
+                <div
+                    style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;">
+                </div>
             </div>
 
             <!-- Code & Link Inputs -->

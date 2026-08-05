@@ -193,10 +193,29 @@ function confirmDuplicateUpload() {
 
     if (!pendingDuplicateFiles || pendingDuplicateFiles.length === 0) return;
 
-    if (typeof showToast === 'function') {
-        showToast('Mengganti / menimpa ' + pendingDuplicateFiles.length + ' berkas dengan versi baru...', 'info');
+    const selectedOption = document.querySelector('input[name="duplicate_option"]:checked');
+    const optionValue = selectedOption ? selectedOption.value : 'replace';
+
+    if (optionValue === 'replace') {
+        if (typeof showToast === 'function') {
+            showToast('Mengganti ' + pendingDuplicateFiles.length + ' berkas dengan versi baru...', 'info');
+        }
+        startGDriveUpload(pendingDuplicateFiles, { isReplace: true, versionText: 'Versi 2' });
+    } else {
+        const existingList = (typeof EXISTING_FILE_NAMES !== 'undefined' && Array.isArray(EXISTING_FILE_NAMES)) ? [...EXISTING_FILE_NAMES] : [];
+        const processedFiles = pendingDuplicateFiles.map(file => {
+            if (existingList.includes(file.name)) {
+                const newName = getUniqueFileName(file.name, existingList);
+                existingList.push(newName);
+                return new File([file], newName, { type: file.type, lastModified: file.lastModified });
+            }
+            return file;
+        });
+        if (typeof showToast === 'function') {
+            showToast('Menyimpan ' + pendingDuplicateFiles.length + ' berkas duplikat dengan nama baru...', 'info');
+        }
+        startGDriveUpload(processedFiles, { isReplace: false });
     }
-    startGDriveUpload(pendingDuplicateFiles, { isReplace: true, versionText: 'Versi 2' });
 
     pendingDuplicateFiles = null;
 }
@@ -2133,7 +2152,10 @@ function submitBulkDelete() {
                 window.location.reload();
             } else {
                 alert('Gagal menghapus item: ' + (data.message || 'Terjadi kesalahan'));
-                if (btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText; }
+                if (btn) {
+                    btn.disab
+                    led = false; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; btn.innerHTML = origText;
+                }
                 isBulkDeleteSubmitting = false;
             }
         })
