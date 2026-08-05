@@ -165,14 +165,6 @@ function processSelectedFiles(fileArray) {
             }
         }
 
-        if (cleanFiles.length === 0 && typeof showToast === 'function') {
-            const firstName = duplicateFiles[0].name;
-            const msg = duplicateFiles.length === 1
-                ? '⚠️ Berkas "' + firstName + '" sudah ada di folder ini.'
-                : '⚠️ ' + duplicateFiles.length + ' berkas yang dipilih sudah ada di folder ini.';
-            showToast(msg, 'warning');
-        }
-
         const modal = document.getElementById('gdrive-duplicate-modal');
         if (modal) modal.style.display = 'flex';
     }
@@ -554,8 +546,8 @@ async function uploadItemInChunks(item) {
             }
             if (chunkResult.replaced && typeof showToast === 'function') {
                 showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
-            } else if (chunkResult.isDuplicate && typeof showToast === 'function') {
-                showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
+            } else if (typeof showToast === 'function') {
+                showToast('Berkas "' + item.file.name + '" berhasil disimpan', 'success');
             }
             renderGDriveWidget();
             processGDriveQueueItem();
@@ -592,8 +584,8 @@ async function pollFinalizeStatus(item) {
                 }
                 if (data.replaced && typeof showToast === 'function') {
                     showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
-                } else if (data.isDuplicate && typeof showToast === 'function') {
-                    showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
+                } else if (typeof showToast === 'function') {
+                    showToast('Berkas "' + item.file.name + '" berhasil disimpan', 'success');
                 }
                 renderGDriveWidget();
                 processGDriveQueueItem();
@@ -697,8 +689,8 @@ async function processGDriveQueueItem() {
                     }
                     if (response.replaced && typeof showToast === 'function') {
                         showToast('Berkas "' + item.file.name + '" telah diganti dengan versi baru', 'success');
-                    } else if (response.isDuplicate && typeof showToast === 'function') {
-                        showToast('Informasi: Berkas "' + item.file.name + '" sudah ada di folder ini', 'warning');
+                    } else if (typeof showToast === 'function') {
+                        showToast('Berkas "' + item.file.name + '" berhasil disimpan', 'success');
                     }
                 } else {
                     item.status = 'failed';
