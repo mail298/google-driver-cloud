@@ -11,6 +11,7 @@ $vendorAutoload = dirname(__DIR__) . '/vendor/autoload.php';
 if (file_exists($vendorAutoload)) {
     require_once $vendorAutoload;
 }
+require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/src/Core/Autoloader.php';
 App\Core\Autoloader::register();
 
