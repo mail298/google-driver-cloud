@@ -241,6 +241,7 @@ class DownloadProxyController
 
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, OPTIONS');
+        header('Access-Control-Expose-Headers: Content-Length, Content-Range, ETag, X-Cache');
         header('Content-Type: ' . $mime);
         header('Content-Disposition: ' . $disposition . '; filename="' . rawurlencode($fileName) . '"');
         header('Accept-Ranges: bytes');
