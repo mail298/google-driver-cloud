@@ -1,11 +1,6 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\BackupController.php
 
-require_once dirname(__DIR__) . '/Models/UserModel.php';
-require_once dirname(__DIR__) . '/Models/PortalModel.php';
-require_once dirname(__DIR__) . '/Models/SecurityModel.php';
-require_once __DIR__ . '/AuthController.php';
-
 class BackupController
 {
     public static function exportAdminBackup()

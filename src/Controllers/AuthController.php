@@ -1,11 +1,6 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\AuthController.php
 
-require_once dirname(__DIR__) . '/Models/UserModel.php';
-require_once dirname(__DIR__) . '/Models/IpWhitelistModel.php';
-require_once dirname(__DIR__) . '/Models/SecurityModel.php';
-require_once dirname(__DIR__) . '/Services/LoggerService.php';
-
 class AuthController {
     public static function startSession() {
         if (session_status() === PHP_SESSION_NONE) {

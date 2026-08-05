@@ -1,10 +1,6 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\DashboardController.php
 
-require_once dirname(__DIR__) . '/Models/PortalModel.php';
-require_once dirname(__DIR__) . '/Models/UserModel.php';
-require_once dirname(__DIR__) . '/Models/SecurityModel.php';
-
 class DashboardController {
     public static function index() {
         AuthController::checkClient();
@@ -22,7 +18,9 @@ class DashboardController {
         }
         $userId = $currentUser['id'] ?? null;
         if (!$userId) {
-            die("Error: Session user not found.");
+            http_response_code(500);
+            echo "500 - Internal Server Error: Session user not found.";
+            exit;
         }
 
         $limitGb = (float)($currentUser['storage_limit_gb'] ?? 15);

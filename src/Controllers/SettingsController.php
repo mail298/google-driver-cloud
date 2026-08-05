@@ -1,10 +1,6 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\SettingsController.php
 
-require_once dirname(__DIR__) . '/Models/UserModel.php';
-require_once dirname(__DIR__) . '/Models/PortalModel.php';
-require_once __DIR__ . '/AuthController.php';
-
 class SettingsController {
     public static function updatePassword() {
         AuthController::checkClient();

@@ -1,11 +1,6 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\AdminController.php
 
-require_once dirname(__DIR__) . '/Models/UserModel.php';
-require_once dirname(__DIR__) . '/Models/PortalModel.php';
-require_once dirname(__DIR__) . '/Models/IpWhitelistModel.php';
-require_once dirname(__DIR__) . '/Models/SecurityModel.php';
-
 class AdminController
 {
     public static function getMasterCapacityGb()
@@ -83,7 +78,7 @@ class AdminController
         $securityStatus = SecurityModel::getSecurityStatus();
         $csrfToken = SecurityModel::getCsrfToken();
 
-        require_once dirname(dirname(__DIR__)) . '/src/Views/admin.php';
+        require_once dirname(__DIR__) . '/Views/admin.php';
     }
 
     public static function createUser()

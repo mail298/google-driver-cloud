@@ -8,7 +8,8 @@ class ShareController
         $fileId = $_GET['id'] ?? null;
         if (!$fileId) {
             http_response_code(404);
-            die("File ID tidak ditemukan.");
+            echo "404 - File ID tidak ditemukan.";
+            exit;
         }
 
         $pdo = Config::getPDO();
@@ -18,7 +19,8 @@ class ShareController
 
         if (!$file) {
             http_response_code(404);
-            die("Berkas tidak ditemukan atau telah dihapus.");
+            echo "404 - Berkas tidak ditemukan atau telah dihapus.";
+            exit;
         }
 
         $accept = $_SERVER['HTTP_ACCEPT'] ?? '';

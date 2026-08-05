@@ -1,12 +1,6 @@
 <?php
 // C:\Users\ADMIN\Desktop\framework\google-drive\cliend\src\Controllers\ClientBackupController.php
 
-require_once dirname(__DIR__) . '/Models/UserModel.php';
-require_once dirname(__DIR__) . '/Models/PortalModel.php';
-require_once dirname(__DIR__) . '/Models/SecurityModel.php';
-require_once __DIR__ . '/AuthController.php';
-require_once __DIR__ . '/DownloadProxyController.php';
-
 class ClientBackupController
 {
     public static function exportMetadataCsv()
@@ -16,7 +10,10 @@ class ClientBackupController
         $currentUser = $_SESSION['user'] ?? null;
         $userId = $currentUser['id'] ?? null;
         if (!$userId) {
-            die("Error: Sesi tidak valid.");
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Sesi tidak valid.']);
+            exit;
         }
 
         $pdo = Config::getPDO();
