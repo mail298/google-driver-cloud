@@ -1,19 +1,19 @@
 services:
-  mysql:
-    image: mysql:8.4
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
+        VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY:-}
     restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-9drive}
-      MYSQL_USER: ${MYSQL_USER:-9drive}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-this-database-password}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
+    depends_on:
+      - backend
+    expose:
+      - "80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend-9drive.rule=Host(`googledrivefrontend.ikan212.com`)"
+      - "traefik.http.services.frontend-9drive.loadbalancer.server.port=80"
 
   backend:
     build:
@@ -41,21 +41,21 @@ services:
       - "traefik.http.routers.backend-9drive.rule=Host(`googledrivebackend.ikan212.com`)"
       - "traefik.http.services.backend-9drive.loadbalancer.server.port=4000"
 
-  frontend:
-    build:
-      context: ./frontend
-      args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:4000}
-        VITE_RECAPTCHA_SITE_KEY: ${VITE_RECAPTCHA_SITE_KEY:-}
+  mysql:
+    image: mysql:8.4
     restart: unless-stopped
-    depends_on:
-      - backend
-    expose:
-      - "80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend-9drive.rule=Host(`googledrivefrontend.ikan212.com`)"
-      - "traefik.http.services.frontend-9drive.loadbalancer.server.port=80"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-9drive}
+      MYSQL_USER: ${MYSQL_USER:-9drive}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-this-database-password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
 volumes:
   mysql_data:
