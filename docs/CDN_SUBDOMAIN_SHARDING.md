@@ -53,10 +53,10 @@ img4.wn-cdn.net ─┘
 ## Checklist Pending
 
 - [x] Buat 4 CNAME `img1-4.wn-cdn.net` → tunnel (Proxied) — selesai via API.
-- [ ] Tambah 4 Public Hostname (img1–4 → `localhost:7878`) di dashboard Zero Trust.
+- [x] Tambah 4 Public Hostname (img1–4 → `localhost:7878`) di tunnel (remote config v5) — selesai via API.
 - [x] Implementasi rotasi hostname:
   - `src/Core/CdnHelper.php` — helper PHP (`CdnHelper::url()` / `hostFor()`), host dipilih via `crc32(fileId) % n` (deterministik).
   - `portal.js` — helper JS `cdnUrl()` / `cdnHostFor()` (dipilih via hash file ID).
   - Diterapkan di `dashboard.php` (thumbnail grid + list), `share.php` (halaman publik), `embed.php` (video), `ClientBackupController.php` (CSV link).
   - Daftar host dari env `CDN_HOSTS` (default `img1-4.wn-cdn.net`), di-ekspos ke JS via `CDN_HOST_LIST`.
-- [ ] Verifikasi `img1-4.wn-cdn.net` setelah Public Hostname aktif (sekarang 404 karena belum terdaftar).
+- [x] Verifikasi end-to-end: `img1-4.wn-cdn.net` → HTTP 200, thumbnail PNG valid, md5 identik di semua host, deterministik per file.
