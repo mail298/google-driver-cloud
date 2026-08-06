@@ -213,7 +213,7 @@ class StreamController
 
         $domains = array_map('trim', explode(',', strtolower($allowedDomainsRaw)));
         foreach ($domains as $domain) {
-            if ($domain && (strpos($refererHost, $domain) !== false || $refererHost === $domain)) {
+            if ($domain && ($refererHost === $domain || str_ends_with($refererHost, '.' . $domain))) {
                 return true;
             }
         }
