@@ -8,11 +8,15 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+    networks:
+      - default
+      - coolify
     expose:
       - "80"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend-9drive.rule=Host(`googledrivefrontend.ikan212.com`)"
+      - "traefik.http.routers.frontend-9drive.entrypoints=http,https"
       - "traefik.http.services.frontend-9drive.loadbalancer.server.port=80"
 
   backend:
@@ -34,11 +38,15 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost:4000/connected-accounts/google/callback}
+    networks:
+      - default
+      - coolify
     expose:
       - "4000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend-9drive.rule=Host(`googledrivebackend.ikan212.com`)"
+      - "traefik.http.routers.backend-9drive.entrypoints=http,https"
       - "traefik.http.services.backend-9drive.loadbalancer.server.port=4000"
 
   mysql:
@@ -51,11 +59,17 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-this-database-password}
     volumes:
       - mysql_data:/var/lib/mysql
+    networks:
+      - default
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
       interval: 5s
       timeout: 5s
       retries: 20
+
+networks:
+  coolify:
+    external: true
 
 volumes:
   mysql_data:
