@@ -23,21 +23,25 @@ Browser (landing page, JS)
   ▼
 <img src="https://imgX.wn-cdn.net/download?id=FILE&thumb=1">
   │
-  ├─ CF edge cache 302? ── ada (HIT) ──► kirim 302 → browser ikuti → thumb dari Google CDN
+  ├─ CF edge cache? ── ada (HIT) ──► kirim thumbnail (~10-15KB) langsung ke browser
+  │                     (Cache Everything rule, TTL 30 hari)
   │
   └─ tidak ada (MISS) ──► CF edge → tunnel → VPS
         │
         ▼
   DownloadProxyController::download()
-        │  isThumb = true, file public?
-        ├─ PUBLIC ──► 302 → https://lh3.googleusercontent.com/d/{pid}=w400
-        │             └─ browser ambil thumb langsung dari Google CDN
-        │             └─ CF edge simpan 302 (30 hari) → request berikutnya tanpa VPS
+        │  isThumb = true
+        ▼
+  cek disk cache: /storage/cache/files/thumb_{id}.jpg
         │
-        └─ NON-PUBLIC ──► disk cache / fetch lh3 via VPS (alur lama)
+        ├─ ada & < 7 hari ──► serve (ETag 304 / 200) ──► CF edge simpan ──► browser
+        │
+        └─ tidak ada ──► fetch Google LH3  → https://lh3.googleusercontent.com/d/{pid}=w400
+                        ▼
+                  simpan ke disk cache → serve → CF edge simpan → browser
 ```
 
-**Keuntungan:** browser buka 24 koneksi paralel (4 host × 6); gambar public di-302 ke CDN Google → VPS hampir tidak mentransfer byte gambar sama sekali; grid loading cepat.
+**Keuntungan:** browser buka 24 koneksi paralel (4 host × 6) + thumbnail kecil + edge cache → grid loading cepat. Browser hanya melihat `imgX.wn-cdn.net` (URL Google tidak bocor).
 
 ---
 
@@ -47,22 +51,22 @@ Browser (landing page, JS)
 Browser: <img src="https://imgX.wn-cdn.net/download?id=FILE&inline=1">
   (header Accept: image/* → ShareController langsung lempar ke download, tanpa halaman HTML)
   │
-  ├─ CF edge: cache 302? ── ada (HIT) ──► kirim 302 → browser ikuti → ambil dari Google CDN
+  ├─ CF edge cache? ── ada (HIT) ──► kirim gambar langsung dari edge
   │
   └─ MISS ──► CF → tunnel → VPS
         ▼
-  DownloadProxyController::download()
-        │  file public? (probe lh3 sekali, flag 7 hari)
+  DownloadProxyController::download()  (isThumb = false, isCacheEligible = true)
         │
-        ├─ PUBLIC ──► 302 → https://lh3.googleusercontent.com/d/{pid}=s0
-        │             └─ browser langsung ambil byte dari CDN Google (VPS lepas total)
-        │             └─ CF edge simpan 302 (status_code_ttl 302 → 30 hari)
+        ├─ disk cache ada ──► serveFromDisk (ETag 304 / 200) → CF cache → browser
         │
-        └─ NON-PUBLIC ──► proxy OAuth seperti lama
-              └─ disk cache / fetch Google Drive via token
+        └─ disk cache tidak ada (COLD START) ──►
+             1. cek token OAuth (getCachedAccessToken)
+             2. gambar → lh3.googleusercontent.com/d/{pid}=s0  (full size)
+             3. full file ter-download dulu ke VPS (tmp → cache)
+             4. baru serve ke browser → CF cache → browser
 ```
 
-**Catatan:** Gambar public di-302 langsung ke CDN Google — VPS hanya mengirim redirect kecil, byte file tidak pernah lewat VPS. Gambar non-public (butuh izin Google) tetap lewat proxy OAuth. Video/PDF tidak di-redirect (Google blokir file besar + butuh Range).
+**Catatan:** VPS yang fetch dari Google lalu serve sendiri → browser hanya melihat `imgX.wn-cdn.net`, URL Google (lh3) tidak pernah terlihat. Cold start = menunggu full file turun ke VPS (2-3 detik untuk ~500KB), setelah itu disk + edge HIT (~50ms).
 
 ---
 
@@ -144,15 +148,14 @@ Browser (dashboard clouds.wn-cdn.net), klik "Copy Link" pada file
 
 ## Ringkasan Performa
 
-| Skenario | Sebelum Cache Rule | Sesudah Cache Rule + Redirect |
+| Skenario | Sebelum Cache Rule | Sesudah Cache Rule |
 |---|---|---|
 | Halaman share (HTML) | ~0.3s TTFB | ~0.3s TTFB (DYNAMIC) |
-| Gambar thumb public, pernah dibuka | 0.6s (disk) | 302 dari edge → Google CDN |
-| Gambar full public, pernah dibuka | 0.6s (disk) | 302 dari edge → Google CDN |
-| Gambar public cold start | 2.3s (fetch Google Drive) | 302 cepat, byte dari Google CDN |
-| Gambar non-public | 2.3s | proxy OAuth (alur lama) |
-| Video MP4 inline (cacheable) | — | proxy VPS + Range (Google blokir direct) |
-| Video HLS segmen | live fetch per segmen | live fetch per segmen (proxy) |
+| Gambar thumb, sudah pernah dibuka | 0.6s (disk) | ~50ms (edge HIT) |
+| Gambar full, sudah pernah dibuka | 0.6s (disk) | ~50ms (edge HIT) |
+| Gambar cold start (file baru) | 2.3s (fetch Google Drive) | 2.3s sekali, lalu cepat |
+| Video MP4 inline (cacheable) | — | disk + edge |
+| Video HLS segmen | live fetch per segmen | live fetch per segmen |
 
 ## Tetap Dinamis Saat File Diganti (Auto Version)
 
