@@ -35,6 +35,12 @@ img4.wn-cdn.net ─┘
 
 3. **Cloudflare edge** memilih lokasi terdekat → 1000 gambar disajikan dari CDN Cloudflare (gratis, sudah termasuk tunnel) + disk cache di server → Google Drive hanya dipanggil sekali per file.
 
+4. **Cache Rule di Cloudflare (Cache Everything)** — wajib! Cache default Cloudflare (Standard) **tidak meng-cache URL ber-query string** (semua URL file kita memakai `?id=...`), jadi sebelum rule ini tiap gambar masih diambil dari origin (VPS) → `cf-cache-status: DYNAMIC`, TTFB ~0.6–2.3s.
+   - Dibuat via Rulesets API (`http_request_cache_settings` phase, zone `wn-cdn.net`):
+   - Expression: `(starts_with(http.host, "img1.wn-cdn.net") or ... img4) and (http.request.uri.path contains "/share" or ... "/download")`
+   - Action: `set_cache_settings` → `cache: true`, Edge TTL = 1 bulan (override origin), Browser TTL = respect origin.
+   - Hasil: `cf-cache-status: HIT` di semua host, gambar di-serve dari edge (TTFB reuse ~50ms; sekali request per kombinasi URL per lokasi edge).
+
 ## Di Sisi Kode (Rotasi Hostname)
 
 - `portal.js` menyimpan daftar host:
@@ -61,3 +67,4 @@ img4.wn-cdn.net ─┘
   - `portal.js` juga: `cmActionDownload()` (download via CDN) dan `openVideoEmbedModal()` (embed/HLS URL via CDN host).
   - Daftar host dari env `CDN_HOSTS` (default `img1-4.wn-cdn.net`), di-ekspos ke JS via `CDN_HOST_LIST`.
 - [x] Verifikasi end-to-end: `img1-4.wn-cdn.net` → HTTP 200, thumbnail PNG valid, md5 identik di semua host, deterministik per file.
+- [x] Cache Rule "Cache Everything" `img1-4.wn-cdn.net/*` di Cloudflare (Rulesets API) → `cf-cache-status: HIT`, TTFB edge ~50ms (reuse) / sebelumnya 0.6–2.3s DYNAMIC.
