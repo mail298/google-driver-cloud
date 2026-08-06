@@ -596,14 +596,6 @@ class DownloadProxyController
         exit;
     }
 
-    private static function encryptText($value, $encryptionKey)
-    {
-        $iv = openssl_random_pseudo_bytes(12);
-        $key = hash('sha256', $encryptionKey, true);
-        $encrypted = openssl_encrypt($value, 'aes-256-gcm', $key, OPENSSL_RAW_DATA, $iv, $tag);
-        return base64_encode($iv) . ':' . base64_encode($tag) . ':' . base64_encode($encrypted);
-    }
-
     /**
      * Invalidate cached file — called when a file is deleted or renamed.
      */
