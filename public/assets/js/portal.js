@@ -402,6 +402,36 @@ let cachedUploadToken = null;
 let cachedUploadTokenAt = 0;
 let cachedUploadTokenPromise = null;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CDN Subdomain Sharding Helpers
+// Distributor URL gambar ke img1..imgN.wn-cdn.net agar browser bisa membuka
+// banyak koneksi paralel (default 6 per-host). Host dipilih deterministik
+// dari hash file ID supaya cache/ETag konsisten per file.
+// ─────────────────────────────────────────────────────────────────────────────
+const CDN_HOSTS = (typeof CDN_HOST_LIST !== 'undefined' && Array.isArray(CDN_HOST_LIST) && CDN_HOST_LIST.length)
+    ? CDN_HOST_LIST
+    : ['img1.wn-cdn.net', 'img2.wn-cdn.net', 'img3.wn-cdn.net', 'img4.wn-cdn.net'];
+
+function cdnHostFor(fileId) {
+    let h = 0;
+    const s = String(fileId);
+    for (let i = 0; i < s.length; i++) {
+        h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+    }
+    return CDN_HOSTS[Math.abs(h) % CDN_HOSTS.length];
+}
+
+function cdnUrl(fileId, opts) {
+    opts = opts || {};
+    const host = opts.host || cdnHostFor(fileId);
+    const path = opts.path || 'download';
+    const q = new URLSearchParams({ id: String(fileId) });
+    if (opts.thumb) q.set('thumb', '1');
+    if (opts.inline) q.set('inline', '1');
+    if (opts.raw) q.set('raw', '1');
+    return 'https://' + host + '/' + path + '?' + q.toString();
+}
+
 async function getUploadToken() {
     const now = Date.now();
     if (cachedUploadToken && now - cachedUploadTokenAt < 8 * 60 * 1000) {
@@ -1228,10 +1258,10 @@ function previewFile(id, name, mimeType) {
     if (!modal || !title || !content || !downloadBtn) return;
 
     title.innerText = name;
-    downloadBtn.href = `/download?id=${id}`;
+    downloadBtn.href = cdnUrl(id, { path: 'download' });
     content.innerHTML = '';
 
-    const previewUrl = `/download?id=${id}&inline=1`;
+    const previewUrl = cdnUrl(id, { inline: true });
 
     if (mimeType.startsWith('image/')) {
         content.innerHTML = `<img src="${previewUrl}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain;">`;

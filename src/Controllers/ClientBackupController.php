@@ -47,7 +47,7 @@ class ClientBackupController
         foreach ($files as $file) {
             $bytes = (int) ($file['size_bytes'] ?? 0);
             $formattedSize = self::formatBytes($bytes);
-            $cdnUrl = $domain . '/share?id=' . $file['id'];
+            $cdnUrl = CdnHelper::url($file['id'], ['path' => 'share']);
 
             fputcsv($output, [
                 $file['id'],

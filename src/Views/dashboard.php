@@ -1600,7 +1600,7 @@
                                 </div>
                                 <div class="card-thumb-box">
                                     <?php if ($isImage): ?>
-                                        <img src="/download?id=<?= $file['id'] ?>&thumb=1"
+                                        <img src="<?= CdnHelper::url($file['id'], ['thumb' => true]) ?>"
                                             alt="<?= htmlspecialchars($file['name']) ?>" class="card-thumb-img" loading="lazy"
                                             decoding="async"
                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -1616,7 +1616,7 @@
                                     <?php elseif ($isVideo): ?>
                                         <div
                                             style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0f172a; overflow:hidden;">
-                                            <img src="/download?id=<?= $file['id'] ?>&thumb=1"
+                                            <img src="<?= CdnHelper::url($file['id'], ['thumb' => true]) ?>"
                                                 alt="<?= htmlspecialchars($file['name']) ?>"
                                                 style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"
                                                 loading="lazy" decoding="async" onerror="this.style.display='none';">
@@ -1760,7 +1760,7 @@
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <?php if ($isImage): ?>
-                                                    <img src="/download?id=<?= $file['id'] ?>&thumb=1" loading="lazy"
+                                                    <img src="<?= CdnHelper::url($file['id'], ['thumb' => true]) ?>" loading="lazy"
                                                         decoding="async"
                                                         style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;">
                                                 <?php else: ?>
@@ -2621,6 +2621,7 @@
         const STORAGE_LIMIT_GB = <?= json_encode((float) ($limitGb ?? 15)) ?>;
         const UPLOAD_DIRECT_URL = <?= json_encode($uploadDirectUrl ?? '') ?>;
         const UPLOAD_DIRECT_THRESHOLD_BYTES = <?= json_encode((float) ($uploadDirectThresholdBytes ?? 90 * 1024 * 1024)) ?>;
+        const CDN_HOST_LIST = <?= json_encode(array_values(array_filter(array_map('trim', explode(',', Config::get('CDN_HOSTS', '')))))) ?>;
     </script>
     <script src="/assets/js/portal.js?v=<?= filemtime(__DIR__ . '/../../public/assets/js/portal.js') ?>"></script>
 </body>
