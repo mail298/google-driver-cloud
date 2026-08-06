@@ -32,6 +32,60 @@ class DownloadProxyController
     }
 
     /**
+     * Check whether a Google Drive file is public ("anyone with the link")
+     * by probing the public lh3 CDN with a tiny thumbnail. Result is cached
+     * in a flag file (7 days) so subsequent requests skip the probe.
+     */
+    private static function isPublicGoogleFile($providerFileId)
+    {
+        if (empty($providerFileId)) {
+            return false;
+        }
+        $flag = self::getCacheDir() . '/public_' . md5($providerFileId) . '.flag';
+        if (file_exists($flag) && (time() - filemtime($flag)) < self::CACHE_TTL) {
+            return true;
+        }
+
+        $probeUrl = 'https://lh3.googleusercontent.com/d/' . rawurlencode($providerFileId) . '=w20';
+        $ch = curl_init($probeUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+        curl_close($ch);
+
+        $isPublic = ($httpCode >= 200 && $httpCode < 300) && strpos((string) $contentType, 'image/') === 0;
+        if ($isPublic) {
+            @touch($flag);
+        }
+        return $isPublic;
+    }
+
+    /**
+     * 302-redirect a public Google Drive image straight to Google's lh3 CDN.
+     * The VPS no longer transfers the image bytes; Cloudflare edge caches the
+     * 302 (status_code_ttl includes 302), so after the first request the
+     * browser gets the redirect from the edge and loads bytes from Google.
+     */
+    private static function redirectPublicGoogleImage($file, $isThumb)
+    {
+        if (empty($file['provider_file_id']) || !self::isPublicGoogleFile($file['provider_file_id'])) {
+            return false;
+        }
+        $suffix = $isThumb ? '=w400' : '=s0';
+        $lh3Url = 'https://lh3.googleusercontent.com/d/' . rawurlencode($file['provider_file_id']) . $suffix;
+        header('Location: ' . $lh3Url);
+        header('Cache-Control: public, max-age=31536000, immutable');
+        header('Cloudflare-CDN-Cache-Control: max-age=31536000');
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, OPTIONS');
+        exit;
+    }
+
+    /**
      * Fire a non-blocking background request that downloads the full file to
      * the local disk cache. Uses a lockfile so the warmer only runs once.
      */
@@ -348,11 +402,17 @@ class DownloadProxyController
         $isInline = isset($_GET['inline']) || isset($_GET['cdn']) || $isImage || $isVideoOrAudio;
         $fileSize = (int) ($file['size_bytes'] ?? 0);
 
+        // Public Google Drive image -> 302 redirect straight to Google's CDN.
+        // VPS only sends a tiny redirect; bytes flow Google CDN -> browser.
+        $isThumb = isset($_GET['thumb']) || isset($_GET['thumbnail']);
+        if ($isImage) {
+            self::redirectPublicGoogleImage($file, $isThumb);
+        }
+
         // ─────────────────────────────────────────────────────────────────
         // THUMBNAIL CACHE PROXY (thumb=1)
         // Instant 10-15KB image preview proxy for images and videos from Google LH3
         // ─────────────────────────────────────────────────────────────────
-        $isThumb = isset($_GET['thumb']) || isset($_GET['thumbnail']);
         if ($isThumb && !empty($file['provider_file_id'])) {
             $thumbEtag = '"thumb_' . md5($file['id'] . '_' . ($file['updated_at'] ?? '')) . '"';
             if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $thumbEtag) {
