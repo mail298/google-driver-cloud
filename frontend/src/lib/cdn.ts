@@ -57,37 +57,47 @@ export function cdnUrl(fileId?: string | number | null, options: CdnUrlOptions =
   // Base origin determination
   let origin = API_URL
   if (selectedHost) {
-    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:'
+    const protocol = (typeof window !== 'undefined' && window.location.protocol === 'https:') ? 'https:' : 'http:'
     origin = selectedHost.startsWith('http://') || selectedHost.startsWith('https://')
       ? selectedHost
       : `${protocol}//${selectedHost}`
   }
 
   const cleanPath = path.startsWith('/') ? path : `/${path}`
-  const url = new URL(`${origin}${cleanPath}`)
+  let baseUrl = origin
+  if (typeof window !== 'undefined' && !baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = `${window.location.origin}${baseUrl.startsWith('/') ? '' : '/'}${baseUrl}`
+  }
 
-  if (options.token) {
-    url.searchParams.set('token', options.token)
-  }
-  if (options.thumb) {
-    url.searchParams.set('thumb', '1')
-  }
-  if (options.inline) {
-    url.searchParams.set('inline', '1')
-  }
-  if (options.raw) {
-    url.searchParams.set('raw', '1')
-  }
-  if (options.version) {
-    url.searchParams.set('v', hashVersion(options.version))
-  }
-  if (options.params) {
-    for (let [k, v] of Object.entries(options.params)) {
-      url.searchParams.set(k, v)
+  try {
+    const url = new URL(`${baseUrl}${cleanPath}`)
+
+    if (options.token) {
+      url.searchParams.set('token', options.token)
     }
-  }
+    if (options.thumb) {
+      url.searchParams.set('thumb', '1')
+    }
+    if (options.inline) {
+      url.searchParams.set('inline', '1')
+    }
+    if (options.raw) {
+      url.searchParams.set('raw', '1')
+    }
+    if (options.version) {
+      url.searchParams.set('v', hashVersion(options.version))
+    }
+    if (options.params) {
+      for (let [k, v] of Object.entries(options.params)) {
+        url.searchParams.set(k, v)
+      }
+    }
 
-  return url.toString()
+    return url.toString()
+  } catch {
+    const tokenPart = options.token ? `?token=${encodeURIComponent(options.token)}` : ''
+    return `${origin}${cleanPath}${tokenPart}`
+  }
 }
 
 /**
