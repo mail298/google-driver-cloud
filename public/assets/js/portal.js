@@ -1430,7 +1430,7 @@ function cmActionPreview() {
 function cmActionDownload() {
     closeContextMenu();
     if (activeContextItem && activeContextItem.type === 'file') {
-        window.location.href = `/download?id=${activeContextItem.id}`;
+        window.location.href = cdnUrl(activeContextItem.id, { path: 'download' });
     }
 }
 
@@ -2385,9 +2385,9 @@ function openVideoEmbedModal(fileId, fileName) {
 
     if (!modal || !fileId) return;
 
-    const origin = window.location.origin;
-    const embedUrl = origin + '/embed/' + encodeURIComponent(fileId);
-    const hlsUrl = origin + '/stream/' + encodeURIComponent(fileId) + '/master.m3u8';
+    const embedHost = cdnHostFor(fileId);
+    const embedUrl = 'https://' + embedHost + '/embed/' + encodeURIComponent(fileId);
+    const hlsUrl = 'https://' + embedHost + '/stream/' + encodeURIComponent(fileId) + '/master.m3u8';
     const iframeCode = `<iframe src="${embedUrl}" width="100%" height="450" frameborder="0" allowfullscreen></iframe>`;
 
     if (nameEl) nameEl.textContent = fileName || 'Video Stream';

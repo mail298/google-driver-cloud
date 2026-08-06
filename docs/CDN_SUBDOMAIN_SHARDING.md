@@ -58,5 +58,6 @@ img4.wn-cdn.net ─┘
   - `src/Core/CdnHelper.php` — helper PHP (`CdnHelper::url()` / `hostFor()`), host dipilih via `crc32(fileId) % n` (deterministik).
   - `portal.js` — helper JS `cdnUrl()` / `cdnHostFor()` (dipilih via hash file ID).
   - Diterapkan di `dashboard.php` (thumbnail grid + list), `share.php` (halaman publik), `embed.php` (video), `ClientBackupController.php` (CSV link).
+  - `portal.js` juga: `cmActionDownload()` (download via CDN) dan `openVideoEmbedModal()` (embed/HLS URL via CDN host).
   - Daftar host dari env `CDN_HOSTS` (default `img1-4.wn-cdn.net`), di-ekspos ke JS via `CDN_HOST_LIST`.
 - [x] Verifikasi end-to-end: `img1-4.wn-cdn.net` → HTTP 200, thumbnail PNG valid, md5 identik di semua host, deterministik per file.
