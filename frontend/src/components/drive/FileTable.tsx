@@ -25,7 +25,7 @@ export function FileTable({ files, mode = 'default', selectedFileIds = new Set<s
             <article key={file.id ?? file.name} draggable onDragStart={(event) => { event.dataTransfer.setData('text/plain', file.id ?? ''); event.dataTransfer.effectAllowed = 'move' }} onClick={() => onToggleFile?.(file)} onContextMenu={(event) => onFileContextMenu?.(event, file)} className={selected ? 'overflow-hidden rounded-2xl border file-selected p-3.5 shadow-sm cursor-grab active:cursor-grabbing' : 'overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm cursor-grab active:cursor-grabbing'}>
               <div className="flex items-center gap-3">
                 {onToggleFile ? <input type="checkbox" className="h-4 w-4 shrink-0 accent-blue-600" checked={selected} onChange={() => onToggleFile?.(file)} onClick={(event) => event.stopPropagation()} /> : null}
-                <div className="shrink-0">{mode === 'starred' ? <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> : <FileIcon kind={file.kind} />}</div>
+                <div className="shrink-0">{mode === 'starred' ? <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" /> : <FileIcon file={file} />}</div>
                 <div className="min-w-0 flex-1 overflow-hidden">
                   <h3 className="truncate text-sm font-bold leading-snug text-slate-950" title={file.name}>{file.name}</h3>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-400">
@@ -66,7 +66,7 @@ export function FileTable({ files, mode = 'default', selectedFileIds = new Set<s
                 <td className="py-2.5"><input type="checkbox" className="h-4 w-4 accent-blue-600" checked={selectedFileIds.has(file.id ?? '')} onChange={() => onToggleFile?.(file)} onClick={(event) => event.stopPropagation()} /></td>
                 <td className="py-2.5 font-semibold">
                   <span className="flex min-w-0 items-center gap-2.5">
-                    {mode === 'starred' ? <Star className="h-4 w-4 shrink-0 fill-yellow-400 text-yellow-400" /> : <FileIcon kind={file.kind} />}
+                    {mode === 'starred' ? <Star className="h-4 w-4 shrink-0 fill-yellow-400 text-yellow-400" /> : <FileIcon file={file} />}
                     <span className="truncate max-w-[200px] lg:max-w-[280px]" title={file.name}>{file.name}</span>
                   </span>
                 </td>
