@@ -56,7 +56,7 @@ export async function streamGoogleFile(file: FileWithAccount, range: string | un
   res.setHeader('Content-Type', responseMimeType)
   res.setHeader('Accept-Ranges', 'bytes')
   if (options.disposition === 'inline') {
-    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=604800')
+    res.setHeader('Cache-Control', 'public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=2592000, immutable')
   }
   if (options.disposition) res.setHeader('Content-Disposition', contentDisposition(options.disposition, responseFileName))
 
