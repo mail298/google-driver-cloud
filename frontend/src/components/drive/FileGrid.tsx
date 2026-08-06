@@ -4,7 +4,8 @@ import { FileIcon } from '@/components/drive/FileIcon'
 import type { FileItem } from '@/data/drive-data'
 import { cn } from '@/lib/utils'
 import { getAccessToken } from '@/lib/auth'
-import { API_URL } from '@/lib/api'
+import { cdnUrl } from '@/lib/api'
+
 
 export type FileSizeScale = 'xs' | 'sm' | 'md' | 'lg'
 
@@ -68,7 +69,12 @@ function FileThumbnail({ file, cfg }: { file: FileItem; cfg: typeof scaleConfig[
   }
 
   const token = getAccessToken()
-  const src = `${API_URL}/files/${file.id}/inline?token=${token}`
+  const src = cdnUrl(file.id, {
+    path: file.id ? `/files/${file.id}/inline` : undefined,
+    token: token || undefined,
+    thumb: true,
+    version: file.createdAt,
+  })
 
   return (
     <img

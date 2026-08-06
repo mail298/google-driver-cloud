@@ -56,6 +56,7 @@ export async function streamGoogleFile(file: FileWithAccount, range: string | un
   res.setHeader('Content-Type', responseMimeType)
   res.setHeader('Accept-Ranges', 'bytes')
   if (options.disposition) res.setHeader('Content-Disposition', contentDisposition(options.disposition, responseFileName))
+  if (options.disposition === 'inline') res.setHeader('Cache-Control', 'public, max-age=86400')
 
   const contentLength = response.headers.get('content-length')
   const contentRange = response.headers.get('content-range')

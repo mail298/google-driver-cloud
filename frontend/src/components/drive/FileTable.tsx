@@ -3,7 +3,7 @@ import { type MouseEvent, useState } from 'react'
 import { AvatarStack } from '@/components/drive/AvatarStack'
 import { FileIcon } from '@/components/drive/FileIcon'
 import type { FileItem } from '@/data/drive-data'
-import { apiFetch, API_URL } from '@/lib/api'
+import { apiFetch, cdnUrl } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
 
 function FileTableThumbnail({ file }: { file: FileItem }) {
@@ -15,7 +15,12 @@ function FileTableThumbnail({ file }: { file: FileItem }) {
   }
 
   const token = getAccessToken()
-  const src = `${API_URL}/files/${file.id}/inline?token=${token}`
+  const src = cdnUrl(file.id, {
+    path: file.id ? `/files/${file.id}/inline` : undefined,
+    token: token || undefined,
+    thumb: true,
+    version: file.createdAt,
+  })
 
   return (
     <img

@@ -95,6 +95,7 @@ export async function streamS3File(file: FileWithAccount, range: string | undefi
   res.setHeader('Content-Type', response.ContentType ?? file.mimeType)
   res.setHeader('Accept-Ranges', 'bytes')
   if (options.disposition) res.setHeader('Content-Disposition', contentDisposition(options.disposition, file.name))
+  if (options.disposition === 'inline') res.setHeader('Cache-Control', 'public, max-age=86400')
   if (response.ContentLength !== undefined) res.setHeader('Content-Length', response.ContentLength.toString())
   if (response.ContentRange) res.setHeader('Content-Range', response.ContentRange)
 

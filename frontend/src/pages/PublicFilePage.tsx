@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Download, ExternalLink, FileArchive, FileText, ImageIcon, Play, Table2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { API_URL, apiFetch, formatBytes, formatDate } from '@/lib/api'
+import { API_URL, apiFetch, formatBytes, formatDate, cdnUrl } from '@/lib/api'
 import { createPlyr, ensurePlyr } from '@/lib/plyr'
 import { getPreviewKind, isSpreadsheetMimeType, officeViewerUrl } from '@/lib/preview'
 
@@ -37,8 +37,8 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   const [file, setFile] = useState<PublicFile | null>(null)
   const [failed, setFailed] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const previewUrl = `${API_URL}/public/files/${token}/preview`
-  const downloadUrl = `${API_URL}/public/files/${token}/download`
+  const previewUrl = token ? cdnUrl(token, { path: `/public/files/${token}/preview`, inline: true, version: file?.createdAt }) : `${API_URL}/public/files/${token}/preview`
+  const downloadUrl = token ? cdnUrl(token, { path: `/public/files/${token}/download`, version: file?.createdAt }) : `${API_URL}/public/files/${token}/download`
   const kind = getPreviewKind(file?.mimeType)
 
   useEffect(() => {

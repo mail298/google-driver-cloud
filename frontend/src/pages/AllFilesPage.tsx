@@ -14,7 +14,7 @@ import { FolderGrid, type FolderSizeScale } from '@/components/drive/FolderGrid'
 import { defaultFolderColor, defaultFolderIconUrl, folderColorOptions, folderIconOptions, normalizeFolderColor } from '@/components/drive/FolderVisual'
 import { PageHeader } from '@/components/drive/PageHeader'
 import { Input } from '@/components/ui/input'
-import { API_URL, apiFetch, formatBytes, formatDate } from '@/lib/api'
+import { API_URL, apiFetch, formatBytes, formatDate, cdnUrl } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
 import { createPlyr, ensurePlyr } from '@/lib/plyr'
 import { getPreviewKind, officeViewerUrl } from '@/lib/preview'
@@ -412,7 +412,7 @@ export function AllFilesPage() {
     try {
       const data = await apiFetch<{ path?: string; url: string }>(`/files/${activeFile.id}/preview-token`, { method: 'POST' })
       const previewPath = data.path ?? new URL(data.url).pathname
-      setPreviewUrl(`${API_URL}${previewPath}`)
+      setPreviewUrl(cdnUrl(activeFile.id, { path: previewPath, version: activeFile.createdAt }))
     } catch (error) {
       setPreviewError(error instanceof Error ? error.message : 'Failed to load preview')
     } finally {
@@ -422,7 +422,8 @@ export function AllFilesPage() {
 
   async function downloadFile() {
     if (!activeFile?.id) return
-    const response = await fetch(`${API_URL}/files/${activeFile.id}/download`, { headers: { Authorization: `Bearer ${getAccessToken()}` } })
+    const downloadEndpoint = cdnUrl(activeFile.id, { path: `/files/${activeFile.id}/download`, version: activeFile.createdAt })
+    const response = await fetch(downloadEndpoint, { headers: { Authorization: `Bearer ${getAccessToken()}` } })
     if (!response.ok) throw new Error('Download failed')
     const blob = await response.blob()
     const url = URL.createObjectURL(blob)

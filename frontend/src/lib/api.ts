@@ -56,3 +56,6 @@ export function formatBytes(input: string | number | bigint | null | undefined) 
 export function formatDate(value: string) {
   return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
+
+export { cdnUrl, cdnHostFor, getCdnOrigin, hashVersion } from './cdn'
+
