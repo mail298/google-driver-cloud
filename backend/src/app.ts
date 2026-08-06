@@ -36,35 +36,4 @@ app.use('/folders', folderRouter)
 app.use('/invites', inviteRouter)
 app.use('/audit-logs', auditLogRouter)
 app.use('/system', systemRouter)
-
-// Fail-safe: Proxy non-API web requests to frontend Nginx container
-app.use((req, res, next) => {
-  const apiPaths = [
-    '/api', '/public', '/auth', '/api-keys', '/provider-configs',
-    '/connected-accounts', '/storage', '/uploads', '/files', '/folders',
-    '/invites', '/audit-logs', '/system', '/health'
-  ]
-  const isApiPath = apiPaths.some((p) => req.path === p || req.path.startsWith(p + '/'))
-
-  if (!isApiPath && (req.method === 'GET' || req.method === 'HEAD')) {
-    const targetUrl = `http://frontend:80${req.originalUrl}`
-    fetch(targetUrl)
-      .then(async (proxyRes) => {
-        if (!proxyRes.ok && proxyRes.status === 404 && !req.path.includes('.')) {
-          const indexRes = await fetch('http://frontend:80/')
-          res.setHeader('content-type', 'text/html; charset=utf-8')
-          return res.send(await indexRes.text())
-        }
-        const contentType = proxyRes.headers.get('content-type')
-        if (contentType) res.setHeader('content-type', contentType)
-        res.status(proxyRes.status)
-        const buffer = Buffer.from(await proxyRes.arrayBuffer())
-        res.send(buffer)
-      })
-      .catch(() => next())
-  } else {
-    next()
-  }
-})
-
 app.use(errorMiddleware)
