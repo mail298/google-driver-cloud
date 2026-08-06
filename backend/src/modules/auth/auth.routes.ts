@@ -110,7 +110,9 @@ authRouter.get('/google/callback', async (req, res) => {
       update: { name },
     })
     const existingAccount = await prisma.connectedAccount.findUnique({ where: { userId_provider_providerAccountId: { userId: user.id, provider: 'google_drive', providerAccountId } } })
-    const refreshTokenEncrypted = tokens.refresh_token ? encryptText(tokens.refresh_token) : existingAccount?.refreshTokenEncrypted
+    const refreshTokenEncrypted = tokens.refresh_token
+      ? encryptText(tokens.refresh_token)
+      : (existingAccount?.refreshTokenEncrypted ?? (tokens.access_token ? encryptText(tokens.access_token) : null))
     if (!refreshTokenEncrypted) return res.redirect(`${env.FRONTEND_URL}/google-auth?status=error`)
 
     const account = await prisma.connectedAccount.upsert({

@@ -198,7 +198,9 @@ connectedAccountRouter.get('/google/callback', async (req, res, next) => {
         update: { name },
       })
       const existingAccount = await prisma.connectedAccount.findUnique({ where: { userId_provider_providerAccountId: { userId: user.id, provider: 'google_drive', providerAccountId } } })
-      const refreshTokenEncrypted = tokens.refresh_token ? encryptText(tokens.refresh_token) : existingAccount?.refreshTokenEncrypted
+      const refreshTokenEncrypted = tokens.refresh_token
+        ? encryptText(tokens.refresh_token)
+        : (existingAccount?.refreshTokenEncrypted ?? (tokens.access_token ? encryptText(tokens.access_token) : null))
       if (!refreshTokenEncrypted) {
         console.error('Google login failed: no refresh token received and no existing account. Has refresh_token:', !!tokens.refresh_token)
         return res.redirect(`${env.FRONTEND_URL}/google-auth?status=error`)
@@ -240,7 +242,9 @@ connectedAccountRouter.get('/google/callback', async (req, res, next) => {
 
     if (oauthState.flow !== 'connect' || !oauthState.userId) return res.status(400).json({ code: 'GOOGLE_OAUTH_STATE_INVALID', message: 'OAuth state expired.' })
     const existingAccount = await prisma.connectedAccount.findUnique({ where: { userId_provider_providerAccountId: { userId: oauthState.userId, provider: 'google_drive', providerAccountId } } })
-    const refreshTokenEncrypted = tokens.refresh_token ? encryptText(tokens.refresh_token) : existingAccount?.refreshTokenEncrypted
+    const refreshTokenEncrypted = tokens.refresh_token
+      ? encryptText(tokens.refresh_token)
+      : (existingAccount?.refreshTokenEncrypted ?? (tokens.access_token ? encryptText(tokens.access_token) : null))
     if (!refreshTokenEncrypted) return res.status(400).json({ code: 'GOOGLE_OAUTH_FAILED', message: 'Google did not return required tokens.' })
 
     const account = await prisma.connectedAccount.upsert({
