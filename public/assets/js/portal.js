@@ -1512,7 +1512,9 @@ function copyToClipboard(text) {
 function cmActionCopyLink() {
     closeContextMenu();
     if (activeContextItem) {
-        const link = window.location.origin + (activeContextItem.type === 'file' ? `/share?id=${encodeURIComponent(activeContextItem.id)}` : `/?folderId=${encodeURIComponent(activeContextItem.id)}`);
+        const link = activeContextItem.type === 'file'
+            ? cdnUrl(activeContextItem.id, { path: 'share' })
+            : window.location.origin + `/?folderId=${encodeURIComponent(activeContextItem.id)}`;
         copyToClipboard(link).then(() => {
             showToast('Tautan berhasil disalin');
         }).catch(() => {
