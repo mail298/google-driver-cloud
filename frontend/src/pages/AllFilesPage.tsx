@@ -8,6 +8,7 @@ import { EmptyAreaContextMenu } from '@/components/drive/EmptyAreaContextMenu'
 import { FileContextMenu } from '@/components/drive/FileContextMenu'
 import { FileDetailsDrawer } from '@/components/drive/FileDetailsDrawer'
 import { FileGrid } from '@/components/drive/FileGrid'
+import { FileIcon } from '@/components/drive/FileIcon'
 import { FileTable } from '@/components/drive/FileTable'
 import { FolderContextMenu } from '@/components/drive/FolderContextMenu'
 import { FolderGrid, type FolderSizeScale } from '@/components/drive/FolderGrid'
@@ -774,36 +775,54 @@ export function AllFilesPage() {
       </DummyModal>
       <DummyModal open={renameOpen} title="Rename File" description={activeFile?.name ?? ''} onClose={() => setRenameOpen(false)}><form onSubmit={renameFile} className="grid gap-4"><Input value={renameValue} onChange={(event) => setRenameValue(event.target.value)} required /><div className="flex justify-end gap-3"><Button type="button" variant="outline" onClick={() => setRenameOpen(false)}>Cancel</Button><Button>Rename</Button></div></form></DummyModal>
       <DummyModal open={moveOpen} title="Move to Folder" description={selectedFileIds.size > 0 ? `Move ${selectedFileIds.size} files` : activeFile?.name ?? ''} onClose={() => setMoveOpen(false)}><form onSubmit={moveFile} className="grid gap-4"><select className="h-11 rounded-xl border border-slate-200 px-3 text-sm" value={selectedFolderId} onChange={(event) => setSelectedFolderId(event.target.value)}><option value="">No folder</option>{allFolders.map((folder) => <option key={folder.id} value={folder.id}>{folder.name}</option>)}</select><div className="flex justify-end gap-3"><Button type="button" variant="outline" onClick={() => setMoveOpen(false)}>Cancel</Button><Button>Move</Button></div></form></DummyModal>
-      <DummyModal open={deleteOpen} title={selectedFileIds.size > 0 ? 'Delete Files' : 'Delete File'} description={selectedFileIds.size > 0 ? `Delete ${selectedFileIds.size} files from Google Drive?` : `Delete ${activeFile?.name ?? 'file'} from Google Drive?`} onClose={() => setDeleteOpen(false)}><div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button><Button variant="danger" onClick={deleteFile}>Delete</Button></div></DummyModal>
-      <DummyModal open={shareOpen} title="Share Link" description={activeFile?.name ?? ''} onClose={() => setShareOpen(false)}>
-        <div className="grid gap-4">
-          <div>
-            <label className="text-xs font-bold text-slate-500 block mb-1">9Drive Public Page Link</label>
-            <div className="flex gap-2">
-              <Input value={shareUrl} readOnly className="flex-1 font-mono text-xs" />
-              <Button onClick={copyShareLink} variant="outline" className="shrink-0">
-                {copiedShareLink ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-                {copiedShareLink ? 'Copied!' : 'Copy Page Link'}
-              </Button>
+      <DummyModal open={deleteOpen} title={selectedFileIds.size > 0 ? 'Delete Files' : 'Delete File'} description={selectedFileIds.size > 0 ? `Delete ${selectedFileIds.size} files from Google Drive?` : `Delete ${activeFile?.name ?? 'file'} from Google Drive?`} onClose={() => setDeleteOpen(false)}><div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button><Button variant="danger" onClick={deleteFile}>Delete</Button></div></DummyModal>      <DummyModal
+        open={shareOpen}
+        title="Share File Link"
+        description=""
+        onClose={() => setShareOpen(false)}
+        className="sm:max-w-xl sm:rounded-3xl p-6"
+      >
+        <div className="grid gap-5">
+          {/* File Header Banner Card */}
+          {activeFile ? (
+            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 dark:border-slate-800/80 dark:bg-slate-800/40">
+              <FileIcon file={activeFile} className="h-11 w-11 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h4 className="truncate text-sm font-extrabold text-slate-900 dark:text-slate-100" title={activeFile.name}>
+                  {activeFile.name}
+                </h4>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <span>{activeFile.size}</span>
+                  <span>•</span>
+                  <span className="truncate max-w-[200px] font-medium text-slate-400">{activeFile.mimeType || 'Public File'}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : null}
 
-          <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3.5 dark:border-blue-900/40 dark:bg-blue-950/20">
-            <label className="text-xs font-extrabold text-blue-700 dark:text-blue-300 block mb-1">
-              🖼️ Direct Media / Stream Link (For Landing Page)
-            </label>
-            <p className="text-[11px] text-blue-600/80 dark:text-blue-400 mb-2">
-              Includes <code>/preview</code> for direct use in <code>&lt;img src="..."&gt;</code> or <code>&lt;video src="..."&gt;</code> on landing pages.
+          {/* Option 1: Direct Media / Stream Link (RECOMMENDED FOR LANDING PAGE) */}
+          <div className="relative overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-blue-50/20 p-4 shadow-sm dark:border-blue-500/40 dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <label className="flex items-center gap-2 text-xs font-extrabold tracking-wide text-blue-700 dark:text-blue-300">
+                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-white text-[10px]">✨</span>
+                Direct Media / Stream Link
+              </label>
+              <span className="rounded-full bg-blue-600/10 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-600 dark:bg-blue-400/20 dark:text-blue-300">
+                For Landing Page
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+              Direct URL for <code>&lt;img src="..."&gt;</code>, <code>&lt;video src="..."&gt;</code>, or landing page hotlinking.
             </p>
-            <div className="flex gap-2">
-              <Input value={`${shareUrl}/preview`} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-900" />
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input value={`${shareUrl}/preview`} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
               <Button
                 onClick={async () => {
                   await navigator.clipboard.writeText(`${shareUrl}/preview`)
                   setCopiedMediaLink(true)
                   setTimeout(() => setCopiedMediaLink(false), 2000)
                 }}
-                className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white"
+                className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-bold"
               >
                 {copiedMediaLink ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 {copiedMediaLink ? 'Copied!' : 'Copy Media Link'}
@@ -811,9 +830,14 @@ export function AllFilesPage() {
             </div>
           </div>
 
-          <div>
-            <label className="text-xs font-bold text-slate-500 block mb-1">HTML Embed Code (Landing Page)</label>
-            <div className="flex gap-2">
+          {/* Option 2: Ready-to-use HTML Snippet */}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <Code2 className="h-4 w-4 text-violet-500" />
+              HTML Code Snippet
+            </label>
+            <p className="text-xs text-slate-500 mb-2">Ready to copy and paste directly into your HTML code.</p>
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 value={
                   activeFile?.kind === 'video'
@@ -821,7 +845,7 @@ export function AllFilesPage() {
                     : `<img src="${shareUrl}/preview" alt="${activeFile?.name || 'Image'}" />`
                 }
                 readOnly
-                className="flex-1 font-mono text-xs"
+                className="flex-1 font-mono text-xs bg-white dark:bg-slate-950"
               />
               <Button
                 variant="outline"
@@ -833,7 +857,7 @@ export function AllFilesPage() {
                   setCopiedHtmlCode(true)
                   setTimeout(() => setCopiedHtmlCode(false), 2000)
                 }}
-                className="shrink-0"
+                className="shrink-0 font-bold"
               >
                 {copiedHtmlCode ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Code2 className="h-4 w-4" />}
                 {copiedHtmlCode ? 'Copied!' : 'Copy HTML Code'}
@@ -841,16 +865,33 @@ export function AllFilesPage() {
             </div>
           </div>
 
+          {/* Option 3: Web Page Link */}
+          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              <Copy className="h-4 w-4 text-slate-400" />
+              9Drive Web View Page
+            </label>
+            <p className="text-xs text-slate-500 mb-2">Opens full 9Drive preview interface with download button.</p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Input value={shareUrl} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-950" />
+              <Button onClick={copyShareLink} variant="outline" className="shrink-0 font-bold">
+                {copiedShareLink ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                {copiedShareLink ? 'Copied!' : 'Copy Page Link'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Google Drive direct link option if connected */}
           {activeFile?.accountProvider === 'google_drive' && (
-            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 grid gap-3">
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 grid gap-3">
               <div>
                 <label className="text-xs font-bold text-slate-500 block mb-1">Google Drive Direct Link (Public Access)</label>
-                <p className="text-xs text-slate-500 mb-2">Configure this file to be publicly accessible on Google Drive so external tools can edit/download it.</p>
+                <p className="text-xs text-slate-500 mb-2">Configure file permissions directly on Google Drive so external tools can edit/download it.</p>
               </div>
               {gdrivePublicUrl ? (
                 <div className="grid gap-2">
-                  <Input value={gdrivePublicUrl} readOnly />
-                  <p className="rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">Google Drive public link generated and copied to clipboard!</p>
+                  <Input value={gdrivePublicUrl} readOnly className="font-mono text-xs" />
+                  <p className="rounded-xl bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">Google Drive public link generated and copied to clipboard!</p>
                 </div>
               ) : (
                 <Button
@@ -864,14 +905,13 @@ export function AllFilesPage() {
                       setGdrivePublicUrl(res.url)
                       await navigator.clipboard.writeText(res.url)
                     } catch (err: any) {
-                      alert('Failed to update Google Drive permission: ' + (err.message || err))
+                      setMessage(err.message || 'Failed to make file public')
                     } finally {
                       setMakingPublic(false)
                     }
                   }}
-                  className="w-full text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 dark:text-blue-400 dark:bg-blue-950/30 dark:border-blue-900/50"
                 >
-                  {makingPublic ? 'Making Public...' : 'Make Public & Copy GDrive Link'}
+                  {makingPublic ? 'Generating Link...' : 'Make Public on Google Drive'}
                 </Button>
               )}
             </div>
