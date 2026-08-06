@@ -22,6 +22,7 @@ app.set('trust proxy', true)
 app.use(cors({ origin: env.FRONTEND_URL }))
 app.use(express.json({ limit: '1mb' }))
 
+app.get('/', (_req, res) => res.json({ name: '9Drive API', status: 'ok', health: '/health' }))
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 app.use('/api', publicApiRouter)
 app.use('/public', publicRouter)
