@@ -20,7 +20,7 @@ publicRouter.get('/files/:token', async (req, res, next) => {
   try {
     const file = await findSharedFile(String(req.params.token))
     const accept = (req.headers.accept ?? '').toLowerCase()
-    if (accept.includes('image/') || accept.includes('video/')) {
+    if (accept.includes('image/') || accept.includes('video/') || accept.includes('audio/')) {
       return streamProviderFile(file, req.headers.range, res, { disposition: 'inline' })
     }
     return res.json({ file: { id: file.id, name: file.name, mimeType: file.mimeType, sizeBytes: file.sizeBytes.toString(), createdAt: file.createdAt } })

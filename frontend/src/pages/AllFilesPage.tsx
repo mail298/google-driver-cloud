@@ -782,141 +782,184 @@ export function AllFilesPage() {
         onClose={() => setShareOpen(false)}
         className="sm:max-w-xl sm:rounded-3xl p-6"
       >
-        <div className="grid gap-5">
-          {/* File Header Banner Card */}
-          {activeFile ? (
-            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 dark:border-slate-800/80 dark:bg-slate-800/40">
-              <FileIcon file={activeFile} className="h-11 w-11 shrink-0" />
-              <div className="min-w-0 flex-1">
-                <h4 className="truncate text-sm font-extrabold text-slate-900 dark:text-slate-100" title={activeFile.name}>
-                  {activeFile.name}
-                </h4>
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                  <span>{activeFile.size}</span>
-                  <span>•</span>
-                  <span className="truncate max-w-[200px] font-medium text-slate-400">{activeFile.mimeType || 'Public File'}</span>
+        {(() => {
+          const isVideo = activeFile?.kind === 'video' || activeFile?.mimeType?.startsWith('video/')
+          const isImage = activeFile?.kind === 'image' || activeFile?.mimeType?.startsWith('image/')
+          const isAudio = activeFile?.mimeType?.startsWith('audio/')
+
+          const mediaTitle = isVideo
+            ? 'Direct Video Stream Link'
+            : isImage
+            ? 'Direct Image Link'
+            : isAudio
+            ? 'Direct Audio Stream Link'
+            : 'Direct File Stream Link'
+
+          const mediaBadge = isVideo
+            ? 'Video Stream'
+            : isImage
+            ? 'Direct Image'
+            : isAudio
+            ? 'Audio Stream'
+            : 'Direct File'
+
+          const mediaSubtitle = isVideo
+            ? 'Direct URL for HTML5 <video src="...">, MP4 streaming, or video background.'
+            : isImage
+            ? 'Direct URL for <img src="...">, CSS background-image, or hotlinking.'
+            : isAudio
+            ? 'Direct URL for HTML5 <audio src="..."> player.'
+            : 'Direct URL for file preview and streaming.'
+
+          const mediaButtonText = isVideo
+            ? 'Copy Video Stream Link'
+            : isImage
+            ? 'Copy Direct Image Link'
+            : isAudio
+            ? 'Copy Audio Stream Link'
+            : 'Copy Direct Stream Link'
+
+          const htmlEmbedCode = isVideo
+            ? `<video controls width="100%"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+            : isAudio
+            ? `<audio controls><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
+            : isImage
+            ? `<img src="${shareUrl}/preview" alt="${activeFile?.name || 'Image'}" />`
+            : `<a href="${shareUrl}/preview" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
+
+          return (
+            <div className="grid gap-5">
+              {/* File Header Banner Card */}
+              {activeFile ? (
+                <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 dark:border-slate-800/80 dark:bg-slate-800/40">
+                  <FileIcon file={activeFile} className="h-11 w-11 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <h4 className="truncate text-sm font-extrabold text-slate-900 dark:text-slate-100" title={activeFile.name}>
+                      {activeFile.name}
+                    </h4>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      <span>{activeFile.size}</span>
+                      <span>•</span>
+                      <span className="truncate max-w-[200px] font-medium text-slate-400">{activeFile.mimeType || 'Public File'}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Option 1: Direct Media / Video Stream Link */}
+              <div className="relative overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-blue-50/20 p-4 shadow-sm dark:border-blue-500/40 dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <label className="flex items-center gap-2 text-xs font-extrabold tracking-wide text-blue-700 dark:text-blue-300">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-white text-[10px]">
+                      {isVideo ? '🎬' : isImage ? '🖼️' : isAudio ? '🎵' : '✨'}
+                    </span>
+                    {mediaTitle}
+                  </label>
+                  <span className="rounded-full bg-blue-600/10 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-600 dark:bg-blue-400/20 dark:text-blue-300">
+                    {mediaBadge}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+                  {mediaSubtitle}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input value={`${shareUrl}/preview`} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
+                  <Button
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(`${shareUrl}/preview`)
+                      setCopiedMediaLink(true)
+                      setTimeout(() => setCopiedMediaLink(false), 2000)
+                    }}
+                    className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-bold"
+                  >
+                    {copiedMediaLink ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    {copiedMediaLink ? 'Copied!' : mediaButtonText}
+                  </Button>
                 </div>
               </div>
-            </div>
-          ) : null}
 
-          {/* Option 1: Direct Media / Stream Link (RECOMMENDED FOR LANDING PAGE) */}
-          <div className="relative overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-blue-50/20 p-4 shadow-sm dark:border-blue-500/40 dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40">
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <label className="flex items-center gap-2 text-xs font-extrabold tracking-wide text-blue-700 dark:text-blue-300">
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-white text-[10px]">✨</span>
-                Direct Media / Stream Link
-              </label>
-              <span className="rounded-full bg-blue-600/10 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-600 dark:bg-blue-400/20 dark:text-blue-300">
-                For Landing Page
-              </span>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
-              Direct URL for <code>&lt;img src="..."&gt;</code>, <code>&lt;video src="..."&gt;</code>, or landing page hotlinking.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input value={`${shareUrl}/preview`} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
-              <Button
-                onClick={async () => {
-                  await navigator.clipboard.writeText(`${shareUrl}/preview`)
-                  setCopiedMediaLink(true)
-                  setTimeout(() => setCopiedMediaLink(false), 2000)
-                }}
-                className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white shadow-sm font-bold"
-              >
-                {copiedMediaLink ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copiedMediaLink ? 'Copied!' : 'Copy Media Link'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Option 2: Ready-to-use HTML Snippet */}
-          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              <Code2 className="h-4 w-4 text-violet-500" />
-              HTML Code Snippet
-            </label>
-            <p className="text-xs text-slate-500 mb-2">Ready to copy and paste directly into your HTML code.</p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input
-                value={
-                  activeFile?.kind === 'video'
-                    ? `<video controls width="100%"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
-                    : `<img src="${shareUrl}/preview" alt="${activeFile?.name || 'Image'}" />`
-                }
-                readOnly
-                className="flex-1 font-mono text-xs bg-white dark:bg-slate-950"
-              />
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  const code = activeFile?.kind === 'video'
-                    ? `<video controls width="100%"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
-                    : `<img src="${shareUrl}/preview" alt="${activeFile?.name || 'Image'}" />`
-                  await navigator.clipboard.writeText(code)
-                  setCopiedHtmlCode(true)
-                  setTimeout(() => setCopiedHtmlCode(false), 2000)
-                }}
-                className="shrink-0 font-bold"
-              >
-                {copiedHtmlCode ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Code2 className="h-4 w-4" />}
-                {copiedHtmlCode ? 'Copied!' : 'Copy HTML Code'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Option 3: Web Page Link */}
-          <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-            <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              <Copy className="h-4 w-4 text-slate-400" />
-              9Drive Web View Page
-            </label>
-            <p className="text-xs text-slate-500 mb-2">Opens full 9Drive preview interface with download button.</p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Input value={shareUrl} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-950" />
-              <Button onClick={copyShareLink} variant="outline" className="shrink-0 font-bold">
-                {copiedShareLink ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-                {copiedShareLink ? 'Copied!' : 'Copy Page Link'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Google Drive direct link option if connected */}
-          {activeFile?.accountProvider === 'google_drive' && (
-            <div className="pt-2 border-t border-slate-200 dark:border-slate-800 grid gap-3">
-              <div>
-                <label className="text-xs font-bold text-slate-500 block mb-1">Google Drive Direct Link (Public Access)</label>
-                <p className="text-xs text-slate-500 mb-2">Configure file permissions directly on Google Drive so external tools can edit/download it.</p>
-              </div>
-              {gdrivePublicUrl ? (
-                <div className="grid gap-2">
-                  <Input value={gdrivePublicUrl} readOnly className="font-mono text-xs" />
-                  <p className="rounded-xl bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">Google Drive public link generated and copied to clipboard!</p>
+              {/* Option 2: Ready-to-use HTML Snippet */}
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <Code2 className="h-4 w-4 text-violet-500" />
+                  HTML Embed Code ({isVideo ? 'Video Player' : isImage ? 'Image' : isAudio ? 'Audio Player' : 'Link'})
+                </label>
+                <p className="text-xs text-slate-500 mb-2">Ready to copy and paste directly into your HTML landing page code.</p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input
+                    value={htmlEmbedCode}
+                    readOnly
+                    className="flex-1 font-mono text-xs bg-white dark:bg-slate-950"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={async () => {
+                      await navigator.clipboard.writeText(htmlEmbedCode)
+                      setCopiedHtmlCode(true)
+                      setTimeout(() => setCopiedHtmlCode(false), 2000)
+                    }}
+                    className="shrink-0 font-bold"
+                  >
+                    {copiedHtmlCode ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Code2 className="h-4 w-4" />}
+                    {copiedHtmlCode ? 'Copied!' : 'Copy HTML Code'}
+                  </Button>
                 </div>
-              ) : (
-                <Button
-                  variant="outline"
-                  disabled={makingPublic}
-                  onClick={async () => {
-                    if (!activeFile?.id) return
-                    setMakingPublic(true)
-                    try {
-                      const res = await apiFetch<{ url: string }>('/files/' + activeFile.id + '/public-permission', { method: 'POST' })
-                      setGdrivePublicUrl(res.url)
-                      await navigator.clipboard.writeText(res.url)
-                    } catch (err: any) {
-                      setMessage(err.message || 'Failed to make file public')
-                    } finally {
-                      setMakingPublic(false)
-                    }
-                  }}
-                >
-                  {makingPublic ? 'Generating Link...' : 'Make Public on Google Drive'}
-                </Button>
+              </div>
+
+              {/* Option 3: Web Page Link */}
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  <Copy className="h-4 w-4 text-slate-400" />
+                  9Drive Web View Page
+                </label>
+                <p className="text-xs text-slate-500 mb-2">Opens full 9Drive preview interface with download button.</p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Input value={shareUrl} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-950" />
+                  <Button onClick={copyShareLink} variant="outline" className="shrink-0 font-bold">
+                    {copiedShareLink ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                    {copiedShareLink ? 'Copied!' : 'Copy Page Link'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Google Drive direct link option if connected */}
+              {activeFile?.accountProvider === 'google_drive' && (
+                <div className="pt-2 border-t border-slate-200 dark:border-slate-800 grid gap-3">
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 block mb-1">Google Drive Direct Link (Public Access)</label>
+                    <p className="text-xs text-slate-500 mb-2">Configure file permissions directly on Google Drive so external tools can edit/download it.</p>
+                  </div>
+                  {gdrivePublicUrl ? (
+                    <div className="grid gap-2">
+                      <Input value={gdrivePublicUrl} readOnly className="font-mono text-xs" />
+                      <p className="rounded-xl bg-emerald-50 p-3 text-xs font-semibold text-emerald-700">Google Drive public link generated and copied to clipboard!</p>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      disabled={makingPublic}
+                      onClick={async () => {
+                        if (!activeFile?.id) return
+                        setMakingPublic(true)
+                        try {
+                          const res = await apiFetch<{ url: string }>('/files/' + activeFile.id + '/public-permission', { method: 'POST' })
+                          setGdrivePublicUrl(res.url)
+                          await navigator.clipboard.writeText(res.url)
+                        } catch (err: any) {
+                          setMessage(err.message || 'Failed to make file public')
+                        } finally {
+                          setMakingPublic(false)
+                        }
+                      }}
+                    >
+                      {makingPublic ? 'Generating Link...' : 'Make Public on Google Drive'}
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
+          )
+        })()}
       </DummyModal>
       <DummyModal open={folderRenameOpen} title="Rename Folder" description={activeFolderForMenu?.name ?? ''} onClose={() => setFolderRenameOpen(false)}><form onSubmit={renameFolder} className="grid gap-4"><Input value={folderRenameValue} onChange={(event) => setFolderRenameValue(event.target.value)} required /><FolderAppearanceFields color={folderRenameColor} iconUrl={folderRenameIconUrl} onColorChange={setFolderRenameColor} onIconChange={setFolderRenameIconUrl} /><div className="flex justify-end gap-3"><Button type="button" variant="outline" onClick={() => setFolderRenameOpen(false)}>Cancel</Button><Button>Rename</Button></div></form></DummyModal>
       <DummyModal open={folderDeleteOpen} title="Delete Folder" description={`Delete virtual folder ${activeFolderForMenu?.name ?? ''}? Files inside will remain uploaded.`} onClose={() => setFolderDeleteOpen(false)}><div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setFolderDeleteOpen(false)}>Cancel</Button><Button variant="danger" onClick={deleteFolder}>Delete</Button></div></DummyModal>
