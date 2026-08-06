@@ -62,10 +62,14 @@ export function TrashPage() {
     setLoading(true)
     setMessage('')
     try {
-      await apiFetch('/files/batch/restore', {
-        method: 'POST',
-        body: JSON.stringify({ fileIds: ids })
-      })
+      const CHUNK_SIZE = 100
+      for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+        const chunk = ids.slice(i, i + CHUNK_SIZE)
+        await apiFetch('/files/batch/restore', {
+          method: 'POST',
+          body: JSON.stringify({ fileIds: chunk })
+        })
+      }
       setFiles((prev) => prev.filter((f) => !ids.includes(f.id)))
       setSelectedIds((prev) => {
         const next = new Set(prev)
@@ -89,10 +93,14 @@ export function TrashPage() {
     setLoading(true)
     setMessage('')
     try {
-      await apiFetch('/files/batch/permanent', {
-        method: 'DELETE',
-        body: JSON.stringify({ fileIds: ids })
-      })
+      const CHUNK_SIZE = 100
+      for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
+        const chunk = ids.slice(i, i + CHUNK_SIZE)
+        await apiFetch('/files/batch/permanent', {
+          method: 'DELETE',
+          body: JSON.stringify({ fileIds: chunk })
+        })
+      }
       setFiles((prev) => prev.filter((f) => !ids.includes(f.id)))
       setSelectedIds((prev) => {
         const next = new Set(prev)
@@ -110,22 +118,49 @@ export function TrashPage() {
     }
   }
 
+  async function handleEmptyTrash() {
+    if (files.length === 0) return
+    if (!confirm(`Are you sure you want to empty the Recycle Bin? All ${files.length} file(s) will be permanently deleted.`)) return
+    setLoading(true)
+    setMessage('')
+    try {
+      await apiFetch('/files/trash/empty', { method: 'DELETE' })
+      setFiles([])
+      setSelectedIds(new Set())
+      setMessage('Recycle Bin emptied successfully.')
+      setMessageType('success')
+      window.dispatchEvent(new Event('9drive:storage-changed'))
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to empty Recycle Bin')
+      setMessageType('error')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <>
       <PageHeader
         title="Recycle Bin"
         description="Manage deleted files. Restore them to active folders or delete them permanently."
         actions={
-          selectedIds.size > 0 ? (
-            <>
-              <Button variant="outline" onClick={() => handleRestore(Array.from(selectedIds))} disabled={loading}>
-                <RotateCcw className="h-4 w-4" /> Restore Selected ({selectedIds.size})
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedIds.size > 0 ? (
+              <>
+                <Button variant="outline" onClick={() => handleRestore(Array.from(selectedIds))} disabled={loading}>
+                  <RotateCcw className="h-4 w-4" /> Restore Selected ({selectedIds.size})
+                </Button>
+                <Button variant="danger" onClick={() => handlePermanentDelete(Array.from(selectedIds))} disabled={loading}>
+                  <Trash2 className="h-4 w-4" /> Delete Selected ({selectedIds.size})
+                </Button>
+              </>
+            ) : null}
+            {files.length > 0 ? (
+              <Button variant="danger" onClick={handleEmptyTrash} disabled={loading}>
+                <Trash2 className="h-4 w-4" /> Empty Recycle Bin
               </Button>
-              <Button variant="danger" onClick={() => handlePermanentDelete(Array.from(selectedIds))} disabled={loading}>
-                <Trash2 className="h-4 w-4" /> Delete Selected ({selectedIds.size})
-              </Button>
-            </>
-          ) : null
+            ) : null}
+          </div>
         }
       />
 

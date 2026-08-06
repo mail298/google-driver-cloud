@@ -90,7 +90,7 @@ fileRouter.get('/', async (req: AuthRequest, res, next) => {
   }
 })
 
-const batchFileSchema = z.object({ fileIds: z.array(z.string().min(1)).min(1).max(100) })
+const batchFileSchema = z.object({ fileIds: z.array(z.string().min(1)).min(1).max(1000) })
 
 fileRouter.patch('/batch', async (req: AuthRequest, res, next) => {
   try {
@@ -210,6 +210,60 @@ fileRouter.delete('/batch/permanent', async (req: AuthRequest, res, next) => {
     return next(error)
   }
 })
+
+fileRouter.delete('/trash/empty', async (req: AuthRequest, res, next) => {
+  try {
+    const files = await prisma.file.findMany({
+      where: { userId: req.user!.id, status: 'deleted' },
+      include: { connectedAccount: true }
+    })
+    const deletedIds: string[] = []
+    const syncedAccountIds = new Set<string>()
+    const failed: Array<{ fileId: string; message: string }> = []
+
+    for (const file of files) {
+      try {
+        if (file.provider === 's3') {
+          await deleteS3Object(file)
+        } else {
+          const auth = await getAuthedGoogleClient(file.connectedAccount)
+          const drive = google.drive({ version: 'v3', auth })
+          await drive.files.delete({ fileId: file.providerFileId })
+        }
+        deletedIds.push(file.id)
+        syncedAccountIds.add(file.connectedAccountId)
+        await createAuditLog(req.user!.id, 'PERMANENT_DELETE_FILE', 'file', file.id, { name: file.name })
+      } catch (error: any) {
+        if (error?.status === 404 || error?.code === 404 || error?.message?.includes('notFound')) {
+          deletedIds.push(file.id)
+          syncedAccountIds.add(file.connectedAccountId)
+        } else {
+          failed.push({ fileId: file.id, message: error instanceof Error ? error.message : 'Delete failed' })
+        }
+      }
+    }
+
+    if (deletedIds.length > 0) {
+      await prisma.file.deleteMany({
+        where: { id: { in: deletedIds }, userId: req.user!.id }
+      })
+    }
+
+    for (const accountId of syncedAccountIds) {
+      const account = files.find((file) => file.connectedAccountId === accountId)?.connectedAccount
+      if (account?.provider === 's3') {
+        await syncS3Quota(accountId).catch(() => undefined)
+      } else {
+        await syncGoogleQuota(accountId).catch(() => undefined)
+      }
+    }
+
+    return res.json({ status: 'ok', deleted: deletedIds.length, failed })
+  } catch (error) {
+    return next(error)
+  }
+})
+
 
 fileRouter.get('/shared-links', async (req: AuthRequest, res, next) => {
   try {
