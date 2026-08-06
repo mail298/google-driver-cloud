@@ -1,6 +1,6 @@
 # ☁️ Drive Portal Client (cliend)
 
-Sistem Portal Klien & Management User yang terintegrasi dengan **9drive Gateway**. Menghubungkan dan menggabungkan banyak akun Google Drive menjadi **Satu Master Storage Pool** yang dapat dialokasikan dan dikelola secara aman untuk masing-masing pengguna (Client User).
+Sistem Portal Klien & Manajemen Pengguna yang terintegrasi dengan **9drive Gateway**. Menghubungkan dan menggabungkan banyak akun Google Drive menjadi **Satu Master Storage Pool** yang dapat dialokasikan dan dikelola secara aman untuk masing-masing pengguna (Client User).
 
 ---
 
@@ -22,7 +22,7 @@ Sistem Portal Klien & Management User yang terintegrasi dengan **9drive Gateway*
 ### 🛡️ 3. Keamanan Tingkat Tinggi (Security Suite)
 - **Admin IP Whitelist**: Pembatasan akses Admin Dashboard berdasarkan alamat IP client yang diizinkan.
 - **Proteksi CSRF**: Token Anti-CSRF pada setiap formulir POST.
-- **Rate Limiting & Lockout**: Proteksi *brute-force* login dengan penguncian otomatis setelah batas batas gagal tercapai.
+- **Rate Limiting & Lockout**: Proteksi *brute-force* login dengan penguncian otomatis setelah batas percobaan gagal tercapai.
 - **Enkripsi Token AES-256-GCM**: Dekripsi token akses Google Drive secara aman di memori server.
 
 ---
@@ -206,7 +206,7 @@ docker compose down -v
 - **Google Image Edge CDN (`lh3.googleusercontent.com`)**: Gambar dan pratinjau dikirimkan langsung dari Google Edge CDN tanpa membebankan bandwidth server lokal.
 - **Adaptive Video & Audio Streaming (HLS & HTTP 206)**: Dukungan streaming video adaptif HLS master playlist (`.m3u8`) serta HTTP 206 Partial Content dengan penguraian chunk 4MB untuk *instant video startup*.
 - **Direct Upload CDN**: Upload file berukuran besar melampaui `UPLOAD_DIRECT_THRESHOLD_BYTES` dialihkan langsung ke endpoint CDN (`UPLOAD_DIRECT_URL`) untuk menghindari kendala `post_max_size` PHP.
-- **Local Disk Cache**: Aset media hingga 30MB disimpankan ke `storage/cache/files` dengan strategi *eviction* otomatis hingga batas 1GB.
+- **Local Disk Cache**: Aset media hingga 30MB disimpan ke `storage/cache/files` dengan strategi *eviction* otomatis hingga batas 1GB.
 
 ---
 
@@ -245,6 +245,10 @@ cliend/
 │   │   ├── DownloadProxyController.php # Proxy download & CDN image engine
 │   │   ├── StreamController.php        # Streaming video HLS & embed player
 │   │   └── UploadController.php        # Handler upload ke gateway & CDN
+│   ├── Core/
+│   │   ├── Autoloader.php              # Autoloader kelas PHP otomatis
+│   │   ├── CdnHelper.php               # Helper rotasi subdomain CDN sharding
+│   │   └── Router.php                  # Sistem routing URL portal
 │   ├── Services/
 │   │   └── LoggerService.php           # Service logging debug berformat JSON
 │   ├── Models/

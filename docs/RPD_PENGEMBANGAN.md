@@ -207,7 +207,7 @@ timeline
 
 ```bash
 # 1. Jalankan Server Development Lokal
-php -S 0.0.0.0:4545 -t public/
+php -S 0.0.0.0:7878 -t public/
 
 # 2. Verifikasi Sintaks PHP & JavaScript
 php -l src/Controllers/DownloadProxyController.php

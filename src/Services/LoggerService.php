@@ -47,10 +47,10 @@ class LoggerService
 
         $logEntry = [
             'id' => $id,
-            'username' => (string)$username,
-            'debug_error' => (string)$message,
+            'username' => (string) $username,
+            'debug_error' => (string) $message,
             'timestamp' => date('c'),
-            'level' => strtoupper((string)$level),
+            'level' => strtoupper((string) $level),
             'ip' => class_exists('IpWhitelistModel') ? IpWhitelistModel::getClientIp() : ($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1'),
             'request_uri' => $_SERVER['REQUEST_URI'] ?? 'CLI'
         ];

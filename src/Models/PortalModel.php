@@ -578,6 +578,11 @@ class PortalModel
         if ($file && !empty($file['provider_file_id'])) {
             self::updateGoogleDriveItemName($pdo, $userId, $file['provider_file_id'], $newName);
         }
+        // Purge disk cache so renamed file metadata is refreshed on next request
+        if ($file) {
+            $etag = '"' . md5($file['id'] . '_' . ($file['updated_at'] ?? '') . '_' . $file['size_bytes']) . '"';
+            DownloadProxyController::invalidateCache($file['id'], $etag);
+        }
         $stmt = $pdo->prepare("UPDATE files SET name = ?, updated_at = NOW() WHERE user_id = ? AND id = ?");
         return $stmt->execute([$newName, $userId, $fileId]);
     }
@@ -589,6 +594,11 @@ class PortalModel
         $file = $stmt->fetch();
         if ($file && !empty($file['provider_file_id'])) {
             self::trashGoogleDriveItem($pdo, $userId, $file['provider_file_id']);
+        }
+        // Purge local disk cache immediately so stale files don't occupy disk for up to 7 days
+        if ($file) {
+            $etag = '"' . md5($file['id'] . '_' . ($file['updated_at'] ?? '') . '_' . $file['size_bytes']) . '"';
+            DownloadProxyController::invalidateCache($file['id'], $etag);
         }
         $stmt = $pdo->prepare("UPDATE files SET status = 'deleted', deleted_at = NOW() WHERE user_id = ? AND id = ?");
         return $stmt->execute([$userId, $fileId]);

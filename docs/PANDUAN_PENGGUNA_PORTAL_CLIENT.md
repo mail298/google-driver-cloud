@@ -12,8 +12,9 @@ Dokumen ini berisi panduan lengkap penggunaan seluruh fitur dan menu yang tersed
 3. [Manajemen Folder (Buat, Navigasi & Pindahkan)](#3-manajemen-folder)
 4. [Menu Opsi & Aksi Berkas (Context Menu)](#4-menu-opsi--aksi-berkas)
 5. [Penggunaan Tautan Gambar CDN untuk Landing Page](#5-penggunaan-tautan-gambar-cdn-untuk-landing-page)
-6. [Fitur Seleksi & Penghapusan Massal (Bulk Action)](#6-fitur-seleksi--penghapusan-massal)
-7. [Pengaturan Akun & Keamanan](#7-pengaturan-akun--keamanan)
+6. [Penggunaan Video Stream & Embed Code](#6-penggunaan-video-stream--embed-code-bunnystream--cloudflare-stream-style)
+7. [Fitur Seleksi & Penghapusan Massal (Bulk Action)](#7-fitur-seleksi--penghapusan-massal)
+8. [Pengaturan Akun & Keamanan](#8-pengaturan-akun--keamanan)
 
 ---
 
@@ -24,7 +25,7 @@ Setelah berhasil *Sign In* ke portal client, Anda akan disambut oleh halaman das
 - **Sidebar Kiri (Panel Navigasi & Kuota)**:
   - **Semua Berkas**: Menampilkan seluruh folder dan dokumen milik Anda.
   - **Pengaturan Akun**: Membuka profil pengguna dan formulir ubah password.
-  - **Ringkasan Kuota Storage**: Menampilkan batas total ruang simpan (misal: 10 GB), jumlah terpakai, dan rincian tipe berkas (Foto, Video, Dokumen).
+  - **Ringkasan Kuota Storage**: Menampilkan batas total ruang simpan (misalnya: 10 GB), jumlah terpakai, dan rincian tipe berkas (Foto, Video, Dokumen).
 - **Header Atas (Pencarian & Profil)**:
   - **Bilah Pencarian (Search Bar)**: Ketik nama berkas atau dokumen untuk menyaring daftar berkas secara *instant*.
   - **Profil Akun**: Menampilkan nama *user* yang aktif.
@@ -159,12 +160,12 @@ Anda dapat mengelola banyak berkas sekaligus tanpa harus menghapus satu per satu
 ### Cara Menghapus Banyak Item (Batch Delete):
 1. Beri tanda centang pada kotak centang (*checkbox*) di sebelah kiri nama folder/berkas.
 2. Atau gunakan centang **"Pilih Semua"** di bagian atas tabel untuk memilih seluruh item di halaman tersebut.
-3. Bar aksi massal (*Bulk Action Bar*) akan muncul di bagian bawah layar menampilkan jumlah item yang dipilih (misal: `5 item dipilih`).
+3. Bar aksi massal (*Bulk Action Bar*) akan muncul di bagian bawah layar menampilkan jumlah item yang dipilih (misalnya: `5 item dipilih`).
 4. Klik tombol merah **`🗑️ Hapus Terpilih`**, lalu konfirmasikan pada pop-up yang muncul.
 
 ---
 
-## 7. Pengaturan Akun & Keamanan
+## 8. Pengaturan Akun & Keamanan
 
 Untuk menjaga keamanan akun Anda:
 

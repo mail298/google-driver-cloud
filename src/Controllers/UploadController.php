@@ -289,7 +289,10 @@ class UploadController
         @touch($lock);
 
         // Internal request — fast and not throttled by Cloudflare's 100s limit.
-        $port = (int) Config::get('PORTAL_PORT', 80);
+        // Port detection: auto-detect from running server (SERVER_PORT),
+        // override via PORTAL_PORT in .env if needed (e.g. Docker, reverse proxy).
+        $port = (int) ($_SERVER['SERVER_PORT'] ?? Config::get('PORTAL_PORT', 7878));
+        if ($port <= 0) $port = 7878;
         $cmd = 'curl -s --max-time 3600 "http://127.0.0.1:' . $port . '/finalize?jobId=' . rawurlencode($jobId) . '" >/dev/null 2>&1 &';
         @exec($cmd);
     }
