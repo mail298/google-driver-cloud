@@ -1,9 +1,11 @@
+import cors from 'cors'
 import { Router } from 'express'
 import { prisma } from '../../config/prisma.js'
 import { hashToken } from '../../utils/crypto.js'
 import { streamProviderFile } from '../files/stream-file.js'
 
 export const publicRouter = Router()
+publicRouter.use(cors({ origin: '*' }))
 
 async function findSharedFile(token: string) {
   const share = await prisma.fileShare.findFirst({
