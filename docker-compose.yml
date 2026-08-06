@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    ports:
+    expose:
       - "80"
 
   backend:
@@ -16,8 +16,7 @@ services:
       context: ./backend
     restart: unless-stopped
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql
     environment:
       DATABASE_URL: mysql://${MYSQL_USER:-9drive}:${MYSQL_PASSWORD:-change-this-database-password}@mysql:3306/${MYSQL_DATABASE:-9drive}
       APP_PORT: 4000
@@ -30,7 +29,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-https://googledrivebackend.ikan212.com/connected-accounts/google/callback}
-    ports:
+    expose:
       - "4000"
 
   mysql:
@@ -43,11 +42,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-this-database-password}
     volumes:
       - mysql_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-root}"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
 
 volumes:
   mysql_data:
