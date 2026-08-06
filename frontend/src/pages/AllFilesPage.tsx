@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type DragEvent, type FormEvent, type MouseEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Archive, CheckCircle, ClipboardPaste, Download, FolderInput, FolderPlus, LayoutGrid, List, RefreshCw, Star, Trash2, Upload, X } from 'lucide-react'
+import { Archive, CheckCircle, ClipboardPaste, Code2, Copy, Download, FolderInput, FolderPlus, LayoutGrid, List, RefreshCw, Star, Trash2, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DummyModal } from '@/components/drive/DummyModal'
@@ -91,6 +91,8 @@ export function AllFilesPage() {
   const [shareOpen, setShareOpen] = useState(false)
   const [shareUrl, setShareUrl] = useState('')
   const [copiedShareLink, setCopiedShareLink] = useState(false)
+  const [copiedMediaLink, setCopiedMediaLink] = useState(false)
+  const [copiedHtmlCode, setCopiedHtmlCode] = useState(false)
   const [previewUrl, setPreviewUrl] = useState('')
   const [previewError, setPreviewError] = useState('')
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -776,14 +778,68 @@ export function AllFilesPage() {
       <DummyModal open={shareOpen} title="Share Link" description={activeFile?.name ?? ''} onClose={() => setShareOpen(false)}>
         <div className="grid gap-4">
           <div>
-            <label className="text-xs font-bold text-slate-500 block mb-1">9Drive Public Share Link (No GDrive login required)</label>
-            <Input value={shareUrl} readOnly />
+            <label className="text-xs font-bold text-slate-500 block mb-1">9Drive Public Page Link</label>
+            <div className="flex gap-2">
+              <Input value={shareUrl} readOnly className="flex-1 font-mono text-xs" />
+              <Button onClick={copyShareLink} variant="outline" className="shrink-0">
+                {copiedShareLink ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                {copiedShareLink ? 'Copied!' : 'Copy Page Link'}
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setShareOpen(false)}>Close</Button>
-            <Button onClick={copyShareLink}>{copiedShareLink ? <CheckCircle className="h-4 w-4" /> : null}{copiedShareLink ? 'Copied!' : 'Copy Link'}</Button>
+
+          <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-3.5 dark:border-blue-900/40 dark:bg-blue-950/20">
+            <label className="text-xs font-extrabold text-blue-700 dark:text-blue-300 block mb-1">
+              🖼️ Direct Media / Stream Link (For Landing Page)
+            </label>
+            <p className="text-[11px] text-blue-600/80 dark:text-blue-400 mb-2">
+              Includes <code>/preview</code> for direct use in <code>&lt;img src="..."&gt;</code> or <code>&lt;video src="..."&gt;</code> on landing pages.
+            </p>
+            <div className="flex gap-2">
+              <Input value={`${shareUrl}/preview`} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-900" />
+              <Button
+                onClick={async () => {
+                  await navigator.clipboard.writeText(`${shareUrl}/preview`)
+                  setCopiedMediaLink(true)
+                  setTimeout(() => setCopiedMediaLink(false), 2000)
+                }}
+                className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {copiedMediaLink ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                {copiedMediaLink ? 'Copied!' : 'Copy Media Link'}
+              </Button>
+            </div>
           </div>
-          {copiedShareLink ? <p className="rounded-xl bg-emerald-50 p-3 text-sm font-semibold text-emerald-700">Share link copied to clipboard.</p> : null}
+
+          <div>
+            <label className="text-xs font-bold text-slate-500 block mb-1">HTML Embed Code (Landing Page)</label>
+            <div className="flex gap-2">
+              <Input
+                value={
+                  activeFile?.kind === 'video'
+                    ? `<video controls width="100%"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+                    : `<img src="${shareUrl}/preview" alt="${activeFile?.name || 'Image'}" />`
+                }
+                readOnly
+                className="flex-1 font-mono text-xs"
+              />
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  const code = activeFile?.kind === 'video'
+                    ? `<video controls width="100%"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+                    : `<img src="${shareUrl}/preview" alt="${activeFile?.name || 'Image'}" />`
+                  await navigator.clipboard.writeText(code)
+                  setCopiedHtmlCode(true)
+                  setTimeout(() => setCopiedHtmlCode(false), 2000)
+                }}
+                className="shrink-0"
+              >
+                {copiedHtmlCode ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Code2 className="h-4 w-4" />}
+                {copiedHtmlCode ? 'Copied!' : 'Copy HTML Code'}
+              </Button>
+            </div>
+          </div>
 
           {activeFile?.accountProvider === 'google_drive' && (
             <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 grid gap-3">
