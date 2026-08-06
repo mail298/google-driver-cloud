@@ -157,6 +157,16 @@ Browser (dashboard clouds.wn-cdn.net), klik "Copy Link" pada file
 | Video MP4 inline (cacheable) | — | disk + edge |
 | Video HLS segmen | live fetch per segmen | live fetch per segmen |
 
+## Tetap Dinamis Saat File Diganti (Auto Version)
+
+Edge cache menyimpan URL 30 hari. Jika file di Google Drive **diganti** dengan konten baru, URL yang sama akan tetap menyajikan versi lama. Solusi: parameter versi otomatis.
+
+- Semua URL konten file (thumb/inline/download di dashboard, share.php, embed.php) sekarang menyertakan `&v=<8-char hash updated_at>`.
+- Saat file diganti/diperbarui (mis. re-upload, edit di Google Drive), `updated_at` di DB berubah → `v` berubah → **URL baru** → cache CDN lama otomatis ter-bypass, file versi baru ter-fetch.
+- File yang tidak berubah → `v` tetap → edge cache tetap HIT (tidak ada kerugian performa).
+- Implementasi: `CdnHelper::url(..., ['version' => $file['updated_at']])` dan `cdnUrl(id, {version})` di `portal.js`.
+- Parameter `v` **tidak divalidasi server** — fungsinya hanya memecah cache key CDN; kebenaran isi tetap dijamin ETag (id + updated_at + size) di disk cache.
+
 ## Cara Baca Debug
 
 - `cf-cache-status: HIT` → dilayani edge Cloudflare (paling cepat).

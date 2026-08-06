@@ -1565,12 +1565,13 @@
                                 'badgeClass' => $badgeClass,
                                 'folderName' => $currentFolderName,
                                 'sizeFormatted' => formatBytes($file['size_bytes']),
-                                'providerFileId' => $file['provider_file_id'] ?? ''
+                                'providerFileId' => $file['provider_file_id'] ?? '',
+                                'updatedAt' => $file['updated_at'] ?? ''
                             ]), ENT_QUOTES, 'UTF-8');
                             ?>
                             <div class="item-card-modern item-card-file" draggable="true" data-type="file"
                                 data-id="<?= $file['id'] ?>" data-name="<?= htmlspecialchars($file['name']) ?>"
-                                onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')">
+                                onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>', '<?= $file['updated_at'] ?? '' ?>')">
                                 <div class="card-header-modern">
                                     <div class="card-header-left">
                                         <input type="checkbox" class="item-checkbox" data-type="file"
@@ -1600,7 +1601,7 @@
                                 </div>
                                 <div class="card-thumb-box">
                                     <?php if ($isImage): ?>
-                                        <img src="<?= CdnHelper::url($file['id'], ['thumb' => true]) ?>"
+                                        <img src="<?= CdnHelper::url($file['id'], ['thumb' => true, 'version' => $file['updated_at'] ?? '']) ?>"
                                             alt="<?= htmlspecialchars($file['name']) ?>" class="card-thumb-img" loading="lazy"
                                             decoding="async"
                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
@@ -1616,7 +1617,7 @@
                                     <?php elseif ($isVideo): ?>
                                         <div
                                             style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#0f172a; overflow:hidden;">
-                                            <img src="<?= CdnHelper::url($file['id'], ['thumb' => true]) ?>"
+                                            <img src="<?= CdnHelper::url($file['id'], ['thumb' => true, 'version' => $file['updated_at'] ?? '']) ?>"
                                                 alt="<?= htmlspecialchars($file['name']) ?>"
                                                 style="width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;"
                                                 loading="lazy" decoding="async" onerror="this.style.display='none';">
@@ -1750,7 +1751,7 @@
                                     ?>
                                     <tr draggable="true" data-type="file" data-id="<?= $file['id'] ?>"
                                         data-name="<?= htmlspecialchars($file['name']) ?>"
-                                        onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>')"
+                                        onclick="previewFile('<?= $file['id'] ?>', '<?= addslashes(htmlspecialchars($file['name'])) ?>', '<?= $file['mime_type'] ?>', '<?= $file['updated_at'] ?? '' ?>')"
                                         style="cursor: pointer;">
                                         <td onclick="event.stopPropagation();"><input type="checkbox" class="item-checkbox"
                                                 data-type="file" data-id="<?= $file['id'] ?>"
@@ -1760,7 +1761,7 @@
                                         <td>
                                             <div style="display: flex; align-items: center; gap: 10px;">
                                                 <?php if ($isImage): ?>
-                                                    <img src="<?= CdnHelper::url($file['id'], ['thumb' => true]) ?>" loading="lazy"
+                                                    <img src="<?= CdnHelper::url($file['id'], ['thumb' => true, 'version' => $file['updated_at'] ?? '']) ?>" loading="lazy"
                                                         decoding="async"
                                                         style="width: 28px; height: 28px; border-radius: 6px; object-fit: cover;">
                                                 <?php else: ?>

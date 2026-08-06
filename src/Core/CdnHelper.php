@@ -38,6 +38,8 @@ class CdnHelper
      *   inline  : ?inline=1 (inline full-size)
      *   raw     : ?raw=1    (force raw download)
      *   path    : share|download|embed|stream  (default download)
+     *   version : updated_at file — dipakai sbg ?v=hash; saat file diganti
+     *             (updated_at berubah), URL berubah → cache CDN lama ter-bypass
      *   extra   : additional query params
      */
     public static function url($fileId, array $opts = [])
@@ -55,6 +57,9 @@ class CdnHelper
         }
         if (!empty($opts['raw'])) {
             $query['raw'] = '1';
+        }
+        if (!empty($opts['version'])) {
+            $query['v'] = substr(md5((string) $opts['version']), 0, 8);
         }
         if (!empty($opts['extra']) && is_array($opts['extra'])) {
             $query = array_merge($query, $opts['extra']);

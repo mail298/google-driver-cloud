@@ -429,6 +429,12 @@ function cdnUrl(fileId, opts) {
     if (opts.thumb) q.set('thumb', '1');
     if (opts.inline) q.set('inline', '1');
     if (opts.raw) q.set('raw', '1');
+    if (opts.version) {
+        let h = 0;
+        const s = String(opts.version);
+        for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
+        q.set('v', Math.abs(h).toString(16).padStart(8, '0').slice(0, 8));
+    }
     return 'https://' + host + '/' + path + '?' + q.toString();
 }
 
@@ -1249,7 +1255,7 @@ function processDroppedFiles(files) {
 }
 
 // File Preview Handling
-function previewFile(id, name, mimeType) {
+function previewFile(id, name, mimeType, updatedAt) {
     const modal = document.getElementById('preview-modal');
     const title = document.getElementById('preview-title');
     const content = document.getElementById('preview-content');
@@ -1258,10 +1264,10 @@ function previewFile(id, name, mimeType) {
     if (!modal || !title || !content || !downloadBtn) return;
 
     title.innerText = name;
-    downloadBtn.href = cdnUrl(id, { path: 'download' });
+    downloadBtn.href = cdnUrl(id, { path: 'download', version: updatedAt });
     content.innerHTML = '';
 
-    const previewUrl = cdnUrl(id, { inline: true });
+    const previewUrl = cdnUrl(id, { inline: true, version: updatedAt });
 
     if (mimeType.startsWith('image/')) {
         content.innerHTML = `<img src="${previewUrl}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; object-fit: contain;">`;
@@ -1423,14 +1429,14 @@ document.addEventListener('click', function (e) {
 function cmActionPreview() {
     closeContextMenu();
     if (activeContextItem && activeContextItem.type === 'file') {
-        previewFile(activeContextItem.id, activeContextItem.name, activeContextItem.mimeType);
+        previewFile(activeContextItem.id, activeContextItem.name, activeContextItem.mimeType, activeContextItem.updatedAt);
     }
 }
 
 function cmActionDownload() {
     closeContextMenu();
     if (activeContextItem && activeContextItem.type === 'file') {
-        window.location.href = cdnUrl(activeContextItem.id, { path: 'download' });
+        window.location.href = cdnUrl(activeContextItem.id, { path: 'download', version: activeContextItem.updatedAt });
     }
 }
 

@@ -223,7 +223,7 @@
         <i class="fa-solid fa-play"></i>
     </div>
 
-    <video id="videoPlayer" src="<?= CdnHelper::url($file['id'], ['inline' => true]) ?>" poster="<?= CdnHelper::url($file['id'], ['thumb' => true]) ?>" playsinline preload="metadata"></video>
+    <video id="videoPlayer" src="<?= CdnHelper::url($file['id'], ['inline' => true, 'version' => $file['updated_at'] ?? '']) ?>" poster="<?= CdnHelper::url($file['id'], ['thumb' => true, 'version' => $file['updated_at'] ?? '']) ?>" playsinline preload="metadata"></video>
 
     <div class="controls-overlay">
         <div class="progress-container" id="progressContainer">
@@ -268,10 +268,10 @@
 
     const fileId = "<?= htmlspecialchars($file['id']) ?>";
     const hlsUrl = "/stream/" + encodeURIComponent(fileId) + "/master.m3u8";
-    const mp4Url = "<?= CdnHelper::url($file['id'], ['inline' => true]) ?>";
+    const mp4Url = "<?= CdnHelper::url($file['id'], ['inline' => true, 'version' => $file['updated_at'] ?? '']) ?>";
 
     if (video) {
-        const mp4DirectUrl = "<?= CdnHelper::url($file['id'], ['inline' => true]) ?>";
+        const mp4DirectUrl = "<?= CdnHelper::url($file['id'], ['inline' => true, 'version' => $file['updated_at'] ?? '']) ?>";
 
         video.src = mp4DirectUrl;
         video.load();

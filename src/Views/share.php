@@ -215,7 +215,7 @@
             </div>
         </div>
         <div class="share-header-right">
-            <a href="<?= CdnHelper::url($file['id']) ?>" class="btn-download-icon" title="Unduh / Buka Berkas">
+            <a href="<?= CdnHelper::url($file['id'], ['version' => $file['updated_at'] ?? '']) ?>" class="btn-download-icon" title="Unduh / Buka Berkas">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
@@ -229,7 +229,7 @@
     <!-- Main Content Viewer -->
     <main class="share-viewer-container">
         <?php if ($isImage): ?>
-            <img src="<?= CdnHelper::url($file['id'], ['inline' => true]) ?>" alt="<?= htmlspecialchars($file['name']) ?>"
+            <img src="<?= CdnHelper::url($file['id'], ['inline' => true, 'version' => $file['updated_at'] ?? '']) ?>" alt="<?= htmlspecialchars($file['name']) ?>"
                 class="share-full-img">
         <?php elseif ($isVideo): ?>
             <div style="position: relative; width: 100%; height: 100%; min-height: 480px; border-radius: 12px; overflow: hidden; background: #000;">
@@ -238,14 +238,14 @@
                 <div style="position: absolute; top:0; right:0; width:80px; height:80px; z-index:999; background:transparent;"></div>
             </div>
         <?php elseif ($isPdf): ?>
-            <iframe src="<?= CdnHelper::url($file['id'], ['inline' => true]) ?>" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
+            <iframe src="<?= CdnHelper::url($file['id'], ['inline' => true, 'version' => $file['updated_at'] ?? '']) ?>" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>
         <?php else: ?>
             <div class="share-generic-card">
                 <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
                 <h2 style="font-size: 18px; margin: 0 0 8px 0;"><?= htmlspecialchars($file['name']) ?></h2>
                 <p style="font-size: 13px; color: #94a3b8; margin: 0 0 20px 0;"><?= formatBytesShare($file['size_bytes']) ?>
                     • Pratinjau langsung tidak tersedia</p>
-                <a href="<?= CdnHelper::url($file['id']) ?>" class="btn-download-main">Unduh Berkas</a>
+                <a href="<?= CdnHelper::url($file['id'], ['version' => $file['updated_at'] ?? '']) ?>" class="btn-download-main">Unduh Berkas</a>
             </div>
         <?php endif; ?>
     </main>
