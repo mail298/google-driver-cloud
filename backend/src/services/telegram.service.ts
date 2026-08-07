@@ -43,6 +43,25 @@ export async function notifyUserRegistration(user: { id: string; name: string; e
   }
 }
 
+export async function notifyServerError(entry: { id: string; method: string; path: string; status: number; message: string; code: string; timestamp: string }) {
+  try {
+    const message = [
+      `⚠️ <b>SYSTEM ERROR DETECTED!</b>`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `📍 <b>Path:</b> <code>${escapeHtml(entry.method)} ${escapeHtml(entry.path)}</code>`,
+      `💥 <b>Status:</b> ${entry.status}`,
+      `🏷️ <b>Code:</b> <code>${escapeHtml(entry.code)}</code>`,
+      `💬 <b>Error:</b> <code>${escapeHtml(entry.message)}</code>`,
+      `🆔 <b>Log ID:</b> <code>${escapeHtml(entry.id)}</code>`,
+      `🕒 <b>Time:</b> ${entry.timestamp.replace('T', ' ').substring(0, 19)} UTC`
+    ].join('\n')
+
+    await sendTelegramNotification(message)
+  } catch (err) {
+    console.error('Error sending server error notification to Telegram:', err)
+  }
+}
+
 export async function getSystemAnalytics() {
   const [totalUsers, users] = await Promise.all([
     prisma.user.count(),
