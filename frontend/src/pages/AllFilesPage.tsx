@@ -581,7 +581,7 @@ export function AllFilesPage() {
 
   async function copyShareLink() {
     // shareUrl format: https://frontend.domain/public/files/TOKEN
-    const shareToken = shareUrl.split('/public/files/')[1] || shareUrl.split('/file/')[1] || ''
+    const shareToken = shareUrl.split('/public/files/')[1] || ''
     const targetUrl = `${window.location.origin}/public/files/${shareToken}`
     await navigator.clipboard.writeText(targetUrl)
     setCopiedShareLink(true)
@@ -792,7 +792,7 @@ export function AllFilesPage() {
           const isAudio = activeFile?.mimeType?.startsWith('audio/')
 
           // shareUrl format: https://frontend.domain/public/files/TOKEN
-          const shareToken = shareUrl.split('/public/files/')[1] || shareUrl.split('/file/')[1] || ''
+          const shareToken = shareUrl.split('/public/files/')[1] || ''
           const fallbackDirectStreamUrl = `${API_URL}/share/files/${shareToken}/preview`
           const mediaStreamUrl = formatCdnUrl(fallbackDirectStreamUrl, activeFile?.id)
           const webViewPageUrl = `${window.location.origin}/public/files/${shareToken}`
