@@ -22,28 +22,32 @@ import { UploadProvider } from '@/context/UploadContext'
 import { apiFetch } from '@/lib/api'
 
 function App() {
-  const [ipBlockedState, setIpBlockedState] = useState<{ isBlocked: boolean; message?: string }>({ isBlocked: false })
+  // Synchronously initialize state from sessionStorage so page refresh instantly renders ForbiddenPage without flashing login screen
+  const [isIpBlocked, setIsIpBlocked] = useState(() => Boolean(sessionStorage.getItem('ip_blocked_msg')))
 
   useEffect(() => {
-    const handleIpBlocked = (e: Event) => {
-      const customEvent = e as CustomEvent<{ message?: string }>
-      setIpBlockedState({ isBlocked: true, message: customEvent.detail?.message })
+    const handleIpBlocked = () => {
+      setIsIpBlocked(true)
     }
 
     window.addEventListener('ip-blocked', handleIpBlocked)
 
     // Silent check on app load to detect IP whitelist status
-    apiFetch('/auth/me', { skipAuth: true }).catch(() => {
-      // Ignore normal authentication errors, we only care if it dispatches 'ip-blocked'
-    })
+    apiFetch('/auth/me', { skipAuth: true })
+      .then(() => {
+        setIsIpBlocked(false)
+      })
+      .catch(() => {
+        // Ignore normal auth errors, ip-blocked handler sets state if 403 IP_NOT_ALLOWED
+      })
 
     return () => {
       window.removeEventListener('ip-blocked', handleIpBlocked)
     }
   }, [])
 
-  if (ipBlockedState.isBlocked) {
-    return <ForbiddenPage message={ipBlockedState.message} />
+  if (isIpBlocked) {
+    return <ForbiddenPage />
   }
 
   return (
@@ -81,4 +85,3 @@ function App() {
 }
 
 export default App
-

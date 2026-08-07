@@ -38,9 +38,20 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
     const error = await response.json().catch(() => ({ message: response.statusText }))
     if (response.status === 401) clearAuthSession()
     if (response.status === 403 && error.code === 'IP_NOT_ALLOWED') {
+      try {
+        sessionStorage.setItem('ip_blocked_msg', error.message || 'IP Access Restricted')
+      } catch {}
       window.dispatchEvent(new CustomEvent('ip-blocked', { detail: { message: error.message } }))
+    } else {
+      try {
+        sessionStorage.removeItem('ip_blocked_msg')
+      } catch {}
     }
     throw new Error(error.message ?? 'Request failed')
+  } else {
+    try {
+      sessionStorage.removeItem('ip_blocked_msg')
+    } catch {}
   }
 
   return response.json() as Promise<T>
