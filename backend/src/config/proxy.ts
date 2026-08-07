@@ -11,7 +11,9 @@ export function setupGlobalProxy() {
     return
   }
 
-  console.log(`[proxy] Global Proxy routing enabled: ${proxyUrl}`)
+  // Sensor password sebelum ditampilkan di log
+  const safeUrl = proxyUrl.replace(/:([^@/]+)@/, ':***@')
+  console.log(`[proxy] Global Proxy routing enabled: ${safeUrl}`)
 
   try {
     // 1. Configure undici global dispatcher for all fetch(), stream, media scraping & Telegram calls
@@ -24,7 +26,7 @@ export function setupGlobalProxy() {
       agent: httpsAgent
     })
 
-    console.log('[proxy] Successfully configured global proxy for all outbound scraping, API, and media streaming requests.')
+    console.log('[proxy] Successfully configured global proxy for all outbound requests (fetch, Google APIs, Telegram).')
   } catch (err: any) {
     console.error('[proxy] Failed to configure proxy agent:', err.message || err)
   }
