@@ -32,44 +32,22 @@ export function normalizeHeaders(headers: Headers | Record<string, string>) {
 }
 
 export async function streamGoogleFile(file: FileWithAccount, range: string | undefined, res: Response, options: StreamOptions = {}) {
+  const auth = await getAuthedGoogleClient(file.connectedAccount)
+  const headers = normalizeHeaders(await auth.getRequestHeaders())
   const exportTarget = (options.disposition === 'inline' ? googlePreviewExportMimeTypes : googleDownloadExportMimeTypes)[file.mimeType]
   const responseMimeType = exportTarget?.mimeType ?? file.mimeType
   const responseFileName = exportTarget ? withExtension(file.name, exportTarget.extension) : file.name
 
-  let response: globalThis.Response | null = null
+  const url = exportTarget
+    ? `https://www.googleapis.com/drive/v3/files/${file.providerFileId}/export?mimeType=${encodeURIComponent(exportTarget.mimeType)}`
+    : `https://www.googleapis.com/drive/v3/files/${file.providerFileId}?alt=media`
 
-  // Fast-path for direct Google Drive CDN (videos, audio, large media files)
-  if (!exportTarget) {
-    try {
-      const cdnUrl = `https://drive.google.com/uc?export=download&id=${file.providerFileId}`
-      const cdnRes = await fetch(cdnUrl, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-          ...(range ? { Range: range } : {}),
-        },
-        redirect: 'follow',
-      })
-      if (cdnRes.ok || cdnRes.status === 206) {
-        response = cdnRes
-      }
-    } catch (_) {
-      // Fall back to OAuth API below if direct CDN fails
-    }
-  }
-
-  if (!response) {
-    const auth = await getAuthedGoogleClient(file.connectedAccount)
-    const headers = normalizeHeaders(await auth.getRequestHeaders())
-    const url = exportTarget
-      ? `https://www.googleapis.com/drive/v3/files/${file.providerFileId}/export?mimeType=${encodeURIComponent(exportTarget.mimeType)}`
-      : `https://www.googleapis.com/drive/v3/files/${file.providerFileId}?alt=media`
-    response = await fetch(url, {
-      headers: {
-        ...headers,
-        ...(range && !exportTarget ? { Range: range } : {}),
-      },
-    })
-  }
+  const response = await fetch(url, {
+    headers: {
+      ...headers,
+      ...(range && !exportTarget ? { Range: range } : {}),
+    },
+  })
 
   if (!response.ok && response.status !== 206) {
     const message = await response.text().catch(() => response.statusText)
