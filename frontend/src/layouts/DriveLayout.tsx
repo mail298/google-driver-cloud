@@ -489,9 +489,9 @@ export function DriveLayout() {
                 </div>
               )}
             </div>
-            {/* Header actions injected by child pages */}
+            {/* Header actions injected by child pages (desktop only, mobile renders below page title) */}
             {headerActions ? (
-              <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <div className="hidden lg:flex flex-wrap items-center gap-2 shrink-0">
                 {headerActions}
               </div>
             ) : null}
