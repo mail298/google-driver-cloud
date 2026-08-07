@@ -6,6 +6,7 @@ export async function sendTelegramNotification(text: string) {
   const chatId = process.env.TELEGRAM_CHAT_ID || (env as any).TELEGRAM_CHAT_ID
 
   if (!botToken || !chatId) {
+    console.warn(`[TELEGRAM] Cannot send notification. Missing config -> TELEGRAM_BOT_TOKEN: ${Boolean(botToken)}, TELEGRAM_CHAT_ID: ${Boolean(chatId)}`)
     return false
   }
 
@@ -21,9 +22,15 @@ export async function sendTelegramNotification(text: string) {
         disable_web_page_preview: true
       })
     })
-    return res.ok
+    if (!res.ok) {
+      const errText = await res.text()
+      console.error(`[TELEGRAM] Failed to send notification (status ${res.status}): ${errText}`)
+      return false
+    }
+    console.log(`[TELEGRAM] Notification successfully sent to chat_id ${chatId}`)
+    return true
   } catch (err) {
-    console.error('Failed to send Telegram notification:', err)
+    console.error('[TELEGRAM] Failed to send Telegram notification:', err)
     return false
   }
 }
