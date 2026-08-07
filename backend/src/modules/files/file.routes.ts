@@ -173,14 +173,20 @@ fileRouter.delete('/batch/permanent', async (req: AuthRequest, res, next) => {
     for (const file of files) {
       try {
         if (file.provider === 's3') {
-          await deleteS3Object(file)
-        } else {
-          const auth = await getAuthedGoogleClient(file.connectedAccount)
-          const drive = google.drive({ version: 'v3', auth })
-          await drive.files.delete({ fileId: file.providerFileId })
+          await deleteS3Object(file).catch((err: any) => {
+            console.warn(`S3 delete warning for file ${file.id}:`, err?.message || err)
+          })
+        } else if (file.connectedAccount) {
+          try {
+            const auth = await getAuthedGoogleClient(file.connectedAccount)
+            const drive = google.drive({ version: 'v3', auth })
+            await drive.files.delete({ fileId: file.providerFileId })
+          } catch (gErr: any) {
+            console.warn(`Google Drive delete warning for file ${file.id} (${file.providerFileId}):`, gErr?.message || gErr)
+          }
         }
         deletedIds.push(file.id)
-        syncedAccountIds.add(file.connectedAccountId)
+        if (file.connectedAccountId) syncedAccountIds.add(file.connectedAccountId)
         await createAuditLog(req.user!.id, 'PERMANENT_DELETE_FILE', 'file', file.id, { name: file.name })
       } catch (error) {
         failed.push({ fileId: file.id, message: error instanceof Error ? error.message : 'Delete failed' })
