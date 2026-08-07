@@ -17,15 +17,17 @@ import { PublicFilePage } from '@/pages/PublicFilePage'
 import { ApiManagementPage } from '@/pages/ApiManagementPage'
 import { TrashPage } from '@/pages/TrashPage'
 import { ActivityLogPage } from '@/pages/ActivityLogPage'
+import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { UploadProvider } from '@/context/UploadContext'
 import { apiFetch } from '@/lib/api'
 
 function App() {
-  const [isIpBlocked, setIsIpBlocked] = useState(false)
+  const [ipBlockedState, setIpBlockedState] = useState<{ isBlocked: boolean; message?: string }>({ isBlocked: false })
 
   useEffect(() => {
-    const handleIpBlocked = () => {
-      setIsIpBlocked(true)
+    const handleIpBlocked = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message?: string }>
+      setIpBlockedState({ isBlocked: true, message: customEvent.detail?.message })
     }
 
     window.addEventListener('ip-blocked', handleIpBlocked)
@@ -40,23 +42,8 @@ function App() {
     }
   }, [])
 
-  if (isIpBlocked) {
-    return (
-      <main className="relative flex h-screen w-screen items-center justify-center bg-slate-950 overflow-hidden select-none">
-        {/* Subtle red background glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.06),transparent_60%)] pointer-events-none" />
-        
-        {/* Fullscreen Responsive Image */}
-        <img 
-          src="/forbidden.png" 
-          alt="Access Denied" 
-          className="h-full w-full max-w-full max-h-full object-contain p-6 md:p-16 transition-all duration-300"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none'
-          }}
-        />
-      </main>
-    )
+  if (ipBlockedState.isBlocked) {
+    return <ForbiddenPage message={ipBlockedState.message} />
   }
 
   return (
