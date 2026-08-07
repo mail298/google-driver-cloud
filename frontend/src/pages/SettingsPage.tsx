@@ -83,7 +83,12 @@ export function SettingsPage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = '9drive-backup.db'
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let filename = '9drive-backup.json'
+      if (contentDisposition && contentDisposition.includes('filename=')) {
+        filename = contentDisposition.split('filename=')[1].replace(/"/g, '').trim()
+      }
+      a.download = filename
       document.body.appendChild(a)
       a.click()
       a.remove()
