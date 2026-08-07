@@ -426,21 +426,21 @@ export function DriveLayout() {
               <form onSubmit={searchFiles} className="relative w-full">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
                 <Input value={searchValue} onChange={(event) => setSearchValue(event.target.value)} placeholder="Search Documents" className="pl-11 pr-12" />
-                <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 transition-colors", filtersOpen && "text-blue-600 hover:text-blue-700")} aria-label="Search filters"><SlidersHorizontal className="h-5 w-5" /></button>
+                <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 transition-colors dark:text-slate-400 dark:hover:text-slate-100", filtersOpen && "text-blue-600 hover:text-blue-700 dark:text-blue-400")} aria-label="Search filters"><SlidersHorizontal className="h-5 w-5" /></button>
               </form>
 
               {filtersOpen && (
-                <div className="absolute left-0 right-0 top-12 z-50 rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <span className="text-sm font-extrabold text-slate-950">Advanced Search Filters</span>
-                    <button type="button" onClick={clearFilters} className="text-xs font-bold text-blue-600 hover:text-blue-700">Clear All</button>
+                <div className="absolute left-0 top-12 z-50 w-[calc(100vw-2rem)] sm:w-[500px] md:w-[540px] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white/95 p-4 sm:p-5 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95 animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                    <span className="text-sm font-extrabold text-slate-950 dark:text-slate-100">Advanced Search Filters</span>
+                    <button type="button" onClick={clearFilters} className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">Clear All</button>
                   </div>
 
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <div className="mt-4 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                     {/* File Kind */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">File Type</label>
-                      <select value={filterKind} onChange={(e) => setFilterKind(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-blue-500 focus:bg-white focus:outline-none">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">File Type</label>
+                      <select value={filterKind} onChange={(e) => setFilterKind(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800">
                         <option value="">All Types</option>
                         <option value="image">Image</option>
                         <option value="video">Video</option>
@@ -452,8 +452,8 @@ export function DriveLayout() {
 
                     {/* Connected Account */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Connected Account</label>
-                      <select value={filterAccountId} onChange={(e) => setFilterAccountId(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-blue-500 focus:bg-white focus:outline-none">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Connected Account</label>
+                      <select value={filterAccountId} onChange={(e) => setFilterAccountId(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800">
                         <option value="">All Accounts</option>
                         {accounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>{acc.email} ({acc.provider})</option>
@@ -463,26 +463,26 @@ export function DriveLayout() {
 
                     {/* Size range */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Size Range (MB)</label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <input type="number" placeholder="Min" value={filterMinSize} onChange={(e) => setFilterMinSize(e.target.value)} className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-blue-500 focus:bg-white focus:outline-none" />
-                        <span className="text-slate-400 text-xs font-semibold">to</span>
-                        <input type="number" placeholder="Max" value={filterMaxSize} onChange={(e) => setFilterMaxSize(e.target.value)} className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-blue-500 focus:bg-white focus:outline-none" />
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Size Range (MB)</label>
+                      <div className="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2">
+                        <input type="number" placeholder="Min" value={filterMinSize} onChange={(e) => setFilterMinSize(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
+                        <span className="text-slate-400 text-xs font-semibold text-center sm:text-left">to</span>
+                        <input type="number" placeholder="Max" value={filterMaxSize} onChange={(e) => setFilterMaxSize(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
                       </div>
                     </div>
 
                     {/* Date range */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Date Range</label>
-                      <div className="mt-1 flex items-center gap-2">
-                        <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-blue-500 focus:bg-white focus:outline-none" />
-                        <span className="text-slate-400 text-xs font-semibold">to</span>
-                        <input type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} className="block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:border-blue-500 focus:bg-white focus:outline-none" />
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Date Range</label>
+                      <div className="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2">
+                        <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
+                        <span className="text-slate-400 text-xs font-semibold text-center sm:text-left">to</span>
+                        <input type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-5 flex justify-end gap-2 border-t border-slate-100 pt-4">
+                  <div className="mt-5 flex justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
                     <Button variant="outline" size="sm" type="button" onClick={() => setFiltersOpen(false)}>Cancel</Button>
                     <Button variant="default" size="sm" type="button" onClick={applyFilters}>Apply Filters</Button>
                   </div>
@@ -491,7 +491,7 @@ export function DriveLayout() {
             </div>
             {/* Header actions injected by child pages */}
             {headerActions ? (
-              <div className="hidden lg:flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 {headerActions}
               </div>
             ) : null}
@@ -511,9 +511,9 @@ export function DriveLayout() {
       </div>
 
       {uploadProgress.open ? (
-        <div className="fixed inset-x-3 bottom-3 z-[70] max-h-[70dvh] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 sm:inset-x-auto sm:bottom-5 sm:right-5 sm:w-[min(420px,calc(100vw-2.5rem))]">
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-950">
+        <div className="fixed inset-x-3 bottom-3 z-[70] max-h-[70dvh] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 dark:border-slate-800 dark:bg-slate-900 sm:inset-x-auto sm:bottom-5 sm:right-5 sm:w-[min(420px,calc(100vw-2.5rem))]">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+            <div className="flex items-center gap-2 font-extrabold text-sm text-slate-950 dark:text-slate-100">
               {uploadProgress.status === 'done' ? <CheckCircle className="h-5 w-5 text-emerald-500" /> : uploadProgress.status === 'partial' || uploadProgress.status === 'error' ? <X className="h-5 w-5 text-red-500" /> : <Upload className="h-5 w-5 text-blue-600" />}
               {uploadProgress.status === 'done' ? 'Upload complete' : uploadProgress.status === 'partial' ? 'Upload completed with errors' : uploadProgress.status === 'error' ? 'Upload failed' : uploadProgress.percent >= 99 ? 'Processing on server' : 'Uploading files'}
             </div>
