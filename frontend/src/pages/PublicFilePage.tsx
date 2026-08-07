@@ -37,15 +37,15 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   const [file, setFile] = useState<PublicFile | null>(null)
   const [failed, setFailed] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const rawPreviewUrl = `${API_URL}/public/files/${token}/preview`
-  const rawDownloadUrl = `${API_URL}/public/files/${token}/download`
+  const rawPreviewUrl = `${API_URL}/share/files/${token}/preview`
+  const rawDownloadUrl = `${API_URL}/share/files/${token}/download`
   const previewUrl = formatCdnUrl(rawPreviewUrl, token)
   const downloadUrl = formatCdnUrl(rawDownloadUrl, token)
   const kind = getPreviewKind(file?.mimeType)
 
   useEffect(() => {
     setFailed(false)
-    apiFetch<{ file: PublicFile }>(`/public/files/${token}`, { skipAuth: true })
+    apiFetch<{ file: PublicFile }>(`/share/files/${token}`, { skipAuth: true })
       .then((data) => setFile(data.file))
       .catch(() => {
         setFile(null)

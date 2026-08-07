@@ -70,11 +70,6 @@ export function formatCdnUrl(originalUrl: string, keyId?: string) {
     const charCodeSum = (keyId || '0').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
     const selectedDomain = cdnList[charCodeSum % cdnList.length]
 
-    // Safety check: Do not use frontend domains for backend media streaming URLs
-    if (selectedDomain.toLowerCase().includes('frontend')) {
-      return originalUrl
-    }
-
     if (selectedDomain.startsWith('http://') || selectedDomain.startsWith('https://')) {
       const targetObj = new URL(selectedDomain)
       urlObj.protocol = targetObj.protocol

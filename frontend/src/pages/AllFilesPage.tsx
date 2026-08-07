@@ -791,7 +791,7 @@ export function AllFilesPage() {
           const isAudio = activeFile?.mimeType?.startsWith('audio/')
 
           const shareToken = shareUrl.split('/public/files/')[1] || shareUrl.split('/public-share/files/')[1] || ''
-          const fallbackDirectStreamUrl = `${API_URL}/public-share/files/${shareToken}/preview`
+          const fallbackDirectStreamUrl = `${API_URL}/share/files/${shareToken}/preview`
           const mediaStreamUrl = formatCdnUrl(fallbackDirectStreamUrl, activeFile?.id)
           const webViewPageUrl = `${window.location.origin}/file/${shareToken}`
 
