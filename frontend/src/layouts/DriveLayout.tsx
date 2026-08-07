@@ -225,12 +225,7 @@ function Sidebar({
                 accounts.map((acc) => (
                   <div
                     key={acc.id}
-                    onClick={() => {
-                      setUserMenuOpen(false)
-                      onNavigate?.()
-                      navigate(`/all-files?accountId=${acc.id}`)
-                    }}
-                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors group"
+                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors group"
                   >
                     <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 border border-slate-200/80 dark:bg-slate-800 dark:border-slate-700">
                       {acc.provider === 'google_drive' ? (
@@ -240,14 +235,14 @@ function Sidebar({
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-bold text-slate-900 dark:text-slate-100 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      <p className="truncate font-bold text-slate-900 dark:text-slate-100 leading-tight">
                         {acc.displayName || acc.email}
                       </p>
                       <p className="truncate text-[10px] text-slate-400 mt-0.5">
                         {acc.storageAccount?.usedBytes ? `${formatBytes(acc.storageAccount.usedBytes)} terpakai` : 'Google Drive'}
                       </p>
                     </div>
-                    <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-sm" title="Terhubung" />
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-sm" title="Online" />
                   </div>
                 ))
               )}
