@@ -5,9 +5,31 @@ import fs from 'fs'
 import { requireAuth } from '../../middleware/auth.middleware.js'
 import { prisma } from '../../config/prisma.js'
 import { decryptText, encryptText } from '../../utils/crypto.js'
+import { clearErrorLogs, getErrorLogs } from '../../utils/logger.js'
 import Busboy from 'busboy'
 
 export const systemRouter = Router()
+
+systemRouter.get('/error-logs', requireAuth, (_req, res) => {
+  const logs = getErrorLogs()
+  return res.json({ logs, count: logs.length })
+})
+
+systemRouter.get('/error-logs/download', requireAuth, (_req, res) => {
+  const logFile = path.resolve(process.cwd(), 'logs', 'error-log.json')
+  if (!fs.existsSync(logFile)) {
+    return res.status(404).json({ code: 'NOT_FOUND', message: 'No JSON error log file found.' })
+  }
+  res.setHeader('Content-Disposition', 'attachment; filename=error-log.json')
+  res.setHeader('Content-Type', 'application/json')
+  return res.sendFile(logFile)
+})
+
+systemRouter.delete('/error-logs', requireAuth, (_req, res) => {
+  clearErrorLogs()
+  return res.json({ status: 'success', message: 'Error log file cleared.' })
+})
+
 
 
 systemRouter.post('/update', requireAuth, (req, res, next) => {

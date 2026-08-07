@@ -1,6 +1,15 @@
 import type { NextFunction, Request, Response } from 'express'
+import { logError } from '../utils/logger.js'
 
-export function errorMiddleware(error: unknown, _req: Request, res: Response, _next: NextFunction) {
-  const message = error instanceof Error ? error.message : 'Internal server error'
-  return res.status(500).json({ code: 'INTERNAL_SERVER_ERROR', message })
+export function errorMiddleware(error: unknown, req: Request, res: Response, _next: NextFunction) {
+  const status = (error as any)?.status || 500
+  const entry = logError(req, error, status)
+
+  return res.status(status).json({
+    code: entry.code,
+    message: entry.message,
+    timestamp: entry.timestamp,
+    errorId: entry.id
+  })
 }
+
