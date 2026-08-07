@@ -7,82 +7,7 @@ import { prisma } from '../../config/prisma.js'
 import { decryptText, encryptText } from '../../utils/crypto.js'
 import Busboy from 'busboy'
 
-import { invalidateIpCache, getWhitelistedIps } from '../../middleware/ip-whitelist.middleware.js'
-
 export const systemRouter = Router()
-
-systemRouter.get('/ip-whitelist', requireAuth, async (req, res, next) => {
-  try {
-    const xForwardedForHeader = req.header('x-forwarded-for')
-    const xForwardedFor = Array.isArray(xForwardedForHeader) ? xForwardedForHeader[0] : xForwardedForHeader
-    const cfConnectingIpHeader = req.header('cf-connecting-ip')
-    const cfConnectingIp = Array.isArray(cfConnectingIpHeader) ? cfConnectingIpHeader[0] : cfConnectingIpHeader
-    const rawIp = cfConnectingIp || (xForwardedFor ? xForwardedFor.split(',')[0].trim() : req.ip) || ''
-    const currentIp = rawIp.replace(/^::ffff:/, '')
-
-    const envIps = (process.env.ADMIN_ALLOWED_IPS || '')
-      .split(',')
-      .map((ip) => ip.trim())
-      .filter(Boolean)
-
-    const dbIps = await prisma.allowedIp.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
-
-    const whitelistedIps = await getWhitelistedIps()
-
-    return res.json({
-      currentIp,
-      enabled: whitelistedIps.length > 0,
-      envIps,
-      dbIps,
-      whitelistedIps,
-    })
-  } catch (error) {
-    return next(error)
-  }
-})
-
-systemRouter.post('/ip-whitelist', requireAuth, async (req, res, next) => {
-  try {
-    const { ip, label } = req.body
-    if (!ip || typeof ip !== 'string') {
-      return res.status(400).json({ code: 'BAD_REQUEST', message: 'Valid IP address or subnet is required.' })
-    }
-
-    const cleanIp = ip.trim().replace(/^::ffff:/, '')
-    if (!cleanIp) {
-      return res.status(400).json({ code: 'BAD_REQUEST', message: 'Invalid IP address.' })
-    }
-
-    const record = await prisma.allowedIp.upsert({
-      where: { ip: cleanIp },
-      update: { label: label?.trim() || null },
-      create: { ip: cleanIp, label: label?.trim() || null },
-    })
-
-    invalidateIpCache()
-
-    return res.status(201).json({
-      status: 'success',
-      message: `IP ${cleanIp} has been added to the whitelist instantly (0 redeploys required).`,
-      item: record,
-    })
-  } catch (error) {
-    return next(error)
-  }
-})
-
-systemRouter.delete('/ip-whitelist/:id', requireAuth, async (req, res, next) => {
-  try {
-    const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id
-    await prisma.allowedIp.delete({ where: { id } })
-    invalidateIpCache()
-    return res.json({ status: 'success', message: 'IP address removed from whitelist.' })
-  } catch (error) {
-    return next(error)
-  }
-})
 
 
 systemRouter.post('/update', requireAuth, (req, res, next) => {
@@ -329,7 +254,7 @@ systemRouter.post('/restore', requireAuth, (req, res, next) => {
 
         } catch (err: any) {
           if (fs.existsSync(tempDbPath)) {
-            try { fs.unlinkSync(tempDbPath) } catch {}
+            try { fs.unlinkSync(tempDbPath) } catch { }
           }
           console.error('Failed to restore database:', err)
           return res.status(500).json({
@@ -342,7 +267,7 @@ systemRouter.post('/restore', requireAuth, (req, res, next) => {
 
       writeStream.on('error', (err) => {
         if (fs.existsSync(tempDbPath)) {
-          try { fs.unlinkSync(tempDbPath) } catch {}
+          try { fs.unlinkSync(tempDbPath) } catch { }
         }
         console.error('Write error on temp DB:', err)
         return res.status(500).json({

@@ -14,6 +14,7 @@ const envSchema = z.object({
   MAX_UPLOAD_BYTES: z.coerce.number().default(5 * 1024 * 1024 * 1024),
   RECAPTCHA_SECRET_KEY: z.string().optional(),
   ADMIN_ALLOWED_IPS: z.string().optional(),
+  IP_WHITELIST_SECRET_KEY: z.string().optional(),
 })
 
 export const env = envSchema.parse(process.env)
