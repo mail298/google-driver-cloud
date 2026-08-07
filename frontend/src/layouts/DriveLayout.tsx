@@ -254,7 +254,7 @@ function Sidebar({
             </div>
 
             {/* Footer Actions */}
-            <div className="mt-1 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 space-y-0.5">
+            <div className="mt-1 pt-1.5 border-t border-slate-100 dark:border-slate-800/80">
               <button
                 type="button"
                 onClick={() => {
@@ -266,18 +266,6 @@ function Sidebar({
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Hubungkan / Kelola Akun</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setUserMenuOpen(false)
-                  onLogout()
-                }}
-                className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Keluar (Log Out)</span>
               </button>
             </div>
           </div>
