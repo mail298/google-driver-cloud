@@ -110,7 +110,7 @@ export function SettingsPage() {
 
   async function restoreBackup() {
     if (!restoreFile) return
-    if (!confirm('WARNING: Restoring database will overwrite all your current configurations, connected accounts, virtual folders, and user accounts. The server will restart. Are you sure you want to proceed?')) {
+    if (!confirm('Apakah Anda yakin ingin memulihkan (restore) data dari file backup ini? Akun Google Drive, folder virtual, dan data file milik akun Anda akan diperbarui sesuai file backup ini.')) {
       return
     }
 
