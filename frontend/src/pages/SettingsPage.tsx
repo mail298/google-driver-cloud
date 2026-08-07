@@ -110,7 +110,7 @@ export function SettingsPage() {
 
   async function restoreBackup() {
     if (!restoreFile) return
-    if (!confirm('Apakah Anda yakin ingin memulihkan (restore) data dari file backup ini? Akun Google Drive, folder virtual, dan data file milik akun Anda akan diperbarui sesuai file backup ini.')) {
+    if (!confirm('Are you sure you want to restore data from this backup file? Your connected accounts, virtual folders, and file metadata will be updated to match this backup file.')) {
       return
     }
 
