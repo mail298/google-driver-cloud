@@ -80,7 +80,7 @@ authRouter.get('/google/url', async (_req, res, next) => {
       access_type: 'offline',
       prompt: 'consent',
       include_granted_scopes: true,
-      scope: config.scopes as string[],
+      scope: ['openid', 'email', 'profile'],
       state,
     })
     return res.json({ url })
