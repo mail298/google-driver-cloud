@@ -21,21 +21,27 @@ export function FileIcon({
 
   const info = getFileCategoryInfo(fileName, fileMime)
   const isImage = info.category === 'image'
-  const { imageUrl, loading } = useFileThumbnailUrl(fileId, isImage)
+  const isVideo = info.category === 'video'
+  const shouldLoad = isImage || isVideo
+  const { imageUrl, loading } = useFileThumbnailUrl(fileId, shouldLoad)
 
-  // List View Thumbnail for Images
-  if (isImage && imageUrl) {
+  // List View Thumbnail for Images & Videos
+  if ((isImage || isVideo) && imageUrl) {
     return (
-      <div className={cn('relative h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-slate-800 bg-slate-100 dark:bg-slate-900', className)}>
-        <img src={imageUrl} alt={fileName} className="h-full w-full object-cover" />
+      <div className={cn('relative h-9 w-9 shrink-0 overflow-hidden rounded-xl border border-slate-200 shadow-sm dark:border-slate-800 bg-slate-950 flex items-center justify-center', className)}>
+        {isImage ? (
+          <img src={imageUrl} alt={fileName} className="h-full w-full object-cover" />
+        ) : (
+          <video src={imageUrl} preload="metadata" muted playsInline className="h-full w-full object-cover" />
+        )}
       </div>
     )
   }
 
-  // Loading image skeleton
-  if (isImage && loading) {
+  // Loading image/video skeleton
+  if (shouldLoad && loading) {
     return (
-      <div className={cn('h-9 w-9 shrink-0 animate-pulse rounded-xl bg-amber-500/20 border border-amber-500/30', className)} />
+      <div className={cn('h-9 w-9 shrink-0 animate-pulse rounded-xl bg-purple-500/20 border border-purple-500/30', className)} />
     )
   }
 

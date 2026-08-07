@@ -70,7 +70,9 @@ const scaleConfig: Record<
 function FileCardPreview({ file }: { file: FileItem }) {
   const info = getFileCategoryInfo(file.name, file.mimeType)
   const isImage = info.category === 'image'
-  const { imageUrl, loading } = useFileThumbnailUrl(file.id, isImage)
+  const isVideo = info.category === 'video'
+  const shouldLoad = isImage || isVideo
+  const { imageUrl, loading } = useFileThumbnailUrl(file.id, shouldLoad)
   const { Icon, bgGradient, iconBg, badgeClass, extension } = info
 
   if (isImage && imageUrl) {
@@ -88,10 +90,37 @@ function FileCardPreview({ file }: { file: FileItem }) {
     )
   }
 
-  if (isImage && loading) {
+  if (isVideo && imageUrl) {
     return (
-      <div className="h-36 sm:h-44 w-full animate-pulse rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-        <Icon className="h-10 w-10 text-amber-500/40" />
+      <div className="relative h-36 sm:h-44 w-full overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-950 shadow-inner group/thumb dark:border-slate-800 flex items-center justify-center">
+        <video
+          src={imageUrl}
+          preload="metadata"
+          muted
+          playsInline
+          className="h-full w-full object-cover transition-transform duration-300 group-hover/thumb:scale-105"
+          onMouseEnter={(e) => e.currentTarget.play().catch(() => {})}
+          onMouseLeave={(e) => {
+            e.currentTarget.pause()
+            e.currentTarget.currentTime = 0
+          }}
+        />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/thumb:bg-black/0 transition-colors pointer-events-none">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-600/80 text-white backdrop-blur-md border border-white/30 shadow-lg group-hover/thumb:scale-110 transition-transform">
+            <Icon className="h-6 w-6 fill-white text-white ml-0.5" />
+          </div>
+        </div>
+        <div className="absolute top-2.5 right-2.5 px-2 py-0.5 text-[10px] font-extrabold uppercase rounded-lg bg-purple-600/80 text-white backdrop-blur-md border border-white/20 shadow-md tracking-wider">
+          {extension}
+        </div>
+      </div>
+    )
+  }
+
+  if (shouldLoad && loading) {
+    return (
+      <div className="h-36 sm:h-44 w-full animate-pulse rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
+        <Icon className="h-10 w-10 text-purple-500/40" />
       </div>
     )
   }

@@ -221,12 +221,12 @@ export function getFileCategoryInfo(filename: string, mimeType?: string): Catego
   }
 }
 
-export function useFileThumbnailUrl(fileId?: string, isImage = false): { imageUrl: string | null; loading: boolean } {
+export function useFileThumbnailUrl(fileId?: string, shouldLoad = false): { imageUrl: string | null; loading: boolean } {
   const [imageUrl, setImageUrl] = useState<string | null>(() => (fileId ? blobCache.get(fileId) ?? null : null))
-  const [loading, setLoading] = useState<boolean>(!imageUrl && isImage && Boolean(fileId))
+  const [loading, setLoading] = useState<boolean>(!imageUrl && shouldLoad && Boolean(fileId))
 
   useEffect(() => {
-    if (!isImage || !fileId) {
+    if (!shouldLoad || !fileId) {
       setLoading(false)
       return
     }
@@ -246,7 +246,7 @@ export function useFileThumbnailUrl(fileId?: string, isImage = false): { imageUr
 
     fetch(`${API_URL}/files/${fileId}/download`, { headers })
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to load preview image')
+        if (!res.ok) throw new Error('Failed to load media preview')
         return res.blob()
       })
       .then((blob) => {
@@ -265,7 +265,7 @@ export function useFileThumbnailUrl(fileId?: string, isImage = false): { imageUr
     return () => {
       active = false
     }
-  }, [fileId, isImage])
+  }, [fileId, shouldLoad])
 
   return { imageUrl, loading }
 }
