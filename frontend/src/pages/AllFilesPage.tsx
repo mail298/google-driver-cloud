@@ -580,8 +580,8 @@ export function AllFilesPage() {
   }
 
   async function copyShareLink() {
-    const shareToken = shareUrl.split('/public/files/')[1] || ''
-    const targetUrl = `${window.location.origin}/public/files/${shareToken}`
+    const shareToken = shareUrl.split('/public/files/')[1] || shareUrl.split('/public-share/files/')[1] || ''
+    const targetUrl = `${window.location.origin}/file/${shareToken}`
     await navigator.clipboard.writeText(targetUrl)
     setCopiedShareLink(true)
     window.setTimeout(() => setCopiedShareLink(false), 1600)
@@ -790,10 +790,10 @@ export function AllFilesPage() {
           const isImage = activeFile?.kind === 'image' || activeFile?.mimeType?.startsWith('image/')
           const isAudio = activeFile?.mimeType?.startsWith('audio/')
 
-          const shareToken = shareUrl.split('/public/files/')[1] || ''
+          const shareToken = shareUrl.split('/public/files/')[1] || shareUrl.split('/public-share/files/')[1] || ''
           const fallbackDirectStreamUrl = `${API_URL}/public-share/files/${shareToken}/preview`
           const mediaStreamUrl = formatCdnUrl(fallbackDirectStreamUrl, activeFile?.id)
-          const webViewPageUrl = `${window.location.origin}/public/files/${shareToken}`
+          const webViewPageUrl = `${window.location.origin}/file/${shareToken}`
 
           const mediaTitle = isVideo
             ? 'Direct Video Stream Link'

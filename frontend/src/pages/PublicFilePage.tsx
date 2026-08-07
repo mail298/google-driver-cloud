@@ -37,15 +37,15 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   const [file, setFile] = useState<PublicFile | null>(null)
   const [failed, setFailed] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
-  const rawPreviewUrl = `${API_URL}/public-share/files/${token}/preview`
-  const rawDownloadUrl = `${API_URL}/public-share/files/${token}/download`
+  const rawPreviewUrl = `${API_URL}/public/files/${token}/preview`
+  const rawDownloadUrl = `${API_URL}/public/files/${token}/download`
   const previewUrl = formatCdnUrl(rawPreviewUrl, token)
   const downloadUrl = formatCdnUrl(rawDownloadUrl, token)
   const kind = getPreviewKind(file?.mimeType)
 
   useEffect(() => {
     setFailed(false)
-    apiFetch<{ file: PublicFile }>(`/public-share/files/${token}`, { skipAuth: true })
+    apiFetch<{ file: PublicFile }>(`/public/files/${token}`, { skipAuth: true })
       .then((data) => setFile(data.file))
       .catch(() => {
         setFile(null)
@@ -153,7 +153,7 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <a href={`/public/files/${token}/embed`} target="_blank" rel="noreferrer" className="hidden sm:block">
+          <a href={`/file/${token}/embed`} target="_blank" rel="noreferrer" className="hidden sm:block">
             <Button variant="ghost" className="text-slate-100 hover:bg-white/10"><ExternalLink className="h-4 w-4" />Embed</Button>
           </a>
           <a href={downloadUrl} download>
