@@ -93,9 +93,43 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   }
 
   const preview = (
-    <div className="flex h-full w-full items-center justify-center">
+    <div className="flex h-full w-full items-center justify-center bg-black overflow-hidden relative">
       {kind === 'image' ? <img src={previewUrl} alt={file.name} className="max-h-full max-w-full object-contain shadow-2xl shadow-black/30" /> : null}
-      {kind === 'video' ? <div className="shared-video-shell"><video ref={videoRef} controls playsInline preload="metadata"><source src={previewUrl} type={file.mimeType} /></video></div> : null}
+      {kind === 'video' ? (
+        <div className="shared-video-shell w-full h-full flex items-center justify-center bg-black overflow-hidden">
+          <video
+            ref={videoRef}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full h-full max-h-full object-contain"
+            onError={(e) => {
+              const target = e.currentTarget
+              if (!target.dataset.failed) {
+                target.dataset.failed = 'true'
+                target.src = rawPreviewUrl
+                target.load()
+              }
+            }}
+          >
+            <source src={previewUrl} type={file.mimeType} />
+            <source src={rawPreviewUrl} type={file.mimeType} />
+          </video>
+        </div>
+      ) : null}
+      {kind === 'audio' ? (
+        <div className="flex flex-col items-center justify-center p-8 text-center bg-slate-950 rounded-2xl border border-white/10 max-w-md w-full mx-4 shadow-2xl">
+          <div className="h-20 w-20 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center mb-6">
+            {fileIcon(file, kind)}
+          </div>
+          <h3 className="text-lg font-bold text-white mb-2">{file.name}</h3>
+          <p className="text-xs text-slate-400 mb-6">{formatBytes(file.sizeBytes)}</p>
+          <audio controls className="w-full" preload="metadata">
+            <source src={previewUrl} type={file.mimeType} />
+            <source src={rawPreviewUrl} type={file.mimeType} />
+          </audio>
+        </div>
+      ) : null}
       {kind === 'document' ? <iframe src={previewUrl} title={file.name} className="h-full w-full border-0 bg-white" /> : null}
       {kind === 'office' ? <iframe src={officeViewerUrl(previewUrl)} title={file.name} className="h-full w-full border-0 bg-white" /> : null}
       {!kind ? <UnsupportedPreview file={file} downloadUrl={downloadUrl} /> : null}
