@@ -47,6 +47,8 @@ publicRouter.get('/files/:token/download', async (req, res, next) => {
 publicRouter.get('/files/:token/preview', async (req, res, next) => {
   try {
     const file = await findSharedFile(String(req.params.token))
+    res.setHeader('X-Content-Type-Options', 'nosniff')
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN')
     return streamProviderFile(file, req.headers.range, res, { disposition: 'inline' })
   } catch (error) {
     return next(error)

@@ -471,9 +471,10 @@ export function AllFilesPage() {
     setPreviewOpen(true)
     setContextMenu({ x: 0, y: 0, file: null })
     try {
-      const data = await apiFetch<{ path?: string; url: string }>(`/files/${activeFile.id}/preview-token`, { method: 'POST' })
-      const previewPath = data.path ?? new URL(data.url).pathname
-      setPreviewUrl(`${API_URL}${previewPath}`)
+      const data = await apiFetch<{ path?: string; url: string; cdnUrl?: string }>(`/files/${activeFile.id}/preview-token`, { method: 'POST' })
+      // Prefer CDN URL for video/image so Cloudflare edge serves the file (faster, cached)
+      const resolvedUrl = data.cdnUrl ?? data.url
+      setPreviewUrl(resolvedUrl)
     } catch (error) {
       setPreviewError(error instanceof Error ? error.message : 'Failed to load preview')
     } finally {

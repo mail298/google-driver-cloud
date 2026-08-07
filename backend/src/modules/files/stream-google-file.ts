@@ -31,6 +31,38 @@ export function normalizeHeaders(headers: Headers | Record<string, string>) {
   return headers
 }
 
+/**
+ * Build an optimal Cache-Control value based on file MIME type and disposition.
+ * - video/*  → browser 1 day, CDN 30 days (Cloudflare ignores max-age, uses s-maxage)
+ * - image/*  → browser 1 day, CDN 30 days, immutable on CDN
+ * - pdf/doc  → browser 1 hour, CDN 1 day
+ * - attachment (download) → private, no CDN cache
+ */
+function buildCacheControl(mimeType: string, disposition: 'inline' | 'attachment' | undefined): string {
+  if (disposition === 'attachment') {
+    return 'private, no-store'
+  }
+
+  const type = mimeType.split('/')[0]
+
+  if (type === 'video') {
+    // Long CDN cache, moderate browser cache
+    return 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400'
+  }
+
+  if (type === 'image') {
+    // Long CDN cache, immutable once cached — images don't change
+    return 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400, immutable'
+  }
+
+  if (mimeType === 'application/pdf') {
+    return 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600'
+  }
+
+  // Generic inline (e.g. text, exports)
+  return 'public, max-age=3600, s-maxage=86400'
+}
+
 export async function streamGoogleFile(file: FileWithAccount, range: string | undefined, res: Response, options: StreamOptions = {}) {
   const auth = await getAuthedGoogleClient(file.connectedAccount)
   const headers = normalizeHeaders(await auth.getRequestHeaders())
@@ -57,11 +89,29 @@ export async function streamGoogleFile(file: FileWithAccount, range: string | un
   res.status(response.status)
   res.setHeader('Content-Type', responseMimeType)
   res.setHeader('Accept-Ranges', 'bytes')
-  if (options.disposition === 'inline') {
-    res.setHeader('Cache-Control', 'public, max-age=2592000, s-maxage=2592000, stale-while-revalidate=2592000, immutable')
-  }
-  if (options.disposition) res.setHeader('Content-Disposition', contentDisposition(options.disposition, responseFileName))
+  res.setHeader('X-Content-Type-Options', 'nosniff')
 
+  // Vary header — tells Cloudflare to cache separately for different Accept-Encoding
+  res.setHeader('Vary', 'Accept-Encoding')
+
+  // Cache-Control based on mime type and disposition
+  const cacheControl = buildCacheControl(responseMimeType, options.disposition)
+  res.setHeader('Cache-Control', cacheControl)
+
+  // Forward Content-Disposition
+  if (options.disposition) {
+    res.setHeader('Content-Disposition', contentDisposition(options.disposition, responseFileName))
+  }
+
+  // Forward ETag from Google Drive — enables 304 Not Modified on browser/CDN revalidation
+  const etag = response.headers.get('etag')
+  if (etag) res.setHeader('ETag', etag)
+
+  // Forward Last-Modified from Google Drive
+  const lastModified = response.headers.get('last-modified')
+  if (lastModified) res.setHeader('Last-Modified', lastModified)
+
+  // Forward Content-Length and Content-Range for range requests (video seeking)
   const contentLength = response.headers.get('content-length')
   const contentRange = response.headers.get('content-range')
   if (contentLength) res.setHeader('Content-Length', contentLength)

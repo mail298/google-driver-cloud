@@ -13,6 +13,7 @@ import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { Readable } from 'node:stream'
 import { ZipArchive } from 'archiver'
 import { createAuditLog } from '../../utils/audit.js'
+import { buildCdnPreviewUrl } from '../../utils/cdn.js'
 
 
 
@@ -340,14 +341,25 @@ fileRouter.delete('/:id/share', async (req: AuthRequest, res, next) => {
   }
 })
 
+// MIME types that benefit from long-lived CDN caching (video, image)
+const LONG_CACHE_MIME_PREFIXES = ['video/', 'image/']
+
 fileRouter.post('/:id/preview-token', async (req: AuthRequest, res, next) => {
   try {
     const fileId = String(req.params.id)
     const file = await prisma.file.findFirstOrThrow({ where: { id: fileId, userId: req.user!.id, status: 'active' } })
     const token = randomToken(32)
-    await prisma.filePreviewToken.create({ data: { fileId: file.id, userId: req.user!.id, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + 10 * 60_000) } })
-    const path = `/files/preview/${token}`
-    return res.status(201).json({ path, url: `${req.protocol}://${req.get('host')}${path}` })
+
+    // Use 24-hour TTL for video/image so Cloudflare CDN can cache long-term.
+    // For other types (PDF, docs) keep shorter 10-minute TTL.
+    const isMediaFile = LONG_CACHE_MIME_PREFIXES.some((prefix) => file.mimeType.startsWith(prefix))
+    const ttlMs = isMediaFile ? 24 * 60 * 60_000 : 10 * 60_000
+
+    await prisma.filePreviewToken.create({ data: { fileId: file.id, userId: req.user!.id, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + ttlMs) } })
+    const previewPath = `/files/preview/${token}`
+    const directUrl = `${req.protocol}://${req.get('host')}${previewPath}`
+    const cdnUrl = buildCdnPreviewUrl(file.id, previewPath)
+    return res.status(201).json({ path: previewPath, url: directUrl, cdnUrl: cdnUrl ?? directUrl })
   } catch (error) {
     return next(error)
   }

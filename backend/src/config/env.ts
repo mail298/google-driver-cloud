@@ -28,6 +28,7 @@ const envSchema = z.object({
   HTTP_PROXY: z.string().optional(),
   HTTPS_PROXY: z.string().optional(),
   GLOBAL_PROXY_URL: z.string().optional(),
+  CDN_SUBDOMAINS: z.string().optional(), // comma-separated CDN origins e.g. https://cdn1.ikan212.com,https://cdn2.ikan212.com
 })
 
 export const env = envSchema.parse(process.env)
