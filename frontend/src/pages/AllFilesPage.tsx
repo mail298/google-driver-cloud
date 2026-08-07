@@ -212,6 +212,18 @@ export function AllFilesPage() {
   }, [activeFolderId, searchQuery])
 
   useEffect(() => {
+    function handleUploadCompleted() {
+      loadAll().catch(() => undefined)
+    }
+    window.addEventListener('9drive:upload-completed', handleUploadCompleted)
+    window.addEventListener('9drive:storage-changed', handleUploadCompleted)
+    return () => {
+      window.removeEventListener('9drive:upload-completed', handleUploadCompleted)
+      window.removeEventListener('9drive:storage-changed', handleUploadCompleted)
+    }
+  }, [activeFolderId, searchQuery])
+
+  useEffect(() => {
     async function loadConnectedAccounts() {
       try {
         const data = await apiFetch<{ accounts: ConnectedAccount[] }>('/connected-accounts')

@@ -87,7 +87,7 @@ function SystemInfoDropdown({ storage }: { storage: any }) {
         <div>
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><HardDrive className="h-3.5 w-3.5 text-blue-500" /> Storage Engine</h4>
           <div className="mt-2 text-xs text-slate-600 space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-            <p>• <b>DB Type:</b> SQLite (Local Database)</p>
+            <p>• <b>DB Type:</b> MySQL Database</p>
             <p>• <b>Upload Folder:</b> Google Drive dedicated <code>9drive</code></p>
             <p>• <b>Max Upload Size:</b> 5 GB per stream</p>
           </div>
@@ -97,7 +97,7 @@ function SystemInfoDropdown({ storage }: { storage: any }) {
         <div>
           <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><Info className="h-3.5 w-3.5 text-indigo-500" /> Usage Tips</h4>
           <ul className="mt-2 text-[11px] text-slate-500 list-disc list-inside space-y-1 pl-1">
-            <li>Virtual folders exist only in your SQLite database.</li>
+            <li>Virtual folders exist in your MySQL database.</li>
             <li>Physical files are always uploaded straight to Google Drive.</li>
             <li>Use the Sync button to fetch changes made directly on Drive.</li>
           </ul>
