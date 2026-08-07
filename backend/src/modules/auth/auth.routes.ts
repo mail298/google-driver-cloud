@@ -8,6 +8,7 @@ import { hashPassword, verifyPassword } from '../../utils/password.js'
 import { encryptText, hashToken, randomToken } from '../../utils/crypto.js'
 import { signAccessToken } from '../../utils/jwt.js'
 import { createOAuthClient, syncGoogleQuota } from '../google/google.service.js'
+import { notifyUserRegistration } from '../../services/telegram.service.js'
 
 export const authRouter = Router()
 
@@ -48,6 +49,7 @@ authRouter.post('/register', async (req, res, next) => {
     if (existing) return res.status(409).json({ code: 'AUTH_EMAIL_TAKEN', message: 'Email already registered.' })
     const user = await prisma.user.create({ data: { name: body.name, email: body.email, passwordHash: await hashPassword(body.password) } })
     const tokens = await createSession(user.id, req)
+    notifyUserRegistration(user, 'Email & Password').catch(() => undefined)
     return res.status(201).json({ ...tokens, user: { id: user.id, name: user.name, email: user.email } })
   } catch (error) {
     return next(error)
@@ -104,11 +106,15 @@ authRouter.get('/google/callback', async (req, res) => {
     if (!providerAccountId || !email) return res.redirect(`${env.FRONTEND_URL}/google-auth?status=error`)
 
     const name = profile.data.name || email.split('@')[0] || 'Google User'
+    const existingUserBefore = await prisma.user.findUnique({ where: { email } })
     const user = await prisma.user.upsert({
       where: { email },
       create: { email, name, passwordHash: await hashPassword(randomToken(32)) },
       update: { name },
     })
+    if (!existingUserBefore) {
+      notifyUserRegistration(user, 'Google OAuth').catch(() => undefined)
+    }
     const existingAccount = await prisma.connectedAccount.findUnique({ where: { userId_provider_providerAccountId: { userId: user.id, provider: 'google_drive', providerAccountId } } })
     const refreshTokenEncrypted = tokens.refresh_token
       ? encryptText(tokens.refresh_token)

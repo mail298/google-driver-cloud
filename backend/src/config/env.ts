@@ -15,6 +15,9 @@ const envSchema = z.object({
   RECAPTCHA_SECRET_KEY: z.string().optional(),
   ADMIN_ALLOWED_IPS: z.string().optional(),
   IP_WHITELIST_SECRET_KEY: z.string().optional(),
+  TELEGRAM_BOT_TOKEN: z.string().optional(),
+  TELEGRAM_CHAT_ID: z.string().optional(),
 })
 
 export const env = envSchema.parse(process.env)
+

@@ -5,10 +5,46 @@ import fs from 'fs'
 import { requireAuth } from '../../middleware/auth.middleware.js'
 import { prisma } from '../../config/prisma.js'
 import { decryptText, encryptText } from '../../utils/crypto.js'
+import { getSystemAnalytics, sendTelegramNotification } from '../../services/telegram.service.js'
 import { clearErrorLogs, getErrorLogs } from '../../utils/logger.js'
 import Busboy from 'busboy'
 
 export const systemRouter = Router()
+
+systemRouter.get('/analytics', requireAuth, async (_req, res, next) => {
+  try {
+    const analytics = await getSystemAnalytics()
+    return res.json(analytics)
+  } catch (error) {
+    return next(error)
+  }
+})
+
+systemRouter.post('/telegram-test', requireAuth, async (_req, res, next) => {
+  try {
+    const analytics = await getSystemAnalytics()
+    const text = [
+      `🤖 <b>9Drive Telegram Test Notification</b>`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `✅ Telegram Bot integration is working properly!`,
+      `📊 <b>Total Registered Users:</b> ${analytics.totalUsers}`,
+      `🔗 <b>Connected Accounts:</b> ${analytics.totalConnectedAccounts}`,
+      `📁 <b>Active Files:</b> ${analytics.totalFiles}`,
+      `🕒 <b>Time:</b> ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC`
+    ].join('\n')
+
+    const success = await sendTelegramNotification(text)
+    if (!success) {
+      return res.status(400).json({
+        code: 'TELEGRAM_CONFIG_MISSING',
+        message: 'Failed to send Telegram message. Make sure TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID environment variables are set in your backend configuration.'
+      })
+    }
+    return res.json({ status: 'success', message: 'Test message sent to Telegram successfully!' })
+  } catch (error) {
+    return next(error)
+  }
+})
 
 systemRouter.get('/error-logs', requireAuth, (_req, res) => {
   const logs = getErrorLogs()
