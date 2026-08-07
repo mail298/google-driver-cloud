@@ -3,7 +3,7 @@ import type { MouseEvent } from 'react'
 import { Card } from '@/components/ui/card'
 import type { FileItem } from '@/data/drive-data'
 import { cn } from '@/lib/utils'
-import { getFileCategoryInfo, useFileThumbnailUrl } from '@/lib/file-utils'
+import { getFileCategoryInfo, useFileThumbnailUrl, getFileStreamUrl } from '@/lib/file-utils'
 
 export type FileSizeScale = 'xs' | 'sm' | 'md' | 'lg'
 
@@ -71,8 +71,8 @@ function FileCardPreview({ file }: { file: FileItem }) {
   const info = getFileCategoryInfo(file.name, file.mimeType)
   const isImage = info.category === 'image'
   const isVideo = info.category === 'video'
-  const shouldLoad = isImage || isVideo
-  const { imageUrl, loading } = useFileThumbnailUrl(file.id, shouldLoad)
+  const { imageUrl, loading } = useFileThumbnailUrl(file.id, isImage)
+  const videoStreamUrl = isVideo ? (imageUrl || getFileStreamUrl(file.id)) : null
   const { Icon, bgGradient, iconBg, badgeClass, extension } = info
 
   if (isImage && imageUrl) {
@@ -90,11 +90,11 @@ function FileCardPreview({ file }: { file: FileItem }) {
     )
   }
 
-  if (isVideo && imageUrl) {
+  if (isVideo && videoStreamUrl) {
     return (
       <div className="relative h-36 sm:h-44 w-full overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-950 shadow-inner group/thumb dark:border-slate-800 flex items-center justify-center">
         <video
-          src={imageUrl}
+          src={videoStreamUrl}
           preload="metadata"
           muted
           playsInline
@@ -117,7 +117,7 @@ function FileCardPreview({ file }: { file: FileItem }) {
     )
   }
 
-  if (shouldLoad && loading) {
+  if (isImage && loading) {
     return (
       <div className="h-36 sm:h-44 w-full animate-pulse rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
         <Icon className="h-10 w-10 text-purple-500/40" />

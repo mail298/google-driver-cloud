@@ -221,6 +221,12 @@ export function getFileCategoryInfo(filename: string, mimeType?: string): Catego
   }
 }
 
+export function getFileStreamUrl(fileId?: string): string {
+  if (!fileId) return ''
+  const token = getAccessToken()
+  return token ? `${API_URL}/files/${fileId}/download?token=${encodeURIComponent(token)}` : `${API_URL}/files/${fileId}/download`
+}
+
 export function useFileThumbnailUrl(fileId?: string, shouldLoad = false): { imageUrl: string | null; loading: boolean } {
   const [imageUrl, setImageUrl] = useState<string | null>(() => (fileId ? blobCache.get(fileId) ?? null : null))
   const [loading, setLoading] = useState<boolean>(!imageUrl && shouldLoad && Boolean(fileId))
