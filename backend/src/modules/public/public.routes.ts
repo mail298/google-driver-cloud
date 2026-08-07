@@ -7,12 +7,22 @@ import { streamProviderFile } from '../files/stream-file.js'
 export const publicRouter = Router()
 publicRouter.use(cors({ origin: '*' }))
 
+const shareCache = new Map<string, { file: any; expires: number }>()
+const CACHE_TTL_MS = 60_000 // 60 seconds cache for public share tokens
+
 async function findSharedFile(token: string) {
+  const cached = shareCache.get(token)
+  if (cached && cached.expires > Date.now()) {
+    return cached.file
+  }
+
   const share = await prisma.fileShare.findFirst({
     where: { enabled: true, AND: [{ OR: [{ token }, { tokenHash: hashToken(token) }] }, { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }] },
     include: { file: { include: { connectedAccount: true } } },
   })
   if (!share || share.file.status !== 'active') throw new Error('Shared file not found')
+
+  shareCache.set(token, { file: share.file, expires: Date.now() + CACHE_TTL_MS })
   return share.file
 }
 

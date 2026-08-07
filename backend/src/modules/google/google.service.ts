@@ -10,10 +10,21 @@ export function createOAuthClient(config: ProviderConfig) {
   return new google.auth.OAuth2(decryptText(config.clientIdEncrypted), decryptText(config.clientSecretEncrypted), config.redirectUri)
 }
 
+const providerConfigCache = new Map<string, { config: ProviderConfig; expires: number }>()
+
 export async function getAuthedGoogleClient(account: ConnectedAccount) {
   if (!account.accessTokenEncrypted || !account.refreshTokenEncrypted || !account.tokenExpiresAt) throw new Error('Google account tokens are missing.')
   if (!account.providerConfigId) throw new Error('Google provider config is missing.')
-  const config = await prisma.providerConfig.findUniqueOrThrow({ where: { id: account.providerConfigId } })
+
+  let config: ProviderConfig
+  const cached = providerConfigCache.get(account.providerConfigId)
+  if (cached && cached.expires > Date.now()) {
+    config = cached.config
+  } else {
+    config = await prisma.providerConfig.findUniqueOrThrow({ where: { id: account.providerConfigId } })
+    providerConfigCache.set(account.providerConfigId, { config, expires: Date.now() + 600_000 })
+  }
+
   const client = createOAuthClient(config)
   client.setCredentials({
     access_token: decryptText(account.accessTokenEncrypted),
