@@ -17,6 +17,9 @@ const envSchema = z.object({
   IP_WHITELIST_SECRET_KEY: z.string().optional(),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_CHAT_ID: z.string().optional(),
+  HTTP_PROXY: z.string().optional(),
+  HTTPS_PROXY: z.string().optional(),
+  GLOBAL_PROXY_URL: z.string().optional(),
 })
 
 export const env = envSchema.parse(process.env)
