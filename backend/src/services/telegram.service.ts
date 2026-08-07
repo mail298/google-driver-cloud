@@ -28,17 +28,13 @@ export async function sendTelegramNotification(text: string) {
   }
 }
 
-export async function notifyUserRegistration(user: { id: string; name: string; email: string }, method = 'Email & Password') {
+export async function notifyUserRegistration(user: { id: string; name: string; email: string }, method = 'Email') {
   try {
     const totalUsers = await prisma.user.count()
     const message = [
       `👤 <b>New User Registered!</b>`,
-      `━━━━━━━━━━━━━━━━━━`,
-      `📛 <b>Name:</b> ${escapeHtml(user.name)}`,
       `📧 <b>Email:</b> <code>${escapeHtml(user.email)}</code>`,
-      `🔑 <b>Method:</b> ${method}`,
-      `🕒 <b>Time:</b> ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC`,
-      `📊 <b>Total Registered Users:</b> ${totalUsers}`
+      `📊 <b>Total Users Registered:</b> ${totalUsers}`
     ].join('\n')
 
     await sendTelegramNotification(message)
@@ -47,48 +43,23 @@ export async function notifyUserRegistration(user: { id: string; name: string; e
   }
 }
 
-export async function notifyAccountConnected(userEmail: string, connectedEmail: string, provider = 'google_drive') {
-  try {
-    const totalAccounts = await prisma.connectedAccount.count({ where: { status: 'connected' } })
-    const message = [
-      `🔗 <b>New Storage Account Connected!</b>`,
-      `━━━━━━━━━━━━━━━━━━`,
-      `👤 <b>User Email:</b> <code>${escapeHtml(userEmail)}</code>`,
-      `📧 <b>Drive Email:</b> <code>${escapeHtml(connectedEmail)}</code>`,
-      `☁️ <b>Provider:</b> ${escapeHtml(provider)}`,
-      `🕒 <b>Time:</b> ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC`,
-      `📊 <b>Total Active Accounts:</b> ${totalAccounts}`
-    ].join('\n')
-
-    await sendTelegramNotification(message)
-  } catch (err) {
-    console.error('Error sending account connected notification to Telegram:', err)
-  }
-}
-
 export async function getSystemAnalytics() {
-  const [totalUsers, totalConnectedAccounts, totalFiles, users] = await Promise.all([
+  const [totalUsers, users] = await Promise.all([
     prisma.user.count(),
-    prisma.connectedAccount.count({ where: { status: 'connected' } }),
-    prisma.file.count({ where: { status: 'active' } }),
     prisma.user.findMany({
-      select: { id: true, name: true, email: true, createdAt: true, _count: { select: { connectedAccounts: true, files: true } } },
+      select: { id: true, name: true, email: true, createdAt: true },
       orderBy: { createdAt: 'desc' },
-      take: 50
+      take: 100
     })
   ])
 
   return {
     totalUsers,
-    totalConnectedAccounts,
-    totalFiles,
     users: users.map((u) => ({
       id: u.id,
       name: u.name,
       email: u.email,
-      createdAt: u.createdAt.toISOString(),
-      connectedAccountsCount: u._count.connectedAccounts,
-      filesCount: u._count.files
+      createdAt: u.createdAt.toISOString()
     }))
   }
 }

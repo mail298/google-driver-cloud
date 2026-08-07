@@ -8,7 +8,6 @@ import { decryptText, encryptText, hashToken, randomToken } from '../../utils/cr
 import { hashPassword } from '../../utils/password.js'
 import { createOAuthClient, syncGoogleQuota } from '../google/google.service.js'
 import { syncS3Quota, testS3Connection } from '../s3/s3.service.js'
-import { notifyAccountConnected } from '../../services/telegram.service.js'
 
 export const connectedAccountRouter = Router()
 
@@ -278,12 +277,6 @@ connectedAccountRouter.get('/google/callback', async (req, res, next) => {
     })
     await prisma.oauthState.update({ where: { id: oauthState.id }, data: { usedAt: new Date() } })
     await syncGoogleQuota(account.id)
-
-    const ownerUser = await prisma.user.findUnique({ where: { id: oauthState.userId } })
-    if (ownerUser) {
-      notifyAccountConnected(ownerUser.email, email, 'Google Drive').catch(() => undefined)
-    }
-
     return res.redirect(`${env.FRONTEND_URL}/google-connected?status=success`)
   } catch (error) {
     console.error('Google OAuth callback failed:', error)

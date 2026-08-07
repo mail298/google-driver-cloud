@@ -24,13 +24,9 @@ systemRouter.post('/telegram-test', requireAuth, async (_req, res, next) => {
   try {
     const analytics = await getSystemAnalytics()
     const text = [
-      `🤖 <b>9Drive Telegram Test Notification</b>`,
-      `━━━━━━━━━━━━━━━━━━`,
+      `👤 <b>9Drive Telegram Test Notification</b>`,
       `✅ Telegram Bot integration is working properly!`,
-      `📊 <b>Total Registered Users:</b> ${analytics.totalUsers}`,
-      `🔗 <b>Connected Accounts:</b> ${analytics.totalConnectedAccounts}`,
-      `📁 <b>Active Files:</b> ${analytics.totalFiles}`,
-      `🕒 <b>Time:</b> ${new Date().toISOString().replace('T', ' ').substring(0, 19)} UTC`
+      `📊 <b>Total Registered Users:</b> ${analytics.totalUsers}`
     ].join('\n')
 
     const success = await sendTelegramNotification(text)
