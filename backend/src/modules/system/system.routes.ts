@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { exec, spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs'
-import { requireAuth } from '../../middleware/auth.middleware.js'
+import { requireAuth, type AuthRequest } from '../../middleware/auth.middleware.js'
 import { prisma } from '../../config/prisma.js'
 import { decryptText, encryptText } from '../../utils/crypto.js'
 import { getSystemAnalytics, sendTelegramNotification } from '../../services/telegram.service.js'
@@ -285,61 +285,46 @@ systemRouter.post('/google-config', requireAuth, async (req, res, next) => {
   }
 })
 
-systemRouter.get('/backup', requireAuth, async (_req, res, next) => {
+systemRouter.get('/backup', requireAuth, async (req: AuthRequest, res, next) => {
   try {
+    const userId = req.user!.id
+
     const [
-      users,
-      userSessions,
-      providerConfigs,
+      user,
       connectedAccounts,
-      storageAccounts,
-      s3StorageConfigs,
       folders,
       files,
       fileShares,
-      filePreviewTokens,
-      auditLogs,
-      workspaceInvites,
-      allowedIps,
       apiKeys,
-      uploadRoutingPolicies
+      uploadRoutingPolicy
     ] = await Promise.all([
-      prisma.user.findMany(),
-      prisma.userSession.findMany(),
-      prisma.providerConfig.findMany(),
-      prisma.connectedAccount.findMany(),
-      prisma.storageAccount.findMany(),
-      prisma.s3StorageConfig.findMany(),
-      prisma.folder.findMany(),
-      prisma.file.findMany(),
-      prisma.fileShare.findMany(),
-      prisma.filePreviewToken.findMany(),
-      prisma.auditLog.findMany(),
-      prisma.workspaceInvite.findMany(),
-      prisma.allowedIp.findMany(),
-      prisma.apiKey.findMany(),
-      prisma.uploadRoutingPolicy.findMany()
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, email: true, status: true, createdAt: true, updatedAt: true }
+      }),
+      prisma.connectedAccount.findMany({
+        where: { userId },
+        include: { storageAccount: true }
+      }),
+      prisma.folder.findMany({ where: { userId } }),
+      prisma.file.findMany({ where: { userId } }),
+      prisma.fileShare.findMany({ where: { userId } }),
+      prisma.apiKey.findMany({ where: { userId } }),
+      prisma.uploadRoutingPolicy.findUnique({ where: { userId } })
     ])
 
     const backupData = {
       version: '1.0',
+      userEmail: user?.email,
       exportedAt: new Date().toISOString(),
       data: {
-        users,
-        userSessions,
-        providerConfigs,
+        user,
         connectedAccounts,
-        storageAccounts,
-        s3StorageConfigs,
         folders,
         files,
         fileShares,
-        filePreviewTokens,
-        auditLogs,
-        workspaceInvites,
-        allowedIps,
         apiKeys,
-        uploadRoutingPolicies
+        uploadRoutingPolicy
       }
     }
 
@@ -350,7 +335,8 @@ systemRouter.get('/backup', requireAuth, async (_req, res, next) => {
     )
 
     const dateStr = new Date().toISOString().split('T')[0]
-    res.setHeader('Content-Disposition', `attachment; filename=9drive-backup-${dateStr}.json`)
+    const userPrefix = user?.email ? user.email.split('@')[0] : 'user'
+    res.setHeader('Content-Disposition', `attachment; filename=9drive-backup-${userPrefix}-${dateStr}.json`)
     res.setHeader('Content-Type', 'application/json')
     return res.status(200).send(jsonString)
   } catch (error) {
@@ -358,8 +344,9 @@ systemRouter.get('/backup', requireAuth, async (_req, res, next) => {
   }
 })
 
-systemRouter.post('/restore', requireAuth, (req, res, next) => {
+systemRouter.post('/restore', requireAuth, (req: AuthRequest, res, next) => {
   try {
+    const userId = req.user!.id
     const contentType = req.headers['content-type']
     if (!contentType?.includes('multipart/form-data')) {
       return res.status(400).json({ code: 'BAD_REQUEST', message: 'multipart/form-data required.' })
@@ -383,36 +370,39 @@ systemRouter.post('/restore', requireAuth, (req, res, next) => {
             return res.status(400).json({ code: 'INVALID_BACKUP', message: 'Invalid backup file format.' })
           }
 
-          // Restore users
-          if (Array.isArray(data.users)) {
-            for (const item of data.users) {
-              await prisma.user.upsert({
-                where: { id: item.id },
-                create: { ...item, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
-                update: { ...item, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
-              }).catch(() => undefined)
-            }
-          }
-
-          // Restore providerConfigs
-          if (Array.isArray(data.providerConfigs)) {
-            for (const item of data.providerConfigs) {
-              await prisma.providerConfig.upsert({
-                where: { id: item.id },
-                create: { ...item, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
-                update: { ...item, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
-              }).catch(() => undefined)
-            }
-          }
-
           // Restore connectedAccounts
           if (Array.isArray(data.connectedAccounts)) {
             for (const item of data.connectedAccounts) {
+              const { storageAccount, ...accData } = item
               await prisma.connectedAccount.upsert({
-                where: { id: item.id },
-                create: { ...item, tokenExpiresAt: item.tokenExpiresAt ? new Date(item.tokenExpiresAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
-                update: { ...item, tokenExpiresAt: item.tokenExpiresAt ? new Date(item.tokenExpiresAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
+                where: { id: accData.id },
+                create: { ...accData, userId, tokenExpiresAt: accData.tokenExpiresAt ? new Date(accData.tokenExpiresAt) : null, createdAt: new Date(accData.createdAt), updatedAt: new Date(accData.updatedAt) },
+                update: { ...accData, userId, tokenExpiresAt: accData.tokenExpiresAt ? new Date(accData.tokenExpiresAt) : null, createdAt: new Date(accData.createdAt), updatedAt: new Date(accData.updatedAt) }
               }).catch(() => undefined)
+
+              if (storageAccount) {
+                await prisma.storageAccount.upsert({
+                  where: { connectedAccountId: accData.id },
+                  create: {
+                    ...storageAccount,
+                    totalBytes: storageAccount.totalBytes ? BigInt(storageAccount.totalBytes) : null,
+                    usedBytes: BigInt(storageAccount.usedBytes || 0),
+                    availableBytes: storageAccount.availableBytes ? BigInt(storageAccount.availableBytes) : null,
+                    trashBytes: storageAccount.trashBytes ? BigInt(storageAccount.trashBytes) : null,
+                    createdAt: new Date(storageAccount.createdAt),
+                    updatedAt: new Date(storageAccount.updatedAt)
+                  },
+                  update: {
+                    ...storageAccount,
+                    totalBytes: storageAccount.totalBytes ? BigInt(storageAccount.totalBytes) : null,
+                    usedBytes: BigInt(storageAccount.usedBytes || 0),
+                    availableBytes: storageAccount.availableBytes ? BigInt(storageAccount.availableBytes) : null,
+                    trashBytes: storageAccount.trashBytes ? BigInt(storageAccount.trashBytes) : null,
+                    createdAt: new Date(storageAccount.createdAt),
+                    updatedAt: new Date(storageAccount.updatedAt)
+                  }
+                }).catch(() => undefined)
+              }
             }
           }
 
@@ -421,8 +411,8 @@ systemRouter.post('/restore', requireAuth, (req, res, next) => {
             for (const item of data.folders) {
               await prisma.folder.upsert({
                 where: { id: item.id },
-                create: { ...item, deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
-                update: { ...item, deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
+                create: { ...item, userId, deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
+                update: { ...item, userId, deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
               }).catch(() => undefined)
             }
           }
@@ -432,21 +422,32 @@ systemRouter.post('/restore', requireAuth, (req, res, next) => {
             for (const item of data.files) {
               await prisma.file.upsert({
                 where: { id: item.id },
-                create: { ...item, sizeBytes: BigInt(item.sizeBytes || 0), deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
-                update: { ...item, sizeBytes: BigInt(item.sizeBytes || 0), deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
+                create: { ...item, userId, sizeBytes: BigInt(item.sizeBytes || 0), deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
+                update: { ...item, userId, sizeBytes: BigInt(item.sizeBytes || 0), deletedAt: item.deletedAt ? new Date(item.deletedAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
+              }).catch(() => undefined)
+            }
+          }
+
+          // Restore fileShares
+          if (Array.isArray(data.fileShares)) {
+            for (const item of data.fileShares) {
+              await prisma.fileShare.upsert({
+                where: { id: item.id },
+                create: { ...item, userId, expiresAt: item.expiresAt ? new Date(item.expiresAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) },
+                update: { ...item, userId, expiresAt: item.expiresAt ? new Date(item.expiresAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
               }).catch(() => undefined)
             }
           }
 
           return res.json({
             status: 'success',
-            message: 'Database backup restored successfully.'
+            message: 'User backup data restored successfully.'
           })
         } catch (err: any) {
-          console.error('Failed to parse and restore database backup:', err)
+          console.error('Failed to parse and restore user database backup:', err)
           return res.status(500).json({
             code: 'RESTORE_FAILED',
-            message: 'Failed to restore database backup. Invalid JSON or schema mismatch.',
+            message: 'Failed to restore user database backup. Invalid JSON format.',
             error: err.message
           })
         }
@@ -462,7 +463,7 @@ systemRouter.post('/restore', requireAuth, (req, res, next) => {
 
     busboy.on('finish', () => {
       if (!fileReceived && !res.headersSent) {
-        return res.status(400).json({ code: 'BAD_REQUEST', message: 'No file uploaded.' })
+        return res.status(400).json({ code: 'BAD_REQUEST', message: 'No backup file uploaded.' })
       }
     })
 
