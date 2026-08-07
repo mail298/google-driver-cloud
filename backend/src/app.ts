@@ -26,6 +26,7 @@ app.use(express.json({ limit: '1mb' }))
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 app.use('/api', publicApiRouter)
 app.use('/public', publicRouter)
+app.use('/public-share', publicRouter)
 
 // IP Whitelist protection for Dashboard & Admin Auth API routes
 app.use(ipWhitelistMiddleware)
