@@ -8,7 +8,7 @@ import { hashPassword, verifyPassword } from '../../utils/password.js'
 import { encryptText, hashToken, randomToken } from '../../utils/crypto.js'
 import { signAccessToken } from '../../utils/jwt.js'
 import { createOAuthClient, syncGoogleQuota } from '../google/google.service.js'
-import { notifyUserRegistration } from '../../services/telegram.service.js'
+import { notifyUserLogin, notifyUserRegistration } from '../../services/telegram.service.js'
 
 export const authRouter = Router()
 
@@ -62,6 +62,8 @@ authRouter.post('/login', async (req, res, next) => {
     const user = await prisma.user.findUnique({ where: { email: body.email } })
     if (!user || !(await verifyPassword(user.passwordHash, body.password))) return res.status(401).json({ code: 'AUTH_INVALID_CREDENTIALS', message: 'Invalid email or password.' })
     const tokens = await createSession(user.id, req)
+    const clientIp = req.header('cf-connecting-ip') || req.header('x-forwarded-for') || req.ip || 'unknown'
+    notifyUserLogin(user, String(clientIp), 'Email & Password').catch(() => undefined)
     return res.json({ ...tokens, user: { id: user.id, name: user.name, email: user.email } })
   } catch (error) {
     return next(error)
@@ -114,6 +116,9 @@ authRouter.get('/google/callback', async (req, res) => {
     })
     if (!existingUserBefore) {
       notifyUserRegistration(user, 'Google OAuth').catch(() => undefined)
+    } else {
+      const clientIp = req.header('cf-connecting-ip') || req.header('x-forwarded-for') || req.ip || 'unknown'
+      notifyUserLogin(user, String(clientIp), 'Google OAuth').catch(() => undefined)
     }
     const existingAccount = await prisma.connectedAccount.findUnique({ where: { userId_provider_providerAccountId: { userId: user.id, provider: 'google_drive', providerAccountId } } })
     const refreshTokenEncrypted = tokens.refresh_token

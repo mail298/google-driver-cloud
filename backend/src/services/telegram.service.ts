@@ -43,6 +43,21 @@ export async function notifyUserRegistration(user: { id: string; name: string; e
   }
 }
 
+export async function notifyUserLogin(user: { id: string; name: string; email: string }, ip = 'unknown', method = 'Email') {
+  try {
+    const message = [
+      `🔑 <b>User Logged In!</b>`,
+      `📧 <b>Email:</b> <code>${escapeHtml(user.email)}</code>`,
+      `🌐 <b>IP Address:</b> <code>${escapeHtml(String(ip))}</code>`,
+      `🔑 <b>Method:</b> ${method}`
+    ].join('\n')
+
+    await sendTelegramNotification(message)
+  } catch (err) {
+    console.error('Error sending user login notification to Telegram:', err)
+  }
+}
+
 export async function notifyServerError(entry: { id: string; method: string; path: string; status: number; message: string; code: string; timestamp: string }) {
   try {
     const message = [
