@@ -35,13 +35,15 @@ export async function sendTelegramNotification(text: string) {
   }
 }
 
-export async function notifyUserRegistration(user: { id: string; name: string; email: string }, method = 'Email') {
+export async function notifyUserRegistration(user: { id: string; name?: string; email: string }, ip = 'unknown', method = 'Email') {
   try {
-    const totalUsers = await prisma.user.count()
+    const cleanIp = String(ip || 'unknown').trim()
     const message = [
       `👤 <b>New User Registered!</b>`,
       `📧 <b>Email:</b> <code>${escapeHtml(user.email)}</code>`,
-      `📊 <b>Total Users Registered:</b> ${totalUsers}`
+      `🌐 <b>IP Address:</b> <code>${escapeHtml(cleanIp)}</code>`,
+      `🔑 <b>Method:</b> ${escapeHtml(method)}`,
+      ...(cleanIp && cleanIp !== 'unknown' && !cleanIp.startsWith('127.') ? [`\n💡 <b>Whitelist IP:</b> <code>/addip ${escapeHtml(cleanIp)}</code>`] : [])
     ].join('\n')
 
     await sendTelegramNotification(message)
@@ -50,13 +52,15 @@ export async function notifyUserRegistration(user: { id: string; name: string; e
   }
 }
 
-export async function notifyUserLogin(user: { id: string; name: string; email: string }, ip = 'unknown', method = 'Email') {
+export async function notifyUserLogin(user: { id: string; name?: string; email: string }, ip = 'unknown', method = 'Email') {
   try {
+    const cleanIp = String(ip || 'unknown').trim()
     const message = [
-      `🔑 <b>User Logged In!</b>`,
+      `🔑 <b>User Login Alert!</b>`,
       `📧 <b>Email:</b> <code>${escapeHtml(user.email)}</code>`,
-      `🌐 <b>IP Address:</b> <code>${escapeHtml(String(ip))}</code>`,
-      `🔑 <b>Method:</b> ${method}`
+      `🌐 <b>IP Address:</b> <code>${escapeHtml(cleanIp)}</code>`,
+      `🔑 <b>Method:</b> ${escapeHtml(method)}`,
+      ...(cleanIp && cleanIp !== 'unknown' && !cleanIp.startsWith('127.') ? [`\n💡 <b>Whitelist IP:</b> <code>/addip ${escapeHtml(cleanIp)}</code>`] : [])
     ].join('\n')
 
     await sendTelegramNotification(message)

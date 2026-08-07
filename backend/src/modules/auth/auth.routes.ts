@@ -41,6 +41,14 @@ async function verifyCaptcha(token: string | undefined) {
   return Boolean(data.success)
 }
 
+function getClientIp(req: any): string {
+  const cfIp = req.header('cf-connecting-ip')
+  if (cfIp) return String(cfIp).trim()
+  const xForwarded = req.header('x-forwarded-for')
+  if (xForwarded) return String(xForwarded).split(',')[0].trim()
+  return String(req.ip || 'unknown').trim()
+}
+
 authRouter.post('/register', async (req, res, next) => {
   try {
     const body = registerSchema.parse(req.body)
@@ -49,7 +57,8 @@ authRouter.post('/register', async (req, res, next) => {
     if (existing) return res.status(409).json({ code: 'AUTH_EMAIL_TAKEN', message: 'Email already registered.' })
     const user = await prisma.user.create({ data: { name: body.name, email: body.email, passwordHash: await hashPassword(body.password) } })
     const tokens = await createSession(user.id, req)
-    notifyUserRegistration(user, 'Email & Password').catch(() => undefined)
+    const clientIp = getClientIp(req)
+    notifyUserRegistration(user, clientIp, 'Email & Password').catch((err) => console.error('[TELEGRAM] Register notify error:', err))
     return res.status(201).json({ ...tokens, user: { id: user.id, name: user.name, email: user.email } })
   } catch (error) {
     return next(error)
@@ -62,8 +71,8 @@ authRouter.post('/login', async (req, res, next) => {
     const user = await prisma.user.findUnique({ where: { email: body.email } })
     if (!user || !(await verifyPassword(user.passwordHash, body.password))) return res.status(401).json({ code: 'AUTH_INVALID_CREDENTIALS', message: 'Invalid email or password.' })
     const tokens = await createSession(user.id, req)
-    const clientIp = req.header('cf-connecting-ip') || req.header('x-forwarded-for') || req.ip || 'unknown'
-    notifyUserLogin(user, String(clientIp), 'Email & Password').catch(() => undefined)
+    const clientIp = getClientIp(req)
+    notifyUserLogin(user, clientIp, 'Email & Password').catch((err) => console.error('[TELEGRAM] Login notify error:', err))
     return res.json({ ...tokens, user: { id: user.id, name: user.name, email: user.email } })
   } catch (error) {
     return next(error)
@@ -114,11 +123,9 @@ authRouter.get('/google/callback', async (req, res) => {
       create: { email, name, passwordHash: await hashPassword(randomToken(32)) },
       update: { name },
     })
+    const clientIp = getClientIp(req)
     if (!existingUserBefore) {
-      notifyUserRegistration(user, 'Google OAuth').catch(() => undefined)
-    } else {
-      const clientIp = req.header('cf-connecting-ip') || req.header('x-forwarded-for') || req.ip || 'unknown'
-      notifyUserLogin(user, String(clientIp), 'Google OAuth').catch(() => undefined)
+      notifyUserRegistration(user, clientIp, 'Google OAuth').catch((err) => console.error('[TELEGRAM] Google reg notify error:', err))
     }
     const existingAccount = await prisma.connectedAccount.findUnique({ where: { userId_provider_providerAccountId: { userId: user.id, provider: 'google_drive', providerAccountId } } })
     const refreshTokenEncrypted = tokens.refresh_token
@@ -174,6 +181,8 @@ authRouter.post('/google/exchange', async (req, res, next) => {
     if (!handoff) return res.status(401).json({ code: 'AUTH_GOOGLE_HANDOFF_INVALID', message: 'Google login session expired.' })
     await prisma.authHandoff.update({ where: { id: handoff.id }, data: { usedAt: new Date() } })
     const tokens = await createSession(handoff.userId, req)
+    const clientIp = getClientIp(req)
+    notifyUserLogin(handoff.user, clientIp, 'Google OAuth').catch((err) => console.error('[TELEGRAM] Google exchange notify error:', err))
     return res.json({ ...tokens, user: { id: handoff.user.id, name: handoff.user.name, email: handoff.user.email } })
   } catch (error) {
     return next(error)
