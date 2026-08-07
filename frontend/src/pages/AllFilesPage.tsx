@@ -580,7 +580,8 @@ export function AllFilesPage() {
   }
 
   async function copyShareLink() {
-    const targetUrl = formatCdnUrl(shareUrl, activeFile?.id)
+    const shareToken = shareUrl.split('/public/files/')[1] || ''
+    const targetUrl = `${window.location.origin}/public/files/${shareToken}`
     await navigator.clipboard.writeText(targetUrl)
     setCopiedShareLink(true)
     window.setTimeout(() => setCopiedShareLink(false), 1600)
@@ -789,7 +790,10 @@ export function AllFilesPage() {
           const isImage = activeFile?.kind === 'image' || activeFile?.mimeType?.startsWith('image/')
           const isAudio = activeFile?.mimeType?.startsWith('audio/')
 
-          const activeShareUrl = formatCdnUrl(shareUrl, activeFile?.id)
+          const shareToken = shareUrl.split('/public/files/')[1] || ''
+          const fallbackDirectStreamUrl = `${API_URL}/public/files/${shareToken}/preview`
+          const mediaStreamUrl = formatCdnUrl(fallbackDirectStreamUrl, activeFile?.id)
+          const webViewPageUrl = `${window.location.origin}/public/files/${shareToken}`
 
           const mediaTitle = isVideo
             ? 'Direct Video Stream Link'
@@ -824,12 +828,12 @@ export function AllFilesPage() {
                 : 'Copy Direct Stream Link'
 
           const htmlEmbedCode = isVideo
-            ? `<video controls width="100%" preload="metadata" playsinline onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src=s.src.replace(/cdn\\d+/,'cdn2');this.load();}}"><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+            ? `<video controls width="100%" preload="metadata" playsinline onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src='${fallbackDirectStreamUrl}';this.load();}}"><source src="${mediaStreamUrl}" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
             : isAudio
-              ? `<audio controls preload="metadata" onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src=s.src.replace(/cdn\\d+/,'cdn2');this.load();}}"><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
+              ? `<audio controls preload="metadata" onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src='${fallbackDirectStreamUrl}';this.load();}}"><source src="${mediaStreamUrl}" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
               : isImage
-                ? `<img src="${activeShareUrl}/preview" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" onerror="if(!this.dataset.fail){this.dataset.fail='1';this.src=this.src.replace(/cdn\\d+/,'cdn2');}" />`
-                : `<a href="${activeShareUrl}/preview" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
+                ? `<img src="${mediaStreamUrl}" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" onerror="if(!this.dataset.fail){this.dataset.fail='1';this.src='${fallbackDirectStreamUrl}';}" />`
+                : `<a href="${mediaStreamUrl}" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
 
           return (
             <div className="grid gap-4 sm:gap-5 min-w-0">
@@ -868,10 +872,10 @@ export function AllFilesPage() {
                   {mediaSubtitle}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 min-w-0">
-                  <Input value={`${activeShareUrl}/preview`} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
+                  <Input value={mediaStreamUrl} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
                   <Button
                     onClick={async () => {
-                      await navigator.clipboard.writeText(`${activeShareUrl}/preview`)
+                      await navigator.clipboard.writeText(mediaStreamUrl)
                       setCopiedMediaLink(true)
                       setTimeout(() => setCopiedMediaLink(false), 2000)
                     }}
@@ -919,7 +923,7 @@ export function AllFilesPage() {
                 </label>
                 <p className="text-xs text-slate-500 mb-2 leading-relaxed">Opens full 9Drive preview interface with download button.</p>
                 <div className="flex flex-col sm:flex-row gap-2 min-w-0">
-                  <Input value={activeShareUrl} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-950" />
+                  <Input value={webViewPageUrl} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-950" />
                   <Button
                     onClick={copyShareLink}
                     variant="outline"
