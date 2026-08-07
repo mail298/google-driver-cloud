@@ -351,6 +351,51 @@ export function AllFilesPage() {
     setSelectedFiles((files) => files.filter((_, fileIndex) => fileIndex !== index))
   }
 
+  const pageDragCounterRef = useRef(0)
+  const [isPageDragging, setIsPageDragging] = useState(false)
+
+  function handlePageDragEnter(event: DragEvent<HTMLDivElement>) {
+    if (!event.dataTransfer?.types?.includes('Files')) return
+    event.preventDefault()
+    event.stopPropagation()
+    pageDragCounterRef.current += 1
+    if (pageDragCounterRef.current === 1) {
+      setIsPageDragging(true)
+    }
+  }
+
+  function handlePageDragOver(event: DragEvent<HTMLDivElement>) {
+    if (!event.dataTransfer?.types?.includes('Files')) return
+    event.preventDefault()
+    event.stopPropagation()
+  }
+
+  function handlePageDragLeave(event: DragEvent<HTMLDivElement>) {
+    if (!event.dataTransfer?.types?.includes('Files')) return
+    event.preventDefault()
+    event.stopPropagation()
+    pageDragCounterRef.current -= 1
+    if (pageDragCounterRef.current <= 0) {
+      pageDragCounterRef.current = 0
+      setIsPageDragging(false)
+    }
+  }
+
+  function handlePageDrop(event: DragEvent<HTMLDivElement>) {
+    if (!event.dataTransfer?.types?.includes('Files')) return
+    event.preventDefault()
+    event.stopPropagation()
+    pageDragCounterRef.current = 0
+    setIsPageDragging(false)
+
+    const filesToUpload = Array.from(event.dataTransfer.files)
+    if (filesToUpload.length > 0) {
+      uploadFiles(filesToUpload, activeFolderId || null, null).catch((err) => {
+        console.error('Direct page drop upload failed:', err)
+      })
+    }
+  }
+
   function handleUploadDrag(event: DragEvent<HTMLLabelElement>) {
     event.preventDefault()
     event.stopPropagation()
@@ -707,7 +752,29 @@ export function AllFilesPage() {
 
   return (
     <>
-      <div onContextMenu={openEmptyContextMenu} className="min-h-[620px] w-full min-w-0">
+      {/* Full Page Drag & Drop Upload Overlay */}
+      {isPageDragging && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-blue-900/40 backdrop-blur-md border-4 border-dashed border-blue-500 rounded-3xl m-4 pointer-events-none transition-all duration-300 animate-in fade-in">
+          <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-2xl shadow-blue-500/50 mb-5 animate-bounce">
+            <Upload className="h-12 w-12 text-white" />
+          </div>
+          <h2 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
+            Drop files here to upload instantly
+          </h2>
+          <p className="mt-2 text-sm font-semibold text-blue-100 bg-slate-900/80 px-5 py-2 rounded-full border border-blue-400/30 shadow-lg">
+            Destination: <b className="text-white">{activeFolder ? activeFolder.name : 'All Files (Root)'}</b> • Target Storage: <b className="text-emerald-400">Automatic (Default)</b>
+          </p>
+        </div>
+      )}
+
+      <div
+        onContextMenu={openEmptyContextMenu}
+        onDragEnter={handlePageDragEnter}
+        onDragOver={handlePageDragOver}
+        onDragLeave={handlePageDragLeave}
+        onDrop={handlePageDrop}
+        className="relative min-h-[620px] w-full min-w-0"
+      >
         <PageHeader title={activeFolder ? <span className="block min-w-0 truncate"><button className="text-blue-600 hover:underline" onClick={closeFolder}>All Files</button>{folderBreadcrumbs.map((folder, index) => <span key={folder.id}><span className="text-slate-400"> / </span>{index === folderBreadcrumbs.length - 1 ? <span>{folder.name}</span> : <button className="text-blue-600 hover:underline" onClick={() => folder.id && openFolderById(folder.id)}>{folder.name}</button>}</span>)}</span> : 'All Files'} />
         {/* Action buttons row — visible on mobile/tablet, hidden on desktop (desktop uses header slot) */}
         <div className="mt-4 flex flex-wrap items-center gap-2 lg:hidden">
