@@ -220,7 +220,7 @@ fileRouter.get('/shared-links', async (req: AuthRequest, res, next) => {
     })
     return res.json({
       shares: shares.filter((share) => share.file.status === 'active').map((share) => {
-        const url = share.token ? `${env.FRONTEND_URL}/file/${share.token}` : null
+        const url = share.token ? `${env.FRONTEND_URL}/public/files/${share.token}` : null
         return {
           id: share.id,
           url,
@@ -295,7 +295,7 @@ fileRouter.post('/:id/share', async (req: AuthRequest, res, next) => {
       shareId = share.id
     }
 
-    return res.status(existingShare ? 200 : 201).json({ url: `${env.FRONTEND_URL}/file/${token}`, shareId })
+    return res.status(existingShare ? 200 : 201).json({ url: `${env.FRONTEND_URL}/public/files/${token}`, shareId })
   } catch (error) {
     return next(error)
   }

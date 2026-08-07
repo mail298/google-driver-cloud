@@ -153,7 +153,7 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <a href={`/file/${token}/embed`} target="_blank" rel="noreferrer" className="hidden sm:block">
+          <a href={`/public/files/${token}/embed`} target="_blank" rel="noreferrer" className="hidden sm:block">
             <Button variant="ghost" className="text-slate-100 hover:bg-white/10"><ExternalLink className="h-4 w-4" />Embed</Button>
           </a>
           <a href={downloadUrl} download>

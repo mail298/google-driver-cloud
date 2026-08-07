@@ -26,6 +26,8 @@ function App() {
         <Route path="register" element={<RegisterPage />} />
         <Route path="google-auth" element={<GoogleAuthPage />} />
         <Route path="google-connected" element={<GoogleConnectedPage />} />
+        <Route path="public/files/:token" element={<PublicFilePage />} />
+        <Route path="public/files/:token/embed" element={<PublicFilePage embed />} />
         <Route path="file/:token" element={<PublicFilePage />} />
         <Route path="file/:token/embed" element={<PublicFilePage embed />} />
         <Route element={<ProtectedRoute />}>
