@@ -780,7 +780,7 @@ export function AllFilesPage() {
         title="Share File Link"
         description=""
         onClose={() => setShareOpen(false)}
-        className="sm:max-w-xl sm:rounded-3xl p-6"
+        className="w-full max-w-full overflow-hidden sm:max-w-xl sm:rounded-3xl p-4 sm:p-6"
       >
         {(() => {
           const isVideo = activeFile?.kind === 'video' || activeFile?.mimeType?.startsWith('video/')
@@ -828,42 +828,42 @@ export function AllFilesPage() {
                 : `<a href="${shareUrl}/preview" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
 
           return (
-            <div className="grid gap-5">
+            <div className="grid gap-4 sm:gap-5 min-w-0">
               {/* File Header Banner Card */}
               {activeFile ? (
-                <div className="flex items-center gap-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3.5 dark:border-slate-800/80 dark:bg-slate-800/40">
-                  <FileIcon file={activeFile} className="h-11 w-11 shrink-0" />
-                  <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200/80 bg-slate-50/80 p-3 sm:p-3.5 dark:border-slate-800/80 dark:bg-slate-800/40 min-w-0 overflow-hidden">
+                  <FileIcon file={activeFile} className="h-10 w-10 sm:h-11 sm:w-11 shrink-0" />
+                  <div className="min-w-0 flex-1 overflow-hidden">
                     <h4 className="truncate text-sm font-extrabold text-slate-900 dark:text-slate-100" title={activeFile.name}>
                       {activeFile.name}
                     </h4>
-                    <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                      <span>{activeFile.size}</span>
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">{activeFile.size}</span>
                       <span>•</span>
-                      <span className="truncate max-w-[200px] font-medium text-slate-400">{activeFile.mimeType || 'Public File'}</span>
+                      <span className="truncate max-w-[180px] font-medium text-slate-400">{activeFile.mimeType || 'Public File'}</span>
                     </div>
                   </div>
                 </div>
               ) : null}
 
               {/* Option 1: Direct Media / Video Stream Link */}
-              <div className="relative overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-blue-50/20 p-4 shadow-sm dark:border-blue-500/40 dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <label className="flex items-center gap-2 text-xs font-extrabold tracking-wide text-blue-700 dark:text-blue-300">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-md bg-blue-600 text-white text-[10px]">
+              <div className="relative overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-blue-50/20 p-3.5 sm:p-4 shadow-sm dark:border-blue-500/40 dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40 min-w-0">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 min-w-0">
+                  <label className="flex items-center gap-2 text-xs font-extrabold tracking-wide text-blue-700 dark:text-blue-300 min-w-0">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-blue-600 text-white text-[10px]">
                       {isVideo ? '🎬' : isImage ? '🖼️' : isAudio ? '🎵' : '✨'}
                     </span>
-                    {mediaTitle}
+                    <span className="truncate">{mediaTitle}</span>
                   </label>
-                  <span className="rounded-full bg-blue-600/10 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-600 dark:bg-blue-400/20 dark:text-blue-300">
+                  <span className="shrink-0 rounded-full bg-blue-600/10 px-2.5 py-0.5 text-[10px] font-black uppercase text-blue-600 dark:bg-blue-400/20 dark:text-blue-300">
                     {mediaBadge}
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">
                   {mediaSubtitle}
                 </p>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Input value={`${shareUrl}/preview`} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
+                <div className="flex flex-col sm:flex-row gap-2 min-w-0">
+                  <Input value={`${shareUrl}/preview`} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
                   <Button
                     onClick={async () => {
                       await navigator.clipboard.writeText(`${shareUrl}/preview`)
@@ -879,17 +879,17 @@ export function AllFilesPage() {
               </div>
 
               {/* Option 2: Ready-to-use HTML Snippet */}
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  <Code2 className="h-4 w-4 text-violet-500" />
-                  HTML Embed Code ({isVideo ? 'Video Player' : isImage ? 'Image' : isAudio ? 'Audio Player' : 'Link'})
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-4 dark:border-slate-800 dark:bg-slate-900/50 min-w-0 overflow-hidden">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 min-w-0">
+                  <Code2 className="h-4 w-4 shrink-0 text-violet-500" />
+                  <span className="truncate">HTML Embed Code ({isVideo ? 'Video Player' : isImage ? 'Image' : isAudio ? 'Audio Player' : 'Link'})</span>
                 </label>
-                <p className="text-xs text-slate-500 mb-2">Ready to copy and paste directly into your HTML landing page code.</p>
-                <div className="flex flex-col sm:flex-row gap-2">
+                <p className="text-xs text-slate-500 mb-2 leading-relaxed">Ready to copy and paste directly into your HTML landing page code.</p>
+                <div className="flex flex-col sm:flex-row gap-2 min-w-0">
                   <Input
                     value={htmlEmbedCode}
                     readOnly
-                    className="flex-1 font-mono text-xs bg-white dark:bg-slate-950"
+                    className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-950"
                   />
                   <Button
                     variant="outline"
@@ -907,14 +907,14 @@ export function AllFilesPage() {
               </div>
 
               {/* Option 3: Web Page Link */}
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
-                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  <Copy className="h-4 w-4 text-slate-400" />
-                  9Drive Web View Page
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-4 dark:border-slate-800 dark:bg-slate-900/50 min-w-0 overflow-hidden">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 min-w-0">
+                  <Copy className="h-4 w-4 shrink-0 text-slate-400" />
+                  <span>9Drive Web View Page</span>
                 </label>
-                <p className="text-xs text-slate-500 mb-2">Opens full 9Drive preview interface with download button.</p>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <Input value={shareUrl} readOnly className="flex-1 font-mono text-xs bg-white dark:bg-slate-950" />
+                <p className="text-xs text-slate-500 mb-2 leading-relaxed">Opens full 9Drive preview interface with download button.</p>
+                <div className="flex flex-col sm:flex-row gap-2 min-w-0">
+                  <Input value={shareUrl} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-950" />
                   <Button onClick={copyShareLink} variant="outline" className="shrink-0 font-bold">
                     {copiedShareLink ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                     {copiedShareLink ? 'Copied!' : 'Copy Page Link'}
