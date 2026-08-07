@@ -351,3 +351,13 @@ model WorkspaceInvite {
   @@index([targetType, targetId])
   @@map("workspace_invites")
 }
+
+model AllowedIp {
+  id        String   @id @default(uuid()) @db.Char(36)
+  ip        String   @unique @db.VarChar(191)
+  label     String?  @db.VarChar(191)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("allowed_ips")
+}

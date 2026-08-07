@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, type FormEvent } from 'react'
-import { Bell, Cloud, Database, Globe, HardDrive, Link2, RefreshCw, Trash2 } from 'lucide-react'
+import { Bell, Cloud, Database, Globe, HardDrive, Link2, Plus, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DummyModal } from '@/components/drive/DummyModal'
@@ -66,6 +66,70 @@ export function SettingsPage() {
   const [restoreFile, setRestoreFile] = useState<File | null>(null)
   const [restoreMessage, setRestoreMessage] = useState('')
   const [restoreSuccess, setRestoreSuccess] = useState(false)
+
+  // IP Whitelist states
+  const [currentClientIp, setCurrentClientIp] = useState('')
+  const [ipWhitelistEnabled, setIpWhitelistEnabled] = useState(false)
+  const [whitelistedIpList, setWhitelistedIpList] = useState<Array<{ id: string; ip: string; label?: string | null; createdAt: string }>>([])
+  const [newIpInput, setNewIpInput] = useState('')
+  const [newIpLabelInput, setNewIpLabelInput] = useState('')
+  const [addingIp, setAddingIp] = useState(false)
+  const [deletingIpId, setDeletingIpId] = useState<string | null>(null)
+  const [ipMessage, setIpMessage] = useState('')
+
+  async function loadIpWhitelist() {
+    try {
+      const data = await apiFetch<{
+        currentIp: string
+        enabled: boolean
+        dbIps: Array<{ id: string; ip: string; label?: string | null; createdAt: string }>
+        whitelistedIps: string[]
+      }>('/system/ip-whitelist')
+
+      setCurrentClientIp(data.currentIp)
+      setIpWhitelistEnabled(data.enabled)
+      setWhitelistedIpList(data.dbIps)
+    } catch (err) {
+      console.error('Failed to load IP whitelist:', err)
+    }
+  }
+
+  async function addIpToWhitelist(ipToAdd?: string, labelToAdd?: string) {
+    const targetIp = ipToAdd || newIpInput
+    const targetLabel = labelToAdd !== undefined ? labelToAdd : newIpLabelInput
+    if (!targetIp.trim()) return
+
+    setAddingIp(true)
+    setIpMessage('')
+    try {
+      await apiFetch('/system/ip-whitelist', {
+        method: 'POST',
+        body: JSON.stringify({ ip: targetIp.trim(), label: targetLabel.trim() || undefined }),
+      })
+      setNewIpInput('')
+      setNewIpLabelInput('')
+      setIpMessage(`IP ${targetIp.trim()} added to whitelist!`)
+      await loadIpWhitelist()
+    } catch (err: any) {
+      setIpMessage(err.message || 'Failed to add IP to whitelist.')
+    } finally {
+      setAddingIp(false)
+    }
+  }
+
+  async function removeIpFromWhitelist(id: string) {
+    setDeletingIpId(id)
+    setIpMessage('')
+    try {
+      await apiFetch(`/system/ip-whitelist/${id}`, { method: 'DELETE' })
+      setIpMessage('IP address removed from whitelist.')
+      await loadIpWhitelist()
+    } catch (err: any) {
+      setIpMessage(err.message || 'Failed to remove IP.')
+    } finally {
+      setDeletingIpId(null)
+    }
+  }
 
   async function downloadBackup() {
     setDownloadingBackup(true)
@@ -252,6 +316,8 @@ export function SettingsPage() {
     } catch (e) {
       console.error('Failed to load global Google config', e)
     }
+
+    await loadIpWhitelist()
   }
 
   useEffect(() => {
@@ -600,6 +666,109 @@ export function SettingsPage() {
                   {restoreMessage}
                 </p>
               )}
+
+              {/* IP Security & Whitelist Section (Translucent Emerald Glass) */}
+              <div className="mt-6 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/30 p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 shrink-0 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                      <ShieldCheck className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">IP Security & Whitelist</h3>
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${ipWhitelistEnabled ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}>
+                          {ipWhitelistEnabled ? '⚡ Active (Restricted)' : '🌐 Open Access (All IPs Allowed)'}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[12px] text-slate-500 dark:text-slate-400 leading-normal">
+                        Restrict admin dashboard access to allowed IP addresses without redeploying the server. Public file links remain 100% accessible to everyone.
+                      </p>
+                    </div>
+                  </div>
+
+                  {currentClientIp && (
+                    <div className="shrink-0 rounded-xl bg-white dark:bg-slate-900 border border-emerald-500/20 p-2.5 sm:text-right">
+                      <span className="text-[10px] font-extrabold uppercase text-slate-400 block">Your Current IP</span>
+                      <code className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 block">{currentClientIp}</code>
+                      <button
+                        type="button"
+                        onClick={() => addIpToWhitelist(currentClientIp, 'My Current IP')}
+                        disabled={addingIp || whitelistedIpList.some((item) => item.ip === currentClientIp)}
+                        className="mt-1 inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 disabled:opacity-50"
+                      >
+                        <Plus className="h-3 w-3" />
+                        {whitelistedIpList.some((item) => item.ip === currentClientIp) ? 'Already Added' : 'Add My Current IP'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Add IP Form */}
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    addIpToWhitelist()
+                  }}
+                  className="flex flex-col sm:flex-row gap-2 mt-1"
+                >
+                  <input
+                    type="text"
+                    placeholder="IP Address or Subnet (e.g. 103.123.45.67 or 103.123.45.*)"
+                    value={newIpInput}
+                    onChange={(e) => setNewIpInput(e.target.value)}
+                    required
+                    className="flex-1 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-xs font-mono"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Label (optional, e.g. Home, Office)"
+                    value={newIpLabelInput}
+                    onChange={(e) => setNewIpLabelInput(e.target.value)}
+                    className="sm:w-48 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 text-xs"
+                  />
+                  <Button type="submit" disabled={addingIp || !newIpInput.trim()} className="h-10 shrink-0 font-bold bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <Plus className="h-4 w-4 mr-1" />
+                    {addingIp ? 'Adding...' : 'Add Whitelist IP'}
+                  </Button>
+                </form>
+
+                {ipMessage && (
+                  <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-1">{ipMessage}</p>
+                )}
+
+                {/* Whitelisted IP List Table */}
+                {whitelistedIpList.length > 0 && (
+                  <div className="mt-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 overflow-hidden">
+                    <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                      <span>Whitelisted IPs ({whitelistedIpList.length})</span>
+                      <span className="text-[10px] text-slate-400 font-normal">Changes take effect instantly with 0 redeploys</span>
+                    </div>
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800/60 max-h-52 overflow-y-auto">
+                      {whitelistedIpList.map((item) => (
+                        <div key={item.id} className="p-3 flex items-center justify-between gap-3 text-xs hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <code className="font-mono font-bold text-slate-900 dark:text-slate-100">{item.ip}</code>
+                            {item.label && <span className="rounded-md bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] text-slate-500 font-semibold">{item.label}</span>}
+                            {item.ip === currentClientIp && (
+                              <span className="rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-extrabold">You</span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeIpFromWhitelist(item.id)}
+                            disabled={deletingIpId === item.id}
+                            className="text-red-500 hover:text-red-600 font-bold p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors disabled:opacity-50"
+                            title="Remove from Whitelist"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
         </div>
