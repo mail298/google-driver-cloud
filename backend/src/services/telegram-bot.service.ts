@@ -18,10 +18,37 @@ export function startTelegramBotListener() {
 
   console.log('[TELEGRAM_BOT] Starting Telegram Bot long polling listener...')
 
+  // Automatically register command menu for Telegram UI autocomplete when typing '/'
+  registerBotCommands(botToken).catch((err) => {
+    console.error('[TELEGRAM_BOT] Failed to set bot commands:', err)
+  })
+
   // Start polling loop asynchronously
   pollTelegramUpdates(botToken, String(chatId).trim()).catch((err) => {
     console.error('[TELEGRAM_BOT] Long polling loop error:', err)
   })
+}
+
+async function registerBotCommands(botToken: string) {
+  try {
+    const commands = [
+      { command: 'addip', description: 'Tambah IP ke Whitelist (contoh: /addip 103.x.x.x)' },
+      { command: 'delip', description: 'Hapus IP dari Whitelist (contoh: /delip 103.x.x.x)' },
+      { command: 'whitelist', description: 'Lihat daftar IP yang terdaftar di Whitelist' },
+      { command: 'mychatid', description: 'Tampilkan Chat ID Telegram kamu' },
+      { command: 'help', description: 'Bantuan & daftar menu perintah' }
+    ]
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/setMyCommands`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ commands })
+    })
+    if (res.ok) {
+      console.log('[TELEGRAM_BOT] Successfully registered bot commands menu for Telegram UI.')
+    }
+  } catch (err) {
+    console.error('[TELEGRAM_BOT] Failed to register bot commands:', err)
+  }
 }
 
 async function pollTelegramUpdates(botToken: string, targetChatId: string) {
