@@ -142,15 +142,24 @@ export function AllFilesPage() {
   function formatCdnUrl(originalUrl: string, fileId?: string) {
     if (!originalUrl) return originalUrl
     try {
+      const cdnListRaw = import.meta.env.VITE_CDN_SUBDOMAINS as string | undefined
+      if (!cdnListRaw) return originalUrl
+
+      const cdnList = cdnListRaw.split(',').map((s) => s.trim()).filter(Boolean)
+      if (cdnList.length === 0) return originalUrl
+
       const urlObj = new URL(originalUrl)
-      const host = urlObj.host
-
       const charCodeSum = (fileId || '0').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-      const cdnIndex = (charCodeSum % 5) + 1
-      const cdnSubdomain = `cdn${cdnIndex}`
+      const selectedDomain = cdnList[charCodeSum % cdnList.length]
 
-      // Auto-sharded 1st-level subdomain format (e.g. cdn1-googledrivefrontend.ikan212.com)
-      urlObj.host = `${cdnSubdomain}-${host}`
+      if (selectedDomain.startsWith('http://') || selectedDomain.startsWith('https://')) {
+        const targetObj = new URL(selectedDomain)
+        urlObj.protocol = targetObj.protocol
+        urlObj.host = targetObj.host
+      } else {
+        urlObj.host = selectedDomain
+      }
+
       return urlObj.toString()
     } catch {
       return originalUrl
