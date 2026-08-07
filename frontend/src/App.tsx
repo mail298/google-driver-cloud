@@ -20,6 +20,7 @@ import { ActivityLogPage } from '@/pages/ActivityLogPage'
 import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { UploadProvider } from '@/context/UploadContext'
 import { apiFetch } from '@/lib/api'
+import { getAccessToken } from '@/lib/auth'
 
 function App() {
   // Synchronously initialize state from sessionStorage so page refresh instantly renders ForbiddenPage without flashing login screen
@@ -33,8 +34,7 @@ function App() {
     window.addEventListener('ip-blocked', handleIpBlocked)
 
     // Silent check on app load to detect IP whitelist status
-    const hasToken = Boolean(localStorage.getItem('9drive.accessToken'))
-    apiFetch('/auth/me', { skipAuth: !hasToken })
+    apiFetch('/auth/me', { skipAuth: !getAccessToken() })
       .then(() => {
         setIsIpBlocked(false)
       })
