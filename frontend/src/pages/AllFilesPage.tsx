@@ -820,11 +820,11 @@ export function AllFilesPage() {
                 : 'Copy Direct Stream Link'
 
           const htmlEmbedCode = isVideo
-            ? `<video controls width="100%"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+            ? `<video controls width="100%" preload="metadata" playsinline><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
             : isAudio
-              ? `<audio controls><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
+              ? `<audio controls preload="metadata"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
               : isImage
-                ? `<img src="${shareUrl}/preview" alt="${activeFile?.name || 'Image'}" />`
+                ? `<img src="${shareUrl}/preview" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" />`
                 : `<a href="${shareUrl}/preview" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
 
           return (
