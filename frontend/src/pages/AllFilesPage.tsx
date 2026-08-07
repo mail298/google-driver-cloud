@@ -15,7 +15,7 @@ import { FolderGrid, type FolderSizeScale } from '@/components/drive/FolderGrid'
 import { defaultFolderColor, defaultFolderIconUrl, folderColorOptions, folderIconOptions, normalizeFolderColor } from '@/components/drive/FolderVisual'
 import { PageHeader } from '@/components/drive/PageHeader'
 import { Input } from '@/components/ui/input'
-import { API_URL, apiFetch, formatBytes, formatDate } from '@/lib/api'
+import { API_URL, apiFetch, formatBytes, formatDate, formatCdnUrl } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
 import { createPlyr, ensurePlyr } from '@/lib/plyr'
 import { getPreviewKind, officeViewerUrl } from '@/lib/preview'
@@ -139,32 +139,7 @@ export function AllFilesPage() {
   const { setHeaderActions } = useDriveLayoutActions()
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
   const [selectedTargetAccountId, setSelectedTargetAccountId] = useState('')
-  function formatCdnUrl(originalUrl: string, fileId?: string) {
-    if (!originalUrl) return originalUrl
-    try {
-      const cdnListRaw = import.meta.env.VITE_CDN_SUBDOMAINS as string | undefined
-      if (!cdnListRaw) return originalUrl
 
-      const cdnList = cdnListRaw.split(',').map((s) => s.trim()).filter(Boolean)
-      if (cdnList.length === 0) return originalUrl
-
-      const urlObj = new URL(originalUrl)
-      const charCodeSum = (fileId || '0').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-      const selectedDomain = cdnList[charCodeSum % cdnList.length]
-
-      if (selectedDomain.startsWith('http://') || selectedDomain.startsWith('https://')) {
-        const targetObj = new URL(selectedDomain)
-        urlObj.protocol = targetObj.protocol
-        urlObj.host = targetObj.host
-      } else {
-        urlObj.host = selectedDomain
-      }
-
-      return urlObj.toString()
-    } catch {
-      return originalUrl
-    }
-  }
 
   function changeFolderSize(scale: FolderSizeScale) {
     setFolderSizeScale(scale)

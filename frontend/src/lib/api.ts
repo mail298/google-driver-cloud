@@ -56,3 +56,30 @@ export function formatBytes(input: string | number | bigint | null | undefined) 
 export function formatDate(value: string) {
   return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
+
+export function formatCdnUrl(originalUrl: string, keyId?: string) {
+  if (!originalUrl) return originalUrl
+  try {
+    const cdnListRaw = import.meta.env.VITE_CDN_SUBDOMAINS as string | undefined
+    if (!cdnListRaw) return originalUrl
+
+    const cdnList = cdnListRaw.split(',').map((s) => s.trim()).filter(Boolean)
+    if (cdnList.length === 0) return originalUrl
+
+    const urlObj = new URL(originalUrl)
+    const charCodeSum = (keyId || '0').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+    const selectedDomain = cdnList[charCodeSum % cdnList.length]
+
+    if (selectedDomain.startsWith('http://') || selectedDomain.startsWith('https://')) {
+      const targetObj = new URL(selectedDomain)
+      urlObj.protocol = targetObj.protocol
+      urlObj.host = targetObj.host
+    } else {
+      urlObj.host = selectedDomain
+    }
+
+    return urlObj.toString()
+  } catch {
+    return originalUrl
+  }
+}
