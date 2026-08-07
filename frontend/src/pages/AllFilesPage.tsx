@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type DragEvent, type FormEvent, type MouseEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Archive, CheckCircle, ClipboardPaste, Code2, Copy, Download, FolderInput, FolderPlus, LayoutGrid, List, RefreshCw, Star, Trash2, Upload, X } from 'lucide-react'
+import { Archive, CheckCircle, ClipboardPaste, Code2, Copy, Download, FolderInput, FolderPlus, LayoutGrid, List, RefreshCw, Star, Trash2, Upload, X, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DummyModal } from '@/components/drive/DummyModal'
@@ -17,6 +17,7 @@ import { PageHeader } from '@/components/drive/PageHeader'
 import { Input } from '@/components/ui/input'
 import { API_URL, apiFetch, formatBytes, formatDate } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
+import { cn } from '@/lib/utils'
 import { createPlyr, ensurePlyr } from '@/lib/plyr'
 import { getPreviewKind, officeViewerUrl } from '@/lib/preview'
 import type { FileItem, FolderItem } from '@/data/drive-data'
@@ -139,6 +140,30 @@ export function AllFilesPage() {
   const { setHeaderActions } = useDriveLayoutActions()
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
   const [selectedTargetAccountId, setSelectedTargetAccountId] = useState('')
+  const [selectedCdnChoice, setSelectedCdnChoice] = useState<string>('auto')
+
+  function formatCdnUrl(originalUrl: string, cdnChoice: string, fileId?: string) {
+    if (!originalUrl) return originalUrl
+    try {
+      const urlObj = new URL(originalUrl)
+      const host = urlObj.host
+      if (cdnChoice === 'main') return originalUrl
+
+      let cdnSubdomain = 'cdn1'
+      if (cdnChoice === 'auto') {
+        const charCodeSum = (fileId || '0').split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+        const cdnIndex = (charCodeSum % 5) + 1
+        cdnSubdomain = `cdn${cdnIndex}`
+      } else if (cdnChoice.startsWith('cdn')) {
+        cdnSubdomain = cdnChoice
+      }
+
+      urlObj.host = `${cdnSubdomain}.${host}`
+      return urlObj.toString()
+    } catch {
+      return originalUrl
+    }
+  }
 
   function changeFolderSize(scale: FolderSizeScale) {
     setFolderSizeScale(scale)
@@ -579,7 +604,8 @@ export function AllFilesPage() {
   }
 
   async function copyShareLink() {
-    await navigator.clipboard.writeText(shareUrl)
+    const targetUrl = formatCdnUrl(shareUrl, selectedCdnChoice, activeFile?.id)
+    await navigator.clipboard.writeText(targetUrl)
     setCopiedShareLink(true)
     window.setTimeout(() => setCopiedShareLink(false), 1600)
   }
@@ -787,6 +813,8 @@ export function AllFilesPage() {
           const isImage = activeFile?.kind === 'image' || activeFile?.mimeType?.startsWith('image/')
           const isAudio = activeFile?.mimeType?.startsWith('audio/')
 
+          const activeShareUrl = formatCdnUrl(shareUrl, selectedCdnChoice, activeFile?.id)
+
           const mediaTitle = isVideo
             ? 'Direct Video Stream Link'
             : isImage
@@ -820,12 +848,12 @@ export function AllFilesPage() {
                 : 'Copy Direct Stream Link'
 
           const htmlEmbedCode = isVideo
-            ? `<video controls width="100%" preload="metadata" playsinline><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+            ? `<video controls width="100%" preload="metadata" playsinline><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
             : isAudio
-              ? `<audio controls preload="metadata"><source src="${shareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
+              ? `<audio controls preload="metadata"><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
               : isImage
-                ? `<img src="${shareUrl}/preview" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" />`
-                : `<a href="${shareUrl}/preview" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
+                ? `<img src="${activeShareUrl}/preview" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" />`
+                : `<a href="${activeShareUrl}/preview" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
 
           return (
             <div className="grid gap-4 sm:gap-5 min-w-0">
@@ -846,6 +874,42 @@ export function AllFilesPage() {
                 </div>
               ) : null}
 
+              {/* CDN Subdomain Sharding Selector */}
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/60 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <label className="flex items-center gap-2 text-xs font-extrabold text-slate-800 dark:text-slate-200">
+                    <Zap className="h-4 w-4 text-amber-500 shrink-0" />
+                    <span>CDN Domain Sharding</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-slate-400">1000+ Fast Stream</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                  {[
+                    { id: 'auto', label: '⚡ Auto CDN Rotator (cdn1..cdn5)' },
+                    { id: 'main', label: 'Main Domain' },
+                    { id: 'cdn1', label: 'cdn1' },
+                    { id: 'cdn2', label: 'cdn2' },
+                    { id: 'cdn3', label: 'cdn3' },
+                    { id: 'cdn4', label: 'cdn4' },
+                    { id: 'cdn5', label: 'cdn5' },
+                  ].map((cdn) => (
+                    <button
+                      key={cdn.id}
+                      type="button"
+                      onClick={() => setSelectedCdnChoice(cdn.id)}
+                      className={cn(
+                        'rounded-xl px-2.5 py-1 text-xs font-bold transition-all border',
+                        selectedCdnChoice === cdn.id
+                          ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400'
+                      )}
+                    >
+                      {cdn.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Option 1: Direct Media / Video Stream Link */}
               <div className="relative overflow-hidden rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-blue-50/20 p-3.5 sm:p-4 shadow-sm dark:border-blue-500/40 dark:from-blue-950/40 dark:via-indigo-950/20 dark:to-slate-900/40 min-w-0">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 min-w-0">
@@ -863,10 +927,10 @@ export function AllFilesPage() {
                   {mediaSubtitle}
                 </p>
                 <div className="flex flex-col sm:flex-row gap-2 min-w-0">
-                  <Input value={`${shareUrl}/preview`} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
+                  <Input value={`${activeShareUrl}/preview`} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-900 border-blue-200 dark:border-blue-800" />
                   <Button
                     onClick={async () => {
-                      await navigator.clipboard.writeText(`${shareUrl}/preview`)
+                      await navigator.clipboard.writeText(`${activeShareUrl}/preview`)
                       setCopiedMediaLink(true)
                       setTimeout(() => setCopiedMediaLink(false), 2000)
                     }}
@@ -914,8 +978,12 @@ export function AllFilesPage() {
                 </label>
                 <p className="text-xs text-slate-500 mb-2 leading-relaxed">Opens full 9Drive preview interface with download button.</p>
                 <div className="flex flex-col sm:flex-row gap-2 min-w-0">
-                  <Input value={shareUrl} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-950" />
-                  <Button onClick={copyShareLink} variant="outline" className="shrink-0 font-bold">
+                  <Input value={activeShareUrl} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-950" />
+                  <Button
+                    onClick={copyShareLink}
+                    variant="outline"
+                    className="shrink-0 font-bold"
+                  >
                     {copiedShareLink ? <CheckCircle className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                     {copiedShareLink ? 'Copied!' : 'Copy Page Link'}
                   </Button>
