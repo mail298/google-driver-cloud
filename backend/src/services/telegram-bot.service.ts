@@ -6,10 +6,10 @@ let lastUpdateId = 0
 
 export function startTelegramBotListener() {
   const botToken = process.env.TELEGRAM_BOT_TOKEN || (env as any).TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID || (env as any).TELEGRAM_CHAT_ID
+  const chatId = process.env.TELEGRAM_CHAT_ID || (env as any).TELEGRAM_CHAT_ID || ''
 
-  if (!botToken || !chatId) {
-    console.log('[TELEGRAM_BOT] TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not configured. Telegram bot listener disabled.')
+  if (!botToken) {
+    console.log('[TELEGRAM_BOT] TELEGRAM_BOT_TOKEN not configured. Telegram bot listener disabled.')
     return
   }
 
@@ -19,7 +19,7 @@ export function startTelegramBotListener() {
   console.log('[TELEGRAM_BOT] Starting Telegram Bot long polling listener...')
 
   // Start polling loop asynchronously
-  pollTelegramUpdates(botToken, String(chatId)).catch((err) => {
+  pollTelegramUpdates(botToken, String(chatId).trim()).catch((err) => {
     console.error('[TELEGRAM_BOT] Long polling loop error:', err)
   })
 }
@@ -31,7 +31,8 @@ async function pollTelegramUpdates(botToken: string, targetChatId: string) {
       const res = await fetch(url)
       
       if (!res.ok) {
-        // Wait 5s on error before retrying
+        // Wait 5s on HTTP error (e.g. 401 Unauthorized token) before retrying
+        console.error(`[TELEGRAM_BOT] getUpdates failed with status ${res.status}`)
         await new Promise((r) => setTimeout(r, 5000))
         continue
       }
@@ -41,7 +42,9 @@ async function pollTelegramUpdates(botToken: string, targetChatId: string) {
         for (const update of data.result) {
           lastUpdateId = Math.max(lastUpdateId, update.update_id)
           if (update.message && update.message.text) {
-            await handleTelegramMessage(botToken, targetChatId, update.message).catch(() => undefined)
+            await handleTelegramMessage(botToken, targetChatId, update.message).catch((err) => {
+              console.error('[TELEGRAM_BOT] Error handling message:', err)
+            })
           }
         }
       }
@@ -53,19 +56,40 @@ async function pollTelegramUpdates(botToken: string, targetChatId: string) {
 }
 
 async function handleTelegramMessage(botToken: string, targetChatId: string, message: any) {
-  const messageChatId = String(message.chat?.id || '')
-  
-  // Security verification: only accept messages from configured TELEGRAM_CHAT_ID
-  if (messageChatId !== targetChatId) {
+  const messageChatId = String(message.chat?.id || '').trim()
+  const rawText = String(message.text || '').trim()
+  if (!rawText || !messageChatId) return
+
+  // Extract command name (stripping bot username if present, e.g. /start@MyBot -> /start)
+  const parts = rawText.split(/\s+/)
+  let command = parts[0].toLowerCase()
+  if (command.includes('@')) {
+    command = command.split('@')[0]
+  }
+  const argument = parts[1] ? parts[1].trim() : ''
+
+  console.log(`[TELEGRAM_BOT] Received command '${command}' from chat_id: ${messageChatId}`)
+
+  // Security verification: check if chat_id matches configured TELEGRAM_CHAT_ID
+  if (targetChatId && messageChatId !== targetChatId) {
+    console.warn(`[TELEGRAM_BOT] Unauthorized access attempt from chat_id ${messageChatId}. Configured: ${targetChatId}`)
+    await replyTelegram(
+      botToken,
+      messageChatId,
+      `⚠️ <b>Unauthorized Chat ID!</b>\nYour Chat ID is <code>${messageChatId}</code>.\n\nPlease configure <code>TELEGRAM_CHAT_ID=${messageChatId}</code> in your backend environment variables to authorize commands.`
+    )
     return
   }
 
-  const text = String(message.text || '').trim()
-  if (!text) return
-
-  const parts = text.split(/\s+/)
-  const command = parts[0].toLowerCase()
-  const argument = parts[1] ? parts[1].trim() : ''
+  if (!targetChatId) {
+    console.warn(`[TELEGRAM_BOT] TELEGRAM_CHAT_ID is not configured in backend environment variables. Received message from chat_id ${messageChatId}`)
+    await replyTelegram(
+      botToken,
+      messageChatId,
+      `⚠️ <b>TELEGRAM_CHAT_ID Not Set!</b>\nYour Telegram Chat ID is <code>${messageChatId}</code>.\n\nPlease set <code>TELEGRAM_CHAT_ID=${messageChatId}</code> in your backend environment variables to enable bot command control.`
+    )
+    return
+  }
 
   if (command === '/start' || command === '/help') {
     const helpMsg = [
@@ -75,10 +99,15 @@ async function handleTelegramMessage(botToken: string, targetChatId: string, mes
       `• <code>/addip &lt;ip&gt;</code> - Add IP to Whitelist`,
       `• <code>/delip &lt;ip&gt;</code> - Remove IP from Whitelist`,
       `• <code>/whitelist</code> or <code>/listip</code> - List all Whitelisted IPs`,
-      `• <code>/myip</code> - Show your current client IP`,
+      `• <code>/mychatid</code> - Show your Telegram Chat ID`,
       `• <code>/help</code> - Show this command list`
     ].join('\n')
     await replyTelegram(botToken, targetChatId, helpMsg)
+    return
+  }
+
+  if (command === '/mychatid' || command === '/id') {
+    await replyTelegram(botToken, targetChatId, `📱 Your Telegram Chat ID is: <code>${messageChatId}</code>`)
     return
   }
 
@@ -130,7 +159,7 @@ function formatIpList(ips: string[]): string {
 
 async function replyTelegram(botToken: string, chatId: string, text: string) {
   try {
-    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -140,6 +169,9 @@ async function replyTelegram(botToken: string, chatId: string, text: string) {
         disable_web_page_preview: true
       })
     })
+    if (!res.ok) {
+      console.error(`[TELEGRAM_BOT] replyTelegram failed with status ${res.status}:`, await res.text())
+    }
   } catch (err) {
     console.error('[TELEGRAM_BOT] Failed to send reply:', err)
   }
