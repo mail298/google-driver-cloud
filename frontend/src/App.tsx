@@ -33,7 +33,8 @@ function App() {
     window.addEventListener('ip-blocked', handleIpBlocked)
 
     // Silent check on app load to detect IP whitelist status
-    apiFetch('/auth/me', { skipAuth: true })
+    const hasToken = Boolean(localStorage.getItem('9drive.accessToken'))
+    apiFetch('/auth/me', { skipAuth: !hasToken })
       .then(() => {
         setIsIpBlocked(false)
       })
