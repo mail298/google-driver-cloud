@@ -42,22 +42,19 @@ function App() {
 
   if (isIpBlocked) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-slate-950 px-4 py-12">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.04),transparent_45%)] pointer-events-none" />
+      <main className="relative flex h-screen w-screen items-center justify-center bg-slate-950 overflow-hidden select-none">
+        {/* Subtle red background glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.06),transparent_60%)] pointer-events-none" />
         
-        <div className="relative w-full max-w-md rounded-2xl border border-slate-900 bg-slate-950/20 p-8 text-center backdrop-blur-xl">
-          {/* Centered Image Only */}
-          <div className="mx-auto flex justify-center">
-            <img 
-              src="/forbidden.png" 
-              alt="Access Denied" 
-              className="h-72 w-auto object-contain rounded-xl border border-slate-900/40 shadow-2xl"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none'
-              }}
-            />
-          </div>
-        </div>
+        {/* Fullscreen Responsive Image */}
+        <img 
+          src="/forbidden.png" 
+          alt="Access Denied" 
+          className="h-full w-full max-w-full max-h-full object-contain p-6 md:p-16 transition-all duration-300"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+        />
       </main>
     )
   }
