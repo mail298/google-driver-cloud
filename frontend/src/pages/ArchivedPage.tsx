@@ -1,24 +1,15 @@
-import { Archive, RotateCcw, Trash2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { FileTable } from '@/components/drive/FileTable'
-import { MetricCard } from '@/components/drive/MetricCard'
-import { PageHeader } from '@/components/drive/PageHeader'
-import { archivedFiles } from '@/data/drive-data'
+import { Archive } from 'lucide-react'
 
 export function ArchivedPage() {
   return (
-    <>
-      <PageHeader title="Archived" description="Older files kept out of active workspace." actions={<><Button variant="outline"><RotateCcw className="h-4 w-4" />Restore</Button><Button variant="danger"><Trash2 className="h-4 w-4" />Delete Permanently</Button></>} />
-      <Card className="mt-8 border-orange-200 bg-orange-50 p-4 text-sm text-orange-700">
-        Archived files stay available and do not count as active workspace clutter.
-      </Card>
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
-        <MetricCard label="Archived Items" value="3" icon={Archive} />
-        <MetricCard label="Recoverable" value="3" icon={RotateCcw} />
-        <MetricCard label="Storage Saved" value="2.6 MB" icon={Trash2} />
+    <div className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-900/30">
+        <Archive className="h-8 w-8 text-orange-500" />
       </div>
-      <FileTable files={archivedFiles} mode="archived" />
-    </>
+      <h1 className="text-2xl font-bold tracking-tight">Archived Files</h1>
+      <p className="mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
+        Fitur Archive belum tersedia. Segera hadir — simpan file lama tanpa mengotori workspace aktif Anda.
+      </p>
+    </div>
   )
 }
