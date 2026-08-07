@@ -848,11 +848,11 @@ export function AllFilesPage() {
                 : 'Copy Direct Stream Link'
 
           const htmlEmbedCode = isVideo
-            ? `<video controls width="100%" preload="metadata" playsinline><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+            ? `<video controls width="100%" preload="metadata" playsinline onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src=s.src.replace(/cdn\\d+/,'cdn2');this.load();}}"><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
             : isAudio
-              ? `<audio controls preload="metadata"><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
+              ? `<audio controls preload="metadata" onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src=s.src.replace(/cdn\\d+/,'cdn2');this.load();}}"><source src="${activeShareUrl}/preview" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
               : isImage
-                ? `<img src="${activeShareUrl}/preview" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" />`
+                ? `<img src="${activeShareUrl}/preview" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" onerror="if(!this.dataset.fail){this.dataset.fail='1';this.src=this.src.replace(/cdn\\d+/,'cdn2');}" />`
                 : `<a href="${activeShareUrl}/preview" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
 
           return (
