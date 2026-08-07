@@ -158,7 +158,9 @@ export function AllFilesPage() {
         cdnSubdomain = cdnChoice
       }
 
-      urlObj.host = `${cdnSubdomain}.${host}`
+      // Convert to 1st-level subdomain format (e.g. cdn1-googledrivefrontend.ikan212.com)
+      // so SSL Certificate (*.ikan212.com) works perfectly without ERR_SSL_VERSION_OR_CIPHER_MISMATCH
+      urlObj.host = `${cdnSubdomain}-${host}`
       return urlObj.toString()
     } catch {
       return originalUrl
