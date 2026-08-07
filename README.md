@@ -719,6 +719,53 @@ cd ../frontend && npm install && npm run build
 pm2 restart 9drive-backend
 ```
 
+## Google Drive Media CDN & Caching Optimization
+
+To deliver fast video and image loading times, 9Drive supports multi-subdomain CDN round-robin routing integrated with Cloudflare. Instead of routing every stream request directly through your VPS, files are cached on Cloudflare's Edge network near your users.
+
+### How it works
+1. **Hash-Based Round-Robin**: When a user previews a video or image, the backend uses a stable SHA-256 hash of the `fileId` to map it to one of your configured CDN subdomains (e.g., `cdn1`, `cdn2`, etc.). This ensures the same file always routes to the same subdomain, maximizing cache consistency.
+2. **Edge Cache Delivery**: Cloudflare intercepts the request. On the first load, it fetches the file from your backend (MISS) and caches it. On subsequent loads (from the same or other users), it serves the file instantly from the edge (HIT) with 0% bandwidth and CPU usage on your VPS.
+3. **Optimized Headers**: The backend automatically streams files with `Vary: Accept-Encoding`, `Accept-Ranges: bytes` (for video seeking), and forwards `ETag`/`Last-Modified` headers to enable conditional `304 Not Modified` browser caching.
+
+### Configuration
+
+#### 1. Cloudflare DNS Setup
+Add your CDN subdomains (e.g. `cdn1` to `cdn5`) in your Cloudflare DNS settings and ensure their proxy status is set to **Proxied (Orange Cloud ☁️)**.
+- Type: `A` or `CNAME`
+- Name: `cdn1-googledrivefrontend` (or similar)
+- Target: Your VPS IP or main domain
+- Proxy status: **Proxied**
+
+#### 2. Cloudflare Page Rule (Crucial)
+By default, Cloudflare does not cache URLs without file extensions (like 9Drive's `/files/preview/<token>` endpoint). You must force Cloudflare to cache these endpoints:
+1. Go to **Rules** -> **Page Rules** in Cloudflare.
+2. Click **Create Page Rule**.
+3. Set the pattern to:
+   ```txt
+   *yourdomain.com/*preview*
+   ```
+4. Add the following settings:
+   - **Cache Level**: `Cache Everything`
+   - **Edge Cache TTL**: `a month` (or `1 month`)
+   - **Browser Cache TTL**: `8 days` (or similar)
+5. Save and deploy the rule.
+
+#### 3. Environment Variables
+Add your CDN subdomains to both backend and frontend `.env` configuration:
+
+In `backend/.env`:
+```env
+CDN_SUBDOMAINS=https://cdn1.yourdomain.com,https://cdn2.yourdomain.com,https://cdn3.yourdomain.com
+```
+
+In `frontend/.env` (rebuild frontend after changing):
+```env
+VITE_CDN_SUBDOMAINS=https://cdn1.yourdomain.com,https://cdn2.yourdomain.com,https://cdn3.yourdomain.com
+```
+
+---
+
 ## Build
 
 Backend:
