@@ -9,7 +9,38 @@ import { getSystemAnalytics, sendTelegramNotification } from '../../services/tel
 import { clearErrorLogs, getErrorLogs } from '../../utils/logger.js'
 import Busboy from 'busboy'
 
+import { addWhitelistedIp, getWhitelistedIps, removeWhitelistedIp } from '../../utils/ip-whitelist.store.js'
+
 export const systemRouter = Router()
+
+systemRouter.get('/ip-whitelist', requireAuth, (_req, res) => {
+  const ips = getWhitelistedIps()
+  return res.json({ ips, count: ips.length })
+})
+
+systemRouter.post('/ip-whitelist', requireAuth, (req, res) => {
+  const { ip } = req.body ?? {}
+  if (!ip || typeof ip !== 'string') {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: 'IP address string is required.' })
+  }
+  const result = addWhitelistedIp(ip)
+  if (!result.success) {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: result.message })
+  }
+  return res.json({ status: 'success', message: result.message, ips: result.ips })
+})
+
+systemRouter.delete('/ip-whitelist', requireAuth, (req, res) => {
+  const { ip } = req.body ?? {}
+  if (!ip || typeof ip !== 'string') {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: 'IP address string is required.' })
+  }
+  const result = removeWhitelistedIp(ip)
+  if (!result.success) {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: result.message })
+  }
+  return res.json({ status: 'success', message: result.message, ips: result.ips })
+})
 
 systemRouter.get('/analytics', requireAuth, async (_req, res, next) => {
   try {
