@@ -15,7 +15,7 @@ import { FolderGrid, type FolderSizeScale } from '@/components/drive/FolderGrid'
 import { defaultFolderColor, defaultFolderIconUrl, folderColorOptions, folderIconOptions, normalizeFolderColor } from '@/components/drive/FolderVisual'
 import { PageHeader } from '@/components/drive/PageHeader'
 import { Input } from '@/components/ui/input'
-import { API_URL, apiFetch, formatBytes, formatDate, formatCdnUrl } from '@/lib/api'
+import { API_URL, apiFetch, formatBytes, formatDate } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
 import { createPlyr, ensurePlyr } from '@/lib/plyr'
 import { getPreviewKind, officeViewerUrl } from '@/lib/preview'
@@ -793,8 +793,7 @@ export function AllFilesPage() {
 
           // shareUrl format: https://frontend.domain/public/files/TOKEN
           const shareToken = shareUrl.split('/public/files/')[1] || ''
-          const fallbackDirectStreamUrl = `${API_URL}/share/files/${shareToken}/preview`
-          const mediaStreamUrl = formatCdnUrl(fallbackDirectStreamUrl, activeFile?.id)
+          const mediaStreamUrl = `${API_URL}/share/files/${shareToken}/preview`
           const webViewPageUrl = `${window.location.origin}/public/files/${shareToken}`
 
           const mediaTitle = isVideo
@@ -830,11 +829,11 @@ export function AllFilesPage() {
                 : 'Copy Direct Stream Link'
 
           const htmlEmbedCode = isVideo
-            ? `<video controls width="100%" preload="metadata" playsinline onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src='${fallbackDirectStreamUrl}';this.load();}}"><source src="${mediaStreamUrl}" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
+            ? `<video controls width="100%" preload="metadata" playsinline><source src="${mediaStreamUrl}" type="${activeFile?.mimeType || 'video/mp4'}" /></video>`
             : isAudio
-              ? `<audio controls preload="metadata" onerror="if(!this.dataset.fail){this.dataset.fail='1';const s=this.querySelector('source');if(s){s.src='${fallbackDirectStreamUrl}';this.load();}}"><source src="${mediaStreamUrl}" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
+              ? `<audio controls preload="metadata"><source src="${mediaStreamUrl}" type="${activeFile?.mimeType || 'audio/mp3'}" /></audio>`
               : isImage
-                ? `<img src="${mediaStreamUrl}" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" onerror="if(!this.dataset.fail){this.dataset.fail='1';this.src='${fallbackDirectStreamUrl}';}" />`
+                ? `<img src="${mediaStreamUrl}" loading="lazy" decoding="async" alt="${activeFile?.name || 'Image'}" />`
                 : `<a href="${mediaStreamUrl}" target="_blank" rel="noopener noreferrer">${activeFile?.name || 'File'}</a>`
 
           return (
