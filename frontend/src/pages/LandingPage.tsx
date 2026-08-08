@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Lock,
   Database,
-  Sparkles,
   CheckCircle2,
   HelpCircle,
   ChevronDown,
@@ -114,11 +113,6 @@ export function LandingPage() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-blue-600/15 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="mx-auto max-w-5xl px-6 text-center relative z-10 space-y-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/10 px-4 py-1.5 text-xs font-extrabold text-blue-400">
-            <Sparkles className="h-4 w-4" />
-            <span>Official Google Drive Storage Gateway & Virtual Cloud Management</span>
-          </div>
-
           <h1 className="text-4xl font-black tracking-tight text-white sm:text-6xl md:text-7xl leading-[1.1]">
             Unified Cloud Storage via <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">drive9</span>
           </h1>
