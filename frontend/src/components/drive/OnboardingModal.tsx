@@ -260,6 +260,7 @@ export function OnboardingModal({
   const step = steps[currentStepIndex]
   const isFirstStep = currentStepIndex === 0
   const isLastStep = currentStepIndex === steps.length - 1
+  const progressPercent = ((currentStepIndex + 1) / steps.length) * 100
 
   function handleComplete() {
     localStorage.setItem('9drive:onboarding-completed', 'true')
@@ -281,8 +282,15 @@ export function OnboardingModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative flex flex-col lg:flex-row w-full max-w-4xl max-h-[90dvh] overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+    <div className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-5 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="relative flex flex-col lg:flex-row w-full max-w-4xl max-h-[92dvh] overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+        {/* Top Progress Bar */}
+        <div className="absolute top-0 inset-x-0 h-1.5 bg-slate-100 dark:bg-slate-800 z-30">
+          <div
+            className="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-violet-600 transition-all duration-300 ease-out"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
         {/* Close Button */}
         <button
           type="button"
