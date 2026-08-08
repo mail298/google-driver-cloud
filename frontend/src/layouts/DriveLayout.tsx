@@ -24,8 +24,10 @@ import {
   Info,
   CheckCircle,
   ChevronDown,
-  Upload
+  Upload,
+  HelpCircle
 } from 'lucide-react'
+import { OnboardingModal } from '@/components/drive/OnboardingModal'
 import { GoogleLogo } from '@/components/auth/GoogleLogo'
 import { Button } from '@/components/ui/button'
 import { BrandLogo } from '@/components/drive/BrandLogo'
@@ -115,7 +117,8 @@ function Sidebar({
   storage,
   breakdown,
   accounts = [],
-  onLogout
+  onLogout,
+  onOpenGuide
 }: {
   onNavigate?: () => void
   user: AuthUser | null
@@ -123,6 +126,7 @@ function Sidebar({
   breakdown: StorageBreakdown
   accounts?: ConnectedAccount[]
   onLogout: () => void
+  onOpenGuide?: () => void
 }) {
   const navigate = useNavigate()
   const used = Number(storage?.usedBytes ?? 0)
@@ -279,6 +283,17 @@ function Sidebar({
             {item.label}
           </NavLink>
         ))}
+        <button
+          type="button"
+          onClick={() => {
+            onNavigate?.()
+            onOpenGuide?.()
+          }}
+          className="mt-1 inline-flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[13px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-all border border-blue-200/40 dark:border-blue-800/40 shadow-sm"
+        >
+          <HelpCircle className="h-4 w-4" />
+          <span>Petunjuk Penggunaan</span>
+        </button>
       </nav>
 
       <div className="mt-auto border-t border-slate-200/60 pt-4 text-[13px]">
@@ -336,6 +351,7 @@ export function DriveLayout() {
   const [storage, setStorage] = useState<StorageSummary | null>(null)
   const [breakdown, setBreakdown] = useState<StorageBreakdown>({ photo: '0', video: '0', document: '0' })
   const [infoOpen, setInfoOpen] = useState(false)
+  const [onboardingOpen, setOnboardingOpen] = useState(false)
   const [headerActions, setHeaderActions] = useState<ReactNode>(null)
   const { uploadProgress, setUploadProgress, retryFailedUpload } = useUpload()
   const [uploadProgressCollapsed, setUploadProgressCollapsed] = useState(false)
@@ -344,6 +360,13 @@ export function DriveLayout() {
     if (saved === 'light' || saved === 'dark') return saved
     return 'dark'
   })
+
+  useEffect(() => {
+    const completed = localStorage.getItem('9drive:onboarding-completed')
+    if (completed !== 'true') {
+      setOnboardingOpen(true)
+    }
+  }, [])
 
   // Advanced search states
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([])
@@ -508,7 +531,7 @@ export function DriveLayout() {
     <main className="min-h-screen w-full overflow-x-hidden bg-white">
       <div className="flex min-h-screen w-full flex-col bg-white lg:h-screen lg:overflow-hidden lg:flex-row">
         <div className="hidden lg:block lg:h-screen lg:shrink-0">
-          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} />
+          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} onOpenGuide={() => setOnboardingOpen(true)} />
         </div>
         <div className={cn('fixed inset-0 z-40 bg-slate-950/40 transition-opacity lg:hidden', sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0')} onClick={() => setSidebarOpen(false)} />
         <div className={cn('fixed inset-y-0 left-0 z-50 transform bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden', sidebarOpen ? 'translate-x-0' : '-translate-x-full')}>
@@ -517,7 +540,7 @@ export function DriveLayout() {
               <X className="h-5 w-5" />
             </Button>
           </div>
-          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} onNavigate={() => setSidebarOpen(false)} />
+          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} onNavigate={() => setSidebarOpen(false)} onOpenGuide={() => setOnboardingOpen(true)} />
         </div>
         <section className="min-w-0 flex-1 p-4 sm:p-6 lg:h-screen lg:overflow-y-auto lg:p-8">
           <header className="flex w-full min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -532,6 +555,9 @@ export function DriveLayout() {
                 </div>
               </div>
               <div className="flex gap-2">
+                <Button variant="outline" size="icon" title="Petunjuk Penggunaan" aria-label="Petunjuk Penggunaan" onClick={() => setOnboardingOpen(true)}>
+                  <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </Button>
                 <Button variant="outline" size="icon" aria-label="Toggle theme" onClick={toggleTheme}>
                   {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
                 </Button>
@@ -618,6 +644,9 @@ export function DriveLayout() {
               </div>
             ) : null}
              <div className="relative hidden flex-wrap gap-2 lg:flex shrink-0">
+              <Button variant="outline" size="icon" title="Petunjuk Penggunaan" aria-label="Petunjuk Penggunaan" onClick={() => setOnboardingOpen(true)}>
+                <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </Button>
               <Button variant="outline" size="icon" aria-label="Toggle theme" onClick={toggleTheme}>
                 {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
               </Button>
@@ -685,6 +714,8 @@ export function DriveLayout() {
           )}
         </div>
       ) : null}
+
+      <OnboardingModal open={onboardingOpen} onClose={() => setOnboardingOpen(false)} />
     </main>
   )
 }
