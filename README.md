@@ -676,7 +676,8 @@ Request format is `multipart/form-data`.
 - `sizeBytes` (Text, **Optional**): File size in bytes. If omitted, 9Drive automatically calculates the exact byte size from the upload stream buffer.
 - `fileName` (Text, **Optional**): Custom file name (defaults to original filename).
 - `mimeType` (Text, **Optional**): File MIME type.
-- `folderId` (Text, **Optional**): Target virtual folder UUID in 9Drive.
+- `folderPath` or `folderName` (Text, **Optional**): Target folder name/path (e.g. `promo` or `landingpage/promo`). **If the folder does not exist yet, 9Drive automatically creates it in MySQL and Google Drive before placing the file inside it!**
+- `folderId` (Text, **Optional**): Exact target virtual folder UUID in 9Drive.
 
 #### Integration Examples
 

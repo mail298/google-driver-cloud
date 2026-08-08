@@ -13,8 +13,73 @@ import { createAuditLog } from '../../utils/audit.js'
 
 export const uploadRouter = Router()
 
-type UploadMeta = { fieldName: string; fileName: string; mimeType: string; sizeBytes: bigint; folderId?: string }
+type UploadMeta = { fieldName: string; fileName: string; mimeType: string; sizeBytes: bigint; folderId?: string; folderPath?: string }
 type RoutingMode = 'most_available' | 'round_robin' | 'priority'
+
+async function resolveOrCreateFolderPath(userId: string, pathStr: string): Promise<string | null> {
+  const parts = pathStr.split('/').map((p) => p.trim()).filter(Boolean)
+  if (parts.length === 0) return null
+
+  let currentParentId: string | null = null
+
+  for (const part of parts) {
+    let folder: any = await prisma.folder.findFirst({
+      where: { userId, name: part, parentId: currentParentId, deletedAt: null }
+    })
+
+    if (!folder) {
+      let providerFolderId: string | null = null
+      let connectedAccountId: string | null = null
+
+      const connectedAccount = await prisma.connectedAccount.findFirst({
+        where: { userId, provider: 'google_drive', status: 'connected' }
+      })
+
+      if (connectedAccount) {
+        connectedAccountId = connectedAccount.id
+        try {
+          const auth = await getAuthedGoogleClient(connectedAccount)
+          const drive = google.drive({ version: 'v3', auth })
+          let googleParentId = await ensureGoogleAppFolder(connectedAccount)
+
+          if (currentParentId) {
+            const parentRecord = await prisma.folder.findFirst({ where: { id: currentParentId, userId } })
+            if (parentRecord?.providerFolderId) {
+              googleParentId = parentRecord.providerFolderId
+            }
+          }
+
+          const driveFolder = await drive.files.create({
+            requestBody: {
+              name: part,
+              mimeType: 'application/vnd.google-apps.folder',
+              parents: [googleParentId]
+            },
+            fields: 'id'
+          })
+          providerFolderId = driveFolder.data.id ?? null
+        } catch (err: any) {
+          console.error(`[upload] Auto-create folder ${part} on Google Drive error:`, err?.message || err)
+        }
+      }
+
+      folder = await prisma.folder.create({
+        data: {
+          userId,
+          name: part,
+          parentId: currentParentId,
+          connectedAccountId,
+          providerFolderId,
+          color: '#3b82f6'
+        }
+      })
+    }
+
+    currentParentId = folder.id
+  }
+
+  return currentParentId
+}
 
 function logUpload(message: string, metadata?: Record<string, unknown>) {
   console.info('[upload]', message, metadata ?? '')
@@ -111,7 +176,7 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
     if (!contentType?.includes('multipart/form-data')) return res.status(400).json({ code: 'UPLOAD_INVALID_CONTENT_TYPE', message: 'multipart/form-data required.' })
 
     const busboy = Busboy({ headers: req.headers, limits: { files: 25, fileSize: env.MAX_UPLOAD_BYTES } })
-    const fields: { sizeBytes?: bigint; fileName?: string; mimeType?: string; folderId?: string } = {}
+    const fields: { sizeBytes?: bigint; fileName?: string; mimeType?: string; folderId?: string; folderPath?: string } = {}
     let batchMeta: UploadMeta[] | null = null
     let responded = false
     let fileSeen = false
@@ -128,18 +193,19 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
       return res.status(status).json({ code, message })
     }
 
-    const parseBatchMeta = (value: string) => JSON.parse(value).map((item: { fieldName: string; fileName: string; mimeType: string; sizeBytes: string | number; folderId?: string }) => ({
+    const parseBatchMeta = (value: string) => JSON.parse(value).map((item: { fieldName: string; fileName: string; mimeType: string; sizeBytes: string | number; folderId?: string; folderPath?: string }) => ({
       fieldName: item.fieldName,
       fileName: item.fileName,
       mimeType: item.mimeType,
-      sizeBytes: BigInt(item.sizeBytes),
+      sizeBytes: BigInt(item.sizeBytes || 0),
       folderId: item.folderId,
+      folderPath: item.folderPath,
     })) as UploadMeta[]
 
     const metaForFile = (fieldName: string, info: { filename: string; mimeType: string }) => {
       if (batchMeta) return batchMeta.find((item) => item.fieldName === fieldName)
       const sizeBytes = fields.sizeBytes || 0n
-      return { fieldName, sizeBytes, fileName: fields.fileName || info.filename, mimeType: fields.mimeType || info.mimeType || 'application/octet-stream', folderId: fields.folderId }
+      return { fieldName, sizeBytes, fileName: fields.fileName || info.filename, mimeType: fields.mimeType || info.mimeType || 'application/octet-stream', folderId: fields.folderId, folderPath: fields.folderPath }
     }
 
     const uploadOne = async (fieldName: string, fileStream: NodeJS.ReadableStream, info: { filename: string; mimeType: string }) => {
@@ -166,7 +232,12 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
           return
         }
 
-        const folderId = meta?.folderId || null
+        let folderId = meta?.folderId || null
+        const folderPath = meta?.folderPath || null
+        if (!folderId && folderPath) {
+          folderId = await resolveOrCreateFolderPath(req.user!.id, folderPath)
+        }
+
         let targetAccountId: string | undefined = undefined
         if (folderId) {
           const folderRecord = await prisma.folder.findFirstOrThrow({ where: { id: folderId, userId: req.user!.id, deletedAt: null } })
@@ -263,6 +334,7 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
       if (name === 'fileName') fields.fileName = value
       if (name === 'mimeType') fields.mimeType = value
       if (name === 'folderId') fields.folderId = value
+      if (name === 'folderPath' || name === 'folderName') fields.folderPath = value
       if (name === 'filesMeta') batchMeta = parseBatchMeta(value)
     })
 
