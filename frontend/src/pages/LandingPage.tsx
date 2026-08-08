@@ -147,7 +147,7 @@ export function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="drive9 logo" className="h-10 w-10 rounded-xl object-contain shadow-lg shadow-blue-500/25 ring-1 ring-white/20 bg-slate-900/80 p-1" />
+            <img src="/logo.png" alt="drive9 logo - Google Drive Storage Gateway" width="40" height="40" fetchPriority="high" loading="eager" className="h-10 w-10 rounded-xl object-contain shadow-lg shadow-blue-500/25 ring-1 ring-white/20 bg-slate-900/80 p-1" />
             <div>
               <span className="text-xl font-black tracking-tight text-white">drive9</span>
               <span className="ml-2.5 text-[10px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">
@@ -453,7 +453,10 @@ export function LandingPage() {
                 <button
                   type="button"
                   onClick={() => toggleFaq(idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-100 hover:text-blue-400 transition-colors"
+                  aria-expanded={openFaq === idx}
+                  aria-controls={`faq-answer-${idx}`}
+                  id={`faq-button-${idx}`}
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-100 hover:text-blue-400 transition-colors cursor-pointer"
                 >
                   <span className="flex items-center gap-3">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 text-xs font-mono font-bold border border-blue-500/20">
@@ -472,6 +475,9 @@ export function LandingPage() {
                 <AnimatePresence initial={false}>
                   {openFaq === idx && (
                     <motion.div
+                      id={`faq-answer-${idx}`}
+                      role="region"
+                      aria-labelledby={`faq-button-${idx}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}

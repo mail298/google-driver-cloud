@@ -14,7 +14,7 @@
   <meta name="keywords"
     content="drive9, Google Drive gateway, cloud storage gateway, virtual cloud storage, Google Drive API, multi account Google Drive, file streaming cloud, Google Drive quota manager, API Key storage" />
   <meta name="author" content="drive9" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://googledrivefrontend.ikan212.com/" />
@@ -27,6 +27,7 @@
     content="drive9 adalah platform Google Drive Storage Gateway aman untuk mengoperasikan file streaming, mengorganisir folder virtual, dan memantau kuota multi-akun." />
   <meta property="og:image" content="https://googledrivefrontend.ikan212.com/logo.png" />
   <meta property="og:site_name" content="drive9" />
+  <meta property="og:locale" content="id_ID" />
 
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
@@ -36,14 +37,69 @@
     content="drive9 adalah platform Google Drive Storage Gateway aman untuk mengoperasikan file streaming, mengorganisir folder virtual, dan memantau kuota multi-akun." />
   <meta property="twitter:image" content="https://googledrivefrontend.ikan212.com/logo.png" />
 
-  <!-- Fonts & Icons -->
+  <!-- Fonts & Performance Preconnect -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap"
     rel="stylesheet" />
+
+  <!-- Icons -->
   <link rel="icon" type="image/png" href="/logo.png" />
   <link rel="shortcut icon" type="image/png" href="/logo.png" />
   <link rel="apple-touch-icon" href="/logo.png" />
+
+  <!-- Schema.org Structured Data (JSON-LD) for Lighthouse 100 SEO & Google Rich Results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://googledrivefrontend.ikan212.com/#website",
+        "url": "https://googledrivefrontend.ikan212.com/",
+        "name": "drive9",
+        "description": "Google Drive Storage Gateway & Virtual Cloud Management",
+        "inLanguage": "id"
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://googledrivefrontend.ikan212.com/#application",
+        "name": "drive9 Storage Gateway",
+        "operatingSystem": "All",
+        "applicationCategory": "BusinessApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://googledrivefrontend.ikan212.com/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Apa itu drive9?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "drive9 adalah platform Google Drive Storage Gateway yang memungkinkan Anda menghubungkan akun Google Drive, mengunggah dan mengelola file dalam folder khusus 9drive, melacak kuota penyimpanan, serta membuat API Key."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Apakah file yang diunggah disimpan di server drive9?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tidak. drive9 menggunakan arsitektur direct file streaming. Setiap file yang Anda unggah akan langsung dialirkan ke folder khusus 9drive di akun Google Drive milik Anda tanpa disimpan di disk fisik server drive9."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
 
   <script>
     (function () {
@@ -64,13 +120,13 @@
   <div id="root">
     <!-- Static SSR Fallback for SEO Crawlers (Screaming Frog, Googlebot, Bingbot) -->
     <header>
-      <nav>
-        <a href="/">drive9 Storage Gateway</a>
-        <a href="#features">Features</a>
-        <a href="#security">Security</a>
-        <a href="#faq">FAQ</a>
-        <a href="/privacy">Privacy Policy</a>
-        <a href="/terms">Terms of Service</a>
+      <nav aria-label="Navigasi Utama">
+        <a href="/" aria-label="Halaman Utama drive9">drive9 Storage Gateway</a>
+        <a href="#features" aria-label="Seksi Fitur">Features</a>
+        <a href="#security" aria-label="Seksi Keamanan">Security</a>
+        <a href="#faq" aria-label="Seksi FAQ">FAQ</a>
+        <a href="/privacy" aria-label="Kebijakan Privasi">Privacy Policy</a>
+        <a href="/terms" aria-label="Ketentuan Layanan">Terms of Service</a>
       </nav>
     </header>
 
