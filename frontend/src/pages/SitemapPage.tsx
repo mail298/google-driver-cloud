@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 
 export function SitemapPage() {
-  useEffect(() => {
-    const origin = window.location.origin
-    const today = new Date().toISOString().split('T')[0]
-    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://googledrivefrontend.ikan212.com'
+  const today = new Date().toISOString().split('T')[0]
+
+  const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${origin}/</loc>
@@ -26,10 +26,13 @@ export function SitemapPage() {
   </url>
 </urlset>`
 
-    document.open('text/xml')
-    document.write(xmlContent)
-    document.close()
+  useEffect(() => {
+    document.title = 'sitemap.xml'
   }, [])
 
-  return null
+  return (
+    <pre className="p-6 bg-slate-950 text-emerald-400 font-mono text-xs leading-relaxed whitespace-pre-wrap selection:bg-blue-600 selection:text-white min-h-screen">
+      {xmlContent}
+    </pre>
+  )
 }
