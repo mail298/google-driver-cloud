@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { CheckCircle, Clipboard, KeyRound, ShieldCheck, Trash2, Sparkles, Layers, Code2, Copy, Check, UploadCloud } from 'lucide-react'
+import { CheckCircle, Clipboard, KeyRound, ShieldCheck, Trash2, Sparkles, Code2, Copy, Check, UploadCloud } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/drive/PageHeader'
@@ -763,23 +763,5 @@ export function ApiManagementPage() {
       </DummyModal>
     </div>
   )
-}e-100 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20"
-              placeholder={t('api_modal_placeholder')}
-              value={keyName}
-              onChange={(e) => setKeyName(e.target.value)}
-              required
-            />
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" type="button" onClick={() => setCreateOpen(false)} disabled={loading}>
-              {t('api_modal_cancel')}
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? t('api_modal_creating') : t('api_modal_submit')}
-            </Button>
-          </div>
-        </form>
-      </DummyModal>
-    </div>
-  )
 }
+
