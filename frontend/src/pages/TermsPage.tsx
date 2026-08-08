@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { HardDrive, ArrowLeft, FileText } from 'lucide-react'
+import { ArrowLeft, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Seo } from '@/components/common/Seo'
 
@@ -18,9 +18,7 @@ export function TermsPage() {
               <ArrowLeft className="h-4 w-4" />
               <span>Back to Home</span>
             </Link>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md">
-              <HardDrive className="h-4 w-4" />
-            </div>
+            <img src="/logo.png" alt="drive9 logo" className="h-9 w-9 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800" />
             <span className="text-lg font-black text-white">drive9</span>
           </div>
           <Link to="/login">

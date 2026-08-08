@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  HardDrive,
   ShieldCheck,
   UploadCloud,
   KeyRound,
@@ -148,9 +147,7 @@ export function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 shadow-lg shadow-blue-500/25 ring-1 ring-white/20">
-              <HardDrive className="h-5 w-5 text-white" />
-            </div>
+            <img src="/logo.png" alt="drive9 logo" className="h-10 w-10 rounded-xl object-contain shadow-lg shadow-blue-500/25 ring-1 ring-white/20 bg-slate-900/80 p-1" />
             <div>
               <span className="text-xl font-black tracking-tight text-white">drive9</span>
               <span className="ml-2.5 text-[10px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">
@@ -522,9 +519,7 @@ export function LandingPage() {
       <footer className="border-t border-slate-800/80 bg-[#030712] py-12 text-xs text-slate-500">
         <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white font-bold">
-              <HardDrive className="h-4 w-4" />
-            </div>
+            <img src="/logo.png" alt="drive9 logo" className="h-8 w-8 rounded-lg object-contain bg-slate-900/80 p-0.5" />
             <span className="font-extrabold text-white text-sm">drive9</span>
             <span>© 2026 drive9. All rights reserved.</span>
           </div>
