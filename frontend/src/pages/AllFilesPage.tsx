@@ -23,6 +23,7 @@ import { getPreviewKind, officeViewerUrl } from '@/lib/preview'
 import type { FileItem, FolderItem } from '@/data/drive-data'
 import { useUpload } from '@/context/UploadContext'
 import { useDriveLayoutActions } from '@/layouts/DriveLayout'
+import { useLanguage } from '@/context/LanguageContext'
 
 type BackendFile = { id: string; name: string; mimeType: string; sizeBytes: string; createdAt: string; folderId?: string | null; connectedAccount?: { email: string; provider: string }; folder?: { id: string; name: string } | null }
 type BackendFolder = { id: string; name: string; color: string; iconUrl?: string | null; parentId?: string | null; providerFolderId?: string | null; updatedAt: string }
@@ -139,6 +140,7 @@ export function AllFilesPage() {
     return (v === 'xs' || v === 'sm' || v === 'md' || v === 'lg') ? v : 'md'
   })
   const { setHeaderActions } = useDriveLayoutActions()
+  const { t } = useLanguage()
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
   const [selectedTargetAccountId, setSelectedTargetAccountId] = useState('')
 
@@ -469,7 +471,7 @@ export function AllFilesPage() {
     const normalizedActiveFolder = activeFolderId || null
 
     if (normalizedTarget === normalizedActiveFolder) {
-      return { disabled: true, reason: 'Folder saat ini' }
+      return { disabled: true, reason: t('move_modal_current_folder') }
     }
 
     const selectedFilesList = files.filter((f) => f.id && selectedFileIds.has(f.id))
@@ -479,20 +481,20 @@ export function AllFilesPage() {
     if (totalSelected === 0 && activeFile) {
       const currentFileFolder = activeFile.folderId || null
       if (currentFileFolder === normalizedTarget) {
-        return { disabled: true, reason: 'Folder saat ini' }
+        return { disabled: true, reason: t('move_modal_current_folder') }
       }
       return { disabled: false }
     }
 
     if (normalizedTarget && selectedFolderIds.has(normalizedTarget)) {
-      return { disabled: true, reason: 'Folder terpilih' }
+      return { disabled: true, reason: t('move_modal_selected_folder') }
     }
 
     if (normalizedTarget && selectedFolderIds.size > 0) {
       for (const selFolderId of selectedFolderIds) {
         const descendants = getFolderDescendantIds(selFolderId, allFolders)
         if (descendants.has(normalizedTarget)) {
-          return { disabled: true, reason: 'Subfolder dari item terpilih' }
+          return { disabled: true, reason: t('move_modal_subfolder') }
         }
       }
     }
@@ -501,7 +503,7 @@ export function AllFilesPage() {
       const allFilesAlreadyInTarget = selectedFilesList.every((f) => (f.folderId || null) === normalizedTarget)
       const allFoldersAlreadyInTarget = selectedFoldersList.every((f) => (f.parentId || null) === normalizedTarget)
       if (allFilesAlreadyInTarget && allFoldersAlreadyInTarget) {
-        return { disabled: true, reason: 'Folder saat ini' }
+        return { disabled: true, reason: t('move_modal_current_folder') }
       }
     }
 
@@ -938,15 +940,15 @@ export function AllFilesPage() {
                   checked={isAllVisibleSelected}
                   onChange={toggleAllVisibleItems}
                 />
-                <span>Pilih Semua ({totalVisibleCount})</span>
+                <span>{t('toolbar_select_all')} ({totalVisibleCount})</span>
               </label>
             ) : null}
-            <Button variant="soft" className="hidden sm:inline-flex"><Archive className="h-4 w-4" />Recents</Button>
-            <Button variant="soft" className="hidden sm:inline-flex"><Star className="h-4 w-4" />Starred</Button>
+            <Button variant="soft" className="hidden sm:inline-flex"><Archive className="h-4 w-4" />{t('toolbar_recents')}</Button>
+            <Button variant="soft" className="hidden sm:inline-flex"><Star className="h-4 w-4" />{t('toolbar_starred')}</Button>
             {totalSelectedCount > 0 ? (
               <div className="flex w-full flex-col gap-3 rounded-2xl border border-orange-500/20 bg-orange-500/10 p-3 sm:w-auto sm:flex-row sm:items-center sm:border-0 sm:bg-transparent sm:p-0">
                 <span className="text-sm font-extrabold text-slate-700 dark:text-slate-200">
-                  {totalSelectedCount} item terpilih ({selectedFileIds.size > 0 ? `${selectedFileIds.size} file` : ''}{selectedFileIds.size > 0 && selectedFolderIds.size > 0 ? ', ' : ''}{selectedFolderIds.size > 0 ? `${selectedFolderIds.size} folder` : ''})
+                  {totalSelectedCount} {t('toolbar_items_selected')} ({selectedFileIds.size > 0 ? `${selectedFileIds.size} ${t('toolbar_file')}` : ''}{selectedFileIds.size > 0 && selectedFolderIds.size > 0 ? ', ' : ''}{selectedFolderIds.size > 0 ? `${selectedFolderIds.size} ${t('toolbar_folder')}` : ''})
                 </span>
                 <div className="grid grid-cols-4 gap-2 sm:flex sm:gap-3">
                   {selectedFileIds.size > 0 ? (
@@ -955,13 +957,13 @@ export function AllFilesPage() {
                     </Button>
                   ) : null}
                   <Button className="w-full" variant="outline" onClick={() => setMoveOpen(true)}>
-                    <FolderInput className="h-4 w-4" />Move
+                    <FolderInput className="h-4 w-4" />{t('toolbar_move')}
                   </Button>
                   <Button className="w-full" variant="danger" onClick={() => setDeleteOpen(true)}>
-                    <Trash2 className="h-4 w-4" />Delete
+                    <Trash2 className="h-4 w-4" />{t('toolbar_delete')}
                   </Button>
                   <Button className="w-full" variant="ghost" onClick={clearSelection}>
-                    Clear
+                    {t('toolbar_clear')}
                   </Button>
                 </div>
               </div>

@@ -28,6 +28,8 @@ import {
   HelpCircle
 } from 'lucide-react'
 import { OnboardingModal } from '@/components/drive/OnboardingModal'
+import { LanguageSwitcher } from '@/components/drive/LanguageSwitcher'
+import { useLanguage } from '@/context/LanguageContext'
 import { GoogleLogo } from '@/components/auth/GoogleLogo'
 import { Button } from '@/components/ui/button'
 import { BrandLogo } from '@/components/drive/BrandLogo'
@@ -38,16 +40,7 @@ import { clearAuthSession, getStoredUser, updateStoredUser, type AuthUser } from
 import { getGravatarUrl } from '@/lib/gravatar'
 import { cn } from '@/lib/utils'
 
-const menu = [
-  { label: 'All Files', icon: FileArchive, href: '/all-files' },
-  { label: 'Quota Tracker', icon: Gauge, href: '/quota' },
-  { label: 'Shared With Me', icon: Share2, href: '/shared' },
-  { label: 'Starred', icon: Star, href: '/starred', disabled: true },
-  { label: 'Recycle Bin', icon: Trash2, href: '/trash' },
-  { label: 'Activity Log', icon: History, href: '/activity' },
-  { label: 'Setting', icon: Settings, href: '/settings' },
-  { label: 'API Keys', icon: Braces, href: '/api' },
-]
+
 
 type StorageSummary = {
   totalBytes: string
@@ -128,6 +121,7 @@ function Sidebar({
   onLogout: () => void
   onOpenGuide?: () => void
 }) {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const used = Number(storage?.usedBytes ?? 0)
   const total = Number(storage?.totalBytes ?? 0)
@@ -147,6 +141,17 @@ function Sidebar({
       setUserMenuOpen(false)
     }, 250)
   }
+
+  const menuList = [
+    { label: t('nav_all_files'), icon: FileArchive, href: '/all-files' },
+    { label: t('nav_quota'), icon: Gauge, href: '/quota' },
+    { label: t('nav_shared'), icon: Share2, href: '/shared' },
+    { label: t('nav_starred'), icon: Star, href: '/starred', disabled: true },
+    { label: t('nav_trash'), icon: Trash2, href: '/trash' },
+    { label: t('nav_activity'), icon: History, href: '/activity' },
+    { label: t('nav_setting'), icon: Settings, href: '/settings' },
+    { label: t('nav_api_keys'), icon: Braces, href: '/api' },
+  ]
 
   const items = [
     ['Photo', formatBytes(breakdown.photo), 'bg-lime-500'],
@@ -198,7 +203,7 @@ function Sidebar({
               "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-all",
               userMenuOpen && "bg-slate-200 text-slate-900"
             )}
-            title="Daftar Akun Terhubung"
+            title={t('nav_connected_accounts')}
           >
             <MoreVertical className="h-4 w-4" />
           </div>
@@ -213,9 +218,9 @@ function Sidebar({
           >
             {/* Header */}
             <div className="flex items-center justify-between px-2.5 py-1.5 border-b border-slate-100 dark:border-slate-800/80 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Akun Terhubung</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{t('nav_connected_accounts')}</span>
               <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
-                {accounts.length} Akun
+                {accounts.length} {accounts.length === 1 ? 'Account' : 'Accounts'}
               </span>
             </div>
 
@@ -223,7 +228,7 @@ function Sidebar({
             <div className="max-h-56 overflow-y-auto space-y-1 py-1">
               {accounts.length === 0 ? (
                 <div className="px-3 py-3 text-center text-xs text-slate-400">
-                  Belum ada akun Google Drive terhubung
+                  {t('nav_no_accounts')}
                 </div>
               ) : (
                 accounts.map((acc) => (
@@ -243,7 +248,7 @@ function Sidebar({
                         {acc.displayName || acc.email}
                       </p>
                       <p className="truncate text-[10px] text-slate-400 mt-0.5">
-                        {acc.storageAccount?.usedBytes ? `${formatBytes(acc.storageAccount.usedBytes)} terpakai` : 'Google Drive'}
+                        {acc.storageAccount?.usedBytes ? `${formatBytes(acc.storageAccount.usedBytes)}` : 'Google Drive'}
                       </p>
                     </div>
                     <span className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-sm" title="Online" />
@@ -264,7 +269,7 @@ function Sidebar({
                 className="w-full flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>Hubungkan / Kelola Akun</span>
+                <span>{t('nav_connect_manage')}</span>
               </button>
             </div>
           </div>
@@ -272,7 +277,7 @@ function Sidebar({
       </div>
 
       <nav className="grid gap-1">
-        {menu.map((item) => item.disabled ? (
+        {menuList.map((item) => item.disabled ? (
           <button key={item.label} type="button" disabled className="inline-flex h-10 cursor-not-allowed items-center gap-2 rounded-xl px-3.5 text-[13px] font-bold text-slate-400 opacity-60">
             <item.icon className="h-4 w-4" />
             {item.label}
@@ -292,7 +297,7 @@ function Sidebar({
           className="mt-1 inline-flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[13px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-all border border-blue-200/40 dark:border-blue-800/40 shadow-sm"
         >
           <HelpCircle className="h-4 w-4" />
-          <span>Petunjuk Penggunaan</span>
+          <span>{t('nav_user_guide')}</span>
         </button>
       </nav>
 
@@ -313,7 +318,7 @@ function Sidebar({
           <div className="h-full rounded-full bg-blue-600 transition-all duration-300" style={{ width: `${progress}%` }} />
         </div>
         <Button variant="danger" size="sm" className="mt-3 w-full justify-start h-10 px-3 text-[13px] font-bold" onClick={onLogout}>
-          <LogOut className="h-4 w-4" />Log Out
+          <LogOut className="h-4 w-4" />{t('nav_logout')}
         </Button>
       </div>
     </aside>
@@ -342,6 +347,7 @@ export function useDriveLayoutActions() {
 }
 
 export function DriveLayout() {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
@@ -554,8 +560,9 @@ export function DriveLayout() {
                   <span className="truncate text-xl font-extrabold tracking-tight">9Drive</span>
                 </div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" size="icon" title="Petunjuk Penggunaan" aria-label="Petunjuk Penggunaan" onClick={() => setOnboardingOpen(true)}>
+              <div className="flex gap-2 items-center">
+                <LanguageSwitcher />
+                <Button variant="outline" size="icon" title={t('nav_user_guide')} aria-label={t('nav_user_guide')} onClick={() => setOnboardingOpen(true)}>
                   <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                 </Button>
                 <Button variant="outline" size="icon" aria-label="Toggle theme" onClick={toggleTheme}>
@@ -643,8 +650,9 @@ export function DriveLayout() {
                 {headerActions}
               </div>
             ) : null}
-             <div className="relative hidden flex-wrap gap-2 lg:flex shrink-0">
-              <Button variant="outline" size="icon" title="Petunjuk Penggunaan" aria-label="Petunjuk Penggunaan" onClick={() => setOnboardingOpen(true)}>
+             <div className="relative hidden flex-wrap gap-2 items-center lg:flex shrink-0">
+              <LanguageSwitcher />
+              <Button variant="outline" size="icon" title={t('nav_user_guide')} aria-label={t('nav_user_guide')} onClick={() => setOnboardingOpen(true)}>
                 <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </Button>
               <Button variant="outline" size="icon" aria-label="Toggle theme" onClick={toggleTheme}>

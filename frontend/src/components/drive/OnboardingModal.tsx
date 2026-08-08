@@ -22,6 +22,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/context/LanguageContext'
 
 export type OnboardingStep = {
   id: string
@@ -38,207 +39,224 @@ export type OnboardingStep = {
   }
 }
 
-const steps: OnboardingStep[] = [
-  {
-    id: 'welcome',
-    title: 'Selamat Datang',
-    subtitle: 'Pengenalan 9Drive Gateway',
-    icon: Sparkles,
-    badge: 'Overview',
-    color: 'from-blue-600 to-indigo-600 text-blue-500',
-    content: {
-      heading: 'Selamat Datang di 9Drive Storage Gateway',
-      description: '9Drive adalah gateway penyimpanan pintar yang menggabungkan beberapa akun Google Drive dan S3 milik Anda menjadi satu ruang penyimpanan besar yang terorganisir.',
-      features: [
-        {
-          title: 'Direct Stream Upload',
-          desc: 'Pengunggahan file di-stream langsung ke Google Drive folder 9drive tanpa membebankan ruang memori lokal server.',
-          icon: Upload
-        },
-        {
-          title: 'Organisasi Folder Virtual',
-          desc: 'Buat struktur folder fleksibel di MySQL tanpa mempengaruhi susunan fisik file Anda di Google Drive.',
-          icon: FolderInput
-        },
-        {
-          title: 'Auto Quota Routing',
-          desc: 'Sistem secara otomatis memilih akun Google Drive terhubung yang memiliki sisa kuota terbesar untuk menyimpan upload baru.',
-          icon: HardDrive
-        }
-      ],
-      tips: [
-        'Anda dapat menghubungkan lebih dari 1 akun Google Drive di menu Setting.',
-        'Semua file di-enkripsi token aksesnya demi keamanan maksimal.'
-      ]
+export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
+  const isEn = lang === 'en'
+  return [
+    {
+      id: 'welcome',
+      title: isEn ? 'Welcome' : 'Selamat Datang',
+      subtitle: isEn ? 'Introduction to 9Drive Gateway' : 'Pengenalan 9Drive Gateway',
+      icon: Sparkles,
+      badge: 'Overview',
+      color: 'from-blue-600 to-indigo-600 text-blue-500',
+      content: {
+        heading: isEn ? 'Welcome to 9Drive Storage Gateway' : 'Selamat Datang di 9Drive Storage Gateway',
+        description: isEn
+          ? '9Drive is a smart storage gateway that unifies multiple Google Drive and S3 accounts into a single organized storage space.'
+          : '9Drive adalah gateway penyimpanan pintar yang menggabungkan beberapa akun Google Drive dan S3 milik Anda menjadi satu ruang penyimpanan besar yang terorganisir.',
+        features: [
+          {
+            title: isEn ? 'Direct Stream Upload' : 'Direct Stream Upload',
+            desc: isEn
+              ? 'Files stream directly to Google Drive 9drive folder without consuming local server disk space.'
+              : 'Pengunggahan file di-stream langsung ke Google Drive folder 9drive tanpa membebankan ruang memori lokal server.',
+            icon: Upload
+          },
+          {
+            title: isEn ? 'Virtual Folder Organization' : 'Organisasi Folder Virtual',
+            desc: isEn
+              ? 'Create flexible folder structures in MySQL without affecting physical files in Google Drive.'
+              : 'Buat struktur folder fleksibel di MySQL tanpa mempengaruhi susunan fisik file Anda di Google Drive.',
+            icon: FolderInput
+          },
+          {
+            title: isEn ? 'Auto Quota Routing' : 'Auto Quota Routing',
+            desc: isEn
+              ? 'Automatically routes uploads to the connected account with the most available free space.'
+              : 'Sistem secara otomatis memilih akun Google Drive terhubung yang memiliki sisa kuota terbesar untuk menyimpan upload baru.',
+            icon: HardDrive
+          }
+        ],
+        tips: isEn
+          ? ['You can connect more than 1 Google Drive account in Settings.', 'All access tokens are encrypted for maximum security.']
+          : ['Anda dapat menghubungkan lebih dari 1 akun Google Drive di menu Setting.', 'Semua file di-enkripsi token aksesnya demi keamanan maksimal.']
+      }
+    },
+    {
+      id: 'all-files',
+      title: isEn ? 'All Files' : 'All Files',
+      subtitle: isEn ? 'File & Folder Management Hub' : 'Pusat Pengelolaan File & Folder',
+      icon: FileArchive,
+      badge: isEn ? 'Main' : 'Utama',
+      color: 'from-indigo-600 to-violet-600 text-indigo-500',
+      content: {
+        heading: isEn ? 'All Files - Manage Your Files & Folders' : 'Menu All Files - Kelola File & Folder Anda',
+        description: isEn
+          ? 'Main page to upload files, organize folders, preview media, and share files with others.'
+          : 'Halaman utama untuk mengupload, mengorganisasi folder, melihat preview media, serta berbagi file dengan pengguna lain.',
+        features: [
+          {
+            title: isEn ? 'Drag & Drop File Upload' : 'Drag & Drop File Upload',
+            desc: isEn ? 'Drag files from your computer into the browser to upload instantly.' : 'Tarik file dari komputer Anda ke dalam browser untuk mengupload secara langsung.',
+            icon: Upload
+          },
+          {
+            title: isEn ? 'Checkbox & Batch Actions' : 'Checkbox & Batch Actions',
+            desc: isEn
+              ? 'Check multiple items to Move, Delete, or Download ZIP simultaneously.'
+              : 'Centang beberapa file untuk melakukan Move (Pindah), Delete (Hapus), atau Download ZIP secara serentak.',
+            icon: CheckCircle
+          },
+          {
+            title: isEn ? 'Smart Move Validation' : 'Smart Move Validation',
+            desc: isEn
+              ? 'When moving items, current folder or selected subfolders are automatically greyed-out (disabled).'
+              : 'Saat memindahkan file, folder lokasi saat ini atau subfolder terpilih otomatis di-hitam-putihkan (disabled) agar tidak salah pilih.',
+            icon: FolderInput
+          },
+          {
+            title: isEn ? 'Select All Checkbox' : 'Tombol Pilih Semua',
+            desc: isEn ? 'Use the "Select All" checkbox in the toolbar to quickly select all displayed files.' : 'Gunakan checkbox "Pilih Semua" di toolbar atas untuk mencentang seluruh file terpapar secara cepat.',
+            icon: CheckCircle
+          }
+        ],
+        tips: isEn
+          ? ['Right-click any file/folder card to open quick context menu (Rename, Move, Share, Delete).', 'Click 3-dots button on folder card to perform per-folder actions.']
+          : ['Klik kanan pada kartu file/folder untuk membuka context menu cepat (Rename, Move, Share, Delete).', 'Klik tombol titik 3 di sudut kartu folder untuk melakukan aksi per-folder.']
+      }
+    },
+    {
+      id: 'quota',
+      title: isEn ? 'Quota Tracker' : 'Quota Tracker',
+      subtitle: isEn ? 'Connected Accounts Storage Monitor' : 'Pemantau Kuota Akun Terhubung',
+      icon: Gauge,
+      badge: 'Storage',
+      color: 'from-emerald-600 to-teal-600 text-emerald-500',
+      content: {
+        heading: isEn ? 'Quota Tracker - Monitor Storage Capacity' : 'Menu Quota Tracker - Pantau Kapasitas Penyimpanan',
+        description: isEn
+          ? 'Track remaining space and storage usage across all connected Google Drive and S3 accounts.'
+          : 'Lacak sisa kapasitas dan penggunaan penyimpanan gabungan dari seluruh akun Google Drive dan S3 yang terhubung.',
+        features: [
+          {
+            title: isEn ? 'Total Quota Summary' : 'Ringkasan Total Kuota',
+            desc: isEn ? 'View aggregated used and free space across all connected accounts.' : 'Melihat akumulasi ruang penyimpanan terpakai dan ruang bebas dari seluruh akun terhubung.',
+            icon: Gauge
+          },
+          {
+            title: isEn ? 'Per-Account Breakdown' : 'Rincian Per-Akun',
+            desc: isEn ? 'View connection status and storage breakdown for each Google Drive account.' : 'Melihat status kesehatan koneksi dan penggunaan penyimpanan pada masing-masing email Google Drive.',
+            icon: ShieldCheck
+          },
+          {
+            title: isEn ? 'Sync Quota Button' : 'Tombol Sync Quota',
+            desc: isEn ? 'Manually refresh storage quotas if you add or remove files directly on Google Drive.' : 'Perbarui kapasitas kuota terbaru secara manual jika Anda menambahkan atau menghapus file langsung melalui website Google Drive.',
+            icon: Info
+          }
+        ],
+        tips: isEn
+          ? ['If storage space is running low, you can add new Google Drive accounts in Settings.']
+          : ['Jika ruang penyimpanan hampir habis, Anda bisa menambahkan akun Google Drive baru di menu Setting.']
+      }
+    },
+    {
+      id: 'shared',
+      title: isEn ? 'Shared With Me' : 'Shared With Me',
+      subtitle: isEn ? 'Shared Files & Folders' : 'File & Folder Berbagi',
+      icon: Share2,
+      badge: isEn ? 'Collaboration' : 'Kolaborasi',
+      color: 'from-amber-600 to-orange-600 text-amber-500',
+      content: {
+        heading: isEn ? 'Shared With Me - Collaboration & Permissions' : 'Menu Shared With Me - Kolaborasi & Hak Akses',
+        description: isEn ? 'Access files and folders shared by team members or public share links.' : 'Kelola dan akses file atau folder yang dibagikan oleh anggota tim lain atau link publik.',
+        features: [
+          {
+            title: isEn ? 'Team Invites' : 'Undangan Akses Tim',
+            desc: isEn ? 'Receive files and folders shared by team members with Viewer or Editor permissions.' : 'Menerima file dan folder yang di-invite oleh email anggota tim Anda dengan role Viewer atau Editor.',
+            icon: Share2
+          },
+          {
+            title: isEn ? 'Public Web Preview Links' : 'Link Publik Web View',
+            desc: isEn ? 'Generate public preview links without requiring user login.' : 'Generasi link preview cepat untuk dibagikan ke publik tanpa memerlukan login.',
+            icon: BookOpen
+          },
+          {
+            title: isEn ? 'Direct HTML Stream Links' : 'Direct HTML Stream Link',
+            desc: isEn ? 'Copy direct video/image/audio stream URLs for embedding in your HTML landing pages.' : 'Salin URL direct stream video/gambar/audio untuk disematkan langsung ke landing page HTML Anda.',
+            icon: Sparkles
+          }
+        ],
+        tips: isEn
+          ? ['Click "Share" button on any file to get direct HTML5 stream links (MP4, MP3, PNG).']
+          : ['Klik tombol "Share" pada file untuk mendapatkan link stream HTML5 langsung (MP4, MP3, PNG).']
+      }
+    },
+    {
+      id: 'other-menus',
+      title: isEn ? 'Starred, Trash & Activity' : 'Starred & Trash & Logs',
+      subtitle: isEn ? 'Favorites, Trash & Audit Logs' : 'Favorit, Tempat Sampah & Aktivitas',
+      icon: Trash2,
+      badge: isEn ? 'System' : 'Sistem',
+      color: 'from-rose-600 to-pink-600 text-rose-500',
+      content: {
+        heading: isEn ? 'Starred, Recycle Bin, & Activity Log' : 'Menu Starred, Recycle Bin, & Activity Log',
+        description: isEn ? 'Helper pages for managing starred favorites, restoring deleted files, and auditing logs.' : 'Fasilitas pendukung untuk mengelola file favorit, memulihkan file terhapus, serta melihat riwayat audit.',
+        features: [
+          {
+            title: isEn ? 'Starred Items' : 'Starred (Berbintang)',
+            desc: isEn ? 'Star important files or folders for quick access from this page.' : 'Tandai file atau folder penting agar dapat diakses dengan cepat dari menu ini.',
+            icon: Star
+          },
+          {
+            title: isEn ? 'Recycle Bin (Trash)' : 'Recycle Bin (Trash)',
+            desc: isEn ? 'Deleted files are safely moved here. You can Restore or Permanently Delete them.' : 'File yang dihapus akan disimpan sementara di sini. Anda dapat memilih untuk Restore (Pulihkan) atau Hapus Permanen.',
+            icon: Trash2
+          },
+          {
+            title: isEn ? 'Activity Log' : 'Activity Log',
+            desc: isEn ? 'Automatic audit log recording uploads, moves, folder creations, and deletions.' : 'Catatan log audit otomatis yang merekam setiap aktivitas upload, pemindahan, pembuatan folder, dan penghapusan.',
+            icon: History
+          }
+        ],
+        tips: isEn
+          ? ['Files in Recycle Bin still count towards storage quota until permanently deleted.']
+          : ['File yang berada di Recycle Bin masih menggunakan kuota hingga Anda menghapusnya secara permanen.']
+      }
+    },
+    {
+      id: 'settings-api',
+      title: isEn ? 'Settings & API Keys' : 'Setting & API Keys',
+      subtitle: isEn ? 'Account Connection & API Tokens' : 'Koneksi Akun & Developer Token',
+      icon: Settings,
+      badge: isEn ? 'Configuration' : 'Konfigurasi',
+      color: 'from-cyan-600 to-blue-600 text-cyan-500',
+      content: {
+        heading: isEn ? 'Settings & API Keys - Configuration & Integrations' : 'Menu Setting & API Keys - Konfigurasi & Integrasi',
+        description: isEn ? 'Manage Google Drive/S3 storage connections and API keys for external applications.' : 'Pengaturan akun penyimpanan Google Drive/S3 dan kunci API untuk integrasi sistem eksternal.',
+        features: [
+          {
+            title: isEn ? 'Google OAuth Connection' : 'Koneksi Google OAuth',
+            desc: isEn ? 'Connect new Google Drive accounts with 1 click via official Google OAuth 2.0.' : 'Tambah akun Google Drive baru dengan sekali klik melalui OAuth 2.0 resmi Google.',
+            icon: Settings
+          },
+          {
+            title: isEn ? 'Developer API Keys' : 'API Keys Developer',
+            desc: isEn ? 'Create secret API Tokens to upload files automatically from external scripts or landing page forms.' : 'Buat API Token rahasia untuk mengupload file secara otomatis dari aplikasi external, website, atau form landing page.',
+            icon: Braces
+          },
+          {
+            title: isEn ? 'Profile & Theme Settings' : 'Pengaturan Profil',
+            desc: isEn ? 'Manage username, password, language preferences, and theme (Light / Dark).' : 'Kelola nama pengguna, password, dan preferensi tema (Light Mode / Dark Mode).',
+            icon: ShieldCheck
+          }
+        ],
+        tips: isEn
+          ? ['Use API Keys to integrate 9Drive with automated file uploader scripts.']
+          : ['Gunakan API Key jika Anda ingin mengintegrasikan 9Drive dengan script pengunggah otomatis.']
+      }
     }
-  },
-  {
-    id: 'all-files',
-    title: 'All Files',
-    subtitle: 'Pusat Pengelolaan File & Folder',
-    icon: FileArchive,
-    badge: 'Utama',
-    color: 'from-indigo-600 to-violet-600 text-indigo-500',
-    content: {
-      heading: 'Menu All Files - Kelola File & Folder Anda',
-      description: 'Halaman utama untuk mengupload, mengorganisasi folder, melihat preview media, serta berbagi file dengan pengguna lain.',
-      features: [
-        {
-          title: 'Drag & Drop File Upload',
-          desc: 'Tarik file dari komputer Anda ke dalam browser untuk mengupload secara langsung.',
-          icon: Upload
-        },
-        {
-          title: 'Checkbox & Batch Actions',
-          desc: 'Centang beberapa file untuk melakukan Move (Pindah), Delete (Hapus), atau Download ZIP secara serentak.',
-          icon: CheckCircle
-        },
-        {
-          title: 'Smart Move Validation',
-          desc: 'Saat memindahkan file, folder lokasi saat ini atau subfolder terpilih otomatis di-hitam-putihkan (disabled) agar tidak salah pilih.',
-          icon: FolderInput
-        },
-        {
-          title: 'Tombol Pilih Semua',
-          desc: 'Gunakan checkbox "Pilih Semua" di toolbar atas untuk mencentang seluruh file terpapar secara cepat.',
-          icon: CheckCircle
-        }
-      ],
-      tips: [
-        'Klik kanan pada kartu file/folder untuk membuka context menu cepat (Rename, Move, Share, Delete).',
-        'Klik tombol titik 3 di sudut kartu folder untuk melakukan aksi per-folder.'
-      ]
-    }
-  },
-  {
-    id: 'quota',
-    title: 'Quota Tracker',
-    subtitle: 'Pemantau Kuota Akun Terhubung',
-    icon: Gauge,
-    badge: 'Storage',
-    color: 'from-emerald-600 to-teal-600 text-emerald-500',
-    content: {
-      heading: 'Menu Quota Tracker - Pantau Kapasitas Penyimpanan',
-      description: 'Lacak sisa kapasitas dan penggunaan penyimpanan gabungan dari seluruh akun Google Drive dan S3 yang terhubung.',
-      features: [
-        {
-          title: 'Ringkasan Total Kuota',
-          desc: 'Melihat akumulasi ruang penyimpanan terpakai dan ruang bebas dari seluruh akun terhubung.',
-          icon: Gauge
-        },
-        {
-          title: 'Rincian Per-Akun',
-          desc: 'Melihat status kesehatan koneksi dan penggunaan penyimpanan pada masing-masing email Google Drive.',
-          icon: ShieldCheck
-        },
-        {
-          title: 'Tombol Sync Quota',
-          desc: 'Perbarui kapasitas kuota terbaru secara manual jika Anda menambahkan atau menghapus file langsung melalui website Google Drive.',
-          icon: Info
-        }
-      ],
-      tips: [
-        'Jika ruang penyimpanan hampir habis, Anda bisa menambahkan akun Google Drive baru di menu Setting.'
-      ]
-    }
-  },
-  {
-    id: 'shared',
-    title: 'Shared With Me',
-    subtitle: 'File & Folder Berbagi',
-    icon: Share2,
-    badge: 'Kolaborasi',
-    color: 'from-amber-600 to-orange-600 text-amber-500',
-    content: {
-      heading: 'Menu Shared With Me - Kolaborasi & Hak Akses',
-      description: 'Kelola dan akses file atau folder yang dibagikan oleh anggota tim lain atau link publik.',
-      features: [
-        {
-          title: 'Undangan Akses Tim',
-          desc: 'Menerima file dan folder yang di-invite oleh email anggota tim Anda dengan role Viewer atau Editor.',
-          icon: Share2
-        },
-        {
-          title: 'Link Publik Web View',
-          desc: 'Generasi link preview cepat untuk dibagikan ke publik tanpa memerlukan login.',
-          icon: BookOpen
-        },
-        {
-          title: 'Direct HTML Stream Link',
-          desc: 'Salin URL direct stream video/gambar/audio untuk disematkan langsung ke landing page HTML Anda.',
-          icon: Sparkles
-        }
-      ],
-      tips: [
-        'Klik tombol "Share" pada file untuk mendapatkan link stream HTML5 langsung (MP4, MP3, PNG).'
-      ]
-    }
-  },
-  {
-    id: 'other-menus',
-    title: 'Starred & Trash & Logs',
-    subtitle: 'Favorit, Tempat Sampah & Aktivitas',
-    icon: Trash2,
-    badge: 'Sistem',
-    color: 'from-rose-600 to-pink-600 text-rose-500',
-    content: {
-      heading: 'Menu Starred, Recycle Bin, & Activity Log',
-      description: 'Fasilitas pendukung untuk mengelola file favorit, memulihkan file terhapus, serta melihat riwayat audit.',
-      features: [
-        {
-          title: 'Starred (Berbintang)',
-          desc: 'Tandai file atau folder penting agar dapat diakses dengan cepat dari menu ini.',
-          icon: Star
-        },
-        {
-          title: 'Recycle Bin (Trash)',
-          desc: 'File yang dihapus akan disimpan sementara di sini. Anda dapat memilih untuk Restore (Pulihkan) atau Hapus Permanen.',
-          icon: Trash2
-        },
-        {
-          title: 'Activity Log',
-          desc: 'Catatan log audit otomatis yang merekam setiap aktivitas upload, pemindahan, pembuatan folder, dan penghapusan.',
-          icon: History
-        }
-      ],
-      tips: [
-        'File yang berada di Recycle Bin masih menggunakan kuota hingga Anda menghapusnya secara permanen.'
-      ]
-    }
-  },
-  {
-    id: 'settings-api',
-    title: 'Setting & API Keys',
-    subtitle: 'Koneksi Akun & Developer Token',
-    icon: Settings,
-    badge: 'Konfigurasi',
-    color: 'from-cyan-600 to-blue-600 text-cyan-500',
-    content: {
-      heading: 'Menu Setting & API Keys - Konfigurasi & Integrasi',
-      description: 'Pengaturan akun penyimpanan Google Drive/S3 dan kunci API untuk integrasi sistem eksternal.',
-      features: [
-        {
-          title: 'Koneksi Google OAuth',
-          desc: 'Tambah akun Google Drive baru dengan sekali klik melalui OAuth 2.0 resmi Google.',
-          icon: Settings
-        },
-        {
-          title: 'API Keys Developer',
-          desc: 'Buat API Token rahasia untuk mengupload file secara otomatis dari aplikasi external, website, atau form landing page.',
-          icon: Braces
-        },
-        {
-          title: 'Pengaturan Profil',
-          desc: 'Kelola nama pengguna, password, dan preferensi tema (Light Mode / Dark Mode).',
-          icon: ShieldCheck
-        }
-      ],
-      tips: [
-        'Gunakan API Key jika Anda ingin mengintegrasikan 9Drive dengan script pengunggah otomatis.'
-      ]
-    }
-  }
-]
+  ]
+}
 
 export function OnboardingModal({
   open,
@@ -247,7 +265,10 @@ export function OnboardingModal({
   open: boolean
   onClose: () => void
 }) {
+  const { lang } = useLanguage()
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const steps = getOnboardingSteps(lang)
+  const isEn = lang === 'en'
 
   useEffect(() => {
     if (open) {
@@ -309,8 +330,8 @@ export function OnboardingModal({
                 <BookOpen className="h-4 w-4" />
               </div>
               <div>
-                <h3 className="text-sm font-extrabold tracking-tight">Petunjuk 9Drive</h3>
-                <p className="text-[11px] text-slate-500">Panduan Lengkap Dashboard</p>
+                <h3 className="text-sm font-extrabold tracking-tight">{isEn ? '9Drive User Guide' : 'Petunjuk 9Drive'}</h3>
+                <p className="text-[11px] text-slate-500">{isEn ? 'Dashboard Complete Tour' : 'Panduan Lengkap Dashboard'}</p>
               </div>
             </div>
 
@@ -351,7 +372,7 @@ export function OnboardingModal({
           </div>
 
           <div className="hidden lg:block pt-4 border-t border-slate-200/60 dark:border-slate-800 text-[11px] text-slate-400">
-            <p>Tips: Anda dapat membuka kembali petunjuk ini kapan saja dari tombol bantuan di sidebar.</p>
+            <p>{isEn ? 'Tip: You can re-open this guide anytime from the help button in the sidebar.' : 'Tips: Anda dapat membuka kembali petunjuk ini kapan saja dari tombol bantuan di sidebar.'}</p>
           </div>
         </div>
 
@@ -365,7 +386,7 @@ export function OnboardingModal({
                 <span>{step.badge}</span>
               </span>
               <span className="text-xs font-extrabold text-slate-400">
-                Langkah {currentStepIndex + 1} dari {steps.length}
+                {isEn ? `Step ${currentStepIndex + 1} of ${steps.length}` : `Langkah ${currentStepIndex + 1} dari ${steps.length}`}
               </span>
             </div>
 
@@ -406,7 +427,7 @@ export function OnboardingModal({
             {step.content.tips && step.content.tips.length > 0 && (
               <div className="mt-5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-900 dark:text-amber-200">
                 <p className="font-extrabold flex items-center gap-1.5 mb-1 text-amber-700 dark:text-amber-400">
-                  <Info className="h-4 w-4 shrink-0" /> Tips Penggunaan:
+                  <Info className="h-4 w-4 shrink-0" /> {isEn ? 'Usage Tips:' : 'Tips Penggunaan:'}
                 </p>
                 <ul className="list-disc list-inside space-y-1 text-[11px] opacity-90 pl-1">
                   {step.content.tips.map((tip, tIdx) => (
@@ -428,7 +449,7 @@ export function OnboardingModal({
               className="font-bold text-xs"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
-              Sebelumnya
+              {isEn ? 'Previous' : 'Sebelumnya'}
             </Button>
 
             <div className="flex items-center gap-2">
@@ -439,7 +460,7 @@ export function OnboardingModal({
                 onClick={handleComplete}
                 className="text-xs font-semibold text-slate-400 hover:text-slate-600"
               >
-                Lewati Panduan
+                {isEn ? 'Skip Guide' : 'Lewati Panduan'}
               </Button>
               <Button
                 type="button"
@@ -450,11 +471,11 @@ export function OnboardingModal({
                 {isLastStep ? (
                   <>
                     <CheckCircle className="h-4 w-4 mr-1" />
-                    Selesai & Paham
+                    {isEn ? 'Done & Got It' : 'Selesai & Paham'}
                   </>
                 ) : (
                   <>
-                    Lanjut
+                    {isEn ? 'Next' : 'Lanjut'}
                     <ChevronRight className="h-4 w-4 ml-1" />
                   </>
                 )}
