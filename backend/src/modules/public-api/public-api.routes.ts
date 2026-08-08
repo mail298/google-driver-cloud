@@ -9,7 +9,7 @@ export const publicApiRouter = Router()
 publicApiRouter.post('/v1/uploads', requireApiKey('files:upload'), handleUpload)
 
 // List folders endpoint
-publicApiRouter.get('/v1/folders', requireApiKey('files:upload'), async (req: ApiKeyRequest, res, next) => {
+publicApiRouter.get('/v1/folders', requireApiKey('files:read'), async (req: ApiKeyRequest, res, next) => {
   try {
     const parentId = req.query.parentId ? String(req.query.parentId) : undefined
     const q = req.query.q ? String(req.query.q).trim() : undefined
@@ -55,7 +55,7 @@ async function resolveFolderPath(userId: string, pathStr: string): Promise<strin
 }
 
 // List files endpoint
-publicApiRouter.get('/v1/files', requireApiKey('files:upload'), async (req: ApiKeyRequest, res, next) => {
+publicApiRouter.get('/v1/files', requireApiKey('files:read'), async (req: ApiKeyRequest, res, next) => {
   try {
     let folderId = req.query.folderId ? String(req.query.folderId) : undefined
     const folderPath = req.query.folderPath ? String(req.query.folderPath) : undefined
@@ -64,7 +64,7 @@ publicApiRouter.get('/v1/files', requireApiKey('files:upload'), async (req: ApiK
     if (!folderId && folderPath) {
       const resolvedId = await resolveFolderPath(req.user!.id, folderPath)
       if (!resolvedId) {
-        return res.json({ status: 'ok', count: 0, files: [] })
+        return res.status(404).json({ code: 'FOLDER_NOT_FOUND', message: 'Folder path not found.' })
       }
       folderId = resolvedId
     }

@@ -29,6 +29,7 @@ export function ApiManagementPage() {
   const [createOpen, setCreateOpen] = useState(false)
   const [keyName, setKeyName] = useState('')
   const [expiration, setExpiration] = useState<ExpirationOption>('never')
+  const [selectedScopes, setSelectedScopes] = useState<string[]>(['files:read', 'files:upload'])
   const [secret, setSecret] = useState('')
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -66,11 +67,12 @@ export function ApiManagementPage() {
 
       const data = await apiFetch<{ apiKey: ApiKey; secret: string }>('/api-keys', {
         method: 'POST',
-        body: JSON.stringify({ name: keyName, expiresAt }),
+        body: JSON.stringify({ name: keyName, expiresAt, scopes: selectedScopes }),
       })
       setSecret(data.secret)
       setKeyName('')
       setExpiration('never')
+      setSelectedScopes(['files:read', 'files:upload'])
       setCreateOpen(false)
       await load()
     } catch (error) {
@@ -409,6 +411,15 @@ print(response.json())`
                     <span>• {t('api_keys_last_used')} {apiKey.lastUsedAt ? formatDate(apiKey.lastUsedAt) : t('api_keys_never')}</span>
                     <span>• Expired: {apiKey.expiresAt ? formatDate(apiKey.expiresAt) : 'Never'}</span>
                   </div>
+                  {apiKey.scopes && apiKey.scopes.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                      {apiKey.scopes.map((s) => (
+                        <span key={s} className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <Button
                   size="sm"
@@ -518,8 +529,13 @@ print(response.json())`
 
             {/* Endpoint */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Endpoint</h3>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Endpoint</h3>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    Scope: files:upload
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={() => copy(`POST ${uploadsEndpoint}`, 'endpoint_upload')}
@@ -714,8 +730,13 @@ print(response.json())`
           <div className="space-y-6 animate-in fade-in">
             {/* Endpoint */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Endpoint</h3>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Endpoint</h3>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                    Scope: files:read
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={() => copy(`GET ${filesEndpoint}`, 'endpoint_files')}
@@ -891,8 +912,13 @@ print(response.json())`
           <div className="space-y-6 animate-in fade-in">
             {/* Endpoint */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Endpoint</h3>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Endpoint</h3>
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                    Scope: files:read
+                  </span>
+                </div>
                 <button
                   type="button"
                   onClick={() => copy(`GET ${foldersEndpoint}`, 'endpoint_folders')}
@@ -1056,6 +1082,59 @@ print(response.json())`
             </div>
           </div>
         )}
+
+        {/* ── Status & Error Codes Table ─────────────────────────────── */}
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+          <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Status & Error Codes Reference</h3>
+          <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-slate-800">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
+                <tr>
+                  <th className="p-3">HTTP Status</th>
+                  <th className="p-3">Error Code</th>
+                  <th className="p-3">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-600 dark:text-slate-300 font-medium">
+                <tr>
+                  <td className="p-3 font-mono font-bold text-emerald-500">200 / 201</td>
+                  <td className="p-3 font-mono text-slate-400">N/A</td>
+                  <td className="p-3">Request successful / Resource created.</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-mono font-bold text-amber-500">401</td>
+                  <td className="p-3 font-mono text-amber-500 font-bold">API_KEY_REQUIRED</td>
+                  <td className="p-3">Header <code className="text-indigo-400">Authorization</code> / <code className="text-indigo-400">X-API-Key</code> is missing.</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-mono font-bold text-amber-500">401</td>
+                  <td className="p-3 font-mono text-amber-500 font-bold">API_KEY_INVALID</td>
+                  <td className="p-3">API Key invalid, expired, or revoked.</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-mono font-bold text-rose-500">403</td>
+                  <td className="p-3 font-mono text-rose-500 font-bold">API_KEY_FORBIDDEN</td>
+                  <td className="p-3">API Key does not have the required scope (<code className="text-indigo-400">files:read</code> or <code className="text-indigo-400">files:upload</code>).</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-mono font-bold text-rose-500">404</td>
+                  <td className="p-3 font-mono text-rose-500 font-bold">FOLDER_NOT_FOUND</td>
+                  <td className="p-3">Specified <code className="text-indigo-400">folderPath</code> does not exist.</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-mono font-bold text-rose-500">404</td>
+                  <td className="p-3 font-mono text-rose-500 font-bold">API_KEY_NOT_FOUND</td>
+                  <td className="p-3">Specified API Key ID was not found or already revoked.</td>
+                </tr>
+                <tr>
+                  <td className="p-3 font-mono font-bold text-rose-500">400</td>
+                  <td className="p-3 font-mono text-rose-500 font-bold">UPLOAD_TOO_LARGE</td>
+                  <td className="p-3">Uploaded file exceeds maximum allowed upload size.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </Card>
 
       {/* ── Create Key Modal ─────────────────────────────────────── */}
@@ -1090,6 +1169,36 @@ print(response.json())`
               <option value="90d">{t('api_expiration_90d')}</option>
               <option value="1y">{t('api_expiration_1y')}</option>
             </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t('api_modal_scopes')}</label>
+            <div className="space-y-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 p-3">
+              <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedScopes.includes('files:read')}
+                  onChange={(e) => {
+                    if (e.target.checked) setSelectedScopes([...selectedScopes, 'files:read'])
+                    else setSelectedScopes(selectedScopes.filter((s) => s !== 'files:read'))
+                  }}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>{t('api_scope_read')}</span>
+              </label>
+              <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedScopes.includes('files:upload')}
+                  onChange={(e) => {
+                    if (e.target.checked) setSelectedScopes([...selectedScopes, 'files:upload'])
+                    else setSelectedScopes(selectedScopes.filter((s) => s !== 'files:upload'))
+                  }}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span>{t('api_scope_upload')}</span>
+              </label>
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

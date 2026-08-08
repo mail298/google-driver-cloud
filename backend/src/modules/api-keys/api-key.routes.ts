@@ -7,8 +7,12 @@ import { hashToken, randomToken } from '../../utils/crypto.js'
 export const apiKeyRouter = Router()
 apiKeyRouter.use(requireAuth)
 
-const createSchema = z.object({ name: z.string().trim().min(1).max(191), expiresAt: z.string().datetime().nullable().optional() })
-const scopes = ['files:upload']
+const ALLOWED_SCOPES = ['files:read', 'files:upload'] as const
+const createSchema = z.object({
+  name: z.string().trim().min(1).max(191),
+  expiresAt: z.string().datetime().nullable().optional(),
+  scopes: z.array(z.string()).optional(),
+})
 
 function serializeApiKey(apiKey: { id: string; name: string; keyPrefix: string; scopes: unknown; status: string; lastUsedAt: Date | null; expiresAt: Date | null; revokedAt: Date | null; createdAt: Date }) {
   return {
@@ -36,6 +40,11 @@ apiKeyRouter.get('/', async (req: AuthRequest, res, next) => {
 apiKeyRouter.post('/', async (req: AuthRequest, res, next) => {
   try {
     const body = createSchema.parse(req.body)
+    const requestedScopes = body.scopes && body.scopes.length > 0
+      ? body.scopes.filter((s): s is typeof ALLOWED_SCOPES[number] => (ALLOWED_SCOPES as readonly string[]).includes(s))
+      : ['files:read', 'files:upload']
+
+    const finalScopes = requestedScopes.length > 0 ? requestedScopes : ['files:read', 'files:upload']
     const secret = `9d_live_${randomToken(32)}`
     const apiKey = await prisma.apiKey.create({
       data: {
@@ -43,7 +52,7 @@ apiKeyRouter.post('/', async (req: AuthRequest, res, next) => {
         name: body.name,
         keyPrefix: secret.slice(0, 16),
         keyHash: hashToken(secret),
-        scopes,
+        scopes: finalScopes,
         expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
       },
     })
@@ -55,9 +64,16 @@ apiKeyRouter.post('/', async (req: AuthRequest, res, next) => {
 
 apiKeyRouter.delete('/:id', async (req: AuthRequest, res, next) => {
   try {
-    await prisma.apiKey.updateMany({ where: { id: String(req.params.id), userId: req.user!.id, revokedAt: null }, data: { status: 'revoked', revokedAt: new Date() } })
+    const result = await prisma.apiKey.updateMany({
+      where: { id: String(req.params.id), userId: req.user!.id, revokedAt: null },
+      data: { status: 'revoked', revokedAt: new Date() }
+    })
+    if (result.count === 0) {
+      return res.status(404).json({ code: 'API_KEY_NOT_FOUND', message: 'API key not found or already revoked.' })
+    }
     return res.json({ status: 'ok' })
   } catch (error) {
     return next(error)
   }
 })
+

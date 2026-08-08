@@ -29,7 +29,7 @@ export function requireApiKey(scope: string) {
       if (!scopes.includes(scope)) return res.status(403).json({ code: 'API_KEY_FORBIDDEN', message: 'API key does not have required scope.' })
       req.user = { id: apiKey.userId, sessionId: `api-key:${apiKey.id}` }
       req.apiKey = { id: apiKey.id, scopes }
-      await prisma.apiKey.update({ where: { id: apiKey.id }, data: { lastUsedAt: new Date() } }).catch(() => undefined)
+      prisma.apiKey.update({ where: { id: apiKey.id }, data: { lastUsedAt: new Date() } }).catch(() => undefined)
       return next()
     } catch {
       return res.status(401).json({ code: 'API_KEY_INVALID', message: 'Invalid API key.' })
