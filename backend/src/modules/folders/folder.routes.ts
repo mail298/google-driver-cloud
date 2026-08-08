@@ -292,8 +292,10 @@ folderRouter.delete('/batch', async (req: AuthRequest, res, next) => {
       }
     }
 
-    await prisma.file.updateMany({ where: { id: { in: files.map((file) => file.id) } }, data: { status: 'deleted', deletedAt: new Date() } })
-    const result = await prisma.folder.updateMany({ where: { id: { in: [...allFolderIdsToDelete] }, userId: req.user!.id }, data: { deletedAt: new Date() } })
+    if (files.length > 0) {
+      await prisma.file.deleteMany({ where: { id: { in: files.map((file) => file.id) } } })
+    }
+    const result = await prisma.folder.deleteMany({ where: { id: { in: [...allFolderIdsToDelete] }, userId: req.user!.id } })
     for (const accountId of syncedAccountIds) await syncGoogleQuota(accountId).catch(() => undefined)
 
     await createAuditLog(req.user!.id, 'DELETE_FOLDERS', 'folder', undefined, { count: result.count })
@@ -434,8 +436,10 @@ folderRouter.delete('/:id', async (req: AuthRequest, res, next) => {
       }
     }
 
-    await prisma.file.updateMany({ where: { id: { in: files.map((file) => file.id) } }, data: { status: 'deleted', deletedAt: new Date() } })
-    await prisma.folder.updateMany({ where: { id: { in: [...folderIds] }, userId: req.user!.id }, data: { deletedAt: new Date() } })
+    if (files.length > 0) {
+      await prisma.file.deleteMany({ where: { id: { in: files.map((file) => file.id) } } })
+    }
+    await prisma.folder.deleteMany({ where: { id: { in: [...folderIds] }, userId: req.user!.id } })
     for (const accountId of syncedAccountIds) await syncGoogleQuota(accountId).catch(() => undefined)
 
     await createAuditLog(req.user!.id, 'DELETE_FOLDER', 'folder', root.id, { name: root.name })

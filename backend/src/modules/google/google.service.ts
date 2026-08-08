@@ -196,9 +196,9 @@ export async function syncGoogleAppFolderFiles(accountId: string, userId: string
     }
   }
 
-  const missingActiveIds = existingFiles.filter((file) => file.status === 'active' && !driveFileIds.has(file.providerFileId)).map((file) => file.id)
-  if (missingActiveIds.length > 0) {
-    const result = await prisma.file.updateMany({ where: { id: { in: missingActiveIds }, userId }, data: { status: 'deleted', deletedAt: new Date() } })
+  const missingFileIds = existingFiles.filter((file) => !driveFileIds.has(file.providerFileId)).map((file) => file.id)
+  if (missingFileIds.length > 0) {
+    const result = await prisma.file.deleteMany({ where: { id: { in: missingFileIds }, userId } })
     deleted = result.count
   }
 

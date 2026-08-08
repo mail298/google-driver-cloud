@@ -108,15 +108,53 @@ fileRouter.patch('/batch', async (req: AuthRequest, res, next) => {
 fileRouter.delete('/batch', async (req: AuthRequest, res, next) => {
   try {
     const body = batchFileSchema.parse(req.body)
-    const files = await prisma.file.findMany({ where: { id: { in: body.fileIds }, userId: req.user!.id, status: 'active' } })
-    const result = await prisma.file.updateMany({
-      where: { id: { in: body.fileIds }, userId: req.user!.id, status: 'active' },
-      data: { status: 'deleted', deletedAt: new Date() }
+    const files = await prisma.file.findMany({
+      where: { id: { in: body.fileIds }, userId: req.user!.id },
+      include: { connectedAccount: true }
     })
-    for (const f of files) {
-      await createAuditLog(req.user!.id, 'TRASH_FILE', 'file', f.id, { name: f.name })
+
+    const deletedIds: string[] = []
+    const syncedAccountIds = new Set<string>()
+
+    for (const file of files) {
+      try {
+        if (file.provider === 's3') {
+          await deleteS3Object(file).catch((err: any) => {
+            console.warn(`S3 delete warning for file ${file.id}:`, err?.message || err)
+          })
+        } else if (file.connectedAccount) {
+          try {
+            const auth = await getAuthedGoogleClient(file.connectedAccount)
+            const drive = google.drive({ version: 'v3', auth })
+            await drive.files.delete({ fileId: file.providerFileId })
+          } catch (gErr: any) {
+            console.warn(`Google Drive delete warning for file ${file.id} (${file.providerFileId}):`, gErr?.message || gErr)
+          }
+        }
+        deletedIds.push(file.id)
+        if (file.connectedAccountId) syncedAccountIds.add(file.connectedAccountId)
+        await createAuditLog(req.user!.id, 'PERMANENT_DELETE_FILE', 'file', file.id, { name: file.name })
+      } catch (error) {
+        console.error(`Failed to delete file ${file.id}:`, error)
+      }
     }
-    return res.json({ status: 'ok', deleted: result.count })
+
+    if (deletedIds.length > 0) {
+      await prisma.file.deleteMany({
+        where: { id: { in: deletedIds }, userId: req.user!.id }
+      })
+    }
+
+    for (const accountId of syncedAccountIds) {
+      const account = files.find((file) => file.connectedAccountId === accountId)?.connectedAccount
+      if (account?.provider === 's3') {
+        await syncS3Quota(accountId).catch(() => undefined)
+      } else {
+        await syncGoogleQuota(accountId).catch(() => undefined)
+      }
+    }
+
+    return res.json({ status: 'ok', deleted: deletedIds.length })
   } catch (error) {
     return next(error)
   }
@@ -406,9 +444,36 @@ fileRouter.get('/:id/download', async (req: AuthRequest, res, next) => {
 fileRouter.delete('/:id', async (req: AuthRequest, res, next) => {
   try {
     const fileId = String(req.params.id)
-    const file = await prisma.file.findFirstOrThrow({ where: { id: fileId, userId: req.user!.id, status: 'active' } })
-    await prisma.file.update({ where: { id: file.id }, data: { status: 'deleted', deletedAt: new Date() } })
-    await createAuditLog(req.user!.id, 'TRASH_FILE', 'file', file.id, { name: file.name })
+    const file = await prisma.file.findFirstOrThrow({
+      where: { id: fileId, userId: req.user!.id },
+      include: { connectedAccount: true }
+    })
+
+    if (file.provider === 's3') {
+      await deleteS3Object(file).catch((err: any) => {
+        console.warn(`S3 delete warning for file ${file.id}:`, err?.message || err)
+      })
+    } else if (file.connectedAccount) {
+      try {
+        const auth = await getAuthedGoogleClient(file.connectedAccount)
+        const drive = google.drive({ version: 'v3', auth })
+        await drive.files.delete({ fileId: file.providerFileId })
+      } catch (gErr: any) {
+        console.warn(`Google Drive delete warning for file ${file.id} (${file.providerFileId}):`, gErr?.message || gErr)
+      }
+    }
+
+    await prisma.file.delete({ where: { id: file.id } })
+
+    if (file.connectedAccountId) {
+      if (file.provider === 's3') {
+        await syncS3Quota(file.connectedAccountId).catch(() => undefined)
+      } else {
+        await syncGoogleQuota(file.connectedAccountId).catch(() => undefined)
+      }
+    }
+
+    await createAuditLog(req.user!.id, 'PERMANENT_DELETE_FILE', 'file', file.id, { name: file.name })
     return res.json({ status: 'ok' })
   } catch (error) {
     return next(error)
