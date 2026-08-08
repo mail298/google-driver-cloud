@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { CheckCircle, Clipboard, KeyRound, ShieldCheck, Trash2, Sparkles, Layers, Code2, Copy, Check } from 'lucide-react'
+import { CheckCircle, Clipboard, KeyRound, ShieldCheck, Trash2, Sparkles, Layers, Code2, Copy, Check, UploadCloud } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/drive/PageHeader'
@@ -237,10 +237,10 @@ export function ApiManagementPage() {
         description={t('api_subtitle')}
         actions={
           <Button
-            className="h-10 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 font-bold text-white shadow-md hover:from-blue-500 hover:to-indigo-500 transition-all"
+            className="h-10 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 font-bold text-white shadow-lg shadow-indigo-500/20 hover:from-blue-500 hover:to-purple-500 transition-all rounded-xl flex items-center gap-2"
             onClick={() => setCreateOpen(true)}
           >
-            <KeyRound className="mr-2 h-4 w-4" />
+            <KeyRound className="h-4 w-4" />
             {t('api_btn_create')}
           </Button>
         }
@@ -248,7 +248,7 @@ export function ApiManagementPage() {
 
       {/* ── Stats Bar ───────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Card className="flex items-center gap-4 p-5 border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl">
+        <Card className="flex items-center gap-4 p-5 border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl rounded-2xl">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20">
             <KeyRound className="h-6 w-6" />
           </div>
@@ -258,7 +258,7 @@ export function ApiManagementPage() {
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5 border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl">
+        <Card className="flex items-center gap-4 p-5 border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl rounded-2xl">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
             <CheckCircle className="h-6 w-6" />
           </div>
@@ -268,9 +268,9 @@ export function ApiManagementPage() {
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5 border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl">
+        <Card className="flex items-center gap-4 p-5 border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl rounded-2xl">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-            <Layers className="h-6 w-6" />
+            <UploadCloud className="h-6 w-6" />
           </div>
           <div>
             <p className="text-2xl font-black text-slate-900 dark:text-slate-100 leading-none">3</p>
@@ -279,7 +279,7 @@ export function ApiManagementPage() {
         </Card>
       </div>
 
-      {/* ── Toast ────────────────────────────────────────────────── */}
+      {/* ── Toast Notification ──────────────────────────────────── */}
       {message && (
         <div className="flex items-center gap-3 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 text-sm font-semibold text-blue-600 dark:text-blue-400 animate-in fade-in">
           <Sparkles className="h-5 w-5 shrink-0" />
@@ -289,7 +289,7 @@ export function ApiManagementPage() {
 
       {/* ── Secret Key Banner ─────────────────────────────────────── */}
       {secret && (
-        <Card className="overflow-hidden border-2 border-emerald-500/50 bg-emerald-500/10 p-5 space-y-4 shadow-lg">
+        <Card className="overflow-hidden border-2 border-emerald-500/50 bg-emerald-500/10 p-5 space-y-4 shadow-lg rounded-2xl">
           <div className="flex items-start gap-3.5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
               <ShieldCheck className="h-6 w-6" />
@@ -329,29 +329,31 @@ export function ApiManagementPage() {
         {/* Left Column: API Keys + Auth Info */}
         <div className="xl:col-span-5 space-y-6">
           {/* API Keys Card */}
-          <Card className="overflow-hidden border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl">
+          <Card className="overflow-hidden border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl rounded-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 px-5 py-4">
               <div>
                 <h2 className="text-base font-black text-slate-900 dark:text-slate-100">{t('api_keys_card_title')}</h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{t('api_keys_card_desc')}</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)} className="h-8 text-xs font-bold">
+              <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)} className="h-8 text-xs font-bold rounded-xl">
                 {t('api_keys_btn_new')}
               </Button>
             </div>
             <div className="p-4 space-y-3">
               {apiKeys.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 p-8 text-center bg-slate-50/50 dark:bg-slate-800/20">
-                  <KeyRound className="mx-auto h-10 w-10 text-slate-400 dark:text-slate-500" />
-                  <p className="mt-3 font-extrabold text-slate-700 dark:text-slate-200">{t('api_keys_empty_title')}</p>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{t('api_keys_empty_desc')}</p>
-                  <Button size="sm" className="mt-4" onClick={() => setCreateOpen(true)}>{t('api_btn_create')}</Button>
+                <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800/80 p-8 text-center bg-slate-50/50 dark:bg-slate-800/20 flex flex-col items-center justify-center gap-2">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 mb-1">
+                    <KeyRound className="h-6 w-6" />
+                  </div>
+                  <p className="font-extrabold text-slate-800 dark:text-slate-100 text-sm">{t('api_keys_empty_title')}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs">{t('api_keys_empty_desc')}</p>
+                  <Button size="sm" className="mt-3 rounded-xl" onClick={() => setCreateOpen(true)}>{t('api_btn_create')}</Button>
                 </div>
               ) : (
                 apiKeys.map((apiKey) => (
                   <div
                     key={apiKey.id}
-                    className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700"
+                    className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50 p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5 min-w-0">
@@ -377,7 +379,7 @@ export function ApiManagementPage() {
                         variant="danger"
                         onClick={() => revokeKey(apiKey.id)}
                         disabled={apiKey.status === 'revoked'}
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 rounded-lg"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
@@ -393,7 +395,7 @@ export function ApiManagementPage() {
           </Card>
 
           {/* Supported Auth Headers */}
-          <Card className="border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 p-5 shadow-sm backdrop-blur-xl">
+          <Card className="border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 p-5 shadow-sm backdrop-blur-xl rounded-2xl">
             <div className="flex items-start gap-3.5">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
                 <Code2 className="h-5 w-5" />
@@ -432,7 +434,7 @@ export function ApiManagementPage() {
 
         {/* Right Column: API Documentation */}
         <div className="xl:col-span-7">
-          <Card className="overflow-hidden border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl">
+          <Card className="overflow-hidden border border-slate-200/80 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 shadow-sm backdrop-blur-xl rounded-2xl">
             {/* Doc Header + Endpoint Tabs */}
             <div className="border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/60 dark:bg-slate-800/40 px-5 py-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -743,6 +745,25 @@ export function ApiManagementPage() {
             <label className="text-xs font-bold text-slate-700 dark:text-slate-300">{t('api_modal_key_name')}</label>
             <input
               className="h-11 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20"
+              placeholder={t('api_modal_placeholder')}
+              value={keyName}
+              onChange={(e) => setKeyName(e.target.value)}
+              required
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button variant="outline" type="button" onClick={() => setCreateOpen(false)} disabled={loading}>
+              {t('api_modal_cancel')}
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? t('api_modal_creating') : t('api_modal_submit')}
+            </Button>
+          </div>
+        </form>
+      </DummyModal>
+    </div>
+  )
+}e-100 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20"
               placeholder={t('api_modal_placeholder')}
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
