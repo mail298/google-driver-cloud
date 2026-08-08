@@ -326,7 +326,7 @@ export function OnboardingModal({
         {/* Close Button */}
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleComplete}
           className="absolute top-3 right-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
           aria-label="Tutup petunjuk"
         >
