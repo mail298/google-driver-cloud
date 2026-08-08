@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { CheckCircle, Clipboard, KeyRound, ShieldCheck, Trash2, Sparkles, Layers, Code2 } from 'lucide-react'
+import { CheckCircle, Clipboard, KeyRound, ShieldCheck, Trash2, Sparkles, Layers, Code2, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DummyModal } from '@/components/drive/DummyModal'
 import { API_URL, apiFetch, formatDate } from '@/lib/api'
@@ -19,11 +19,11 @@ type ApiKey = {
 
 const curlUploadExample = `curl -X POST "${API_URL}/api/v1/uploads" \\
   -H "Authorization: Bearer 9d_live_your_secret_api_key" \\
-  -F "folderPath=promo" \\
+  -F "folderPath=Namafolder" \\
   -F "file=@/path/to/local/photo.png"`
 
 const jsUploadExample = `const form = new FormData()
-form.append('folderPath', 'promo') // Auto-creates "promo" folder if missing!
+form.append('folderPath', 'Namafolder') // Auto-creates "Namafolder" folder if missing!
 form.append('file', fileInput.files[0])
 
 const response = await fetch('${API_URL}/api/v1/uploads', {
@@ -40,14 +40,14 @@ headers = { "Authorization": "Bearer 9d_live_your_secret_api_key" }
 
 with open("photo.png", "rb") as f:
     files = [
-        ("folderPath", (None, "promo")),
+        ("folderPath", (None, "Namafolder")),
         ("file", ("photo.png", f.read(), "image/png"))
     ]
     response = requests.post(url, headers=headers, files=files)
 
 print(response.json())`
 
-const curlGetFilesExample = `curl -X GET "${API_URL}/api/v1/files?folderPath=promo" \\
+const curlGetFilesExample = `curl -X GET "${API_URL}/api/v1/files?folderPath=Namafolder" \\
   -H "Authorization: Bearer 9d_live_your_secret_api_key"
 
 # Response JSON:
@@ -61,7 +61,7 @@ const curlGetFilesExample = `curl -X GET "${API_URL}/api/v1/files?folderPath=pro
 #       "mimeType": "image/png",
 #       "sizeBytes": "204800",
 #       "folderId": "uuid...",
-#       "folderName": "promo",
+#       "folderName": "Namafolder",
 #       "provider": "google_drive",
 #       "viewUrl": "https://drive.google.com/file/d/xxx/view",
 #       "downloadUrl": "https://drive.google.com/uc?id=xxx&export=download",
@@ -70,7 +70,7 @@ const curlGetFilesExample = `curl -X GET "${API_URL}/api/v1/files?folderPath=pro
 #   ]
 # }`
 
-const jsGetFilesExample = `const response = await fetch('${API_URL}/api/v1/files?folderPath=promo', {
+const jsGetFilesExample = `const response = await fetch('${API_URL}/api/v1/files?folderPath=Namafolder', {
   method: 'GET',
   headers: { 'Authorization': 'Bearer 9d_live_your_secret_api_key' }
 })
@@ -78,7 +78,7 @@ const data = await response.json()
 // Each file: id, name, mimeType, sizeBytes, folderId,
 //   folderName, provider, viewUrl, downloadUrl, createdAt
 
-// Example: render images from "promo" folder
+// Example: render images from "Namafolder" folder
 data.files
   .filter((f: any) => f.mimeType.startsWith('image/'))
   .forEach((f: any) => {
@@ -89,7 +89,7 @@ data.files
 
 const pythonGetFilesExample = `import requests
 
-url = "${API_URL}/api/v1/files?folderPath=promo"
+url = "${API_URL}/api/v1/files?folderPath=Namafolder"
 headers = { "Authorization": "Bearer 9d_live_your_secret_api_key" }
 
 data = requests.get(url, headers=headers).json()
@@ -107,7 +107,7 @@ const curlGetFoldersExample = `curl -X GET "${API_URL}/api/v1/folders" \\
 #   "folders": [
 #     {
 #       "id": "uuid...",
-#       "name": "promo",
+#       "name": "Namafolder",
 #       "parentId": null,
 #       "color": "#3b82f6",
 #       "createdAt": "2024-01-01T00:00:00.000Z"
@@ -147,6 +147,7 @@ export function ApiManagementPage() {
   const [loading, setLoading] = useState(false)
   const [selectedEndpoint, setSelectedEndpoint] = useState<'upload' | 'files' | 'folders'>('upload')
   const [activeLang, setActiveLang] = useState<'curl' | 'js' | 'python'>('curl')
+  const [copiedField, setCopiedField] = useState<string | null>(null)
 
   async function load() {
     const data = await apiFetch<{ apiKeys: ApiKey[] }>('/api-keys')
@@ -182,10 +183,16 @@ export function ApiManagementPage() {
     await load()
   }
 
-  function copy(value: string) {
+  function copy(value: string, fieldId?: string) {
     navigator.clipboard
       .writeText(value)
-      .then(() => setMessage(t('api_toast_copied')))
+      .then(() => {
+        if (fieldId) {
+          setCopiedField(fieldId)
+          setTimeout(() => setCopiedField(null), 2000)
+        }
+        setMessage(t('api_toast_copied'))
+      })
       .catch(() => setMessage(t('api_toast_copy_fail')))
     setTimeout(() => setMessage(''), 3000)
   }
@@ -400,11 +407,10 @@ export function ApiManagementPage() {
                       key={ep}
                       type="button"
                       onClick={() => setSelectedEndpoint(ep)}
-                      className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                        selectedEndpoint === ep
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                      }`}
+                      className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${selectedEndpoint === ep
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                        }`}
                     >
                       {endpointLabel(ep)}
                     </button>
@@ -424,14 +430,24 @@ export function ApiManagementPage() {
                     {API_URL}/api/v1/{selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}
                   </code>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0 border-slate-700 text-slate-300 hover:bg-slate-800 px-2.5"
-                  onClick={() => copy(`${API_URL}/api/v1/${selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}`)}
+                <button
+                  type="button"
+                  onClick={() => copy(`${API_URL}/api/v1/${selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}`, 'url')}
+                  className="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-800/90 px-3 py-1.5 text-xs font-bold text-slate-200 hover:border-slate-600 hover:bg-slate-700 hover:text-white transition-all shadow-sm active:scale-95"
+                  title={t('api_btn_copy')}
                 >
-                  <Clipboard className="h-3.5 w-3.5" />
-                </Button>
+                  {copiedField === 'url' ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 text-emerald-400" />
+                      <span className="text-emerald-400">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-3.5 w-3.5 text-slate-400" />
+                      <span>{t('api_btn_copy')}</span>
+                    </>
+                  )}
+                </button>
               </div>
 
               {/* ── Upload Docs ── */}
@@ -466,7 +482,7 @@ export function ApiManagementPage() {
                           <td className={tdCls}><span className="rounded-full bg-slate-200 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">Optional</span></td>
                           <td className={tdCls}>
                             Folder name/path (e.g.{' '}
-                            <code className="rounded bg-slate-100 dark:bg-slate-800 px-1 font-bold text-emerald-600 dark:text-emerald-400">promo</code>
+                            <code className="rounded bg-slate-100 dark:bg-slate-800 px-1 font-bold text-emerald-600 dark:text-emerald-400">Namafolder</code>
                             ). Auto-creates in MySQL &amp; Drive if missing.
                           </td>
                         </tr>
@@ -505,7 +521,7 @@ export function ApiManagementPage() {
                         <tr className={trBase}>
                           <td className={`${tdCls} font-extrabold text-blue-600 dark:text-blue-400`}>folderPath</td>
                           <td className={tdCls}><span className={mono}>String</span></td>
-                          <td className={tdCls}>Filter by folder name (e.g. promo).</td>
+                          <td className={tdCls}>Filter by folder name (e.g. Namafolder).</td>
                         </tr>
                         <tr className={trBase}>
                           <td className={`${tdCls} font-semibold`}>folderId</td>
@@ -640,21 +656,29 @@ export function ApiManagementPage() {
                         key={lang}
                         type="button"
                         onClick={() => setActiveLang(lang)}
-                        className={`rounded px-2.5 py-1 text-xs font-bold transition-all ${
-                          activeLang === lang ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
-                        }`}
+                        className={`rounded px-2.5 py-1 text-xs font-bold transition-all ${activeLang === lang ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+                          }`}
                       >
                         {lang === 'curl' ? 'cURL' : lang === 'js' ? 'JS (Fetch)' : 'Python'}
                       </button>
                     ))}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="ml-2 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white"
-                      onClick={() => copy(getCodeSnippet())}
+                    <button
+                      type="button"
+                      onClick={() => copy(getCodeSnippet(), 'snippet')}
+                      className="ml-2 flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-700/80 bg-slate-800/90 px-3 py-1.5 text-xs font-bold text-slate-200 hover:border-slate-600 hover:bg-slate-700 hover:text-white transition-all shadow-sm active:scale-95"
                     >
-                      <Clipboard className="mr-1 h-3.5 w-3.5" /> {t('api_btn_copy')}
-                    </Button>
+                      {copiedField === 'snippet' ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 text-emerald-400" />
+                          <span className="text-emerald-400">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3.5 w-3.5 text-slate-400" />
+                          <span>{t('api_btn_copy')}</span>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
                 <pre className="max-h-80 overflow-auto p-4 font-mono text-xs leading-relaxed text-slate-300">

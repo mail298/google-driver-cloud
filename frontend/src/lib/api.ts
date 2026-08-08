@@ -6,8 +6,6 @@ export const API_URL = (rawApiUrl && rawApiUrl !== 'http://localhost:4000')
   ? rawApiUrl
   : (isProd ? 'https://googledrivebackend.ikan212.com' : 'http://localhost:4000')
 
-export const DOCS_API_URL = 'https://googledrivebackend.ikan212.com'
-
 
 type ApiOptions = RequestInit & { skipAuth?: boolean; retry?: boolean }
 
