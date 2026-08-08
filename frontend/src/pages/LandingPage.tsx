@@ -15,7 +15,9 @@ import {
   ExternalLink,
   Cpu,
   Zap,
-  Server
+  Server,
+  Menu,
+  X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -93,7 +95,7 @@ function ElegantShape({
 const faqs = [
   {
     q: 'Apa itu drive9?',
-    a: 'drive9 adalah platform Google Drive Storage Gateway yang memungkinkan Anda menghubungkan akun Google Drive, mengunggah dan mengelola file dalam folder khusus "9drive", melacak kuota penyimpanan, serta membuat API Key untuk integrasi aplikasi eksternal.'
+    a: 'drive9 adalah platform Google Drive Storage Gateway yang memungkinkan Anda menghubungkan akun Google Drive, mengunggah dan mengelola file dalam folder khusus "9drive", melacak kuota penyimpanan, serta membuat API Key terenkripsi.'
   },
   {
     q: 'Apakah file yang diunggah disimpan di server drive9?',
@@ -135,6 +137,7 @@ const faqs = [
 
 export function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index)
@@ -143,14 +146,23 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
       <Seo title="drive9 - Google Drive Storage Gateway & Virtual Cloud Management" />
-      {/* ── Navigation Bar ────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="drive9 logo - Google Drive Storage Gateway" width="40" height="40" fetchPriority="high" loading="eager" className="h-10 w-10 rounded-xl object-contain shadow-lg shadow-blue-500/25 ring-1 ring-white/20 bg-slate-900/80 p-1" />
-            <div>
-              <span className="text-xl font-black tracking-tight text-white">drive9</span>
-              <span className="ml-2.5 text-[10px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-0.5 rounded-full">
+
+      {/* ── Navigation Bar (Fully Mobile Optimized) ───────────────── */}
+      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/logo.png"
+              alt="drive9 logo - Google Drive Storage Gateway"
+              width="40"
+              height="40"
+              fetchPriority="high"
+              loading="eager"
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain shadow-lg shadow-blue-500/25 ring-1 ring-white/20 bg-slate-900/80 p-1 shrink-0"
+            />
+            <div className="flex items-center">
+              <span className="text-lg sm:text-xl font-black tracking-tight text-white">drive9</span>
+              <span className="hidden sm:inline-block ml-2 text-[10px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
                 Storage Gateway
               </span>
             </div>
@@ -164,7 +176,7 @@ export function LandingPage() {
             <RouterLink to="/terms" className="hover:text-white transition-colors">Terms of Service</RouterLink>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <RouterLink to="/login">
               <Button variant="outline" className="h-9 px-4 text-xs font-bold border border-slate-700/80 bg-slate-900/90 text-white hover:bg-slate-800 hover:text-white transition-all rounded-xl shadow-sm">
                 Sign In
@@ -176,11 +188,61 @@ export function LandingPage() {
               </Button>
             </RouterLink>
           </div>
+
+          {/* Mobile Actions & Menu Toggle */}
+          <div className="flex md:hidden items-center gap-2">
+            <RouterLink to="/login">
+              <Button size="sm" className="h-8 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg">
+                Sign In
+              </Button>
+            </RouterLink>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle mobile menu"
+              className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800 focus:outline-none"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5 text-blue-400" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              className="md:hidden overflow-hidden border-t border-slate-800/80 bg-[#030712]/98 backdrop-blur-2xl px-6 py-5 space-y-4"
+            >
+              <div className="flex flex-col space-y-3 text-sm font-semibold text-slate-300">
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Features</a>
+                <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Security</a>
+                <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">FAQ</a>
+                <RouterLink to="/privacy" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Privacy Policy</RouterLink>
+                <RouterLink to="/terms" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Terms of Service</RouterLink>
+              </div>
+              <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
+                <RouterLink to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full h-10 text-xs font-bold border border-slate-700 bg-slate-900 text-white rounded-xl">
+                    Sign In with Google
+                  </Button>
+                </RouterLink>
+                <RouterLink to="/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full h-10 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl">
+                    Get Started Free
+                  </Button>
+                </RouterLink>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* ── Hero Section with 21st.dev Geometric Animated Shapes ─── */}
-      <section className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-20 overflow-hidden">
+      <section className="relative min-h-[85vh] flex items-center justify-center pt-12 sm:pt-20 pb-16 overflow-hidden">
         {/* Ambient Glow Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 via-transparent to-purple-600/10 blur-3xl pointer-events-none" />
 
@@ -192,7 +254,7 @@ export function LandingPage() {
             height={140}
             rotate={12}
             gradient="from-blue-500/[0.18]"
-            className="left-[-12%] md:left-[-5%] top-[15%] md:top-[18%]"
+            className="left-[-15%] md:left-[-5%] top-[15%] md:top-[18%]"
           />
           <ElegantShape
             delay={0.5}
@@ -200,7 +262,7 @@ export function LandingPage() {
             height={120}
             rotate={-15}
             gradient="from-indigo-500/[0.18]"
-            className="right-[-8%] md:right-[-2%] top-[65%] md:top-[70%]"
+            className="right-[-12%] md:right-[-2%] top-[65%] md:top-[70%]"
           />
           <ElegantShape
             delay={0.4}
@@ -210,25 +272,17 @@ export function LandingPage() {
             gradient="from-purple-500/[0.15]"
             className="left-[5%] md:left-[8%] bottom-[8%]"
           />
-          <ElegantShape
-            delay={0.6}
-            width={220}
-            height={60}
-            rotate={20}
-            gradient="from-cyan-500/[0.15]"
-            className="right-[12%] md:right-[18%] top-[10%]"
-          />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-5xl px-6 text-center space-y-8">
+        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 text-center space-y-6 sm:space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] backdrop-blur-md max-w-full text-center"
           >
-            <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-300 tracking-wide">
+            <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-300 tracking-wide leading-tight">
               Secure Google Drive Cloud Gateway & API Interface
             </span>
           </motion.div>
@@ -237,7 +291,7 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.35 }}
-            className="text-4xl font-black tracking-tight text-white sm:text-6xl md:text-7xl leading-[1.08]"
+            className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight text-white leading-[1.12]"
           >
             Unified Cloud Storage via{' '}
             <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
@@ -249,7 +303,7 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mx-auto max-w-2xl text-base sm:text-lg text-slate-400 font-normal leading-relaxed"
+            className="mx-auto max-w-2xl text-sm sm:text-lg text-slate-400 font-normal leading-relaxed px-2"
           >
             <strong className="text-slate-200">drive9</strong> adalah platform gateway penyimpanan Google Drive yang memungkinkan pengguna menghubungkan akun Google Drive, mengorganisir folder virtual, memantau kuota penyimpanan, dan mengunggah file secara langsung ke cloud storage.
           </motion.p>
@@ -258,16 +312,16 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.65 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+            className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2"
           >
-            <RouterLink to="/login">
-              <Button className="h-13 px-8 text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/25 transition-all rounded-xl flex items-center gap-2 ring-1 ring-white/20">
+            <RouterLink to="/login" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto h-12 px-7 text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/25 transition-all rounded-xl flex items-center justify-center gap-2 ring-1 ring-white/20">
                 <span>Sign In with Google</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </RouterLink>
-            <RouterLink to="/register">
-              <Button variant="outline" className="h-13 px-8 text-sm font-extrabold border border-slate-700 bg-slate-900/90 text-white hover:bg-slate-800 transition-all rounded-xl">
+            <RouterLink to="/register" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto h-12 px-7 text-sm font-extrabold border border-slate-700 bg-slate-900/90 text-white hover:bg-slate-800 transition-all rounded-xl">
                 Create Free Account
               </Button>
             </RouterLink>
@@ -278,7 +332,7 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-14 border-t border-slate-800/80 text-left"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-10 sm:pt-14 border-t border-slate-800/80 text-left"
           >
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-blue-500/40 transition-colors">
               <div className="flex items-center gap-2 text-blue-400 font-bold text-sm mb-1.5">
@@ -321,43 +375,43 @@ export function LandingPage() {
       </section>
 
       {/* ── Features Section ──────────────────────────────────────── */}
-      <section id="features" className="py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
-        <div className="mx-auto max-w-7xl px-6 space-y-16">
-          <div className="text-center max-w-2xl mx-auto space-y-4">
+      <section id="features" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12 sm:space-y-16">
+          <div className="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">
               <Cpu className="h-4 w-4" />
               <span>Gateway Features</span>
             </div>
-            <h2 className="text-3xl font-black text-white sm:text-4xl">Fitur & Keunggulan drive9</h2>
-            <p className="text-slate-400 text-sm">Dirancang untuk manajemen penyimpanan cloud berkecepatan tinggi dengan keamanan tingkat lanjut.</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-white">Fitur & Keunggulan drive9</h2>
+            <p className="text-slate-400 text-xs sm:text-sm">Dirancang untuk manajemen penyimpanan cloud berkecepatan tinggi dengan keamanan tingkat lanjut.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="group p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform">
-                <UploadCloud className="h-7 w-7" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-4">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform">
+                <UploadCloud className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
-              <h3 className="text-xl font-bold text-white">Direct Streamed Uploads</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white">Direct Streamed Uploads</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Mengunggah file multipart dan resumable secara langsung ke Google Drive tanpa menampung file di disk server lokal. Izin akses file publik otomatis disesuaikan.
               </p>
             </div>
 
-            <div className="group p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
-                <FolderTree className="h-7 w-7" />
+            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-4">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
+                <FolderTree className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
-              <h3 className="text-xl font-bold text-white">Folder Virtual Bersarang</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white">Folder Virtual Bersarang</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Organisir file dalam struktur folder virtual bersarang. Otomatis menyelesaikan dan mensinkronkan path folder di Google Drive saat diminta oleh client.
               </p>
             </div>
 
-            <div className="group p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-emerald-500/40 transition-all duration-300 space-y-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                <KeyRound className="h-7 w-7" />
+            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-emerald-500/40 transition-all duration-300 space-y-4">
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                <KeyRound className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
-              <h3 className="text-xl font-bold text-white">Developer API Keys</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white">Developer API Keys</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Buat API Key dengan kontrol hak akses terisolasi (<code className="text-emerald-300 font-mono">files:read</code>, <code className="text-emerald-300 font-mono">files:upload</code>) untuk integrasi skrip backend.
               </p>
@@ -367,20 +421,20 @@ export function LandingPage() {
       </section>
 
       {/* ── Security & Purpose Section ────────────────────────────── */}
-      <section id="security" className="py-24 border-t border-slate-800/80 bg-[#030712] relative">
-        <div className="mx-auto max-w-7xl px-6 grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
+      <section id="security" className="py-16 sm:py-24 border-t border-slate-800/80 bg-[#030712] relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-bold text-emerald-400">
               <ShieldCheck className="h-4 w-4" />
               <span>Google OAuth Security & Privacy</span>
             </div>
-            <h2 className="text-3xl font-black text-white sm:text-4xl leading-tight">
+            <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
               Bagaimana drive9 Mengelola Data & Akses Google Drive Anda
             </h2>
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
               <strong className="text-slate-200">drive9</strong> mengakses Google Drive semata-mata untuk membuat dan mengelola file dalam folder khusus bernama <code className="text-indigo-300 font-mono font-bold">9drive</code>. Kami menjaga privasi data Anda:
             </p>
-            <ul className="space-y-4 text-xs text-slate-300">
+            <ul className="space-y-3 text-xs text-slate-300">
               <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60">
                 <Lock className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span><strong>Enkripsi OAuth:</strong> Token Access & Refresh terenkripsi dengan algoritma AES-256-GCM sebelum disimpan di database.</span>
@@ -396,7 +450,7 @@ export function LandingPage() {
             </ul>
           </div>
 
-          <div className="p-8 rounded-3xl border border-slate-800 bg-slate-900/80 space-y-6 shadow-2xl backdrop-blur-xl">
+          <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/80 space-y-6 shadow-2xl backdrop-blur-xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4 text-blue-400" />
@@ -411,7 +465,7 @@ export function LandingPage() {
               </div>
               <div>
                 <p className="font-bold text-slate-400 mb-1">Target Google Scope:</p>
-                <p className="font-mono text-purple-300 bg-slate-950 p-2 rounded-lg border border-slate-800">https://www.googleapis.com/auth/drive</p>
+                <p className="font-mono text-purple-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 break-all">https://www.googleapis.com/auth/drive</p>
               </div>
               <div>
                 <p className="font-bold text-slate-400 mb-1">Tujuan Folder Storage:</p>
@@ -433,18 +487,18 @@ export function LandingPage() {
       </section>
 
       {/* ── FAQ Section (10 Frequently Asked Questions) ─────────────── */}
-      <section id="faq" className="py-24 border-t border-slate-800/80 bg-slate-950/40">
-        <div className="mx-auto max-w-4xl px-6 space-y-12">
+      <section id="faq" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/40">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-10 sm:space-y-12">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-xs font-bold text-purple-400">
               <HelpCircle className="h-4 w-4" />
               <span>Pertanyaan Sering Diajukan</span>
             </div>
-            <h2 className="text-3xl font-black text-white sm:text-4xl">Frequently Asked Questions (FAQ)</h2>
-            <p className="text-slate-400 text-sm">Temukan jawaban lengkap seputar penggunaan, keamanan, dan integrasi drive9.</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-white">Frequently Asked Questions (FAQ)</h2>
+            <p className="text-slate-400 text-xs sm:text-sm">Temukan jawaban lengkap seputar penggunaan, keamanan, dan integrasi drive9.</p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3.5 sm:space-y-4">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
@@ -456,9 +510,9 @@ export function LandingPage() {
                   aria-expanded={openFaq === idx}
                   aria-controls={`faq-answer-${idx}`}
                   id={`faq-button-${idx}`}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-slate-100 hover:text-blue-400 transition-colors cursor-pointer"
+                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 sm:gap-4 font-bold text-xs sm:text-sm text-slate-100 hover:text-blue-400 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center gap-3">
+                  <span className="flex items-center gap-2.5 sm:gap-3">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 text-xs font-mono font-bold border border-blue-500/20">
                       {idx + 1}
                     </span>
@@ -484,7 +538,7 @@ export function LandingPage() {
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <div className="px-5 pb-5 pt-1 text-xs text-slate-300 leading-relaxed border-t border-slate-800/50">
+                      <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 text-xs text-slate-300 leading-relaxed border-t border-slate-800/50">
                         {faq.a}
                       </div>
                     </motion.div>
@@ -497,23 +551,23 @@ export function LandingPage() {
       </section>
 
       {/* ── Call to Action Banner ──────────────────────────────────── */}
-      <section className="py-20 border-t border-slate-800/80 bg-gradient-to-b from-slate-950 via-[#030712] to-blue-950/40 relative overflow-hidden">
-        <div className="mx-auto max-w-4xl px-6 text-center space-y-6 relative z-10">
-          <div className="flex h-16 w-16 mx-auto items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
-            <Zap className="h-8 w-8" />
+      <section className="py-16 sm:py-20 border-t border-slate-800/80 bg-gradient-to-b from-slate-950 via-[#030712] to-blue-950/40 relative overflow-hidden">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6 relative z-10">
+          <div className="flex h-14 w-14 sm:h-16 sm:w-16 mx-auto items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
+            <Zap className="h-7 w-7 sm:h-8 sm:w-8" />
           </div>
-          <h2 className="text-3xl font-black text-white sm:text-4xl">Siap Mengelola Storage Google Drive Anda?</h2>
-          <p className="text-slate-400 text-sm max-w-xl mx-auto">
+          <h2 className="text-2xl sm:text-4xl font-black text-white">Siap Mengelola Storage Google Drive Anda?</h2>
+          <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto">
             Hubungkan akun Google Drive Anda dalam hitungan detik dan mulai nikmati pengalaman manajemen penyimpanan cloud modern.
           </p>
-          <div className="flex items-center justify-center gap-4 pt-2">
-            <RouterLink to="/login">
-              <Button className="h-12 px-8 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 rounded-xl">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <RouterLink to="/login" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto h-12 px-8 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 rounded-xl">
                 Sign In dengan Google
               </Button>
             </RouterLink>
-            <RouterLink to="/register">
-              <Button variant="outline" className="h-12 px-8 text-xs font-bold border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 rounded-xl">
+            <RouterLink to="/register" className="w-full sm:w-auto">
+              <Button variant="outline" className="w-full sm:w-auto h-12 px-8 text-xs font-bold border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 rounded-xl">
                 Daftar Akun
               </Button>
             </RouterLink>
@@ -522,15 +576,15 @@ export function LandingPage() {
       </section>
 
       {/* ── Footer ────────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-800/80 bg-[#030712] py-12 text-xs text-slate-500">
-        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <footer className="border-t border-slate-800/80 bg-[#030712] py-10 text-xs text-slate-500">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="drive9 logo" className="h-8 w-8 rounded-lg object-contain bg-slate-900/80 p-0.5" />
+            <img src="/logo.png" alt="drive9 logo" width="32" height="32" loading="lazy" className="h-8 w-8 rounded-lg object-contain bg-slate-900/80 p-0.5" />
             <span className="font-extrabold text-white text-sm">drive9</span>
             <span>© 2026 drive9. All rights reserved.</span>
           </div>
 
-          <div className="flex items-center gap-6 font-semibold">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-semibold">
             <a href="#faq" className="hover:text-slate-300 transition-colors">FAQ</a>
             <RouterLink to="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</RouterLink>
             <RouterLink to="/terms" className="hover:text-slate-300 transition-colors">Terms of Service</RouterLink>
