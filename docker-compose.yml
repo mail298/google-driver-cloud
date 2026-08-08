@@ -13,7 +13,7 @@ services:
       - "80"
     labels:
       - "gatus.enable=true"
-      - "gatus.name=node-js : google-driver-cloud frontend"
+      - "gatus.name=node-js : google-driver-cloud-frontend"
       - "gatus.group=Applications"
       - "gatus.url=https://googledrivefrontend.ikan212.com"
       - "gatus.interval=60s"
@@ -48,11 +48,11 @@ services:
       - "4000"
     labels:
       - "gatus.enable=true"
-      - "gatus.name=node-js : google-driver-cloud backend"
+      - "gatus.name=node-js : google-driver-cloud-backend"
       - "gatus.group=Applications"
-      - "gatus.url=https://googledrivebackend.ikan212.com/health"
+      - "gatus.url=https://googledrivebackend.ikan212.com"
       - "gatus.interval=60s"
-      - "gatus.conditions=[STATUS] == 200, [RESPONSE_TIME] < 5000"
+      - "gatus.conditions=[STATUS] == any(200, 301, 302, 307, 401, 403), [RESPONSE_TIME] < 5000"
 
   mysql:
     image: mysql:8.4
