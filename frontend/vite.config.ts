@@ -13,8 +13,8 @@ export default defineConfig({
         name: '9Drive',
         short_name: '9Drive',
         description: 'Google Drive storage gateway for files, folders, sharing, and quota tracking.',
-        theme_color: '#2563eb',
-        background_color: '#ffffff',
+        theme_color: '#030712',
+        background_color: '#030712',
         display: 'standalone',
         start_url: '/all-files',
         scope: '/',
@@ -35,6 +35,27 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+    },
+  },
+  build: {
+    target: 'esnext',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+              return 'vendor-react'
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-motion'
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons'
+            }
+          }
+        },
+      },
     },
   },
 })
