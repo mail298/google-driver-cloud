@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom'
 import { HardDrive, ArrowLeft, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Seo } from '@/components/common/Seo'
 
 export function TermsPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
+      <Seo
+        title="Terms of Service - drive9 Google Drive Gateway"
+        description="Ketentuan penggunaan layanan drive9 untuk pengelolaan cloud storage Google Drive dan API Key pengembang."
+      />
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">

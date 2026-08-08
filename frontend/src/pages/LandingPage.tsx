@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Seo } from '@/components/common/Seo'
 
 // Floating 3D Geometric Shape Component inspired by 21st.dev
 function ElegantShape({
@@ -142,6 +143,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
+      <Seo title="drive9 - Google Drive Storage Gateway & Virtual Cloud Management" />
       {/* ── Navigation Bar ────────────────────────────────────────── */}
       <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
