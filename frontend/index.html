@@ -61,7 +61,67 @@
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Static SSR Fallback for SEO Crawlers (Screaming Frog, Googlebot, Bingbot) -->
+    <header>
+      <nav>
+        <a href="/">drive9 Storage Gateway</a>
+        <a href="#features">Features</a>
+        <a href="#security">Security</a>
+        <a href="#faq">FAQ</a>
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms of Service</a>
+      </nav>
+    </header>
+
+    <main>
+      <section>
+        <h1>Unified Cloud Storage via drive9</h1>
+        <p>
+          drive9 adalah platform gateway penyimpanan Google Drive yang memungkinkan pengguna menghubungkan akun Google Drive, mengorganisir folder virtual, memantau kuota penyimpanan, dan mengunggah file secara langsung ke cloud storage.
+        </p>
+      </section>
+
+      <section id="features">
+        <h2>Fitur & Keunggulan drive9</h2>
+        <p>Dirancang untuk manajemen penyimpanan cloud berkecepatan tinggi dengan keamanan tingkat lanjut.</p>
+        <article>
+          <h3>Direct Streamed Uploads</h3>
+          <p>Mengunggah file multipart dan resumable secara langsung ke Google Drive tanpa menampung file di disk server lokal.</p>
+        </article>
+        <article>
+          <h3>Folder Virtual Bersarang</h3>
+          <p>Organisir file dalam struktur folder virtual bersarang. Otomatis menyelesaikan path folder di Google Drive.</p>
+        </article>
+        <article>
+          <h3>Developer API Keys</h3>
+          <p>Buat API Key dengan kontrol hak akses terisolasi untuk integrasi skrip backend.</p>
+        </article>
+      </section>
+
+      <section id="security">
+        <h2>Bagaimana drive9 Mengelola Data & Akses Google Drive Anda</h2>
+        <p>
+          drive9 mengakses Google Drive semata-mata untuk membuat dan mengelola file dalam folder khusus bernama 9drive. Enkripsi OAuth AES-256-GCM menjamin keamanan token pengguna.
+        </p>
+      </section>
+
+      <section id="faq">
+        <h2>Frequently Asked Questions (FAQ)</h2>
+        <p>Temukan jawaban lengkap seputar penggunaan, keamanan, dan integrasi drive9.</p>
+      </section>
+
+      <section>
+        <h2>Siap Mengelola Storage Google Drive Anda?</h2>
+        <p>Hubungkan akun Google Drive Anda dalam hitungan detik dan mulai nikmati pengalaman manajemen penyimpanan cloud modern.</p>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2026 drive9. All rights reserved.</p>
+    </footer>
+  </div>
+
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
