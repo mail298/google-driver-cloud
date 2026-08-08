@@ -1,0 +1,46 @@
+[
+  {
+    "id": "err_1786178909869_2tcdg",
+    "timestamp": "2026-08-08T08:48:29.869Z",
+    "method": "GET",
+    "path": "/auth/google/url",
+    "ip": "::1",
+    "status": 500,
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "Unsupported state or unable to authenticate data",
+    "stack": "Error: Unsupported state or unable to authenticate data\n    at Decipheriv.final (node:internal/crypto/cipher:184:29)\n    at decryptText (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\utils\\crypto.ts:19:88)\n    at createOAuthClient (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\google\\google.service.ts:10:33)\n    at <anonymous> (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:87:20)"
+  },
+  {
+    "id": "err_1786178820450_5brok",
+    "timestamp": "2026-08-08T08:47:00.450Z",
+    "method": "GET",
+    "path": "/auth/google/url",
+    "ip": "::1",
+    "status": 500,
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "\nInvalid `prisma.providerConfig.findFirstOrThrow()` invocation in\nC:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:48\n\n  81 \n  82 authRouter.get('/google/url', async (_req, res, next) => {\n  83   try {\n→ 84     const config = await prisma.providerConfig.findFirstOrThrow(\nAuthentication failed against database server, the provided database credentials for `root` are not valid.\n\nPlease make sure to provide valid database credentials for the database server at the configured address.",
+    "stack": "PrismaClientInitializationError: \nInvalid `prisma.providerConfig.findFirstOrThrow()` invocation in\nC:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:48\n\n  81 \n  82 authRouter.get('/google/url', async (_req, res, next) => {\n  83   try {\n→ 84     const config = await prisma.providerConfig.findFirstOrThrow(\nAuthentication failed against database server, the provided database credentials for `root` are not valid.\n\nPlease make sure to provide valid database credentials for the database server at the configured address.\n    at ei.handleRequestError (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:242:13)\n    at ei.handleAndLogRequestError (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:174:12)\n    at ei.request (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:143:12)\n    at async a (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:833:24)\n    at async <anonymous> (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:20)"
+  },
+  {
+    "id": "err_1786178805584_fmqi7",
+    "timestamp": "2026-08-08T08:46:45.584Z",
+    "method": "GET",
+    "path": "/auth/google/url",
+    "ip": "::1",
+    "status": 500,
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "\nInvalid `prisma.providerConfig.findFirstOrThrow()` invocation in\nC:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:48\n\n  81 \n  82 authRouter.get('/google/url', async (_req, res, next) => {\n  83   try {\n→ 84     const config = await prisma.providerConfig.findFirstOrThrow(\nAuthentication failed against database server, the provided database credentials for `root` are not valid.\n\nPlease make sure to provide valid database credentials for the database server at the configured address.",
+    "stack": "PrismaClientInitializationError: \nInvalid `prisma.providerConfig.findFirstOrThrow()` invocation in\nC:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:48\n\n  81 \n  82 authRouter.get('/google/url', async (_req, res, next) => {\n  83   try {\n→ 84     const config = await prisma.providerConfig.findFirstOrThrow(\nAuthentication failed against database server, the provided database credentials for `root` are not valid.\n\nPlease make sure to provide valid database credentials for the database server at the configured address.\n    at ei.handleRequestError (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:242:13)\n    at ei.handleAndLogRequestError (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:174:12)\n    at ei.request (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:143:12)\n    at async a (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:833:24)\n    at async <anonymous> (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:20)"
+  },
+  {
+    "id": "err_1786178635713_oeu5z",
+    "timestamp": "2026-08-08T08:43:55.713Z",
+    "method": "GET",
+    "path": "/auth/google/url",
+    "ip": "::1",
+    "status": 500,
+    "code": "INTERNAL_SERVER_ERROR",
+    "message": "\nInvalid `prisma.providerConfig.findFirstOrThrow()` invocation in\nC:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:48\n\n  81 \n  82 authRouter.get('/google/url', async (_req, res, next) => {\n  83   try {\n→ 84     const config = await prisma.providerConfig.findFirstOrThrow(\nAuthentication failed against database server, the provided database credentials for `root` are not valid.\n\nPlease make sure to provide valid database credentials for the database server at the configured address.",
+    "stack": "PrismaClientInitializationError: \nInvalid `prisma.providerConfig.findFirstOrThrow()` invocation in\nC:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:48\n\n  81 \n  82 authRouter.get('/google/url', async (_req, res, next) => {\n  83   try {\n→ 84     const config = await prisma.providerConfig.findFirstOrThrow(\nAuthentication failed against database server, the provided database credentials for `root` are not valid.\n\nPlease make sure to provide valid database credentials for the database server at the configured address.\n    at ei.handleRequestError (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:242:13)\n    at ei.handleAndLogRequestError (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:174:12)\n    at ei.request (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\RequestHandler.ts:143:12)\n    at async a (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\node_modules\\@prisma\\client\\src\\runtime\\getPrismaClient.ts:833:24)\n    at async <anonymous> (C:\\Users\\ADMIN\\Desktop\\framework\\ai\\9drive\\backend\\src\\modules\\auth\\auth.routes.ts:84:20)"
+  }
+]

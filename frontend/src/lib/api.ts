@@ -6,6 +6,8 @@ export const API_URL = (rawApiUrl && rawApiUrl !== 'http://localhost:4000')
   ? rawApiUrl
   : (isProd ? 'https://googledrivebackend.ikan212.com' : 'http://localhost:4000')
 
+export const DOCS_API_URL = 'https://googledrivebackend.ikan212.com'
+
 
 type ApiOptions = RequestInit & { skipAuth?: boolean; retry?: boolean }
 
@@ -40,18 +42,18 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
     if (response.status === 403 && error.code === 'IP_NOT_ALLOWED') {
       try {
         sessionStorage.setItem('ip_blocked_msg', error.message || 'IP Access Restricted')
-      } catch {}
+      } catch { }
       window.dispatchEvent(new CustomEvent('ip-blocked', { detail: { message: error.message } }))
     } else {
       try {
         sessionStorage.removeItem('ip_blocked_msg')
-      } catch {}
+      } catch { }
     }
     throw new Error(error.message ?? 'Request failed')
   } else {
     try {
       sessionStorage.removeItem('ip_blocked_msg')
-    } catch {}
+    } catch { }
   }
 
   return response.json() as Promise<T>
