@@ -38,6 +38,22 @@ publicApiRouter.get('/v1/folders', requireApiKey('files:upload'), async (req: Ap
   }
 })
 
+async function resolveFolderPath(userId: string, pathStr: string): Promise<string | null> {
+  const parts = pathStr.split('/').map((p) => p.trim()).filter(Boolean)
+  if (parts.length === 0) return null
+
+  let currentParentId: string | null = null
+  for (const part of parts) {
+    const folderMatch: { id: string } | null = await prisma.folder.findFirst({
+      where: { userId, name: part, parentId: currentParentId, deletedAt: null },
+      select: { id: true }
+    })
+    if (!folderMatch) return null
+    currentParentId = folderMatch.id
+  }
+  return currentParentId
+}
+
 // List files endpoint
 publicApiRouter.get('/v1/files', requireApiKey('files:upload'), async (req: ApiKeyRequest, res, next) => {
   try {
@@ -46,12 +62,11 @@ publicApiRouter.get('/v1/files', requireApiKey('files:upload'), async (req: ApiK
     const q = req.query.q ? String(req.query.q).trim() : undefined
 
     if (!folderId && folderPath) {
-      const folderRecord = await prisma.folder.findFirst({
-        where: { userId: req.user!.id, name: folderPath, deletedAt: null }
-      })
-      if (folderRecord) {
-        folderId = folderRecord.id
+      const resolvedId = await resolveFolderPath(req.user!.id, folderPath)
+      if (!resolvedId) {
+        return res.json({ status: 'ok', count: 0, files: [] })
       }
+      folderId = resolvedId
     }
 
     const files = await prisma.file.findMany({
