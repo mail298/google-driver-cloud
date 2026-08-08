@@ -59,9 +59,16 @@ export function ApiManagementPage() {
   }
 
   async function revokeKey(id: string) {
-    await apiFetch(`/api-keys/${id}`, { method: 'DELETE' })
-    await load()
+    try {
+      await apiFetch(`/api-keys/${id}`, { method: 'DELETE' })
+      setMessage('API key deleted successfully')
+      setTimeout(() => setMessage(''), 3000)
+      await load()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Failed to delete API key')
+    }
   }
+
 
   function copy(value: string, fieldId: string) {
     navigator.clipboard
@@ -259,8 +266,8 @@ response = requests.post(url, headers=headers, files=files)`
                   size="sm"
                   variant="danger"
                   onClick={() => revokeKey(apiKey.id)}
-                  disabled={apiKey.status === 'revoked'}
                   className="h-8 w-8 p-0 rounded-lg shrink-0 self-end sm:self-center"
+                  title="Hapus API Key"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>

@@ -55,9 +55,10 @@ apiKeyRouter.post('/', async (req: AuthRequest, res, next) => {
 
 apiKeyRouter.delete('/:id', async (req: AuthRequest, res, next) => {
   try {
-    await prisma.apiKey.updateMany({ where: { id: String(req.params.id), userId: req.user!.id, revokedAt: null }, data: { status: 'revoked', revokedAt: new Date() } })
+    await prisma.apiKey.deleteMany({ where: { id: String(req.params.id), userId: req.user!.id } })
     return res.json({ status: 'ok' })
   } catch (error) {
     return next(error)
   }
 })
+
