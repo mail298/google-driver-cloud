@@ -229,7 +229,7 @@ export function LandingPage() {
           >
             <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
             <span className="text-xs font-semibold text-slate-300 tracking-wide">
-              Official Google Drive Cloud Gateway & API Interface
+              Secure Google Drive Cloud Gateway & API Interface
             </span>
           </motion.div>
 
