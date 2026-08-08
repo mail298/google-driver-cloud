@@ -17,6 +17,9 @@ import { PublicFilePage } from '@/pages/PublicFilePage'
 import { ApiManagementPage } from '@/pages/ApiManagementPage'
 import { TrashPage } from '@/pages/TrashPage'
 import { ActivityLogPage } from '@/pages/ActivityLogPage'
+import { LandingPage } from '@/pages/LandingPage'
+import { PrivacyPage } from '@/pages/PrivacyPage'
+import { TermsPage } from '@/pages/TermsPage'
 import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { UploadProvider } from '@/context/UploadContext'
 import { LanguageProvider } from '@/context/LanguageContext'
@@ -56,6 +59,9 @@ function App() {
     <LanguageProvider>
       <UploadProvider>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="privacy" element={<PrivacyPage />} />
+          <Route path="terms" element={<TermsPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="google-auth" element={<GoogleAuthPage />} />
@@ -68,7 +74,6 @@ function App() {
           <Route path="file/:token/embed" element={<PublicFilePage embed />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<DriveLayout />}>
-              <Route index element={<Navigate to="/all-files" replace />} />
               <Route path="all-files" element={<AllFilesPage />} />
               <Route path="quota" element={<QuotaTrackerPage />} />
               <Route path="shared" element={<SharedPage />} />
@@ -81,7 +86,7 @@ function App() {
               <Route path="api" element={<ApiManagementPage />} />
             </Route>
           </Route>
-          <Route path="*" element={<Navigate to="/all-files" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </UploadProvider>
     </LanguageProvider>

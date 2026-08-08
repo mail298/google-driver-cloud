@@ -462,11 +462,10 @@ print(response.json())`
           <button
             type="button"
             onClick={() => setActiveTab('upload')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'upload'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'upload'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
           >
             <UploadCloud className="h-3.5 w-3.5" />
             <span>{t('api_tab_upload')}</span>
@@ -475,11 +474,10 @@ print(response.json())`
           <button
             type="button"
             onClick={() => setActiveTab('files')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'files'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'files'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
           >
             <FileText className="h-3.5 w-3.5" />
             <span>{t('api_tab_files')}</span>
@@ -488,11 +486,10 @@ print(response.json())`
           <button
             type="button"
             onClick={() => setActiveTab('folders')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'folders'
-                ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'folders'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
           >
             <FolderTree className="h-3.5 w-3.5" />
             <span>{t('api_tab_folders')}</span>
@@ -509,18 +506,16 @@ print(response.json())`
                 <button
                   type="button"
                   onClick={() => setUploadMode('simple')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    uploadMode === 'simple' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
-                  }`}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${uploadMode === 'simple' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
                 >
                   Standard Single-File
                 </button>
                 <button
                   type="button"
                   onClick={() => setUploadMode('batch')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
-                    uploadMode === 'batch' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
-                  }`}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${uploadMode === 'batch' ? 'bg-white dark:bg-slate-900 text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                    }`}
                 >
                   Batch & Metadata ({t('api_upload_auto_folder')})
                 </button>
