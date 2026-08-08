@@ -359,8 +359,18 @@ export function AllFilesPage() {
   const pageDragCounterRef = useRef(0)
   const [isPageDragging, setIsPageDragging] = useState(false)
 
+  function isExternalFileDrag(event: DragEvent<HTMLDivElement>): boolean {
+    const dt = event.dataTransfer
+    if (!dt || !dt.types) return false
+    const types = Array.from(dt.types)
+    if (types.includes('text/plain') || types.includes('text/uri-list') || types.includes('9drive-internal-drag')) {
+      return false
+    }
+    return types.includes('Files')
+  }
+
   function handlePageDragEnter(event: DragEvent<HTMLDivElement>) {
-    if (!event.dataTransfer?.types?.includes('Files')) return
+    if (!isExternalFileDrag(event)) return
     event.preventDefault()
     event.stopPropagation()
     pageDragCounterRef.current += 1
@@ -370,13 +380,13 @@ export function AllFilesPage() {
   }
 
   function handlePageDragOver(event: DragEvent<HTMLDivElement>) {
-    if (!event.dataTransfer?.types?.includes('Files')) return
+    if (!isExternalFileDrag(event)) return
     event.preventDefault()
     event.stopPropagation()
   }
 
   function handlePageDragLeave(event: DragEvent<HTMLDivElement>) {
-    if (!event.dataTransfer?.types?.includes('Files')) return
+    if (!isExternalFileDrag(event)) return
     event.preventDefault()
     event.stopPropagation()
     pageDragCounterRef.current -= 1
@@ -387,7 +397,7 @@ export function AllFilesPage() {
   }
 
   function handlePageDrop(event: DragEvent<HTMLDivElement>) {
-    if (!event.dataTransfer?.types?.includes('Files')) return
+    if (!isExternalFileDrag(event)) return
     event.preventDefault()
     event.stopPropagation()
     pageDragCounterRef.current = 0

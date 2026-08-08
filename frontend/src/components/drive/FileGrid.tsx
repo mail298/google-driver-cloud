@@ -176,6 +176,7 @@ export function FileGrid({
             draggable
             onDragStart={(event) => {
               event.dataTransfer.setData('text/plain', file.id ?? '')
+              event.dataTransfer.setData('9drive-internal-drag', 'true')
               event.dataTransfer.effectAllowed = 'move'
             }}
             onClick={() => onToggleFile?.(file)}
