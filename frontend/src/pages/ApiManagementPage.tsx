@@ -267,7 +267,7 @@ print(response.json())`
         description={t('api_subtitle')}
         actions={
           <Button
-            className="h-10 px-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 font-bold text-white shadow-lg shadow-indigo-500/20 hover:from-blue-500 hover:to-purple-500 transition-all rounded-xl flex items-center gap-2"
+            className="h-10 px-4 bg-blue-600 hover:bg-blue-500 font-bold text-white shadow-md shadow-blue-500/20 transition-all rounded-xl flex items-center gap-2"
             onClick={() => setCreateOpen(true)}
           >
             <KeyRound className="h-4 w-4" />
