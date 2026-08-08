@@ -18,7 +18,8 @@ import {
   Sparkles,
   BookOpen,
   Info,
-  HardDrive
+  HardDrive,
+  RefreshCw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -101,6 +102,13 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
             icon: Upload
           },
           {
+            title: isEn ? 'Google Drive Sync Button' : 'Tombol Sinkronkan (Sync)',
+            desc: isEn
+              ? 'Scans Google Drive 9drive folder to discover external uploads and sync metadata without reviving trashed files.'
+              : 'Memindai folder 9drive di Google Drive untuk mendeteksi file baru dan menyinkronkan data tanpa mengembalikan file terhapus.',
+            icon: RefreshCw
+          },
+          {
             title: isEn ? 'Checkbox & Batch Actions' : 'Checkbox & Batch Actions',
             desc: isEn
               ? 'Check multiple items to Move, Delete, or Download ZIP simultaneously.'
@@ -113,16 +121,19 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
               ? 'When moving items, current folder or selected subfolders are automatically greyed-out (disabled).'
               : 'Saat memindahkan file, folder lokasi saat ini atau subfolder terpilih otomatis di-hitam-putihkan (disabled) agar tidak salah pilih.',
             icon: FolderInput
-          },
-          {
-            title: isEn ? 'Select All Checkbox' : 'Tombol Pilih Semua',
-            desc: isEn ? 'Use the "Select All" checkbox in the toolbar to quickly select all displayed files.' : 'Gunakan checkbox "Pilih Semua" di toolbar atas untuk mencentang seluruh file terpapar secara cepat.',
-            icon: CheckCircle
           }
         ],
         tips: isEn
-          ? ['Right-click any file/folder card to open quick context menu (Rename, Move, Share, Delete).', 'Click 3-dots button on folder card to perform per-folder actions.']
-          : ['Klik kanan pada kartu file/folder untuk membuka context menu cepat (Rename, Move, Share, Delete).', 'Klik tombol titik 3 di sudut kartu folder untuk melakukan aksi per-folder.']
+          ? [
+              'Click "Sync" button if you added files directly via Google Drive web to update 9Drive database instantly.',
+              'Files moved to Trash in 9Drive remain safely in Recycle Bin and will not be resurrected when clicking Sync.',
+              'Right-click any file/folder card to open quick context menu (Rename, Move, Share, Delete).'
+            ]
+          : [
+              'Klik tombol "Sinkron" jika Anda menambah file langsung melalui Google Drive web untuk memperbarui database 9Drive.',
+              'File yang sudah dihapus ke Tempat Sampah akan tetap berada di Tempat Sampah dan tidak akan muncul kembali saat tombol Sync diklik.',
+              'Klik kanan pada kartu file/folder untuk membuka context menu cepat (Rename, Move, Share, Delete).'
+            ]
       }
     },
     {
