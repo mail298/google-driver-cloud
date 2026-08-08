@@ -12,7 +12,10 @@
 - Google Drive uploads are stored under a root `9drive` folder.
 - Direct upload stream to S3-compatible storage through the backend without exposing storage credentials to the frontend.
 - Upload routing policies with most-available, round-robin, and priority-order modes.
-- External upload API using API keys at `POST /api/v1/uploads`.
+- Multi-Language Support (i18n): Toggle seamlessly between Bahasa Indonesia 🇮🇩 and English 🇺🇸 across the entire application and interactive guide.
+- External upload API (`POST /api/v1/uploads`) with optional `sizeBytes` auto-calculated from stream buffer.
+- Real-time hard deletion & 1:1 database synchronization with Google Drive & S3.
+- Interactive multi-step user guide modal with step-by-step feature tours for all dashboard pages.
 - API key management with one-time secret display, hashed key storage, last-used tracking, and revocation.
 - Email/password auth plus Google sign-in/register with automatic first Drive connection.
 - Multi-account storage quota summary.
@@ -650,16 +653,71 @@ Uploads:
 
 ```txt
 POST /uploads
+POST /api/v1/uploads
 ```
 
-Upload is `multipart/form-data`. Metadata fields should be appended before the file:
+### External Upload API (`POST /api/v1/uploads`)
 
-```txt
-sizeBytes
-fileName
-mimeType
-folderId optional
-file
+Developers can upload files programmatically from external scripts, applications, or landing page forms using API Keys.
+
+#### Authentication Headers
+Pass your secret API key via either header:
+```http
+Authorization: Bearer 9d_live_your_secret_api_key_here
+```
+Or:
+```http
+X-API-Key: 9d_live_your_secret_api_key_here
+```
+
+#### Form-Data Fields
+Request format is `multipart/form-data`.
+- `file` (File, **Required**): The binary file to upload.
+- `sizeBytes` (Text, **Optional**): File size in bytes. If omitted, 9Drive automatically calculates the exact byte size from the upload stream buffer.
+- `fileName` (Text, **Optional**): Custom file name (defaults to original filename).
+- `mimeType` (Text, **Optional**): File MIME type.
+- `folderId` (Text, **Optional**): Target virtual folder UUID in 9Drive.
+
+#### Integration Examples
+
+**1. cURL Command:**
+```bash
+curl -X POST https://googledrivebackend.ikan212.com/api/v1/uploads \
+  -H "Authorization: Bearer 9d_live_your_secret_api_key_here" \
+  -F "file=@/path/to/local/document.pdf"
+```
+
+**2. JavaScript / Node.js:**
+```javascript
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+const response = await fetch('https://googledrivebackend.ikan212.com/api/v1/uploads', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer 9d_live_your_secret_api_key_here'
+  },
+  body: formData
+});
+
+const result = await response.json();
+console.log(result);
+```
+
+**3. Python (`requests`):**
+```python
+import requests
+
+url = "https://googledrivebackend.ikan212.com/api/v1/uploads"
+headers = {
+    "Authorization": "Bearer 9d_live_your_secret_api_key_here"
+}
+
+with open("sample.png", "rb") as f:
+    files = {"file": ("sample.png", f, "image/png")}
+    response = requests.post(url, headers=headers, files=files)
+
+print(response.json())
 ```
 
 ## Security Notes
