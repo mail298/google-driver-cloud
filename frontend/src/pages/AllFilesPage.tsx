@@ -255,7 +255,10 @@ export function AllFilesPage() {
     function onOpenMoveShortcut(e: Event) {
       const file = (e as CustomEvent).detail as FileItem
       setActiveFile(file)
-      setSelectedFolderId(file.folderId || '')
+      if (file.id && selectedFileIds.size === 0) {
+        setSelectedFileIds(new Set([file.id]))
+      }
+      setSelectedFolderId('')
       setMoveOpen(true)
     }
 
@@ -462,35 +465,44 @@ export function AllFilesPage() {
   }
 
   function getDisabledTargetFolderReason(targetFolderId: string | null): { disabled: boolean; reason?: string } {
+    const normalizedTarget = targetFolderId || null
+    const normalizedActiveFolder = activeFolderId || null
+
+    if (normalizedTarget === normalizedActiveFolder) {
+      return { disabled: true, reason: 'Folder saat ini' }
+    }
+
     const selectedFilesList = files.filter((f) => f.id && selectedFileIds.has(f.id))
     const selectedFoldersList = allFolders.filter((f) => f.id && selectedFolderIds.has(f.id))
     const totalSelected = selectedFilesList.length + selectedFoldersList.length
 
-    if (totalSelected === 0) {
-      if (activeFile && (activeFile.folderId ?? null) === targetFolderId) {
+    if (totalSelected === 0 && activeFile) {
+      const currentFileFolder = activeFile.folderId || null
+      if (currentFileFolder === normalizedTarget) {
         return { disabled: true, reason: 'Folder saat ini' }
       }
       return { disabled: false }
     }
 
-    if (targetFolderId && selectedFolderIds.has(targetFolderId)) {
+    if (normalizedTarget && selectedFolderIds.has(normalizedTarget)) {
       return { disabled: true, reason: 'Folder terpilih' }
     }
 
-    if (targetFolderId && selectedFolderIds.size > 0) {
+    if (normalizedTarget && selectedFolderIds.size > 0) {
       for (const selFolderId of selectedFolderIds) {
         const descendants = getFolderDescendantIds(selFolderId, allFolders)
-        if (descendants.has(targetFolderId)) {
+        if (descendants.has(normalizedTarget)) {
           return { disabled: true, reason: 'Subfolder dari item terpilih' }
         }
       }
     }
 
-    const allFilesAlreadyInTarget = selectedFilesList.every((f) => (f.folderId ?? null) === targetFolderId)
-    const allFoldersAlreadyInTarget = selectedFoldersList.every((f) => (f.parentId ?? null) === targetFolderId)
-
-    if (allFilesAlreadyInTarget && allFoldersAlreadyInTarget) {
-      return { disabled: true, reason: 'Folder saat ini' }
+    if (totalSelected > 0) {
+      const allFilesAlreadyInTarget = selectedFilesList.every((f) => (f.folderId || null) === normalizedTarget)
+      const allFoldersAlreadyInTarget = selectedFoldersList.every((f) => (f.parentId || null) === normalizedTarget)
+      if (allFilesAlreadyInTarget && allFoldersAlreadyInTarget) {
+        return { disabled: true, reason: 'Folder saat ini' }
+      }
     }
 
     return { disabled: false }
@@ -838,6 +850,21 @@ export function AllFilesPage() {
   const recentFolders = folders.slice(0, 4)
   const moreFolders = folders.slice(4)
   const activeFolder = allFolders.find((folder) => folder.id === activeFolderId)
+
+  const visibleFolderItems = activeFolder ? folders : [...recentFolders, ...moreFolders]
+  const visibleFolderIds = visibleFolderItems.map((f) => f.id).filter(Boolean) as string[]
+  const visibleFileIds = files.map((f) => f.id).filter(Boolean) as string[]
+  const totalVisibleCount = visibleFolderIds.length + visibleFileIds.length
+  const isAllVisibleSelected = totalVisibleCount > 0 && visibleFolderIds.every((id) => selectedFolderIds.has(id)) && visibleFileIds.every((id) => selectedFileIds.has(id))
+
+  function toggleAllVisibleItems() {
+    if (isAllVisibleSelected) {
+      clearSelection()
+    } else {
+      setSelectedFolderIds(new Set(visibleFolderIds))
+      setSelectedFileIds(new Set(visibleFileIds))
+    }
+  }
   const folderBreadcrumbs = (() => {
     if (!activeFolder) return []
     const foldersById = new Map(allFolders.map((folder) => [folder.id, folder]))
@@ -903,6 +930,17 @@ export function AllFilesPage() {
         </> : null}
         <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
+            {totalVisibleCount > 0 ? (
+              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all select-none">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-blue-600 rounded cursor-pointer"
+                  checked={isAllVisibleSelected}
+                  onChange={toggleAllVisibleItems}
+                />
+                <span>Pilih Semua ({totalVisibleCount})</span>
+              </label>
+            ) : null}
             <Button variant="soft" className="hidden sm:inline-flex"><Archive className="h-4 w-4" />Recents</Button>
             <Button variant="soft" className="hidden sm:inline-flex"><Star className="h-4 w-4" />Starred</Button>
             {totalSelectedCount > 0 ? (
