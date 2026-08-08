@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { DriveLayout } from '@/layouts/DriveLayout'
@@ -21,40 +21,21 @@ import { LandingPage } from '@/pages/LandingPage'
 import { PrivacyPage } from '@/pages/PrivacyPage'
 import { TermsPage } from '@/pages/TermsPage'
 import { SitemapPage } from '@/pages/SitemapPage'
-import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { UploadProvider } from '@/context/UploadContext'
 import { LanguageProvider } from '@/context/LanguageContext'
 import { apiFetch } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
 
 function App() {
-  // Synchronously initialize state from sessionStorage so page refresh instantly renders ForbiddenPage without flashing login screen
-  const [isIpBlocked, setIsIpBlocked] = useState(() => Boolean(sessionStorage.getItem('ip_blocked_msg')))
-
   useEffect(() => {
-    const handleIpBlocked = () => {
-      setIsIpBlocked(true)
-    }
-
-    window.addEventListener('ip-blocked', handleIpBlocked)
-
-    // Silent check on app load to detect IP whitelist status
-    apiFetch('/auth/me', { skipAuth: !getAccessToken() })
-      .then(() => {
-        setIsIpBlocked(false)
-      })
-      .catch(() => {
-        // Ignore normal auth errors, ip-blocked handler sets state if 403 IP_NOT_ALLOWED
-      })
-
-    return () => {
-      window.removeEventListener('ip-blocked', handleIpBlocked)
+    // Silent check on app load if user has access token
+    if (getAccessToken()) {
+      apiFetch('/auth/me')
+        .catch(() => {
+          // Handled by apiFetch / ProtectedRoute if IP blocked
+        })
     }
   }, [])
-
-  if (isIpBlocked) {
-    return <ForbiddenPage />
-  }
 
   return (
     <LanguageProvider>
