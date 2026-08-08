@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /privacy
+Allow: /terms
+Disallow: /all-files
+Disallow: /quota
+Disallow: /shared
+Disallow: /recent
+Disallow: /starred
+Disallow: /archived
+Disallow: /trash
+Disallow: /activity
+Disallow: /settings
+Disallow: /api
+
+Sitemap: https://googledrivefrontend.ikan212.com/sitemap.xml
