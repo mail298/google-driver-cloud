@@ -110,8 +110,7 @@ function Sidebar({
   storage,
   breakdown,
   accounts = [],
-  onLogout,
-  onOpenGuide
+  onLogout
 }: {
   onNavigate?: () => void
   user: AuthUser | null
@@ -119,7 +118,6 @@ function Sidebar({
   breakdown: StorageBreakdown
   accounts?: ConnectedAccount[]
   onLogout: () => void
-  onOpenGuide?: () => void
 }) {
   const { t } = useLanguage()
   const navigate = useNavigate()
@@ -288,17 +286,6 @@ function Sidebar({
             {item.label}
           </NavLink>
         ))}
-        <button
-          type="button"
-          onClick={() => {
-            onNavigate?.()
-            onOpenGuide?.()
-          }}
-          className="mt-1 inline-flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[13px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50/60 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-all border border-blue-200/40 dark:border-blue-800/40 shadow-sm"
-        >
-          <HelpCircle className="h-4 w-4" />
-          <span>{t('nav_user_guide')}</span>
-        </button>
       </nav>
 
       <div className="mt-auto border-t border-slate-200/60 pt-4 text-[13px]">
@@ -537,7 +524,7 @@ export function DriveLayout() {
     <main className="min-h-screen w-full overflow-x-hidden bg-white">
       <div className="flex min-h-screen w-full flex-col bg-white lg:h-screen lg:overflow-hidden lg:flex-row">
         <div className="hidden lg:block lg:h-screen lg:shrink-0">
-          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} onOpenGuide={() => setOnboardingOpen(true)} />
+          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} />
         </div>
         <div className={cn('fixed inset-0 z-40 bg-slate-950/40 transition-opacity lg:hidden', sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0')} onClick={() => setSidebarOpen(false)} />
         <div className={cn('fixed inset-y-0 left-0 z-50 transform bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden', sidebarOpen ? 'translate-x-0' : '-translate-x-full')}>
@@ -546,7 +533,7 @@ export function DriveLayout() {
               <X className="h-5 w-5" />
             </Button>
           </div>
-          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} onNavigate={() => setSidebarOpen(false)} onOpenGuide={() => setOnboardingOpen(true)} />
+          <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} onNavigate={() => setSidebarOpen(false)} />
         </div>
         <section className="min-w-0 flex-1 p-4 sm:p-6 lg:h-screen lg:overflow-y-auto lg:p-8">
           <header className="flex w-full min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

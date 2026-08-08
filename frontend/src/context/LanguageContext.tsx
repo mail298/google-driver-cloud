@@ -133,6 +133,20 @@ export const translations: Dictionary = {
   api_modal_cancel: { id: 'Batal', en: 'Cancel' },
   api_modal_creating: { id: 'Membuat...', en: 'Creating...' },
   api_modal_submit: { id: 'Buat API Key', en: 'Create API Key' },
+
+  // Quota Tracker
+  quota_title: { id: 'Pemantau Kuota', en: 'Quota Tracker' },
+  quota_desc: { id: 'Pantau dan kelola batas penyimpanan penyedia terhubung.', en: 'Track and manage connected provider storage limits.' },
+  quota_auto_refresh: { id: 'Auto-refresh', en: 'Auto-refresh' },
+  quota_on: { id: 'Aktif', en: 'On' },
+  quota_off: { id: 'Nonaktif', en: 'Off' },
+  quota_refresh: { id: 'Perbarui', en: 'Refresh' },
+  quota_refreshing: { id: 'Memperbarui...', en: 'Refreshing...' },
+  quota_connect_drive: { id: 'Hubungkan Drive', en: 'Connect Drive' },
+  quota_total_storage: { id: 'Total Penyimpanan', en: 'Total Storage' },
+  quota_used_storage: { id: 'Terpakai', en: 'Used Storage' },
+  quota_available: { id: 'Tersedia', en: 'Available' },
+  quota_accounts: { id: 'Akun Terhubung', en: 'Connected Accounts' },
 }
 
 type LanguageContextType = {

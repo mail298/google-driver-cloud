@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle, Cloud, Database, Filter, Gauge, Link2, RefreshCw } from 'lucide-react'
+import { Cloud, Database, Filter, Gauge, Link2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/drive/PageHeader'
 import { apiFetch, formatBytes } from '@/lib/api'
 import { cn } from '@/lib/utils'
+
+import { useLanguage } from '@/context/LanguageContext'
 
 type StorageSummary = { totalBytes: string; usedBytes: string; availableBytes: string }
 type ConnectedAccount = { id: string; email: string; displayName?: string | null; provider: string; status: string; storageAccount?: { totalBytes: string | null; usedBytes: string; availableBytes: string | null; lastSyncedAt: string | null } | null }
@@ -44,6 +46,7 @@ function statusColor(percent: number) {
 }
 
 export function QuotaTrackerPage() {
+  const { t } = useLanguage()
   const [summary, setSummary] = useState<StorageSummary | null>(null)
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([])
   const [routingPolicy, setRoutingPolicy] = useState<RoutingPolicy>({ mode: 'most_available', priorityAccountIds: [], roundRobinCursor: 0 })
@@ -78,7 +81,8 @@ export function QuotaTrackerPage() {
 
   useEffect(() => {
     if (!autoRefresh) return
-    const timer = window.setInterval(() => load().catch(() => undefined), 35_000)
+    load().catch(() => undefined)
+    const timer = window.setInterval(() => load().catch(() => undefined), 10_000)
     return () => window.clearInterval(timer)
   }, [autoRefresh])
 
@@ -147,14 +151,57 @@ export function QuotaTrackerPage() {
 
   return (
     <>
-      <PageHeader title="Quota Tracker" description="Track and manage connected provider storage limits." actions={<><Button variant="outline" onClick={() => setAutoRefresh(!autoRefresh)}><CheckCircle className="h-4 w-4" />Auto-refresh {autoRefresh ? 'On' : 'Off'}</Button><Button variant="outline" onClick={refresh} disabled={refreshing}><RefreshCw className={refreshing ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />{refreshing ? 'Refreshing...' : 'Refresh'}</Button><Button onClick={connectDrive}><Link2 className="h-4 w-4" />Connect Drive</Button></>} />
-      {message ? <p className="mt-5 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">{message}</p> : null}
+      <PageHeader
+        title={t('quota_title')}
+        description={t('quota_desc')}
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setAutoRefresh((prev) => !prev)}
+              className={cn(
+                'inline-flex h-10 items-center gap-2 rounded-xl border px-3.5 text-xs font-bold transition-all shadow-sm active:scale-95',
+                autoRefresh
+                  ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
+                  : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+              )}
+            >
+              <span className={cn('h-2 w-2 rounded-full', autoRefresh ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400')} />
+              <span>{t('quota_auto_refresh')} {autoRefresh ? t('quota_on') : t('quota_off')}</span>
+            </button>
+
+            <Button variant="outline" onClick={refresh} disabled={refreshing}>
+              <RefreshCw className={refreshing ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+              {refreshing ? t('quota_refreshing') : t('quota_refresh')}
+            </Button>
+
+            <Button onClick={connectDrive}>
+              <Link2 className="h-4 w-4" />
+              {t('quota_connect_drive')}
+            </Button>
+          </>
+        }
+      />
+
+      {message ? <p className="mt-5 rounded-xl bg-blue-50 dark:bg-blue-950/40 p-3 text-sm text-blue-700 dark:text-blue-300">{message}</p> : null}
 
       <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-        <Card className="p-5"><p className="text-sm text-slate-500">Total Storage</p><p className="mt-2 text-2xl font-extrabold">{formatBytes(summary?.totalBytes)}</p></Card>
-        <Card className="p-5"><p className="text-sm text-slate-500">Used Storage</p><p className="mt-2 text-2xl font-extrabold">{formatBytes(summary?.usedBytes)}</p></Card>
-        <Card className="p-5"><p className="text-sm text-slate-500">Available</p><p className="mt-2 text-2xl font-extrabold">{formatBytes(summary?.availableBytes)}</p></Card>
-        <Card className="p-5"><p className="text-sm text-slate-500">Accounts</p><p className="mt-2 text-2xl font-extrabold">{accounts.length}</p></Card>
+        <Card className="p-5">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('quota_total_storage')}</p>
+          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-slate-100">{formatBytes(summary?.totalBytes)}</p>
+        </Card>
+        <Card className="p-5">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('quota_used_storage')}</p>
+          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-slate-100">{formatBytes(summary?.usedBytes)}</p>
+        </Card>
+        <Card className="p-5">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('quota_available')}</p>
+          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-slate-100">{formatBytes(summary?.availableBytes)}</p>
+        </Card>
+        <Card className="p-5">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t('quota_accounts')}</p>
+          <p className="mt-2 text-2xl font-extrabold text-slate-900 dark:text-slate-100">{accounts.length}</p>
+        </Card>
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-3">
