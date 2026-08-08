@@ -20,6 +20,7 @@ import { ActivityLogPage } from '@/pages/ActivityLogPage'
 import { LandingPage } from '@/pages/LandingPage'
 import { PrivacyPage } from '@/pages/PrivacyPage'
 import { TermsPage } from '@/pages/TermsPage'
+import { SitemapPage } from '@/pages/SitemapPage'
 import { ForbiddenPage } from '@/pages/ForbiddenPage'
 import { UploadProvider } from '@/context/UploadContext'
 import { LanguageProvider } from '@/context/LanguageContext'
@@ -62,6 +63,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="privacy" element={<PrivacyPage />} />
           <Route path="terms" element={<TermsPage />} />
+          <Route path="sitemap.xml" element={<SitemapPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
           <Route path="google-auth" element={<GoogleAuthPage />} />

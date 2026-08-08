@@ -13,4 +13,4 @@ Disallow: /activity
 Disallow: /settings
 Disallow: /api
 
-Sitemap: https://googledrivefrontend.ikan212.com/sitemap.xml
+Sitemap: /sitemap.xml
