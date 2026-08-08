@@ -1,11 +1,20 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { CheckCircle, Clipboard, KeyRound, ShieldCheck, Trash2, Sparkles, Layers, Code2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { DummyModal } from '@/components/drive/DummyModal'
 import { API_URL, apiFetch, formatDate } from '@/lib/api'
 
-type ApiKey = { id: string; name: string; keyPrefix: string; scopes: string[]; status: string; lastUsedAt: string | null; expiresAt: string | null; revokedAt: string | null; createdAt: string }
+type ApiKey = {
+  id: string
+  name: string
+  keyPrefix: string
+  scopes: string[]
+  status: string
+  lastUsedAt: string | null
+  expiresAt: string | null
+  revokedAt: string | null
+  createdAt: string
+}
 
 const curlUploadExample = `curl -X POST "${API_URL}/api/v1/uploads" \\
   -H "Authorization: Bearer 9d_live_your_secret_api_key" \\
@@ -14,13 +23,11 @@ const curlUploadExample = `curl -X POST "${API_URL}/api/v1/uploads" \\
 
 const jsUploadExample = `const form = new FormData()
 form.append('folderPath', 'promo') // Auto-creates "promo" folder if missing!
-form.append('file', fileInput.files[0]) // sizeBytes is automatically calculated!
+form.append('file', fileInput.files[0])
 
 const response = await fetch('${API_URL}/api/v1/uploads', {
   method: 'POST',
-  headers: {
-    'Authorization': 'Bearer 9d_live_your_secret_api_key'
-  },
+  headers: { 'Authorization': 'Bearer 9d_live_your_secret_api_key' },
   body: form,
 })
 const result = await response.json()`
@@ -28,9 +35,7 @@ const result = await response.json()`
 const pythonUploadExample = `import requests
 
 url = "${API_URL}/api/v1/uploads"
-headers = {
-    "Authorization": "Bearer 9d_live_your_secret_api_key"
-}
+headers = { "Authorization": "Bearer 9d_live_your_secret_api_key" }
 
 with open("photo.png", "rb") as f:
     files = [
@@ -66,20 +71,16 @@ const curlGetFilesExample = `curl -X GET "${API_URL}/api/v1/files?folderPath=pro
 
 const jsGetFilesExample = `const response = await fetch('${API_URL}/api/v1/files?folderPath=promo', {
   method: 'GET',
-  headers: {
-    'Authorization': 'Bearer 9d_live_your_secret_api_key'
-  }
+  headers: { 'Authorization': 'Bearer 9d_live_your_secret_api_key' }
 })
 const data = await response.json()
-// data.files is an array of file objects
-// Each file has: id, name, mimeType, sizeBytes, folderId,
+// Each file: id, name, mimeType, sizeBytes, folderId,
 //   folderName, provider, viewUrl, downloadUrl, createdAt
-console.log(data.files)
 
-// Example: Display images on your landing page
+// Example: render images from "promo" folder
 data.files
-  .filter(f => f.mimeType.startsWith('image/'))
-  .forEach(f => {
+  .filter((f: any) => f.mimeType.startsWith('image/'))
+  .forEach((f: any) => {
     const img = document.createElement('img')
     img.src = f.downloadUrl
     document.body.appendChild(img)
@@ -88,24 +89,15 @@ data.files
 const pythonGetFilesExample = `import requests
 
 url = "${API_URL}/api/v1/files?folderPath=promo"
-headers = {
-    "Authorization": "Bearer 9d_live_your_secret_api_key"
-}
+headers = { "Authorization": "Bearer 9d_live_your_secret_api_key" }
 
-response = requests.get(url, headers=headers)
-data = response.json()
+data = requests.get(url, headers=headers).json()
 
-# data['files'] contains array of file objects
-# Each file has: id, name, mimeType, sizeBytes,
-#   folderId, folderName, provider, viewUrl, downloadUrl
 for file in data['files']:
-    print(f"{file['name']} → {file['viewUrl']}")`
+    print(f"{file['name']} -> {file['viewUrl']}")`
 
 const curlGetFoldersExample = `curl -X GET "${API_URL}/api/v1/folders" \\
   -H "Authorization: Bearer 9d_live_your_secret_api_key"
-
-# With parent filter:
-# curl -X GET "${API_URL}/api/v1/folders?parentId=null" \\
 
 # Response JSON:
 # {
@@ -124,34 +116,25 @@ const curlGetFoldersExample = `curl -X GET "${API_URL}/api/v1/folders" \\
 
 const jsGetFoldersExample = `const response = await fetch('${API_URL}/api/v1/folders', {
   method: 'GET',
-  headers: {
-    'Authorization': 'Bearer 9d_live_your_secret_api_key'
-  }
+  headers: { 'Authorization': 'Bearer 9d_live_your_secret_api_key' }
 })
 const data = await response.json()
-// data.folders is an array of folder objects
-// Each folder has: id, name, parentId, color, createdAt, updatedAt
-console.log(data.folders)
+// Each folder: id, name, parentId, color, createdAt
 
-// Filter root folders only (no parent)
-const rootFolders = data.folders.filter(f => f.parentId === null)
+// Get only root-level folders
+const rootFolders = data.folders.filter((f: any) => f.parentId === null)
 console.log('Root folders:', rootFolders)`
 
 const pythonGetFoldersExample = `import requests
 
 url = "${API_URL}/api/v1/folders"
-headers = {
-    "Authorization": "Bearer 9d_live_your_secret_api_key"
-}
+headers = { "Authorization": "Bearer 9d_live_your_secret_api_key" }
 
-response = requests.get(url, headers=headers)
-data = response.json()
+data = requests.get(url, headers=headers).json()
 
-# data['folders'] contains array of folder objects
-# Each folder has: id, name, parentId, color, createdAt
 for folder in data['folders']:
     parent = folder['parentId'] or 'root'
-    print(f"{folder['name']} (parent: {parent})")  `
+    print(f"{folder['name']} (parent: {parent})")`
 
 export function ApiManagementPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
@@ -177,7 +160,10 @@ export function ApiManagementPage() {
     setLoading(true)
     setMessage('')
     try {
-      const data = await apiFetch<{ apiKey: ApiKey; secret: string }>('/api-keys', { method: 'POST', body: JSON.stringify({ name: keyName }) })
+      const data = await apiFetch<{ apiKey: ApiKey; secret: string }>('/api-keys', {
+        method: 'POST',
+        body: JSON.stringify({ name: keyName }),
+      })
       setSecret(data.secret)
       setKeyName('')
       setCreateOpen(false)
@@ -195,14 +181,17 @@ export function ApiManagementPage() {
   }
 
   function copy(value: string) {
-    navigator.clipboard.writeText(value).then(() => setMessage('Copied to clipboard! ✨')).catch(() => setMessage('Failed to copy.'))
+    navigator.clipboard
+      .writeText(value)
+      .then(() => setMessage('Copied to clipboard! ✨'))
+      .catch(() => setMessage('Failed to copy.'))
     setTimeout(() => setMessage(''), 3000)
   }
 
-  const activeKeys = apiKeys.filter((apiKey) => apiKey.status === 'active').length
-  const usedKeys = apiKeys.filter((apiKey) => apiKey.lastUsedAt).length
+  const activeKeys = apiKeys.filter((k) => k.status === 'active').length
+  const usedKeys = apiKeys.filter((k) => k.lastUsedAt).length
 
-  const getCodeSnippet = () => {
+  function getCodeSnippet() {
     if (selectedEndpoint === 'upload') {
       if (activeLang === 'curl') return curlUploadExample
       if (activeLang === 'js') return jsUploadExample
@@ -218,29 +207,38 @@ export function ApiManagementPage() {
     }
   }
 
+  // ── Reusable dark-mode table classes ─────────────────────────────────────
+  const thCls = 'px-4 py-2.5 text-left text-[11px] font-extrabold uppercase tracking-wide text-slate-500 dark:text-slate-400'
+  const tdCls = 'px-4 py-3 text-xs text-slate-700 dark:text-slate-300 align-top'
+  const trBase = 'border-b border-slate-100 dark:border-slate-800 last:border-0'
+  const trGreen = 'border-b border-slate-100 dark:border-slate-800 last:border-0 bg-emerald-500/5 dark:bg-emerald-500/10'
+  const mono = 'rounded bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 font-mono text-[11px] text-slate-600 dark:text-slate-300'
+  const sectionH = 'text-sm font-extrabold text-slate-800 dark:text-slate-100'
+
+  const endpointLabel = (ep: 'upload' | 'files' | 'folders') =>
+    ep === 'upload' ? 'POST Upload' : ep === 'files' ? 'GET Files' : 'GET Folders'
+
   return (
     <div className="mx-auto max-w-7xl space-y-8 pb-12">
-      {/* Hero Header Banner */}
+      {/* ── Hero Banner ─────────────────────────────────────────── */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 sm:p-8 text-white shadow-2xl border border-indigo-900/40">
         <div className="absolute -right-10 -top-10 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
         <div className="absolute -left-10 -bottom-10 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
-
         <div className="relative z-10 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold text-indigo-300 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-bold text-indigo-300">
               <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
               <span>DEVELOPER API GATEWAY v1</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tight sm:text-3xl lg:text-4xl text-white">
-              API Keys & Developer Documentation
+            <h1 className="text-2xl font-black tracking-tight sm:text-3xl text-white">
+              API Keys &amp; Developer Documentation
             </h1>
-            <p className="max-w-2xl text-sm leading-relaxed text-indigo-200/80 sm:text-base">
-              Integrate 9Drive directly into your web apps, external scripts, or landing pages. Upload files directly into folders with zero configuration.
+            <p className="max-w-2xl text-sm leading-relaxed text-indigo-200/80">
+              Integrate 9Drive into your web apps, scripts, or landing pages. Upload files directly into virtual folders with zero config.
             </p>
           </div>
-
           <Button
-            className="h-11 px-5 w-full bg-gradient-to-r from-blue-600 to-indigo-600 font-extrabold text-white shadow-lg transition-all hover:from-blue-500 hover:to-indigo-500 hover:shadow-indigo-500/25 sm:w-auto"
+            className="h-11 px-5 w-full bg-gradient-to-r from-blue-600 to-indigo-600 font-extrabold text-white shadow-lg hover:from-blue-500 hover:to-indigo-500 sm:w-auto"
             onClick={() => setCreateOpen(true)}
           >
             <KeyRound className="mr-2 h-5 w-5" />
@@ -248,138 +246,111 @@ export function ApiManagementPage() {
           </Button>
         </div>
 
-        {/* Stats Grid */}
+        {/* Stats */}
         <div className="mt-8 grid gap-4 border-t border-white/10 pt-6 sm:grid-cols-3">
-          <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 backdrop-blur-sm border border-white/10">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
-              <KeyRound className="h-5 w-5" />
+          {([
+            { icon: <KeyRound className="h-5 w-5" />, value: activeKeys, label: 'Active Keys', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+            { icon: <CheckCircle className="h-5 w-5" />, value: usedKeys, label: 'Used Keys', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+            { icon: <Layers className="h-5 w-5" />, value: 3, label: 'Endpoints Ready', color: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
+          ] as const).map((stat) => (
+            <div key={stat.label} className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 border border-white/10">
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${stat.color}`}>{stat.icon}</div>
+              <div>
+                <p className="text-2xl font-black text-white">{stat.value}</p>
+                <p className="text-xs font-medium text-slate-400">{stat.label}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-2xl font-black text-white">{activeKeys}</p>
-              <p className="text-xs font-medium text-slate-400">Active Keys</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 backdrop-blur-sm border border-white/10">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              <CheckCircle className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-white">{usedKeys}</p>
-              <p className="text-xs font-medium text-slate-400">Used Keys</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-4 backdrop-blur-sm border border-white/10">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-              <Layers className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-white">3</p>
-              <p className="text-xs font-medium text-slate-400">Endpoints Ready</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      {/* Secret Toast Banner */}
-      {message ? (
-        <div className="flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-4 text-sm font-semibold text-blue-900 shadow-sm animate-in fade-in">
-          <Sparkles className="h-5 w-5 shrink-0 text-blue-600" />
+      {/* ── Toast ────────────────────────────────────────────────── */}
+      {message && (
+        <div className="flex items-center gap-3 rounded-2xl border border-blue-500/30 bg-blue-500/10 p-4 text-sm font-semibold text-blue-400 animate-in fade-in">
+          <Sparkles className="h-5 w-5 shrink-0" />
           <span>{message}</span>
         </div>
-      ) : null}
+      )}
 
-      {secret ? (
-        <Card className="min-w-0 overflow-hidden border-2 border-emerald-500/50 bg-gradient-to-r from-emerald-50 to-teal-50 p-0 shadow-lg">
-          <div className="grid min-w-0 gap-4 p-5 sm:p-6">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-lg font-black text-emerald-950">Copy Your Secret API Key Now!</p>
-                <p className="mt-1 text-sm font-medium text-emerald-800">
-                  This key will only be shown ONCE. Store it in a secure environment variable before closing.
-                </p>
-              </div>
+      {/* ── Secret Key Banner ─────────────────────────────────────── */}
+      {secret && (
+        <div className="overflow-hidden rounded-2xl border-2 border-emerald-500/50 bg-emerald-500/10 p-5 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-600 text-white">
+              <ShieldCheck className="h-6 w-6" />
             </div>
-            <div className="grid min-w-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-              <code className="block min-w-0 max-w-full overflow-x-auto rounded-xl border border-emerald-300 bg-white p-3.5 text-xs font-black text-slate-950 shadow-inner sm:text-sm">
-                {secret}
-              </code>
-              <Button className="h-11 px-5 w-full bg-emerald-600 font-bold hover:bg-emerald-700 lg:w-auto" type="button" onClick={() => copy(secret)}>
-                <Clipboard className="mr-2 h-4 w-4" />
-                Copy Secret Key
-              </Button>
+            <div>
+              <p className="text-base font-black text-emerald-300">Copy Your Secret API Key Now!</p>
+              <p className="text-sm text-emerald-400/80 mt-0.5">This key is shown ONCE. Store it in a secure environment variable.</p>
             </div>
           </div>
-        </Card>
-      ) : null}
+          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <code className="block min-w-0 overflow-x-auto rounded-xl border border-emerald-500/40 bg-slate-950 p-3.5 text-xs font-bold text-emerald-300">
+              {secret}
+            </code>
+            <Button className="bg-emerald-600 hover:bg-emerald-700 font-bold text-white" onClick={() => copy(secret)}>
+              <Clipboard className="mr-2 h-4 w-4" /> Copy Key
+            </Button>
+          </div>
+        </div>
+      )}
 
-      {/* Main Grid: Keys List & Documentation */}
+      {/* ── Main Grid ────────────────────────────────────────────── */}
       <div className="grid gap-8 lg:grid-cols-12">
-        {/* Left Column: API Keys Management (5 Cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          <Card className="rounded-3xl border border-slate-200 p-6 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        {/* Left: Keys + Auth info */}
+        <div className="lg:col-span-5 space-y-5">
+          {/* API Keys Card */}
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-5 py-4">
               <div>
-                <h2 className="text-lg font-black text-slate-900">Your API Keys</h2>
-                <p className="text-xs text-slate-500">Keys give external apps permission to upload files.</p>
+                <h2 className="text-base font-black text-slate-900 dark:text-slate-100">Your API Keys</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Keys let external apps upload files.</p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
-                + New
-              </Button>
+              <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>+ New</Button>
             </div>
-
-            <div className="mt-5 space-y-3">
+            <div className="p-4 space-y-3">
               {apiKeys.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+                <div className="rounded-xl border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center">
                   <KeyRound className="mx-auto h-10 w-10 text-slate-400" />
-                  <p className="mt-3 font-extrabold text-slate-800">No API keys created</p>
-                  <p className="mt-1 text-xs text-slate-500">Create your first API key to start integrating.</p>
-                  <Button size="sm" className="mt-4" onClick={() => setCreateOpen(true)}>
-                    Create API Key
-                  </Button>
+                  <p className="mt-3 font-extrabold text-slate-700 dark:text-slate-200">No API keys yet</p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-500">Create your first key to start integrating.</p>
+                  <Button size="sm" className="mt-4" onClick={() => setCreateOpen(true)}>Create API Key</Button>
                 </div>
               ) : (
                 apiKeys.map((apiKey) => (
                   <div
                     key={apiKey.id}
-                    className="group rounded-2xl border border-slate-200 bg-slate-50/50 p-4 transition-all hover:border-slate-300 hover:bg-white hover:shadow-md"
+                    className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 p-4 transition-all hover:border-slate-300 dark:hover:border-slate-700"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <div className="space-y-1">
+                      <div className="space-y-1.5 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="relative flex h-2.5 w-2.5">
+                          <span className="relative flex h-2.5 w-2.5 shrink-0">
                             {apiKey.status === 'active' ? (
                               <>
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                               </>
                             ) : (
-                              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-slate-400" />
+                              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-slate-400" />
                             )}
                           </span>
-                          <p className="font-bold text-slate-900">{apiKey.name}</p>
+                          <p className="font-bold text-slate-900 dark:text-slate-100 text-sm">{apiKey.name}</p>
                         </div>
-                        <code className="inline-block rounded-md bg-slate-200/70 px-2 py-0.5 text-xs font-bold text-slate-800">
+                        <code className="inline-block rounded bg-slate-200 dark:bg-slate-700 px-2 py-0.5 text-xs font-bold text-slate-700 dark:text-slate-300">
                           {apiKey.keyPrefix}...
                         </code>
                       </div>
-
                       <Button
                         size="sm"
                         variant="danger"
-                        className="opacity-90 hover:opacity-100"
                         onClick={() => revokeKey(apiKey.id)}
                         disabled={apiKey.status === 'revoked'}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-
-                    <div className="mt-3 flex items-center justify-between border-t border-slate-200/60 pt-2 text-[11px] text-slate-500">
+                    <div className="mt-3 flex items-center justify-between border-t border-slate-200 dark:border-slate-700/60 pt-2 text-[11px] text-slate-500 dark:text-slate-500">
                       <span>Created: {formatDate(apiKey.createdAt)}</span>
                       <span>Last used: {apiKey.lastUsedAt ? formatDate(apiKey.lastUsedAt) : 'Never'}</span>
                     </div>
@@ -387,314 +358,327 @@ export function ApiManagementPage() {
                 ))
               )}
             </div>
-          </Card>
+          </div>
 
-          {/* Authentication Tip Card */}
-          <Card className="rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 to-indigo-50/30 p-6">
+          {/* Supported Auth Headers */}
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
             <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
                 <Code2 className="h-4 w-4" />
               </div>
-              <div className="space-y-1 text-xs leading-relaxed text-slate-700">
-                <p className="font-extrabold text-slate-900">Supported Headers</p>
-                <p>You can send your API key in either header format:</p>
-                <div className="mt-2 space-y-1 font-mono text-[11px] font-bold text-blue-900">
-                  <p className="rounded bg-white/80 p-1.5 border border-blue-200">Authorization: Bearer 9d_live_...</p>
-                  <p className="rounded bg-white/80 p-1.5 border border-blue-200">X-API-Key: 9d_live_...</p>
+              <div className="min-w-0 space-y-2">
+                <p className="text-sm font-extrabold text-slate-900 dark:text-slate-100">Supported Auth Headers</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Send your API key in either format:</p>
+                <div className="space-y-1.5">
+                  <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 font-mono text-[11px] font-bold text-blue-700 dark:text-blue-400">
+                    Authorization: Bearer 9d_live_...
+                  </div>
+                  <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-3 py-2 font-mono text-[11px] font-bold text-blue-700 dark:text-blue-400">
+                    X-API-Key: 9d_live_...
+                  </div>
                 </div>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Right Column: Interactive API Documentation & Code Playground (7 Cols) */}
-        <div className="lg:col-span-7 space-y-6">
-          <Card className="overflow-hidden rounded-3xl border border-slate-200 shadow-sm">
-            {/* Docs Section Header */}
-            <div className="border-b border-slate-200 bg-slate-50 p-6">
-              <div className="flex items-center justify-between">
+        {/* Right: API Docs */}
+        <div className="lg:col-span-7">
+          <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+            {/* Doc Header + Endpoint Tabs */}
+            <div className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-5 py-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">API Documentation</h2>
-                  <p className="text-xs text-slate-500">Explore interactive request specifications and code snippets.</p>
+                  <h2 className="text-base font-black text-slate-900 dark:text-slate-100">API Documentation</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Interactive specs &amp; code snippets.</p>
                 </div>
-                <div className="flex items-center gap-1 rounded-full bg-slate-200/80 p-1">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedEndpoint('upload')}
-                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
-                      selectedEndpoint === 'upload' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:text-slate-900'
-                    }`}
-                  >
-                    POST Upload
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedEndpoint('files')}
-                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
-                      selectedEndpoint === 'files' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:text-slate-900'
-                    }`}
-                  >
-                    GET Files
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedEndpoint('folders')}
-                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
-                      selectedEndpoint === 'folders' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:text-slate-900'
-                    }`}
-                  >
-                    GET Folders
-                  </button>
+                <div className="flex items-center gap-1 rounded-xl bg-slate-200 dark:bg-slate-700 p-1">
+                  {(['upload', 'files', 'folders'] as const).map((ep) => (
+                    <button
+                      key={ep}
+                      type="button"
+                      onClick={() => setSelectedEndpoint(ep)}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                        selectedEndpoint === ep
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      {endpointLabel(ep)}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Endpoint Display Badge */}
-              <div className="rounded-2xl border border-slate-200 bg-slate-900 p-4 text-white shadow-inner">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <span className={`rounded-lg px-2.5 py-1 text-xs font-black uppercase ${selectedEndpoint === 'upload' ? 'bg-blue-500 text-white' : 'bg-emerald-500 text-white'}`}>
-                      {selectedEndpoint === 'upload' ? 'POST' : 'GET'}
-                    </span>
-                    <code className="text-xs font-mono font-extrabold text-blue-300 sm:text-sm">
-                      {API_URL}/api/v1/{selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}
-                    </code>
-                  </div>
-                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:bg-slate-800" onClick={() => copy(`${API_URL}/api/v1/${selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}`)}>
-                    <Clipboard className="h-3.5 w-3.5" />
-                  </Button>
+            <div className="p-5 space-y-5">
+              {/* URL Bar */}
+              <div className="rounded-xl border border-slate-800 bg-slate-950 px-4 py-3 flex items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className={`shrink-0 rounded-md px-2.5 py-1 text-[11px] font-black text-white ${selectedEndpoint === 'upload' ? 'bg-blue-600' : 'bg-emerald-600'}`}>
+                    {selectedEndpoint === 'upload' ? 'POST' : 'GET'}
+                  </span>
+                  <code className="min-w-0 truncate text-xs font-mono font-bold text-sky-400">
+                    {API_URL}/api/v1/{selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}
+                  </code>
                 </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 border-slate-700 text-slate-300 hover:bg-slate-800"
+                  onClick={() => copy(`${API_URL}/api/v1/${selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}`)}
+                >
+                  <Clipboard className="h-3.5 w-3.5" />
+                </Button>
               </div>
 
-              {/* Endpoint Details */}
-              {selectedEndpoint === 'upload' ? (
+              {/* ── Upload Docs ── */}
+              {selectedEndpoint === 'upload' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-extrabold text-slate-900 text-sm">Upload Parameters (`multipart/form-data`)</h3>
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800">✨ Auto-Folder Creation Supported</span>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className={sectionH}>Upload Parameters <span className="font-normal text-slate-500 dark:text-slate-400 text-[11px] normal-case">(multipart/form-data)</span></h3>
+                    <span className="rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                      ✨ Auto-creates folders
+                    </span>
                   </div>
-
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-100 font-extrabold text-slate-800">
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-left">
+                      <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
                         <tr>
-                          <th className="p-3">Field</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Status</th>
-                          <th className="p-3">Description</th>
+                          <th className={thCls}>Field</th>
+                          <th className={thCls}>Type</th>
+                          <th className={thCls}>Status</th>
+                          <th className={thCls}>Description</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
-                        <tr>
-                          <td className="p-3 font-extrabold text-blue-600">file</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">File</span></td>
-                          <td className="p-3"><span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">Required</span></td>
-                          <td className="p-3">The binary file content to upload.</td>
+                      <tbody>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-extrabold text-blue-600 dark:text-blue-400`}>file</td>
+                          <td className={tdCls}><span className={mono}>File</span></td>
+                          <td className={tdCls}><span className="rounded-full bg-rose-500/15 px-2 py-0.5 text-[10px] font-bold text-rose-600 dark:text-rose-400">Required</span></td>
+                          <td className={tdCls}>Binary file content to upload.</td>
                         </tr>
-                        <tr className="bg-emerald-50/50">
-                          <td className="p-3 font-extrabold text-emerald-700">folderPath</td>
-                          <td className="p-3"><span className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-900">Text</span></td>
-                          <td className="p-3"><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">Optional</span></td>
-                          <td className="p-3">
-                            Target folder name/path (e.g. <code className="font-bold text-emerald-800">promo</code>). 
-                            <span className="ml-1 font-bold text-emerald-700">Auto-creates folder in MySQL & Google Drive if it doesn't exist!</span>
+                        <tr className={trGreen}>
+                          <td className={`${tdCls} font-extrabold text-emerald-600 dark:text-emerald-400`}>folderPath</td>
+                          <td className={tdCls}><span className={mono}>Text</span></td>
+                          <td className={tdCls}><span className="rounded-full bg-slate-200 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">Optional</span></td>
+                          <td className={tdCls}>
+                            Folder name/path (e.g.{' '}
+                            <code className="rounded bg-slate-100 dark:bg-slate-800 px-1 font-bold text-emerald-600 dark:text-emerald-400">promo</code>
+                            ). Auto-creates in MySQL &amp; Drive if missing.
                           </td>
                         </tr>
-                        <tr>
-                          <td className="p-3 font-semibold text-slate-900">folderId</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">Text</span></td>
-                          <td className="p-3"><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">Optional</span></td>
-                          <td className="p-3">Exact UUID of an existing virtual folder in 9Drive.</td>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-semibold`}>folderId</td>
+                          <td className={tdCls}><span className={mono}>Text</span></td>
+                          <td className={tdCls}><span className="rounded-full bg-slate-200 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">Optional</span></td>
+                          <td className={tdCls}>UUID of an existing virtual folder in 9Drive.</td>
                         </tr>
-                        <tr>
-                          <td className="p-3 font-semibold text-slate-900">sizeBytes</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">Text</span></td>
-                          <td className="p-3"><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">Optional</span></td>
-                          <td className="p-3">File size in bytes. <span className="font-semibold text-slate-950">Auto-calculated from stream buffer if omitted!</span></td>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-semibold`}>sizeBytes</td>
+                          <td className={tdCls}><span className={mono}>Text</span></td>
+                          <td className={tdCls}><span className="rounded-full bg-slate-200 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-300">Optional</span></td>
+                          <td className={tdCls}>File size in bytes — auto-calculated from buffer if omitted.</td>
                         </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : selectedEndpoint === 'files' ? (
-                <div className="space-y-4">
-                  <h3 className="font-extrabold text-slate-900 text-sm">File Listing Query Parameters</h3>
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-100 font-extrabold text-slate-800">
-                        <tr>
-                          <th className="p-3">Query Param</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
-                        <tr>
-                          <td className="p-3 font-extrabold text-blue-600">folderPath</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
-                          <td className="p-3">Filter files inside folder name (e.g. <code className="font-bold">promo</code>).</td>
-                        </tr>
-                        <tr>
-                          <td className="p-3 font-semibold text-slate-900">folderId</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
-                          <td className="p-3">Filter files by folder UUID.</td>
-                        </tr>
-                        <tr>
-                          <td className="p-3 font-semibold text-slate-900">q</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
-                          <td className="p-3">Search by file name keyword.</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Response Fields */}
-                  <h3 className="font-extrabold text-slate-900 text-sm pt-2">Response Fields (per file)</h3>
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-100 font-extrabold text-slate-800">
-                        <tr>
-                          <th className="p-3">Field</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
-                        <tr><td className="p-3 font-extrabold text-blue-600">id</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Unique file UUID in 9Drive database.</td></tr>
-                        <tr><td className="p-3 font-semibold">name</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">File name with extension.</td></tr>
-                        <tr><td className="p-3 font-semibold">mimeType</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">MIME type (e.g. <code>image/png</code>, <code>video/mp4</code>).</td></tr>
-                        <tr><td className="p-3 font-semibold">sizeBytes</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">File size in bytes (as string to avoid BigInt issues).</td></tr>
-                        <tr><td className="p-3 font-semibold">folderId</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String|null</span></td><td className="p-3">Parent folder UUID, or null if root.</td></tr>
-                        <tr><td className="p-3 font-semibold">folderName</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String|null</span></td><td className="p-3">Parent folder name, or null if root.</td></tr>
-                        <tr><td className="p-3 font-semibold">provider</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Storage provider: <code>google_drive</code> or <code>s3</code>.</td></tr>
-                        <tr className="bg-emerald-50/50"><td className="p-3 font-extrabold text-emerald-700">viewUrl</td><td className="p-3"><span className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-900">String|null</span></td><td className="p-3">Google Drive view link — open file in browser directly.</td></tr>
-                        <tr className="bg-emerald-50/50"><td className="p-3 font-extrabold text-emerald-700">downloadUrl</td><td className="p-3"><span className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-900">String|null</span></td><td className="p-3">Direct download/embed link — use as <code>&lt;img src&gt;</code> or <code>&lt;video src&gt;</code>.</td></tr>
-                        <tr><td className="p-3 font-semibold">createdAt</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">DateTime</span></td><td className="p-3">ISO 8601 timestamp when file was uploaded.</td></tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <h3 className="font-extrabold text-slate-900 text-sm">Folder Listing Query Parameters</h3>
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-100 font-extrabold text-slate-800">
-                        <tr>
-                          <th className="p-3">Query Param</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
-                        <tr>
-                          <td className="p-3 font-semibold text-slate-900">parentId</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
-                          <td className="p-3">Filter by parent folder UUID. Use <code className="font-bold">null</code> or <code className="font-bold">root</code> to get top-level folders.</td>
-                        </tr>
-                        <tr>
-                          <td className="p-3 font-semibold text-slate-900">q</td>
-                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
-                          <td className="p-3">Search by folder name keyword.</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Folder Response Fields */}
-                  <h3 className="font-extrabold text-slate-900 text-sm pt-2">Response Fields (per folder)</h3>
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-100 font-extrabold text-slate-800">
-                        <tr>
-                          <th className="p-3">Field</th>
-                          <th className="p-3">Type</th>
-                          <th className="p-3">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
-                        <tr><td className="p-3 font-extrabold text-blue-600">id</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Unique folder UUID. Use this as <code>folderId</code> in file upload.</td></tr>
-                        <tr><td className="p-3 font-semibold">name</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Folder display name.</td></tr>
-                        <tr><td className="p-3 font-semibold">parentId</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String|null</span></td><td className="p-3">Parent folder UUID. Null means top-level (root) folder.</td></tr>
-                        <tr><td className="p-3 font-semibold">color</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Folder color hex code (e.g. <code>#3b82f6</code>).</td></tr>
-                        <tr><td className="p-3 font-semibold">createdAt</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">DateTime</span></td><td className="p-3">ISO 8601 timestamp when folder was created.</td></tr>
                       </tbody>
                     </table>
                   </div>
                 </div>
               )}
 
-              {/* Code Snippet Window */}
-              <div className="rounded-2xl border border-slate-900 bg-slate-950 shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full bg-rose-500/80" />
-                    <div className="h-3 w-3 rounded-full bg-amber-500/80" />
-                    <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
-                    <span className="ml-2 font-mono text-xs font-semibold text-slate-400">
-                      {selectedEndpoint === 'upload' ? 'upload_example' : selectedEndpoint === 'files' ? 'get_files_example' : 'get_folders_example'}
-                    </span>
+              {/* ── Files Docs ── */}
+              {selectedEndpoint === 'files' && (
+                <div className="space-y-4">
+                  <h3 className={sectionH}>Query Parameters</h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-left">
+                      <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                        <tr>
+                          <th className={thCls}>Param</th>
+                          <th className={thCls}>Type</th>
+                          <th className={thCls}>Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-extrabold text-blue-600 dark:text-blue-400`}>folderPath</td>
+                          <td className={tdCls}><span className={mono}>String</span></td>
+                          <td className={tdCls}>Filter by folder name (e.g. promo).</td>
+                        </tr>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-semibold`}>folderId</td>
+                          <td className={tdCls}><span className={mono}>String</span></td>
+                          <td className={tdCls}>Filter by exact folder UUID.</td>
+                        </tr>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-semibold`}>q</td>
+                          <td className={tdCls}><span className={mono}>String</span></td>
+                          <td className={tdCls}>Search by file name keyword.</td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
 
+                  <h3 className={sectionH}>Response Fields <span className="font-normal text-slate-500 dark:text-slate-400 text-[11px]">(per file)</span></h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-left">
+                      <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                        <tr>
+                          <th className={thCls}>Field</th>
+                          <th className={thCls}>Type</th>
+                          <th className={thCls}>Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { name: 'id', type: 'String', desc: 'Unique file UUID in 9Drive.', cls: `${tdCls} font-extrabold text-blue-600 dark:text-blue-400`, row: trBase },
+                          { name: 'name', type: 'String', desc: 'File name with extension.', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'mimeType', type: 'String', desc: 'MIME type (e.g. image/png, video/mp4).', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'sizeBytes', type: 'String', desc: 'File size in bytes (returned as string).', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'folderId', type: 'String|null', desc: 'Parent folder UUID, or null if root.', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'folderName', type: 'String|null', desc: 'Parent folder name, or null if root.', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'provider', type: 'String', desc: 'Storage: google_drive or s3.', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'viewUrl', type: 'String|null', desc: 'Google Drive view link — open in browser.', cls: `${tdCls} font-extrabold text-emerald-600 dark:text-emerald-400`, row: trGreen },
+                          { name: 'downloadUrl', type: 'String|null', desc: 'Direct embed URL — use as <img src> or <video src>.', cls: `${tdCls} font-extrabold text-emerald-600 dark:text-emerald-400`, row: trGreen },
+                          { name: 'createdAt', type: 'DateTime', desc: 'ISO 8601 upload timestamp.', cls: `${tdCls} font-semibold`, row: trBase },
+                        ].map((f) => (
+                          <tr key={f.name} className={f.row}>
+                            <td className={f.cls}>{f.name}</td>
+                            <td className={tdCls}><span className={mono}>{f.type}</span></td>
+                            <td className={tdCls}>{f.desc}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Folders Docs ── */}
+              {selectedEndpoint === 'folders' && (
+                <div className="space-y-4">
+                  <h3 className={sectionH}>Query Parameters</h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-left">
+                      <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                        <tr>
+                          <th className={thCls}>Param</th>
+                          <th className={thCls}>Type</th>
+                          <th className={thCls}>Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-semibold`}>parentId</td>
+                          <td className={tdCls}><span className={mono}>String</span></td>
+                          <td className={tdCls}>
+                            Filter by parent UUID. Pass{' '}
+                            <code className="rounded bg-slate-100 dark:bg-slate-800 px-1 font-mono">null</code> or{' '}
+                            <code className="rounded bg-slate-100 dark:bg-slate-800 px-1 font-mono">root</code> for top-level folders.
+                          </td>
+                        </tr>
+                        <tr className={trBase}>
+                          <td className={`${tdCls} font-semibold`}>q</td>
+                          <td className={tdCls}><span className={mono}>String</span></td>
+                          <td className={tdCls}>Search by folder name keyword.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <h3 className={sectionH}>Response Fields <span className="font-normal text-slate-500 dark:text-slate-400 text-[11px]">(per folder)</span></h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-left">
+                      <thead className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60">
+                        <tr>
+                          <th className={thCls}>Field</th>
+                          <th className={thCls}>Type</th>
+                          <th className={thCls}>Description</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { name: 'id', type: 'String', desc: 'Unique folder UUID — pass as folderId when uploading.', cls: `${tdCls} font-extrabold text-blue-600 dark:text-blue-400`, row: trBase },
+                          { name: 'name', type: 'String', desc: 'Folder display name.', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'parentId', type: 'String|null', desc: 'Parent UUID. Null = root level.', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'color', type: 'String', desc: 'Hex color code (e.g. #3b82f6).', cls: `${tdCls} font-semibold`, row: trBase },
+                          { name: 'createdAt', type: 'DateTime', desc: 'ISO 8601 creation timestamp.', cls: `${tdCls} font-semibold`, row: trBase },
+                        ].map((f) => (
+                          <tr key={f.name} className={f.row}>
+                            <td className={f.cls}>{f.name}</td>
+                            <td className={tdCls}><span className={mono}>{f.type}</span></td>
+                            <td className={tdCls}>{f.desc}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Code Snippet Window ─────────────────────────────────── */}
+              <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-xl">
+                {/* Terminal Title Bar */}
+                <div className="flex items-center justify-between border-b border-slate-800 bg-[#161b2e] px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2.5 w-2.5 rounded-full bg-rose-500/80" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+                    <span className="ml-2 font-mono text-[11px] font-semibold text-slate-500">
+                      {selectedEndpoint === 'upload'
+                        ? 'upload_example'
+                        : selectedEndpoint === 'files'
+                          ? 'get_files_example'
+                          : 'get_folders_example'}
+                    </span>
+                  </div>
                   <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => setActiveLang('curl')}
-                      className={`rounded-md px-2.5 py-1 text-xs font-bold transition-all ${
-                        activeLang === 'curl' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      cURL
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveLang('js')}
-                      className={`rounded-md px-2.5 py-1 text-xs font-bold transition-all ${
-                        activeLang === 'js' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      JS (Fetch)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveLang('python')}
-                      className={`rounded-md px-2.5 py-1 text-xs font-bold transition-all ${
-                        activeLang === 'python' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      Python
-                    </button>
+                    {(['curl', 'js', 'python'] as const).map((lang) => (
+                      <button
+                        key={lang}
+                        type="button"
+                        onClick={() => setActiveLang(lang)}
+                        className={`rounded px-2.5 py-1 text-xs font-bold transition-all ${
+                          activeLang === lang ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {lang === 'curl' ? 'cURL' : lang === 'js' ? 'JS (Fetch)' : 'Python'}
+                      </button>
+                    ))}
                     <Button
-                      variant="outline"
                       size="sm"
-                      className="ml-2 border-slate-700 bg-slate-800 text-white hover:bg-slate-700"
+                      variant="outline"
+                      className="ml-2 border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white"
                       onClick={() => copy(getCodeSnippet())}
                     >
-                      <Clipboard className="mr-1 h-3.5 w-3.5" /> Copy Code
+                      <Clipboard className="mr-1 h-3.5 w-3.5" /> Copy
                     </Button>
                   </div>
                 </div>
-
-                <pre className="max-h-96 overflow-auto p-4 font-mono text-xs leading-relaxed text-slate-200">
+                <pre className="max-h-80 overflow-auto p-4 font-mono text-xs leading-relaxed text-slate-300">
                   {getCodeSnippet()}
                 </pre>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
 
-      {/* Modal Create Key */}
-      <DummyModal open={createOpen} title="Create API Key" description="API keys allow external applications to upload and manage files." onClose={() => setCreateOpen(false)}>
+      {/* ── Create Key Modal ─────────────────────────────────────── */}
+      <DummyModal
+        open={createOpen}
+        title="Create API Key"
+        description="API keys allow external applications to upload and manage files."
+        onClose={() => setCreateOpen(false)}
+      >
         <form className="space-y-4" onSubmit={createKey}>
           <div className="space-y-2">
-            <label className="text-xs font-bold text-slate-700">Key Name</label>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Key Name</label>
             <input
-              className="h-11 w-full rounded-xl border border-slate-200 px-3.5 text-sm font-semibold outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              className="h-11 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 text-sm font-semibold text-slate-900 dark:text-slate-100 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20"
               placeholder="e.g. Landing Page Form, Backup Script"
               value={keyName}
-              onChange={(event) => setKeyName(event.target.value)}
+              onChange={(e) => setKeyName(e.target.value)}
               required
             />
           </div>
@@ -703,7 +687,7 @@ export function ApiManagementPage() {
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating Key...' : 'Create API Key'}
+              {loading ? 'Creating...' : 'Create API Key'}
             </Button>
           </div>
         </form>
