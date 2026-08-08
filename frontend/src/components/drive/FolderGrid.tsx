@@ -43,19 +43,15 @@ export function FolderGrid({
   items,
   mobileTwoColumns = true,
   sizeScale = 'md',
-  selectedFolderIds = new Set<string>(),
   onFolderMenu,
   onFolderOpen,
-  onToggleFolder,
   onDropItem,
 }: {
   items: FolderItem[]
   mobileTwoColumns?: boolean
   sizeScale?: FolderSizeScale
-  selectedFolderIds?: Set<string>
   onFolderMenu?: (event: MouseEvent<HTMLElement>, folder: FolderItem) => void
   onFolderOpen?: (folder: FolderItem) => void
-  onToggleFolder?: (folder: FolderItem) => void
   onDropItem?: (fileId: string, folderId: string) => void
 }) {
   const cfg = scaleConfig[sizeScale] || scaleConfig.md
@@ -63,7 +59,6 @@ export function FolderGrid({
   return (
     <div className={cn('mt-4 grid', cfg.grid, mobileTwoColumns && sizeScale === 'md' && 'grid-cols-2')}>
       {items.map((folder) => {
-        const selected = Boolean(folder.id && selectedFolderIds.has(folder.id))
         return (
           <Card
             key={folder.id || folder.name}
@@ -79,23 +74,14 @@ export function FolderGrid({
               if (fileId && folder.id) onDropItem?.(fileId, folder.id)
             }}
             className={cn(
-              'group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl transition-all duration-200 hover:-translate-y-1 hover:shadow-xl',
-              selected
-                ? 'folder-selected shadow-md border-amber-500/70 ring-2 ring-amber-500/40 bg-amber-500/10 dark:bg-amber-500/20'
-                : 'border border-slate-200/80 bg-white/95 dark:border-slate-800/80 dark:bg-slate-900/90 dark:hover:border-amber-500/30',
+              'group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 transition-all duration-200 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-xl dark:border-slate-800/80 dark:bg-slate-900/90 dark:hover:border-amber-500/30',
               cfg.cardPadding
             )}
           >
             {/* Top Header Row */}
             <div className="flex items-center justify-between gap-1.5 min-w-0">
               <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 shrink-0 accent-blue-600 shadow-sm cursor-pointer"
-                  checked={selected}
-                  onChange={() => onToggleFolder?.(folder)}
-                  onClick={(event) => event.stopPropagation()}
-                />
+                <span className="h-3.5 w-3.5 rounded border border-slate-300/80 dark:border-slate-700/80 bg-slate-200/60 dark:bg-slate-800/60 shrink-0 opacity-40 grayscale cursor-not-allowed" title="Actions available via 3-dots menu" />
                 <FolderVisual folder={folder} className="h-4 w-4 shrink-0" />
                 <span className="truncate text-xs sm:text-base font-bold text-slate-800 dark:text-slate-100" title={folder.name}>
                   {folder.name}

@@ -428,16 +428,6 @@ export function AllFilesPage() {
     })
   }
 
-  function toggleFolderSelection(folder: FolderItem) {
-    if (!folder.id) return
-    setSelectedFolderIds((current) => {
-      const next = new Set(current)
-      if (next.has(folder.id!)) next.delete(folder.id!)
-      else next.add(folder.id!)
-      return next
-    })
-  }
-
   function toggleAllVisibleFiles() {
     const visibleIds = files.map((file) => file.id).filter(Boolean) as string[]
     const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedFileIds.has(id))
@@ -919,14 +909,14 @@ export function AllFilesPage() {
           </div>
         </div>
         {message ? <p className="mt-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">{message}</p> : null}
-        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} selectedFolderIds={selectedFolderIds} onToggleFolder={toggleFolderSelection} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No folders yet. Click New Folder to organize uploads.</p>)}
+        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No folders yet. Click New Folder to organize uploads.</p>)}
         {!activeFolder && moreFolders.length > 0 ? <>
           <h2 className="mt-4 font-extrabold text-slate-700">More Folders</h2>
-          <FolderGrid items={moreFolders} sizeScale={folderSizeScale} selectedFolderIds={selectedFolderIds} onToggleFolder={toggleFolderSelection} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
+          <FolderGrid items={moreFolders} sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
         </> : null}
         {activeFolder && folders.length > 0 ? <>
           <h2 className="mt-4 font-extrabold text-slate-700">Folders</h2>
-          <FolderGrid items={folders} sizeScale={folderSizeScale} selectedFolderIds={selectedFolderIds} onToggleFolder={toggleFolderSelection} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
+          <FolderGrid items={folders} sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
         </> : null}
         <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
