@@ -66,6 +66,8 @@ publicApiRouter.get('/v1/files', requireApiKey('files:upload'), async (req: ApiK
         name: true,
         mimeType: true,
         sizeBytes: true,
+        provider: true,
+        providerFileId: true,
         folderId: true,
         folder: { select: { id: true, name: true } },
         createdAt: true,
@@ -74,16 +76,22 @@ publicApiRouter.get('/v1/files', requireApiKey('files:upload'), async (req: ApiK
       orderBy: { createdAt: 'desc' }
     })
 
-    const formattedFiles = files.map((file) => ({
-      id: file.id,
-      name: file.name,
-      mimeType: file.mimeType,
-      sizeBytes: file.sizeBytes.toString(),
-      folderId: file.folderId,
-      folderName: file.folder?.name ?? null,
-      createdAt: file.createdAt,
-      updatedAt: file.updatedAt
-    }))
+    const formattedFiles = files.map((file) => {
+      const isGoogle = file.provider === 'google_drive' && file.providerFileId
+      return {
+        id: file.id,
+        name: file.name,
+        mimeType: file.mimeType,
+        sizeBytes: file.sizeBytes.toString(),
+        folderId: file.folderId,
+        folderName: file.folder?.name ?? null,
+        provider: file.provider,
+        viewUrl: isGoogle ? `https://drive.google.com/file/d/${file.providerFileId}/view` : null,
+        downloadUrl: isGoogle ? `https://drive.google.com/uc?id=${file.providerFileId}&export=download` : null,
+        createdAt: file.createdAt,
+        updatedAt: file.updatedAt
+      }
+    })
 
     return res.json({ status: 'ok', count: formattedFiles.length, files: formattedFiles })
   } catch (error) {
