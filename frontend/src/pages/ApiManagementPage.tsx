@@ -42,7 +42,27 @@ with open("photo.png", "rb") as f:
 print(response.json())`
 
 const curlGetFilesExample = `curl -X GET "${API_URL}/api/v1/files?folderPath=promo" \\
-  -H "Authorization: Bearer 9d_live_your_secret_api_key"`
+  -H "Authorization: Bearer 9d_live_your_secret_api_key"
+
+# Response JSON:
+# {
+#   "status": "ok",
+#   "count": 2,
+#   "files": [
+#     {
+#       "id": "uuid...",
+#       "name": "photo.png",
+#       "mimeType": "image/png",
+#       "sizeBytes": "204800",
+#       "folderId": "uuid...",
+#       "folderName": "promo",
+#       "provider": "google_drive",
+#       "viewUrl": "https://drive.google.com/file/d/xxx/view",
+#       "downloadUrl": "https://drive.google.com/uc?id=xxx&export=download",
+#       "createdAt": "2024-01-01T00:00:00.000Z"
+#     }
+#   ]
+# }`
 
 const jsGetFilesExample = `const response = await fetch('${API_URL}/api/v1/files?folderPath=promo', {
   method: 'GET',
@@ -51,7 +71,19 @@ const jsGetFilesExample = `const response = await fetch('${API_URL}/api/v1/files
   }
 })
 const data = await response.json()
-console.log(data.files)`
+// data.files is an array of file objects
+// Each file has: id, name, mimeType, sizeBytes, folderId,
+//   folderName, provider, viewUrl, downloadUrl, createdAt
+console.log(data.files)
+
+// Example: Display images on your landing page
+data.files
+  .filter(f => f.mimeType.startsWith('image/'))
+  .forEach(f => {
+    const img = document.createElement('img')
+    img.src = f.downloadUrl
+    document.body.appendChild(img)
+  })`
 
 const pythonGetFilesExample = `import requests
 
@@ -61,7 +93,65 @@ headers = {
 }
 
 response = requests.get(url, headers=headers)
-print(response.json())`
+data = response.json()
+
+# data['files'] contains array of file objects
+# Each file has: id, name, mimeType, sizeBytes,
+#   folderId, folderName, provider, viewUrl, downloadUrl
+for file in data['files']:
+    print(f"{file['name']} → {file['viewUrl']}")`
+
+const curlGetFoldersExample = `curl -X GET "${API_URL}/api/v1/folders" \\
+  -H "Authorization: Bearer 9d_live_your_secret_api_key"
+
+# With parent filter:
+# curl -X GET "${API_URL}/api/v1/folders?parentId=null" \\
+
+# Response JSON:
+# {
+#   "status": "ok",
+#   "count": 2,
+#   "folders": [
+#     {
+#       "id": "uuid...",
+#       "name": "promo",
+#       "parentId": null,
+#       "color": "#3b82f6",
+#       "createdAt": "2024-01-01T00:00:00.000Z"
+#     }
+#   ]
+# }`
+
+const jsGetFoldersExample = `const response = await fetch('${API_URL}/api/v1/folders', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer 9d_live_your_secret_api_key'
+  }
+})
+const data = await response.json()
+// data.folders is an array of folder objects
+// Each folder has: id, name, parentId, color, createdAt, updatedAt
+console.log(data.folders)
+
+// Filter root folders only (no parent)
+const rootFolders = data.folders.filter(f => f.parentId === null)
+console.log('Root folders:', rootFolders)`
+
+const pythonGetFoldersExample = `import requests
+
+url = "${API_URL}/api/v1/folders"
+headers = {
+    "Authorization": "Bearer 9d_live_your_secret_api_key"
+}
+
+response = requests.get(url, headers=headers)
+data = response.json()
+
+# data['folders'] contains array of folder objects
+# Each folder has: id, name, parentId, color, createdAt
+for folder in data['folders']:
+    parent = folder['parentId'] or 'root'
+    print(f"{folder['name']} (parent: {parent})")  `
 
 export function ApiManagementPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
@@ -117,10 +207,14 @@ export function ApiManagementPage() {
       if (activeLang === 'curl') return curlUploadExample
       if (activeLang === 'js') return jsUploadExample
       return pythonUploadExample
-    } else {
+    } else if (selectedEndpoint === 'files') {
       if (activeLang === 'curl') return curlGetFilesExample
       if (activeLang === 'js') return jsGetFilesExample
       return pythonGetFilesExample
+    } else {
+      if (activeLang === 'curl') return curlGetFoldersExample
+      if (activeLang === 'js') return jsGetFoldersExample
+      return pythonGetFoldersExample
     }
   }
 
@@ -342,6 +436,15 @@ export function ApiManagementPage() {
                   >
                     GET Files
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedEndpoint('folders')}
+                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                      selectedEndpoint === 'folders' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-700 hover:text-slate-900'
+                    }`}
+                  >
+                    GET Folders
+                  </button>
                 </div>
               </div>
             </div>
@@ -355,10 +458,10 @@ export function ApiManagementPage() {
                       {selectedEndpoint === 'upload' ? 'POST' : 'GET'}
                     </span>
                     <code className="text-xs font-mono font-extrabold text-blue-300 sm:text-sm">
-                      {API_URL}/api/v1/{selectedEndpoint === 'upload' ? 'uploads' : 'files'}
+                      {API_URL}/api/v1/{selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}
                     </code>
                   </div>
-                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:bg-slate-800" onClick={() => copy(`${API_URL}/api/v1/${selectedEndpoint === 'upload' ? 'uploads' : 'files'}`)}>
+                  <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:bg-slate-800" onClick={() => copy(`${API_URL}/api/v1/${selectedEndpoint === 'upload' ? 'uploads' : selectedEndpoint}`)}>
                     <Clipboard className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -414,7 +517,7 @@ export function ApiManagementPage() {
                     </table>
                   </div>
                 </div>
-              ) : (
+              ) : selectedEndpoint === 'files' ? (
                 <div className="space-y-4">
                   <h3 className="font-extrabold text-slate-900 text-sm">File Listing Query Parameters</h3>
                   <div className="overflow-x-auto rounded-2xl border border-slate-200">
@@ -440,8 +543,82 @@ export function ApiManagementPage() {
                         <tr>
                           <td className="p-3 font-semibold text-slate-900">q</td>
                           <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
-                          <td className="p-3">Search query term for file names.</td>
+                          <td className="p-3">Search by file name keyword.</td>
                         </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Response Fields */}
+                  <h3 className="font-extrabold text-slate-900 text-sm pt-2">Response Fields (per file)</h3>
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100 font-extrabold text-slate-800">
+                        <tr>
+                          <th className="p-3">Field</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
+                        <tr><td className="p-3 font-extrabold text-blue-600">id</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Unique file UUID in 9Drive database.</td></tr>
+                        <tr><td className="p-3 font-semibold">name</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">File name with extension.</td></tr>
+                        <tr><td className="p-3 font-semibold">mimeType</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">MIME type (e.g. <code>image/png</code>, <code>video/mp4</code>).</td></tr>
+                        <tr><td className="p-3 font-semibold">sizeBytes</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">File size in bytes (as string to avoid BigInt issues).</td></tr>
+                        <tr><td className="p-3 font-semibold">folderId</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String|null</span></td><td className="p-3">Parent folder UUID, or null if root.</td></tr>
+                        <tr><td className="p-3 font-semibold">folderName</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String|null</span></td><td className="p-3">Parent folder name, or null if root.</td></tr>
+                        <tr><td className="p-3 font-semibold">provider</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Storage provider: <code>google_drive</code> or <code>s3</code>.</td></tr>
+                        <tr className="bg-emerald-50/50"><td className="p-3 font-extrabold text-emerald-700">viewUrl</td><td className="p-3"><span className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-900">String|null</span></td><td className="p-3">Google Drive view link — open file in browser directly.</td></tr>
+                        <tr className="bg-emerald-50/50"><td className="p-3 font-extrabold text-emerald-700">downloadUrl</td><td className="p-3"><span className="rounded bg-emerald-100 px-1.5 py-0.5 font-mono text-emerald-900">String|null</span></td><td className="p-3">Direct download/embed link — use as <code>&lt;img src&gt;</code> or <code>&lt;video src&gt;</code>.</td></tr>
+                        <tr><td className="p-3 font-semibold">createdAt</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">DateTime</span></td><td className="p-3">ISO 8601 timestamp when file was uploaded.</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <h3 className="font-extrabold text-slate-900 text-sm">Folder Listing Query Parameters</h3>
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100 font-extrabold text-slate-800">
+                        <tr>
+                          <th className="p-3">Query Param</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
+                        <tr>
+                          <td className="p-3 font-semibold text-slate-900">parentId</td>
+                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
+                          <td className="p-3">Filter by parent folder UUID. Use <code className="font-bold">null</code> or <code className="font-bold">root</code> to get top-level folders.</td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-semibold text-slate-900">q</td>
+                          <td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td>
+                          <td className="p-3">Search by folder name keyword.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Folder Response Fields */}
+                  <h3 className="font-extrabold text-slate-900 text-sm pt-2">Response Fields (per folder)</h3>
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-100 font-extrabold text-slate-800">
+                        <tr>
+                          <th className="p-3">Field</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white text-slate-700">
+                        <tr><td className="p-3 font-extrabold text-blue-600">id</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Unique folder UUID. Use this as <code>folderId</code> in file upload.</td></tr>
+                        <tr><td className="p-3 font-semibold">name</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Folder display name.</td></tr>
+                        <tr><td className="p-3 font-semibold">parentId</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String|null</span></td><td className="p-3">Parent folder UUID. Null means top-level (root) folder.</td></tr>
+                        <tr><td className="p-3 font-semibold">color</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">String</span></td><td className="p-3">Folder color hex code (e.g. <code>#3b82f6</code>).</td></tr>
+                        <tr><td className="p-3 font-semibold">createdAt</td><td className="p-3"><span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono">DateTime</span></td><td className="p-3">ISO 8601 timestamp when folder was created.</td></tr>
                       </tbody>
                     </table>
                   </div>
@@ -456,7 +633,7 @@ export function ApiManagementPage() {
                     <div className="h-3 w-3 rounded-full bg-amber-500/80" />
                     <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
                     <span className="ml-2 font-mono text-xs font-semibold text-slate-400">
-                      {selectedEndpoint === 'upload' ? 'upload_example' : 'get_files_example'}
+                      {selectedEndpoint === 'upload' ? 'upload_example' : selectedEndpoint === 'files' ? 'get_files_example' : 'get_folders_example'}
                     </span>
                   </div>
 
