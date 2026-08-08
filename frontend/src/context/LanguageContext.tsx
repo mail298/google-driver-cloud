@@ -125,6 +125,7 @@ export const translations: Dictionary = {
   api_table_description: { id: 'Deskripsi', en: 'Description' },
   api_query_params: { id: 'Query Parameter', en: 'Query Parameters' },
   api_response_fields: { id: 'Field Response', en: 'Response Fields' },
+  api_response_example: { id: 'Contoh Response (JSON)', en: 'Response Example (JSON)' },
   api_btn_copy: { id: 'Salin', en: 'Copy' },
   api_modal_create_title: { id: 'Buat API Key', en: 'Create API Key' },
   api_modal_create_desc: { id: 'API key mengizinkan aplikasi eksternal mengupload dan mengelola file.', en: 'API keys allow external applications to upload and manage files.' },
@@ -133,6 +134,14 @@ export const translations: Dictionary = {
   api_modal_cancel: { id: 'Batal', en: 'Cancel' },
   api_modal_creating: { id: 'Membuat...', en: 'Creating...' },
   api_modal_submit: { id: 'Buat API Key', en: 'Create API Key' },
+  api_modal_expiration: { id: 'Masa Berlaku (Expiration)', en: 'Key Expiration' },
+  api_expiration_never: { id: 'Selamanya (Tidak pernah kadaluarsa)', en: 'Never (No expiration)' },
+  api_expiration_7d: { id: '7 Hari', en: '7 Days' },
+  api_expiration_30d: { id: '30 Hari', en: '30 Days' },
+  api_expiration_90d: { id: '90 Hari', en: '90 Days' },
+  api_expiration_1y: { id: '1 Tahun', en: '1 Year' },
+  api_status_active: { id: 'Aktif', en: 'Active' },
+  api_status_revoked: { id: 'Dicabut', en: 'Revoked' },
 
   // Quota Tracker
   quota_title: { id: 'Pemantau Kuota', en: 'Quota Tracker' },
