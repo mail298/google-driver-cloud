@@ -43,77 +43,93 @@ export function FolderGrid({
   items,
   mobileTwoColumns = true,
   sizeScale = 'md',
+  selectedFolderIds = new Set<string>(),
   onFolderMenu,
   onFolderOpen,
+  onToggleFolder,
   onDropItem,
 }: {
   items: FolderItem[]
   mobileTwoColumns?: boolean
   sizeScale?: FolderSizeScale
+  selectedFolderIds?: Set<string>
   onFolderMenu?: (event: MouseEvent<HTMLElement>, folder: FolderItem) => void
   onFolderOpen?: (folder: FolderItem) => void
+  onToggleFolder?: (folder: FolderItem) => void
   onDropItem?: (fileId: string, folderId: string) => void
 }) {
   const cfg = scaleConfig[sizeScale] || scaleConfig.md
 
   return (
     <div className={cn('mt-4 grid', cfg.grid, mobileTwoColumns && sizeScale === 'md' && 'grid-cols-2')}>
-      {items.map((folder) => (
-        <Card
-          key={folder.id || folder.name}
-          onClick={() => onFolderOpen?.(folder)}
-          onContextMenu={(event) => onFolderMenu?.(event, folder)}
-          onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move' }}
-          onDragEnter={(event) => { event.currentTarget.classList.add('bg-blue-50/50', 'border-blue-300') }}
-          onDragLeave={(event) => { event.currentTarget.classList.remove('bg-blue-50/50', 'border-blue-300') }}
-          onDrop={(event) => {
-            event.preventDefault()
-            event.currentTarget.classList.remove('bg-blue-50/50', 'border-blue-300')
-            const fileId = event.dataTransfer.getData('text/plain')
-            if (fileId && folder.id) onDropItem?.(fileId, folder.id)
-          }}
-          className={cn(
-            'group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 transition-all duration-200 hover:-translate-y-1 hover:border-amber-500/40 hover:shadow-xl dark:border-slate-800/80 dark:bg-slate-900/90 dark:hover:border-amber-500/30',
-            cfg.cardPadding
-          )}
-        >
-          {/* Top Header Row */}
-          <div className="flex items-center justify-between gap-1.5 min-w-0">
-            <div className="flex items-center gap-1.5 min-w-0 flex-1">
-              <span className="h-3.5 w-3.5 rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/80 shrink-0" />
-              <FolderVisual folder={folder} className="h-4 w-4 shrink-0" />
-              <span className="truncate text-xs sm:text-base font-bold text-slate-800 dark:text-slate-100" title={folder.name}>
-                {folder.name}
+      {items.map((folder) => {
+        const selected = Boolean(folder.id && selectedFolderIds.has(folder.id))
+        return (
+          <Card
+            key={folder.id || folder.name}
+            onClick={() => onFolderOpen?.(folder)}
+            onContextMenu={(event) => onFolderMenu?.(event, folder)}
+            onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move' }}
+            onDragEnter={(event) => { event.currentTarget.classList.add('bg-blue-50/50', 'border-blue-300') }}
+            onDragLeave={(event) => { event.currentTarget.classList.remove('bg-blue-50/50', 'border-blue-300') }}
+            onDrop={(event) => {
+              event.preventDefault()
+              event.currentTarget.classList.remove('bg-blue-50/50', 'border-blue-300')
+              const fileId = event.dataTransfer.getData('text/plain')
+              if (fileId && folder.id) onDropItem?.(fileId, folder.id)
+            }}
+            className={cn(
+              'group relative flex flex-col justify-between cursor-pointer overflow-hidden rounded-2xl transition-all duration-200 hover:-translate-y-1 hover:shadow-xl',
+              selected
+                ? 'folder-selected shadow-md border-amber-500/70 ring-2 ring-amber-500/40 bg-amber-500/10 dark:bg-amber-500/20'
+                : 'border border-slate-200/80 bg-white/95 dark:border-slate-800/80 dark:bg-slate-900/90 dark:hover:border-amber-500/30',
+              cfg.cardPadding
+            )}
+          >
+            {/* Top Header Row */}
+            <div className="flex items-center justify-between gap-1.5 min-w-0">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 shrink-0 accent-blue-600 shadow-sm cursor-pointer"
+                  checked={selected}
+                  onChange={() => onToggleFolder?.(folder)}
+                  onClick={(event) => event.stopPropagation()}
+                />
+                <FolderVisual folder={folder} className="h-4 w-4 shrink-0" />
+                <span className="truncate text-xs sm:text-base font-bold text-slate-800 dark:text-slate-100" title={folder.name}>
+                  {folder.name}
+                </span>
+              </div>
+              <button
+                className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 shrink-0"
+                onClick={(event) => { event.stopPropagation(); onFolderMenu?.(event, folder) }}
+                aria-label={`Open ${folder.name} menu`}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Middle Inner Center Preview Box */}
+            <div className={cn('my-2.5 flex w-full items-center justify-center rounded-xl border border-dashed border-amber-500/25 bg-amber-500/5 dark:border-amber-500/20 dark:bg-slate-950/40 transition-transform group-hover:scale-[1.02]', cfg.innerHeight)}>
+              <FolderVisual folder={folder} className={cn('drop-shadow-md transition-transform group-hover:scale-110', cfg.innerIconSize)} />
+            </div>
+
+            {/* Bottom Info Row */}
+            <div className="flex items-center justify-between gap-1 min-w-0 text-[11px] sm:text-xs">
+              <div className="flex items-center gap-1 min-w-0 flex-1">
+                <FolderVisual folder={folder} className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate font-semibold text-slate-700 dark:text-slate-300" title={folder.name}>
+                  {folder.name}
+                </span>
+              </div>
+              <span className="shrink-0 font-medium text-slate-400 dark:text-slate-500">
+                Folder
               </span>
             </div>
-            <button
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 shrink-0"
-              onClick={(event) => { event.stopPropagation(); onFolderMenu?.(event, folder) }}
-              aria-label={`Open ${folder.name} menu`}
-            >
-              <MoreVertical className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Middle Inner Center Preview Box */}
-          <div className={cn('my-2.5 flex w-full items-center justify-center rounded-xl border border-dashed border-amber-500/25 bg-amber-500/5 dark:border-amber-500/20 dark:bg-slate-950/40 transition-transform group-hover:scale-[1.02]', cfg.innerHeight)}>
-            <FolderVisual folder={folder} className={cn('drop-shadow-md transition-transform group-hover:scale-110', cfg.innerIconSize)} />
-          </div>
-
-          {/* Bottom Info Row */}
-          <div className="flex items-center justify-between gap-1 min-w-0 text-[11px] sm:text-xs">
-            <div className="flex items-center gap-1 min-w-0 flex-1">
-              <FolderVisual folder={folder} className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate font-semibold text-slate-700 dark:text-slate-300" title={folder.name}>
-                {folder.name}
-              </span>
-            </div>
-            <span className="shrink-0 font-medium text-slate-400 dark:text-slate-500">
-              Folder
-            </span>
-          </div>
-        </Card>
-      ))}
+          </Card>
+        )
+      })}
     </div>
   )
 }

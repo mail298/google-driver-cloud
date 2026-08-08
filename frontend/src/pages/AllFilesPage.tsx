@@ -12,11 +12,12 @@ import { FileIcon } from '@/components/drive/FileIcon'
 import { FileTable } from '@/components/drive/FileTable'
 import { FolderContextMenu } from '@/components/drive/FolderContextMenu'
 import { FolderGrid, type FolderSizeScale } from '@/components/drive/FolderGrid'
-import { defaultFolderColor, defaultFolderIconUrl, folderColorOptions, folderIconOptions, normalizeFolderColor } from '@/components/drive/FolderVisual'
+import { FolderVisual, defaultFolderColor, defaultFolderIconUrl, folderColorOptions, folderIconOptions, normalizeFolderColor } from '@/components/drive/FolderVisual'
 import { PageHeader } from '@/components/drive/PageHeader'
 import { Input } from '@/components/ui/input'
 import { API_URL, apiFetch, formatBytes, formatDate } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
+import { cn } from '@/lib/utils'
 import { createPlyr, ensurePlyr } from '@/lib/plyr'
 import { getPreviewKind, officeViewerUrl } from '@/lib/preview'
 import type { FileItem, FolderItem } from '@/data/drive-data'
@@ -113,6 +114,7 @@ export function AllFilesPage() {
   const [activeFile, setActiveFile] = useState<FileItem | null>(null)
   const [activeFolderForMenu, setActiveFolderForMenu] = useState<FolderItem | null>(null)
   const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set())
+  const [selectedFolderIds, setSelectedFolderIds] = useState<Set<string>>(new Set())
   const [cutFolder, setCutFolder] = useState<FolderItem | null>(null)
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; file: FileItem | null }>({ x: 0, y: 0, file: null })
   const [folderContextMenu, setFolderContextMenu] = useState<{ x: number; y: number; folder: FolderItem | null }>({ x: 0, y: 0, folder: null })
@@ -198,7 +200,7 @@ export function AllFilesPage() {
       })
       setMessage(`Successfully moved ${fileIds.length} item(s).`)
       loadAll().catch(() => undefined)
-      setSelectedFileIds(new Set())
+      clearSelection()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Failed to move items')
     } finally {
@@ -208,7 +210,7 @@ export function AllFilesPage() {
 
   useEffect(() => {
     loadAll().catch((error) => setMessage(error instanceof Error ? error.message : 'Failed to load files'))
-    setSelectedFileIds(new Set())
+    clearSelection()
   }, [activeFolderId, searchQuery])
 
   useEffect(() => {
@@ -423,6 +425,16 @@ export function AllFilesPage() {
     })
   }
 
+  function toggleFolderSelection(folder: FolderItem) {
+    if (!folder.id) return
+    setSelectedFolderIds((current) => {
+      const next = new Set(current)
+      if (next.has(folder.id!)) next.delete(folder.id!)
+      else next.add(folder.id!)
+      return next
+    })
+  }
+
   function toggleAllVisibleFiles() {
     const visibleIds = files.map((file) => file.id).filter(Boolean) as string[]
     const allSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedFileIds.has(id))
@@ -431,6 +443,57 @@ export function AllFilesPage() {
 
   function clearSelection() {
     setSelectedFileIds(new Set())
+    setSelectedFolderIds(new Set())
+  }
+
+  function getFolderDescendantIds(folderId: string, foldersList: FolderItem[]): Set<string> {
+    const descendants = new Set<string>([folderId])
+    let changed = true
+    while (changed) {
+      changed = false
+      for (const f of foldersList) {
+        if (f.id && f.parentId && descendants.has(f.parentId) && !descendants.has(f.id)) {
+          descendants.add(f.id)
+          changed = true
+        }
+      }
+    }
+    return descendants
+  }
+
+  function getDisabledTargetFolderReason(targetFolderId: string | null): { disabled: boolean; reason?: string } {
+    const selectedFilesList = files.filter((f) => f.id && selectedFileIds.has(f.id))
+    const selectedFoldersList = allFolders.filter((f) => f.id && selectedFolderIds.has(f.id))
+    const totalSelected = selectedFilesList.length + selectedFoldersList.length
+
+    if (totalSelected === 0) {
+      if (activeFile && (activeFile.folderId ?? null) === targetFolderId) {
+        return { disabled: true, reason: 'Folder saat ini' }
+      }
+      return { disabled: false }
+    }
+
+    if (targetFolderId && selectedFolderIds.has(targetFolderId)) {
+      return { disabled: true, reason: 'Folder terpilih' }
+    }
+
+    if (targetFolderId && selectedFolderIds.size > 0) {
+      for (const selFolderId of selectedFolderIds) {
+        const descendants = getFolderDescendantIds(selFolderId, allFolders)
+        if (descendants.has(targetFolderId)) {
+          return { disabled: true, reason: 'Subfolder dari item terpilih' }
+        }
+      }
+    }
+
+    const allFilesAlreadyInTarget = selectedFilesList.every((f) => (f.folderId ?? null) === targetFolderId)
+    const allFoldersAlreadyInTarget = selectedFoldersList.every((f) => (f.parentId ?? null) === targetFolderId)
+
+    if (allFilesAlreadyInTarget && allFoldersAlreadyInTarget) {
+      return { disabled: true, reason: 'Folder saat ini' }
+    }
+
+    return { disabled: false }
   }
 
   function changeFileViewMode(mode: FileViewMode) {
@@ -538,25 +601,64 @@ export function AllFilesPage() {
 
   async function moveFile(event: FormEvent) {
     event.preventDefault()
-    const selectedIds = [...selectedFileIds]
-    if (selectedIds.length > 0) await apiFetch('/files/batch', { method: 'PATCH', body: JSON.stringify({ fileIds: selectedIds, folderId: selectedFolderId || null }) })
-    else if (activeFile?.id) await apiFetch(`/files/${activeFile.id}`, { method: 'PATCH', body: JSON.stringify({ folderId: selectedFolderId || null }) })
-    else return
-    setMoveOpen(false)
-    setSelectedFolderId('')
-    clearSelection()
-    await loadFiles()
+    const fileIds = [...selectedFileIds]
+    const folderIds = [...selectedFolderIds]
+    const targetFolder = selectedFolderId || null
+
+    const { disabled, reason } = getDisabledTargetFolderReason(targetFolder)
+    if (disabled) {
+      setMessage(`Folder tujuan tidak dapat dipilih (${reason}).`)
+      return
+    }
+
+    setLoading(true)
+    try {
+      if (fileIds.length > 0) {
+        await apiFetch('/files/batch', { method: 'PATCH', body: JSON.stringify({ fileIds, folderId: targetFolder }) })
+      }
+      if (folderIds.length > 0) {
+        await apiFetch('/folders/batch', { method: 'PATCH', body: JSON.stringify({ folderIds, parentId: targetFolder }) })
+      }
+      if (fileIds.length === 0 && folderIds.length === 0 && activeFile?.id) {
+        await apiFetch(`/files/${activeFile.id}`, { method: 'PATCH', body: JSON.stringify({ folderId: targetFolder }) })
+      }
+      setMoveOpen(false)
+      setSelectedFolderId('')
+      clearSelection()
+      await loadAll()
+      setMessage(`Berhasil memindahkan ${fileIds.length + folderIds.length || 1} item.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Gagal memindahkan item')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function deleteFile() {
-    const selectedIds = [...selectedFileIds]
-    if (selectedIds.length > 0) await apiFetch('/files/batch', { method: 'DELETE', body: JSON.stringify({ fileIds: selectedIds }) })
-    else if (activeFile?.id) await apiFetch(`/files/${activeFile.id}`, { method: 'DELETE' })
-    else return
-    setDeleteOpen(false)
-    clearSelection()
-    await loadFiles()
-    window.dispatchEvent(new Event('9drive:storage-changed'))
+    const fileIds = [...selectedFileIds]
+    const folderIds = [...selectedFolderIds]
+
+    setLoading(true)
+    try {
+      if (fileIds.length > 0) {
+        await apiFetch('/files/batch', { method: 'DELETE', body: JSON.stringify({ fileIds }) })
+      }
+      if (folderIds.length > 0) {
+        await apiFetch('/folders/batch', { method: 'DELETE', body: JSON.stringify({ folderIds }) })
+      }
+      if (fileIds.length === 0 && folderIds.length === 0 && activeFile?.id) {
+        await apiFetch(`/files/${activeFile.id}`, { method: 'DELETE' })
+      }
+      setDeleteOpen(false)
+      clearSelection()
+      await loadAll()
+      window.dispatchEvent(new Event('9drive:storage-changed'))
+      setMessage(`Berhasil menghapus ${fileIds.length + folderIds.length || 1} item.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Gagal menghapus item')
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function shareFile() {
@@ -732,6 +834,7 @@ export function AllFilesPage() {
   }, [syncingDrive, folderSizeScale])
 
 
+  const totalSelectedCount = selectedFileIds.size + selectedFolderIds.size
   const recentFolders = folders.slice(0, 4)
   const moreFolders = folders.slice(4)
   const activeFolder = allFolders.find((folder) => folder.id === activeFolderId)
@@ -789,17 +892,43 @@ export function AllFilesPage() {
           </div>
         </div>
         {message ? <p className="mt-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">{message}</p> : null}
-        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No folders yet. Click New Folder to organize uploads.</p>)}
+        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} selectedFolderIds={selectedFolderIds} onToggleFolder={toggleFolderSelection} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No folders yet. Click New Folder to organize uploads.</p>)}
         {!activeFolder && moreFolders.length > 0 ? <>
           <h2 className="mt-4 font-extrabold text-slate-700">More Folders</h2>
-          <FolderGrid items={moreFolders} sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
+          <FolderGrid items={moreFolders} sizeScale={folderSizeScale} selectedFolderIds={selectedFolderIds} onToggleFolder={toggleFolderSelection} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
         </> : null}
         {activeFolder && folders.length > 0 ? <>
           <h2 className="mt-4 font-extrabold text-slate-700">Folders</h2>
-          <FolderGrid items={folders} sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
+          <FolderGrid items={folders} sizeScale={folderSizeScale} selectedFolderIds={selectedFolderIds} onToggleFolder={toggleFolderSelection} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
         </> : null}
         <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3"><Button variant="soft" className="hidden sm:inline-flex"><Archive className="h-4 w-4" />Recents</Button><Button variant="soft" className="hidden sm:inline-flex"><Star className="h-4 w-4" />Starred</Button>{selectedFileIds.size > 0 ? <div className="flex w-full flex-col gap-3 rounded-2xl border border-orange-500/20 bg-orange-500/10 p-3 sm:w-auto sm:flex-row sm:items-center sm:border-0 sm:bg-transparent sm:p-0"><span className="text-sm font-extrabold text-slate-700">{selectedFileIds.size} selected</span><div className="grid grid-cols-4 gap-2 sm:flex sm:gap-3"><Button className="w-full" variant="outline" onClick={downloadBatchAsZip}><Download className="h-4 w-4" />ZIP</Button><Button className="w-full" variant="outline" onClick={() => setMoveOpen(true)}><FolderInput className="h-4 w-4" />Move</Button><Button className="w-full" variant="danger" onClick={() => setDeleteOpen(true)}><Trash2 className="h-4 w-4" />Delete</Button><Button className="w-full" variant="ghost" onClick={clearSelection}>Clear</Button></div></div> : null}</div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button variant="soft" className="hidden sm:inline-flex"><Archive className="h-4 w-4" />Recents</Button>
+            <Button variant="soft" className="hidden sm:inline-flex"><Star className="h-4 w-4" />Starred</Button>
+            {totalSelectedCount > 0 ? (
+              <div className="flex w-full flex-col gap-3 rounded-2xl border border-orange-500/20 bg-orange-500/10 p-3 sm:w-auto sm:flex-row sm:items-center sm:border-0 sm:bg-transparent sm:p-0">
+                <span className="text-sm font-extrabold text-slate-700 dark:text-slate-200">
+                  {totalSelectedCount} item terpilih ({selectedFileIds.size > 0 ? `${selectedFileIds.size} file` : ''}{selectedFileIds.size > 0 && selectedFolderIds.size > 0 ? ', ' : ''}{selectedFolderIds.size > 0 ? `${selectedFolderIds.size} folder` : ''})
+                </span>
+                <div className="grid grid-cols-4 gap-2 sm:flex sm:gap-3">
+                  {selectedFileIds.size > 0 ? (
+                    <Button className="w-full" variant="outline" onClick={downloadBatchAsZip}>
+                      <Download className="h-4 w-4" />ZIP
+                    </Button>
+                  ) : null}
+                  <Button className="w-full" variant="outline" onClick={() => setMoveOpen(true)}>
+                    <FolderInput className="h-4 w-4" />Move
+                  </Button>
+                  <Button className="w-full" variant="danger" onClick={() => setDeleteOpen(true)}>
+                    <Trash2 className="h-4 w-4" />Delete
+                  </Button>
+                  <Button className="w-full" variant="ghost" onClick={clearSelection}>
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+          </div>
           <div className="flex gap-3"><Button variant={fileViewMode === 'grid' ? 'soft' : 'outline'} size="icon" aria-label="Show files as grid" aria-pressed={fileViewMode === 'grid'} onClick={() => changeFileViewMode('grid')}><LayoutGrid className="h-5 w-5" /></Button><Button variant={fileViewMode === 'list' ? 'soft' : 'outline'} size="icon" aria-label="Show files as list" aria-pressed={fileViewMode === 'list'} onClick={() => changeFileViewMode('list')}><List className="h-5 w-5" /></Button></div>
         </div>
         {cutFolder ? <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-700"><ClipboardPaste className="mr-2 inline h-4 w-4" />Cut folder: {cutFolder.name}. Press Ctrl+V or right-click empty area to paste here.</p> : null}
@@ -858,8 +987,137 @@ export function AllFilesPage() {
         </form>
       </DummyModal>
       <DummyModal open={renameOpen} title="Rename File" description={activeFile?.name ?? ''} onClose={() => setRenameOpen(false)}><form onSubmit={renameFile} className="grid gap-4"><Input value={renameValue} onChange={(event) => setRenameValue(event.target.value)} required /><div className="flex justify-end gap-3"><Button type="button" variant="outline" onClick={() => setRenameOpen(false)}>Cancel</Button><Button>Rename</Button></div></form></DummyModal>
-      <DummyModal open={moveOpen} title="Move to Folder" description={selectedFileIds.size > 0 ? `Move ${selectedFileIds.size} files` : activeFile?.name ?? ''} onClose={() => setMoveOpen(false)}><form onSubmit={moveFile} className="grid gap-4"><select className="h-11 rounded-xl border border-slate-200 px-3 text-sm" value={selectedFolderId} onChange={(event) => setSelectedFolderId(event.target.value)}><option value="">No folder</option>{allFolders.map((folder) => <option key={folder.id} value={folder.id}>{folder.name}</option>)}</select><div className="flex justify-end gap-3"><Button type="button" variant="outline" onClick={() => setMoveOpen(false)}>Cancel</Button><Button>Move</Button></div></form></DummyModal>
-      <DummyModal open={deleteOpen} title={selectedFileIds.size > 0 ? 'Delete Files' : 'Delete File'} description={selectedFileIds.size > 0 ? `Delete ${selectedFileIds.size} files from Google Drive?` : `Delete ${activeFile?.name ?? 'file'} from Google Drive?`} onClose={() => setDeleteOpen(false)}><div className="flex justify-end gap-3"><Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancel</Button><Button variant="danger" onClick={deleteFile}>Delete</Button></div></DummyModal>      <DummyModal
+      <DummyModal
+        open={moveOpen}
+        title="Pindahkan ke Folder"
+        description={
+          totalSelectedCount > 0
+            ? `Pindahkan ${totalSelectedCount} item terpilih (${selectedFileIds.size} file, ${selectedFolderIds.size} folder)`
+            : activeFile?.name ?? ''
+        }
+        onClose={() => setMoveOpen(false)}
+      >
+        <form onSubmit={moveFile} className="grid gap-4">
+          <div className="grid gap-2">
+            <label className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Pilih Folder Tujuan:
+            </label>
+            <div className="max-h-64 overflow-y-auto grid gap-2 rounded-2xl border border-slate-200 bg-slate-50/50 p-2.5 dark:border-slate-800 dark:bg-slate-950/50">
+              {/* Option 1: Root / All Files */}
+              {(() => {
+                const rootCheck = getDisabledTargetFolderReason(null)
+                const isSelected = selectedFolderId === ''
+                return (
+                  <div
+                    key="root"
+                    onClick={() => {
+                      if (!rootCheck.disabled) setSelectedFolderId('')
+                    }}
+                    className={cn(
+                      'flex items-center justify-between rounded-xl p-3 text-sm transition-all border select-none',
+                      rootCheck.disabled
+                        ? 'opacity-50 grayscale bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed border-dashed border-slate-300 dark:border-slate-700'
+                        : isSelected
+                          ? 'bg-blue-50/90 border-blue-500 text-blue-900 font-bold dark:bg-blue-950/50 dark:border-blue-500 dark:text-blue-200 shadow-sm cursor-pointer'
+                          : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:border-blue-300 cursor-pointer'
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <input
+                        type="radio"
+                        name="targetFolderRadio"
+                        checked={isSelected}
+                        disabled={rootCheck.disabled}
+                        onChange={() => {
+                          if (!rootCheck.disabled) setSelectedFolderId('')
+                        }}
+                        className="accent-blue-600 h-4 w-4 shrink-0"
+                      />
+                      <FolderInput className="h-4 w-4 text-blue-600 shrink-0" />
+                      <span className="truncate font-semibold">All Files (Root)</span>
+                    </div>
+                    {rootCheck.disabled && (
+                      <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                        {rootCheck.reason}
+                      </span>
+                    )}
+                  </div>
+                )
+              })()}
+
+              {/* Option 2+: All user folders */}
+              {allFolders.map((folder) => {
+                const targetId = folder.id || ''
+                const folderCheck = getDisabledTargetFolderReason(folder.id || null)
+                const isSelected = selectedFolderId === targetId
+                return (
+                  <div
+                    key={folder.id || folder.name}
+                    onClick={() => {
+                      if (!folderCheck.disabled) setSelectedFolderId(targetId)
+                    }}
+                    className={cn(
+                      'flex items-center justify-between rounded-xl p-3 text-sm transition-all border select-none',
+                      folderCheck.disabled
+                        ? 'opacity-50 grayscale bg-slate-100 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed border-dashed border-slate-300 dark:border-slate-700'
+                        : isSelected
+                          ? 'bg-blue-50/90 border-blue-500 text-blue-900 font-bold dark:bg-blue-950/50 dark:border-blue-500 dark:text-blue-200 shadow-sm cursor-pointer'
+                          : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 text-slate-800 dark:text-slate-200 hover:border-blue-300 cursor-pointer'
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <input
+                        type="radio"
+                        name="targetFolderRadio"
+                        checked={isSelected}
+                        disabled={folderCheck.disabled}
+                        onChange={() => {
+                          if (!folderCheck.disabled) setSelectedFolderId(targetId)
+                        }}
+                        className="accent-blue-600 h-4 w-4 shrink-0"
+                      />
+                      <FolderVisual folder={folder} className="h-4 w-4 shrink-0" />
+                      <span className="truncate font-semibold">{folder.name}</span>
+                    </div>
+                    {folderCheck.disabled && (
+                      <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-500 dark:bg-slate-700 dark:text-slate-400">
+                        {folderCheck.reason}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-2">
+            <Button type="button" variant="outline" onClick={() => setMoveOpen(false)}>
+              Batal
+            </Button>
+            <Button disabled={loading || getDisabledTargetFolderReason(selectedFolderId || null).disabled}>
+              {loading ? 'Memindahkan...' : 'Pindahkan'}
+            </Button>
+          </div>
+        </form>
+      </DummyModal>
+      <DummyModal
+        open={deleteOpen}
+        title={totalSelectedCount > 0 ? 'Hapus Item Terpilih' : 'Hapus File'}
+        description={
+          totalSelectedCount > 0
+            ? `Hapus ${totalSelectedCount} item (${selectedFileIds.size} file, ${selectedFolderIds.size} folder) dari 9Drive?`
+            : `Hapus ${activeFile?.name ?? 'file'} dari 9Drive?`
+        }
+        onClose={() => setDeleteOpen(false)}
+      >
+        <div className="flex justify-end gap-3 pt-2">
+          <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+            Batal
+          </Button>
+          <Button variant="danger" disabled={loading} onClick={deleteFile}>
+            {loading ? 'Menghapus...' : 'Hapus'}
+          </Button>
+        </div>
+      </DummyModal>      <DummyModal
         open={shareOpen}
         title="Share File Link"
         description=""

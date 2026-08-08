@@ -169,6 +169,140 @@ folderRouter.post('/', async (req: AuthRequest, res, next) => {
   }
 })
 
+const batchFolderSchema = z.object({
+  folderIds: z.array(z.string().min(1)).min(1).max(100),
+})
+
+folderRouter.patch('/batch', async (req: AuthRequest, res, next) => {
+  try {
+    const body = batchFolderSchema.extend({ parentId: z.string().nullable().optional() }).parse(req.body)
+    const targetParentId = body.parentId ?? null
+
+    if (targetParentId) {
+      await prisma.folder.findFirstOrThrow({ where: { id: targetParentId, userId: req.user!.id, deletedAt: null } })
+      if (body.folderIds.includes(targetParentId)) {
+        return res.status(400).json({ code: 'FOLDER_INVALID_PARENT', message: 'Folder cannot be moved into itself.' })
+      }
+      const allFolders = await prisma.folder.findMany({ where: { userId: req.user!.id, deletedAt: null }, select: { id: true, parentId: true } })
+      const invalidIds = new Set<string>(body.folderIds)
+      let changed = true
+      while (changed) {
+        changed = false
+        for (const folder of allFolders) {
+          if (folder.parentId && invalidIds.has(folder.parentId) && !invalidIds.has(folder.id)) {
+            invalidIds.add(folder.id)
+            changed = true
+          }
+        }
+      }
+      if (invalidIds.has(targetParentId)) {
+        return res.status(400).json({ code: 'FOLDER_INVALID_PARENT', message: 'Folder cannot be moved into itself or a child folder.' })
+      }
+    }
+
+    const targetFolders = await prisma.folder.findMany({
+      where: { id: { in: body.folderIds }, userId: req.user!.id, deletedAt: null },
+      include: { connectedAccount: true }
+    })
+
+    for (const folderRecord of targetFolders) {
+      if (folderRecord.providerFolderId && folderRecord.connectedAccount) {
+        try {
+          const auth = await getAuthedGoogleClient(folderRecord.connectedAccount)
+          const drive = google.drive({ version: 'v3', auth })
+          let newGoogleParentId = await ensureGoogleAppFolder(folderRecord.connectedAccount)
+          if (targetParentId) {
+            const newParent = await prisma.folder.findFirst({ where: { id: targetParentId, userId: req.user!.id } })
+            if (newParent?.providerFolderId) {
+              newGoogleParentId = newParent.providerFolderId
+            }
+          }
+          const fileInfo = await drive.files.get({ fileId: folderRecord.providerFolderId, fields: 'parents' })
+          const previousParents = fileInfo.data.parents?.join(',')
+          await drive.files.update({
+            fileId: folderRecord.providerFolderId,
+            addParents: newGoogleParentId,
+            removeParents: previousParents,
+            fields: 'id, parents'
+          })
+        } catch (error) {
+          console.error(`Failed to move folder ${folderRecord.id} on Google Drive:`, error)
+        }
+      }
+    }
+
+    const result = await prisma.folder.updateMany({
+      where: { id: { in: body.folderIds }, userId: req.user!.id, deletedAt: null },
+      data: { parentId: targetParentId }
+    })
+
+    await createAuditLog(req.user!.id, 'MOVE_FOLDERS', 'folder', undefined, { count: result.count, parentId: targetParentId })
+    return res.json({ status: 'ok', moved: result.count })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+folderRouter.delete('/batch', async (req: AuthRequest, res, next) => {
+  try {
+    const body = batchFolderSchema.parse(req.body)
+    const allFolders = await prisma.folder.findMany({ where: { userId: req.user!.id, deletedAt: null }, select: { id: true, parentId: true } })
+    const allFolderIdsToDelete = new Set<string>(body.folderIds)
+    let changed = true
+    while (changed) {
+      changed = false
+      for (const folder of allFolders) {
+        if (folder.parentId && allFolderIdsToDelete.has(folder.parentId) && !allFolderIdsToDelete.has(folder.id)) {
+          allFolderIdsToDelete.add(folder.id)
+          changed = true
+        }
+      }
+    }
+
+    const files = await prisma.file.findMany({
+      where: { userId: req.user!.id, status: 'active', folderId: { in: [...allFolderIdsToDelete] } },
+      include: { connectedAccount: true }
+    })
+    const syncedAccountIds = new Set<string>()
+    for (const file of files) {
+      try {
+        const auth = await getAuthedGoogleClient(file.connectedAccount)
+        const drive = google.drive({ version: 'v3', auth })
+        await drive.files.delete({ fileId: file.providerFileId })
+        syncedAccountIds.add(file.connectedAccountId)
+      } catch {
+        // continue
+      }
+    }
+
+    const foldersToDelete = await prisma.folder.findMany({
+      where: { id: { in: [...allFolderIdsToDelete] }, userId: req.user!.id },
+      include: { connectedAccount: true }
+    })
+    for (const f of foldersToDelete) {
+      if (f.providerFolderId && f.connectedAccount) {
+        try {
+          const auth = await getAuthedGoogleClient(f.connectedAccount)
+          const drive = google.drive({ version: 'v3', auth })
+          await drive.files.delete({ fileId: f.providerFolderId })
+          if (f.connectedAccountId) syncedAccountIds.add(f.connectedAccountId)
+        } catch {
+          // continue
+        }
+      }
+    }
+
+    await prisma.file.updateMany({ where: { id: { in: files.map((file) => file.id) } }, data: { status: 'deleted', deletedAt: new Date() } })
+    const result = await prisma.folder.updateMany({ where: { id: { in: [...allFolderIdsToDelete] }, userId: req.user!.id }, data: { deletedAt: new Date() } })
+    for (const accountId of syncedAccountIds) await syncGoogleQuota(accountId).catch(() => undefined)
+
+    await createAuditLog(req.user!.id, 'DELETE_FOLDERS', 'folder', undefined, { count: result.count })
+    return res.json({ status: 'ok', deleted: result.count })
+  } catch (error) {
+    return next(error)
+  }
+})
+
 folderRouter.patch('/:id', async (req: AuthRequest, res, next) => {
   try {
     const body = createSchema.partial().parse(req.body)
