@@ -17,7 +17,8 @@ import {
   Zap,
   Server,
   Menu,
-  X
+  X,
+  Info
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -169,6 +170,7 @@ export function LandingPage() {
           </div>
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <a href="#purpose" className="hover:text-white transition-colors">App Purpose</a>
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#security" className="hover:text-white transition-colors">Security</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
@@ -218,6 +220,7 @@ export function LandingPage() {
               className="md:hidden overflow-hidden border-t border-slate-800/80 bg-[#030712]/98 backdrop-blur-2xl px-6 py-5 space-y-4"
             >
               <div className="flex flex-col space-y-3 text-sm font-semibold text-slate-300">
+                <a href="#purpose" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">App Purpose</a>
                 <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Features</a>
                 <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Security</a>
                 <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">FAQ</a>
@@ -242,7 +245,7 @@ export function LandingPage() {
       </header>
 
       {/* ── Hero Section with 21st.dev Geometric Animated Shapes ─── */}
-      <section className="relative min-h-[85vh] flex items-center justify-center pt-12 sm:pt-20 pb-16 overflow-hidden">
+      <section className="relative min-h-[80vh] flex items-center justify-center pt-12 sm:pt-16 pb-14 overflow-hidden">
         {/* Ambient Glow Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 via-transparent to-purple-600/10 blur-3xl pointer-events-none" />
 
@@ -283,7 +286,7 @@ export function LandingPage() {
           >
             <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
             <span className="text-[11px] sm:text-xs font-semibold text-slate-300 tracking-wide leading-tight">
-              Secure Google Drive Cloud Gateway & API Interface
+              drive9 - Secure Google Drive Cloud Gateway & API Interface
             </span>
           </motion.div>
 
@@ -303,9 +306,9 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="mx-auto max-w-2xl text-sm sm:text-lg text-slate-400 font-normal leading-relaxed px-2"
+            className="mx-auto max-w-3xl text-sm sm:text-lg text-slate-300 font-medium leading-relaxed px-2"
           >
-            <strong className="text-slate-200">drive9</strong> adalah platform gateway penyimpanan Google Drive yang memungkinkan pengguna menghubungkan akun Google Drive, mengorganisir folder virtual, memantau kuota penyimpanan, dan mengunggah file secara langsung ke cloud storage.
+            <strong className="text-white font-black">drive9</strong> adalah platform <strong>Google Drive Storage Gateway</strong> yang berfungsi untuk mengunggah file, mengorganisir folder virtual, memantau kuota penyimpanan multi-akun, dan mengintegrasikan API Key pengembang. Seluruh file yang diunggah dialirkan (streamed) secara aman langsung ke folder khusus <code className="text-blue-400 font-mono font-bold">9drive</code> di akun Google Drive pengguna.
           </motion.p>
 
           <motion.div
@@ -371,6 +374,45 @@ export function LandingPage() {
               </p>
             </div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* ── App Purpose & Google Drive API Scope Disclosure (Google Verification Compliant) ── */}
+      <section id="purpose" className="py-12 border-t border-slate-800/80 bg-slate-900/40 relative">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-6">
+          <div className="p-6 sm:p-8 rounded-3xl border border-blue-500/30 bg-slate-900/90 shadow-2xl backdrop-blur-xl space-y-5">
+            <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 shrink-0">
+                <Info className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black text-white">Tujuan Aplikasi drive9 (Application Purpose)</h2>
+                <p className="text-xs text-blue-400 font-medium">Google OAuth Verification & Scope Transparency Disclosure</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                  <span>Untuk Apa drive9 Dibuat? (What is drive9?)</span>
+                </h3>
+                <p className="text-slate-400">
+                  <strong className="text-slate-200">drive9</strong> adalah platform gateway penyimpanan cloud yang dirancang untuk membantu pengguna mengunggah file, mengorganisir folder virtual, memantau sisa kuota penyimpanan dari beberapa akun Google Drive, serta membuat API Key untuk otomatisasi pengunggahan file dari skrip backend.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0" />
+                  <span>Bagaimana drive9 Menggunakan Google Drive API?</span>
+                </h3>
+                <p className="text-slate-400">
+                  Aplikasi <strong className="text-slate-200">drive9</strong> meminta akses scope Google Drive (<code className="text-purple-300 font-mono">https://www.googleapis.com/auth/drive</code>) khusus untuk membuat folder bernama <code className="text-indigo-300 font-mono font-bold">9drive</code> di Google Drive milik Anda dan mengalirkan file unggahan (*direct streaming*) secara otomatis tanpa pernah menyimpan data di disk fisik server kami.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -585,7 +627,8 @@ export function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-semibold">
-            <a href="#faq" className="hover:text-slate-300 transition-colors">FAQ</a>
+            <a href="#purpose" className="hover:text-slate-300 transition-colors">App Purpose</a>
+            <a href="#features" className="hover:text-slate-300 transition-colors">Features</a>
             <RouterLink to="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</RouterLink>
             <RouterLink to="/terms" className="hover:text-slate-300 transition-colors">Terms of Service</RouterLink>
             <RouterLink to="/login" className="hover:text-slate-300 transition-colors">Dashboard Login</RouterLink>
