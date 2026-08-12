@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 export function SitemapPage() {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://googledrivefrontend.ikan212.com'
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://drive9.wn-cdn.net'
   const today = new Date().toISOString().split('T')[0]
 
   const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>

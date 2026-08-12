@@ -2,7 +2,7 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-ARG VITE_API_URL=https://googledrivebackend.ikan212.com
+ARG VITE_API_URL=https://drive9-backend.wn-cdn.net
 ARG VITE_RECAPTCHA_SITE_KEY=
 ARG VITE_CDN_SUBDOMAINS=
 ENV VITE_API_URL=$VITE_API_URL

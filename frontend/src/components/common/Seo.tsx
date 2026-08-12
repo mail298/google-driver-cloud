@@ -36,7 +36,7 @@ export function Seo({
     metaKey.setAttribute('content', keywords)
 
     // 4. Update Canonical Link
-    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://googledrivefrontend.ikan212.com'
+    const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://drive9.wn-cdn.net'
     const currentPath = typeof window !== 'undefined' ? window.location.pathname : '/'
     const targetUrl = canonicalUrl || `${currentOrigin}${currentPath}`
 

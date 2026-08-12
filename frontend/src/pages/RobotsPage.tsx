@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 export function RobotsPage() {
-  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://googledrivefrontend.ikan212.com'
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://drive9.wn-cdn.net'
 
   const content = `User-agent: *
 Allow: /
