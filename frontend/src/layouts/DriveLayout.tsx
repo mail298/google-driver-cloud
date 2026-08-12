@@ -537,28 +537,28 @@ export function DriveLayout() {
         </div>
         <section className="min-w-0 flex-1 p-4 sm:p-6 lg:h-screen lg:overflow-y-auto lg:p-8">
           <header className="flex w-full min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center justify-between gap-3 lg:hidden">
-              <div className="flex min-w-0 items-center gap-3">
-                <Button variant="outline" size="icon" aria-label="Open sidebar" onClick={() => setSidebarOpen(true)}>
+            <div className="flex items-center justify-between gap-2 lg:hidden">
+              <div className="flex items-center gap-2 min-w-0">
+                <Button variant="outline" size="icon" aria-label="Open sidebar" onClick={() => setSidebarOpen(true)} className="shrink-0 h-9 w-9">
                   <Menu className="h-5 w-5" />
                 </Button>
-                <div className="flex min-w-0 items-center gap-2">
-                  <BrandLogo className="h-9 w-9 shrink-0" />
-                  <span className="truncate text-xl font-extrabold tracking-tight">9Drive</span>
+                <div className="flex items-center gap-2 shrink-0">
+                  <BrandLogo className="h-8 w-8 shrink-0" />
+                  <span className="text-lg font-extrabold tracking-tight shrink-0 whitespace-nowrap">9Drive</span>
                 </div>
               </div>
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <LanguageSwitcher />
-                <Button variant="outline" size="icon" title={t('nav_user_guide')} aria-label={t('nav_user_guide')} onClick={() => setOnboardingOpen(true)}>
-                  <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <Button variant="outline" size="icon" className="hidden sm:inline-flex h-9 w-9" title={t('nav_user_guide')} aria-label={t('nav_user_guide')} onClick={() => setOnboardingOpen(true)}>
+                  <HelpCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </Button>
-                <Button variant="outline" size="icon" aria-label="Toggle theme" onClick={toggleTheme}>
-                  {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                <Button variant="outline" size="icon" className="h-9 w-9" aria-label="Toggle theme" onClick={toggleTheme}>
+                  {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
                 </Button>
                 <div className="relative shrink-0">
-                  <Button variant="outline" size="icon" className="relative" aria-label="System info" aria-expanded={infoOpen} onClick={() => setInfoOpen(!infoOpen)}>
-                    <Bell className="h-5 w-5" />
-                    {!infoOpen ? <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-600" /> : null}
+                  <Button variant="outline" size="icon" className="relative h-9 w-9" aria-label="System info" aria-expanded={infoOpen} onClick={() => setInfoOpen(!infoOpen)}>
+                    <Bell className="h-4 w-4" />
+                    {!infoOpen ? <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-blue-600" /> : null}
                   </Button>
                   {infoOpen ? <SystemInfoDropdown storage={storage} /> : null}
                 </div>

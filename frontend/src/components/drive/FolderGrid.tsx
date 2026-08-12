@@ -14,28 +14,28 @@ const scaleConfig: Record<FolderSizeScale, {
   cardPadding: string
 }> = {
   xs: {
-    grid: 'grid-cols-3 sm:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3',
-    innerHeight: 'h-16 sm:h-20',
-    innerIconSize: 'h-8 w-8 sm:h-10 sm:w-10',
-    cardPadding: 'p-2 sm:p-3',
+    grid: 'grid-cols-2 sm:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-3',
+    innerHeight: 'h-12 sm:h-20',
+    innerIconSize: 'h-6 w-6 sm:h-10 sm:w-10',
+    cardPadding: 'p-2.5 sm:p-3',
   },
   sm: {
     grid: 'grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-4',
-    innerHeight: 'h-20 sm:h-28',
-    innerIconSize: 'h-10 w-10 sm:h-14 sm:w-14',
+    innerHeight: 'h-16 sm:h-28',
+    innerIconSize: 'h-8 w-8 sm:h-14 sm:w-14',
     cardPadding: 'p-2.5 sm:p-3.5',
   },
   md: {
     grid: 'grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5',
-    innerHeight: 'h-28 sm:h-44',
-    innerIconSize: 'h-14 w-14 sm:h-24 sm:w-24',
+    innerHeight: 'h-24 sm:h-44',
+    innerIconSize: 'h-12 w-12 sm:h-24 sm:w-24',
     cardPadding: 'p-3 sm:p-5',
   },
   lg: {
     grid: 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6',
-    innerHeight: 'h-36 sm:h-56',
-    innerIconSize: 'h-20 w-20 sm:h-32 sm:w-32',
-    cardPadding: 'p-4 sm:p-6',
+    innerHeight: 'h-32 sm:h-56',
+    innerIconSize: 'h-16 w-16 sm:h-32 sm:w-32',
+    cardPadding: 'p-3.5 sm:p-6',
   },
 }
 

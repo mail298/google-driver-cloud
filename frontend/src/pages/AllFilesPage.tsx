@@ -910,13 +910,35 @@ export function AllFilesPage() {
       >
         <PageHeader title={activeFolder ? <span className="block min-w-0 truncate"><button className="text-blue-600 hover:underline" onClick={closeFolder}>All Files</button>{folderBreadcrumbs.map((folder, index) => <span key={folder.id}><span className="text-slate-400"> / </span>{index === folderBreadcrumbs.length - 1 ? <span>{folder.name}</span> : <button className="text-blue-600 hover:underline" onClick={() => folder.id && openFolderById(folder.id)}>{folder.name}</button>}</span>)}</span> : 'All Files'} />
         {/* Action buttons row — visible on mobile/tablet, hidden on desktop (desktop uses header slot) */}
-        <div className="mt-4 flex flex-wrap items-center gap-2 lg:hidden">
-          <Button size="sm" onClick={() => setUploadOpen(true)}><Upload className="h-3.5 w-3.5" />Upload</Button>
-          <Button size="sm" variant="outline" onClick={() => setFolderOpen(true)}><FolderPlus className="h-3.5 w-3.5" />New Folder</Button>
-          <Button size="sm" variant="outline" disabled={syncingDrive} onClick={syncGoogleDrive}><RefreshCw className={syncingDrive ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />{syncingDrive ? 'Syncing...' : 'Sync'}</Button>
-          <div className="flex items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-50 p-0.5 dark:border-slate-800 dark:bg-slate-800/80">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 lg:hidden">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <Button size="sm" onClick={() => setUploadOpen(true)} className="h-9 px-3 text-xs font-bold shadow-sm">
+              <Upload className="h-3.5 w-3.5 mr-1" />
+              Upload
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setFolderOpen(true)} className="h-9 px-3 text-xs font-bold">
+              <FolderPlus className="h-3.5 w-3.5 mr-1" />
+              New Folder
+            </Button>
+            <Button size="sm" variant="outline" disabled={syncingDrive} onClick={syncGoogleDrive} className="h-9 px-3 text-xs font-bold">
+              <RefreshCw className={syncingDrive ? 'h-3.5 w-3.5 mr-1 animate-spin' : 'h-3.5 w-3.5 mr-1'} />
+              {syncingDrive ? 'Syncing...' : 'Sync'}
+            </Button>
+          </div>
+          <div className="flex items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-800/80">
             {(['xs', 'sm', 'md', 'lg'] as FolderSizeScale[]).map((s) => (
-              <button key={s} type="button" onClick={() => changeFolderSize(s)} className={['rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wide transition-all border border-transparent', folderSizeScale === s ? sizeActiveClasses[s] : 'text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200'].join(' ')} aria-label={`Folder size ${s}`}>{s}</button>
+              <button
+                key={s}
+                type="button"
+                onClick={() => changeFolderSize(s)}
+                className={[
+                  'rounded-lg px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide transition-all border border-transparent',
+                  folderSizeScale === s ? sizeActiveClasses[s] : 'text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200'
+                ].join(' ')}
+                aria-label={`Folder size ${s}`}
+              >
+                {s}
+              </button>
             ))}
           </div>
         </div>
