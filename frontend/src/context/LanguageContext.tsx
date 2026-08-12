@@ -177,6 +177,10 @@ export const translations: Dictionary = {
   pwd_success: { id: 'Password berhasil diperbarui!', en: 'Password updated successfully!' },
   pwd_hint_current: { id: '💡 Kosongkan jika Anda daftar via Google dan ini pertama kali membuat password.', en: '💡 Leave blank if you signed up via Google and this is your first time setting a password.' },
   pwd_hint_new: { id: '🔒 Gunakan minimal 8 karakter.', en: '🔒 Must be at least 8 characters long.' },
+  pwd_match_success: { id: '✓ Password cocok', en: '✓ Passwords match' },
+  pwd_match_error: { id: '✕ Password tidak cocok', en: '✕ Passwords do not match' },
+  pwd_req_min_met: { id: '✓ Minimal 8 karakter terpenuhi', en: '✓ At least 8 characters met' },
+  pwd_req_min_not_met: { id: '✕ Minimal 8 karakter', en: '✕ At least 8 characters required' },
 }
 
 type LanguageContextType = {

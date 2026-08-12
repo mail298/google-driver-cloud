@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, type FormEvent } from 'react'
-import { Bell, CheckCircle2, Cloud, Database, Eye, EyeOff, Globe, HardDrive, Info, Key, Link2, Lock, RefreshCw, ShieldAlert, ShieldCheck, Trash2 } from 'lucide-react'
+import { AlertCircle, Bell, CheckCircle2, Cloud, Database, Eye, EyeOff, Globe, HardDrive, Info, Key, Link2, Lock, RefreshCw, ShieldAlert, ShieldCheck, Trash2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -533,7 +533,19 @@ export function SettingsPage() {
                     {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t('pwd_hint_new')}</p>
+                {newPassword.length > 0 ? (
+                  newPassword.length >= 8 ? (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle2 className="h-3.5 w-3.5" /> {t('pwd_req_min_met')}
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                      <AlertCircle className="h-3.5 w-3.5" /> {t('pwd_req_min_not_met')} ({newPassword.length}/8)
+                    </p>
+                  )
+                ) : (
+                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t('pwd_hint_new')}</p>
+                )}
               </div>
 
               {/* Confirm New Password Field */}
@@ -561,10 +573,26 @@ export function SettingsPage() {
                     {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {confirmPassword.length > 0 ? (
+                  confirmPassword === newPassword ? (
+                    <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/60">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> {t('pwd_match_success')}
+                    </p>
+                  ) : (
+                    <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 px-2.5 py-1 rounded-lg border border-rose-200 dark:border-rose-800/60">
+                      <XCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" /> {t('pwd_match_error')}
+                    </p>
+                  )
+                ) : null}
               </div>
 
               {/* Submit Button */}
-              <Button type="submit" size="sm" className="w-fit font-bold bg-blue-600 hover:bg-blue-700 text-white mt-1 shadow-sm" disabled={changingPassword}>
+              <Button
+                type="submit"
+                size="sm"
+                className="w-fit font-bold bg-blue-600 hover:bg-blue-700 text-white mt-1 shadow-sm disabled:opacity-50"
+                disabled={changingPassword || newPassword.length < 8 || (confirmPassword.length > 0 && confirmPassword !== newPassword)}
+              >
                 {changingPassword ? (
                   <>
                     <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
