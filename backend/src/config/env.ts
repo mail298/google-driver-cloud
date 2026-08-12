@@ -12,12 +12,12 @@ if (fs.existsSync(path.resolve(process.cwd(), '.env'))) {
 }
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1),
-  APP_PORT: z.coerce.number().default(4000),
-  FRONTEND_URL: z.string().url(),
-  JWT_ACCESS_SECRET: z.string().min(32),
-  TOKEN_ENCRYPTION_KEY: z.string().min(32),
-  ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().default(900),
+  DATABASE_URL: z.string().min(1).default('mysql://root:root@mysql:3306/9drive'),
+  APP_PORT: z.coerce.number().default(80),
+  FRONTEND_URL: z.string().default('https://drive9.wn-cdn.net'),
+  JWT_ACCESS_SECRET: z.string().default('change-this-jwt-secret-at-least-32-chars'),
+  TOKEN_ENCRYPTION_KEY: z.string().default('change-this-encryption-key-32bytes!'),
+  ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().default(3600),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().default(30),
   MAX_UPLOAD_BYTES: z.coerce.number().default(5 * 1024 * 1024 * 1024),
   RECAPTCHA_SECRET_KEY: z.string().optional(),
@@ -28,7 +28,7 @@ const envSchema = z.object({
   HTTP_PROXY: z.string().optional(),
   HTTPS_PROXY: z.string().optional(),
   GLOBAL_PROXY_URL: z.string().optional(),
-  CDN_SUBDOMAINS: z.string().optional(), // comma-separated CDN origins e.g. https://cdn1.ikan212.com,https://cdn2.ikan212.com
+  CDN_SUBDOMAINS: z.string().optional(),
 })
 
 export const env = envSchema.parse(process.env)
