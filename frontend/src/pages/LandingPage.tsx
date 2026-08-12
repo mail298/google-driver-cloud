@@ -23,6 +23,8 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Seo } from '@/components/common/Seo'
+import { LanguageSwitcher } from '@/components/drive/LanguageSwitcher'
+import { useLanguage } from '@/context/LanguageContext'
 
 // Floating 3D Geometric Shape Component inspired by 21st.dev
 function ElegantShape({
@@ -93,7 +95,7 @@ function ElegantShape({
   )
 }
 
-const faqs = [
+const faqsId = [
   {
     q: 'Apa itu drive9?',
     a: 'drive9 adalah platform Google Drive Storage Gateway yang memungkinkan Anda menghubungkan akun Google Drive, mengunggah dan mengelola file dalam folder khusus "9drive", melacak kuota penyimpanan, serta membuat API Key terenkripsi.'
@@ -136,7 +138,52 @@ const faqs = [
   }
 ]
 
+const faqsEn = [
+  {
+    q: 'What is drive9?',
+    a: 'drive9 is a Google Drive Storage Gateway platform that allows you to connect Google Drive accounts, upload and manage files inside a dedicated "9drive" folder, track storage quota across accounts, and generate encrypted API Keys.'
+  },
+  {
+    q: 'Are uploaded files stored on drive9 servers?',
+    a: 'No. drive9 uses a direct file streaming architecture. Every file you upload is streamed straight to the dedicated "9drive" folder in your Google Drive account without ever being stored on drive9 physical server disks.'
+  },
+  {
+    q: 'How does drive9 secure my data and Google account access?',
+    a: 'All your OAuth Access Tokens & Refresh Tokens are stored in the database encrypted with strong AES-256-GCM. drive9 only requests permission to manage files inside its dedicated folder and never touches your private files outside it.'
+  },
+  {
+    q: 'Can I connect more than one Google Drive account?',
+    a: 'Yes! You can connect multiple Google Drive accounts simultaneously. drive9 automatically tracks each account quota and can route new uploads to the account with the most free space.'
+  },
+  {
+    q: 'How do Developer API Keys work?',
+    a: 'From the API Management page, you can generate API Keys with isolated scope permissions such as files:read (read files/folders) and files:upload (upload files). These API Keys can be used in your backend scripts, automation, or external apps.'
+  },
+  {
+    q: 'What is the maximum file size limit for uploads?',
+    a: 'drive9 supports file uploads up to 5 GB per file. We also provide chunked resumable upload support so that your upload process stays resilient even on unstable network connections.'
+  },
+  {
+    q: 'How can I share files with other users?',
+    a: 'You can share files directly via Public Shared Links, generate custom Preview Tokens, or invite other users by email to access specific virtual folders.'
+  },
+  {
+    q: 'Can I revoke Google account access at any time?',
+    a: 'Absolutely. You can disconnect your Google Drive account at any time from the Settings menu in drive9, or revoke drive9 permissions directly from your Google Account Security page.'
+  },
+  {
+    q: 'Does drive9 require a paid subscription fee?',
+    a: 'drive9 is free to use using your own Google Drive storage quota with zero hidden fees.'
+  },
+  {
+    q: 'What happens if one of my Google Drive account storage is full?',
+    a: 'drive9 intelligent Upload Routing Policy automatically detects full quotas and routes subsequent file uploads to another connected Google Drive account with available free space.'
+  }
+]
+
 export function LandingPage() {
+  const { lang } = useLanguage()
+  const faqs = lang === 'id' ? faqsId : faqsEn
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -146,9 +193,9 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
-      <Seo title="drive9 - Google Drive Storage Gateway & Virtual Cloud Management" />
+      <Seo title={lang === 'id' ? 'drive9 - Google Drive Storage Gateway & Virtual Cloud Management' : 'drive9 - Google Drive Storage Gateway & Cloud Management'} />
 
-      {/* ── Navigation Bar (Fully Mobile Optimized) ───────────────── */}
+      {/* ── Navigation Bar (Fully Mobile & Bilingual Optimized) ───────────────── */}
       <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3">
           <div className="flex items-center gap-2.5">
@@ -169,33 +216,35 @@ export function LandingPage() {
             </div>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-xs font-bold uppercase tracking-wider text-slate-400">
-            <a href="#purpose" className="hover:text-white transition-colors">App Purpose</a>
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#security" className="hover:text-white transition-colors">Security</a>
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-bold uppercase tracking-wider text-slate-400">
+            <a href="#purpose" className="hover:text-white transition-colors">{lang === 'id' ? 'Tujuan Aplikasi' : 'App Purpose'}</a>
+            <a href="#features" className="hover:text-white transition-colors">{lang === 'id' ? 'Fitur' : 'Features'}</a>
+            <a href="#security" className="hover:text-white transition-colors">{lang === 'id' ? 'Keamanan' : 'Security'}</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            <RouterLink to="/privacy" className="hover:text-white transition-colors">Privacy Policy</RouterLink>
-            <RouterLink to="/terms" className="hover:text-white transition-colors">Terms of Service</RouterLink>
+            <RouterLink to="/privacy" className="hover:text-white transition-colors">{lang === 'id' ? 'Privasi' : 'Privacy'}</RouterLink>
+            <RouterLink to="/terms" className="hover:text-white transition-colors">{lang === 'id' ? 'Syarat & Ketentuan' : 'Terms'}</RouterLink>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
             <RouterLink to="/login">
               <Button variant="outline" className="h-9 px-4 text-xs font-bold border border-slate-700/80 bg-slate-900/90 text-white hover:bg-slate-800 hover:text-white transition-all rounded-xl shadow-sm">
-                Sign In
+                {lang === 'id' ? 'Masuk' : 'Sign In'}
               </Button>
             </RouterLink>
             <RouterLink to="/register">
               <Button className="h-9 px-4 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 transition-all rounded-xl">
-                Get Started
+                {lang === 'id' ? 'Mulai Gratis' : 'Get Started'}
               </Button>
             </RouterLink>
           </div>
 
           {/* Mobile Actions & Menu Toggle */}
           <div className="flex md:hidden items-center gap-2">
+            <LanguageSwitcher />
             <RouterLink to="/login">
               <Button size="sm" className="h-8 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg">
-                Sign In
+                {lang === 'id' ? 'Masuk' : 'Sign In'}
               </Button>
             </RouterLink>
             <button
@@ -220,22 +269,22 @@ export function LandingPage() {
               className="md:hidden overflow-hidden border-t border-slate-800/80 bg-[#030712]/98 backdrop-blur-2xl px-6 py-5 space-y-4"
             >
               <div className="flex flex-col space-y-3 text-sm font-semibold text-slate-300">
-                <a href="#purpose" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">App Purpose</a>
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Features</a>
-                <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Security</a>
+                <a href="#purpose" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Tujuan Aplikasi' : 'App Purpose'}</a>
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Fitur & Keunggulan' : 'Features'}</a>
+                <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Keamanan Data' : 'Security'}</a>
                 <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">FAQ</a>
-                <RouterLink to="/privacy" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Privacy Policy</RouterLink>
-                <RouterLink to="/terms" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">Terms of Service</RouterLink>
+                <RouterLink to="/privacy" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'}</RouterLink>
+                <RouterLink to="/terms" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Ketentuan Layanan' : 'Terms of Service'}</RouterLink>
               </div>
               <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
                 <RouterLink to="/login" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full h-10 text-xs font-bold border border-slate-700 bg-slate-900 text-white rounded-xl">
-                    Sign In with Google
+                    {lang === 'id' ? 'Masuk dengan Google' : 'Sign In with Google'}
                   </Button>
                 </RouterLink>
                 <RouterLink to="/register" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full h-10 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl">
-                    Get Started Free
+                    {lang === 'id' ? 'Daftar Gratis' : 'Get Started Free'}
                   </Button>
                 </RouterLink>
               </div>
@@ -286,7 +335,7 @@ export function LandingPage() {
           >
             <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
             <span className="text-[11px] sm:text-xs font-semibold text-slate-300 tracking-wide leading-tight">
-              drive9 - Secure Google Drive Cloud Gateway & API Interface
+              {lang === 'id' ? 'drive9 - Gateway Google Drive & Antarmuka API Cloud Aman' : 'drive9 - Secure Google Drive Cloud Gateway & API Interface'}
             </span>
           </motion.div>
 
@@ -296,7 +345,7 @@ export function LandingPage() {
             transition={{ duration: 0.8, delay: 0.35 }}
             className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight text-white leading-[1.12]"
           >
-            Unified Cloud Storage via{' '}
+            {lang === 'id' ? 'Penyimpanan Cloud Terpadu via ' : 'Unified Cloud Storage via '}
             <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
               drive9
             </span>
@@ -308,8 +357,18 @@ export function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mx-auto max-w-3xl text-sm sm:text-lg text-slate-300 font-medium leading-relaxed px-2"
           >
-            <strong className="text-white font-black text-base sm:text-xl">drive9 Application Purpose & Overview:</strong><br />
-            <span className="text-slate-200">drive9 is a secure <strong>Google Drive Storage Gateway & Virtual Cloud Storage Manager</strong> application. It allows users to register an account, securely connect their Google Drive accounts via OAuth 2.0, organize files in virtual folders, monitor storage quota across multiple connected accounts, stream file uploads directly to a dedicated <code className="text-blue-400 font-mono font-bold">9drive</code> Google Drive folder, and manage encrypted API keys for cloud automation.</span>
+            <strong className="text-white font-black text-base sm:text-xl">
+              {lang === 'id' ? 'Ringkasan & Tujuan Aplikasi drive9:' : 'drive9 Application Purpose & Overview:'}
+            </strong><br />
+            <span className="text-slate-200">
+              {lang === 'id'
+                ? 'drive9 adalah platform Google Drive Storage Gateway & Manajer Penyimpanan Cloud Virtual yang aman. Mengizinkan pengguna menghubungkan akun Google Drive via OAuth 2.0, mengorganisir file dalam folder virtual, memantau kuota multi-akun, menstreaming unggahan file langsung ke folder '
+                : 'drive9 is a secure Google Drive Storage Gateway & Virtual Cloud Storage Manager application. It allows users to register an account, securely connect their Google Drive accounts via OAuth 2.0, organize files in virtual folders, monitor storage quota across multiple connected accounts, stream file uploads directly to a dedicated '}
+              <code className="text-blue-400 font-mono font-bold">9drive</code>
+              {lang === 'id'
+                ? ' di Google Drive, dan mengelola API Key terenkripsi untuk otomatisasi.'
+                : ' Google Drive folder, and manage encrypted API keys for cloud automation.'}
+            </span>
           </motion.p>
 
           <motion.div
@@ -320,13 +379,13 @@ export function LandingPage() {
           >
             <RouterLink to="/login" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto h-12 px-7 text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/25 transition-all rounded-xl flex items-center justify-center gap-2 ring-1 ring-white/20">
-                <span>Sign In with Google</span>
+                <span>{lang === 'id' ? 'Masuk dengan Google' : 'Sign In with Google'}</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </RouterLink>
             <RouterLink to="/register" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full sm:w-auto h-12 px-7 text-sm font-extrabold border border-slate-700 bg-slate-900/90 text-white hover:bg-slate-800 transition-all rounded-xl">
-                Create Free Account
+                {lang === 'id' ? 'Buat Akun Gratis' : 'Create Free Account'}
               </Button>
             </RouterLink>
           </motion.div>
@@ -344,7 +403,9 @@ export function LandingPage() {
                 <span>Zero Disk Storage</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                File dialirkan langsung ke folder khusus <code className="text-indigo-300 font-mono">9drive</code> di Google Drive Anda.
+                {lang === 'id' ? 'File dialirkan langsung ke folder khusus ' : 'Files stream directly to dedicated '}
+                <code className="text-indigo-300 font-mono">9drive</code>
+                {lang === 'id' ? ' di Google Drive Anda.' : ' folder in your Google Drive.'}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-emerald-500/40 transition-colors">
@@ -353,7 +414,7 @@ export function LandingPage() {
                 <span>AES-256 Encryption</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                OAuth token Anda disimpan terenkripsi kuat menggunakan AES-256-GCM.
+                {lang === 'id' ? 'OAuth token Anda disimpan terenkripsi kuat menggunakan AES-256-GCM.' : 'Your OAuth tokens are stored strongly encrypted using AES-256-GCM.'}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-purple-500/40 transition-colors">
@@ -362,7 +423,7 @@ export function LandingPage() {
                 <span>Multi-Account Quota</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Kelola dan pantau kuota dari beberapa akun Google Drive terhubung secara otomatis.
+                {lang === 'id' ? 'Kelola dan pantau kuota dari beberapa akun Google Drive terhubung secara otomatis.' : 'Manage and track quota across multiple connected Google Drive accounts automatically.'}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-amber-500/40 transition-colors">
@@ -371,7 +432,9 @@ export function LandingPage() {
                 <span>Public REST API</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                API Key terisolasi (<code className="text-amber-300 font-mono">files:read</code>, <code className="text-amber-300 font-mono">files:upload</code>).
+                {lang === 'id' ? 'API Key terisolasi (' : 'Isolated API Keys ('}
+                <code className="text-amber-300 font-mono">files:read</code>, <code className="text-amber-300 font-mono">files:upload</code>
+                {lang === 'id' ? ') untuk pengembang.' : ') for developers.'}
               </p>
             </div>
           </motion.div>
@@ -387,7 +450,9 @@ export function LandingPage() {
                 <Info className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white">Tujuan Aplikasi drive9 (Application Purpose)</h2>
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  {lang === 'id' ? 'Tujuan Aplikasi drive9 (Application Purpose)' : 'drive9 Application Purpose & Scope Disclosure'}
+                </h2>
                 <p className="text-xs text-blue-400 font-medium">Google OAuth Verification & Scope Transparency Disclosure</p>
               </div>
             </div>
@@ -396,20 +461,26 @@ export function LandingPage() {
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>Untuk Apa drive9 Dibuat? (What is drive9?)</span>
+                  <span>{lang === 'id' ? 'Untuk Apa drive9 Dibuat? (What is drive9?)' : 'What is drive9 built for?'}</span>
                 </h3>
                 <p className="text-slate-400">
-                  <strong className="text-slate-200">drive9</strong> adalah platform gateway penyimpanan cloud yang dirancang untuk membantu pengguna mengunggah file, mengorganisir folder virtual, memantau sisa kuota penyimpanan dari beberapa akun Google Drive, serta membuat API Key untuk otomatisasi pengunggahan file dari skrip backend.
+                  <strong className="text-slate-200">drive9</strong> {lang === 'id' ? 'adalah platform gateway penyimpanan cloud yang dirancang untuk membantu pengguna mengunggah file, mengorganisir folder virtual, memantau sisa kuota penyimpanan dari beberapa akun Google Drive, serta membuat API Key untuk otomatisasi pengunggahan file dari skrip backend.' : 'is a cloud storage gateway platform designed to help users upload files, organize virtual folders, monitor remaining storage quota from multiple Google Drive accounts, and generate API Keys for backend script upload automation.'}
                 </p>
               </div>
 
               <div className="space-y-3">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0" />
-                  <span>Bagaimana drive9 Menggunakan Google Drive API?</span>
+                  <span>{lang === 'id' ? 'Bagaimana drive9 Menggunakan Google Drive API?' : 'How does drive9 use Google Drive API?'}</span>
                 </h3>
                 <p className="text-slate-400">
-                  Aplikasi <strong className="text-slate-200">drive9</strong> meminta akses scope Google Drive (<code className="text-purple-300 font-mono">https://www.googleapis.com/auth/drive</code>) khusus untuk membuat folder bernama <code className="text-indigo-300 font-mono font-bold">9drive</code> di Google Drive milik Anda dan mengalirkan file unggahan (*direct streaming*) secara otomatis tanpa pernah menyimpan data di disk fisik server kami.
+                  {lang === 'id' ? 'Aplikasi ' : 'The '}
+                  <strong className="text-slate-200">drive9</strong>
+                  {lang === 'id' ? ' meminta akses scope Google Drive (' : ' app requests Google Drive scope access ('}
+                  <code className="text-purple-300 font-mono">https://www.googleapis.com/auth/drive</code>
+                  {lang === 'id' ? ') khusus untuk membuat folder bernama ' : ') solely to create a folder named '}
+                  <code className="text-indigo-300 font-mono font-bold">9drive</code>
+                  {lang === 'id' ? ' di Google Drive milik Anda dan mengalirkan file unggahan (direct streaming) secara otomatis tanpa pernah menyimpan data di disk fisik server kami.' : ' in your Google Drive and automatically stream uploaded files (direct streaming) without ever storing data on server physical disks.'}
                 </p>
               </div>
             </div>
@@ -425,8 +496,12 @@ export function LandingPage() {
               <Cpu className="h-4 w-4" />
               <span>Gateway Features</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-black text-white">Fitur & Keunggulan drive9</h2>
-            <p className="text-slate-400 text-xs sm:text-sm">Dirancang untuk manajemen penyimpanan cloud berkecepatan tinggi dengan keamanan tingkat lanjut.</p>
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
+              {lang === 'id' ? 'Fitur & Keunggulan drive9' : 'drive9 Features & Capabilities'}
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              {lang === 'id' ? 'Dirancang untuk manajemen penyimpanan cloud berkecepatan tinggi dengan keamanan tingkat lanjut.' : 'Built for high-speed cloud storage management with advanced security.'}
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
@@ -436,7 +511,7 @@ export function LandingPage() {
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-white">Direct Streamed Uploads</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Mengunggah file multipart dan resumable secara langsung ke Google Drive tanpa menampung file di disk server lokal. Izin akses file publik otomatis disesuaikan.
+                {lang === 'id' ? 'Mengunggah file multipart dan resumable secara langsung ke Google Drive tanpa menampung file di disk server lokal. Izin akses file publik otomatis disesuaikan.' : 'Upload multipart and resumable files directly to Google Drive without holding files on local server disk. Public file access permissions are automatically configured.'}
               </p>
             </div>
 
@@ -444,9 +519,11 @@ export function LandingPage() {
               <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
                 <FolderTree className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">Folder Virtual Bersarang</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-white">
+                {lang === 'id' ? 'Folder Virtual Bersarang' : 'Nested Virtual Folders'}
+              </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Organisir file dalam struktur folder virtual bersarang. Otomatis menyelesaikan dan mensinkronkan path folder di Google Drive saat diminta oleh client.
+                {lang === 'id' ? 'Organisir file dalam struktur folder virtual bersarang. Otomatis menyelesaikan dan mensinkronkan path folder di Google Drive saat diminta oleh client.' : 'Organize files in nested virtual folder structures. Automatically resolves and syncs folder paths in Google Drive upon request.'}
               </p>
             </div>
 
@@ -456,7 +533,9 @@ export function LandingPage() {
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-white">Developer API Keys</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Buat API Key dengan kontrol hak akses terisolasi (<code className="text-emerald-300 font-mono">files:read</code>, <code className="text-emerald-300 font-mono">files:upload</code>) untuk integrasi skrip backend.
+                {lang === 'id' ? 'Buat API Key dengan kontrol hak akses terisolasi (' : 'Generate API Keys with isolated access scope controls ('}
+                <code className="text-emerald-300 font-mono">files:read</code>, <code className="text-emerald-300 font-mono">files:upload</code>
+                {lang === 'id' ? ') untuk integrasi skrip backend.' : ') for backend script integration.'}
               </p>
             </div>
           </div>
@@ -472,23 +551,30 @@ export function LandingPage() {
               <span>Google OAuth Security & Privacy</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight">
-              Bagaimana drive9 Mengelola Data & Akses Google Drive Anda
+              {lang === 'id' ? 'Bagaimana drive9 Mengelola Data & Akses Google Drive Anda' : 'How drive9 Manages Your Data & Google Drive Access'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">
-              <strong className="text-slate-200">drive9</strong> mengakses Google Drive semata-mata untuk membuat dan mengelola file dalam folder khusus bernama <code className="text-indigo-300 font-mono font-bold">9drive</code>. Kami menjaga privasi data Anda:
+              <strong className="text-slate-200">drive9</strong> {lang === 'id' ? 'mengakses Google Drive semata-mata untuk membuat dan mengelola file dalam folder khusus bernama ' : 'accesses Google Drive solely to create and manage files in a dedicated folder named '}
+              <code className="text-indigo-300 font-mono font-bold">9drive</code>. {lang === 'id' ? 'Kami menjaga privasi data Anda:' : 'We safeguard your data privacy:'}
             </p>
             <ul className="space-y-3 text-xs text-slate-300">
               <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60">
                 <Lock className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                <span><strong>Enkripsi OAuth:</strong> Token Access & Refresh terenkripsi dengan algoritma AES-256-GCM sebelum disimpan di database.</span>
+                <span>
+                  <strong>{lang === 'id' ? 'Enkripsi OAuth:' : 'OAuth Encryption:'}</strong> {lang === 'id' ? 'Token Access & Refresh terenkripsi dengan algoritma AES-256-GCM sebelum disimpan di database.' : 'Access & Refresh tokens are encrypted with AES-256-GCM before saving to database.'}
+                </span>
               </li>
               <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60">
                 <Database className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
-                <span><strong>Tanpa Penyimpanan File di Server:</strong> File unggahan langsung dialirkan ke cloud storage tanpa disimpan di penyimpanan lokal server.</span>
+                <span>
+                  <strong>{lang === 'id' ? 'Tanpa Penyimpanan File di Server:' : 'Zero Server File Storage:'}</strong> {lang === 'id' ? 'File unggahan langsung dialirkan ke cloud storage tanpa disimpan di penyimpanan lokal server.' : 'Uploaded files stream directly to cloud storage without saving to local server storage.'}
+                </span>
               </li>
               <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60">
                 <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
-                <span><strong>Hak Pencabutan Akses:</strong> Anda dapat memutuskan koneksi akun Google kapan saja via menu Settings atau Google Security.</span>
+                <span>
+                  <strong>{lang === 'id' ? 'Hak Pencabutan Akses:' : 'Access Revocation Rights:'}</strong> {lang === 'id' ? 'Anda dapat memutuskan koneksi akun Google kapan saja via menu Settings atau Google Security.' : 'You can disconnect your Google account anytime via Settings or Google Security.'}
+                </span>
               </li>
             </ul>
           </div>
@@ -497,13 +583,13 @@ export function LandingPage() {
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4 text-blue-400" />
-                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">Informasi Aplikasi</span>
+                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">{lang === 'id' ? 'Informasi Aplikasi' : 'Application Information'}</span>
               </div>
               <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">drive9 v1.0</span>
             </div>
             <div className="space-y-4 text-xs">
               <div>
-                <p className="font-bold text-slate-400 mb-1">Nama Aplikasi (App Name):</p>
+                <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Nama Aplikasi (App Name):' : 'App Name:'}</p>
                 <p className="font-mono text-blue-400 text-sm font-black">drive9</p>
               </div>
               <div>
@@ -511,17 +597,21 @@ export function LandingPage() {
                 <p className="font-mono text-purple-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 break-all">https://www.googleapis.com/auth/drive</p>
               </div>
               <div>
-                <p className="font-bold text-slate-400 mb-1">Tujuan Folder Storage:</p>
-                <p className="text-slate-300">Folder Khusus <code className="text-indigo-300 font-mono font-bold">9drive</code> di Google Drive Pengguna</p>
+                <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Tujuan Folder Storage:' : 'Target Storage Folder:'}</p>
+                <p className="text-slate-300">
+                  {lang === 'id' ? 'Folder Khusus ' : 'Dedicated '}
+                  <code className="text-indigo-300 font-mono font-bold">9drive</code>
+                  {lang === 'id' ? ' di Google Drive Pengguna' : ' Folder in User Google Drive'}
+                </p>
               </div>
             </div>
             <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
               <RouterLink to="/privacy" className="text-xs text-blue-400 hover:underline font-semibold flex items-center gap-1">
-                <span>Kebijakan Privasi</span>
+                <span>{lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'}</span>
                 <ExternalLink className="h-3 w-3" />
               </RouterLink>
               <RouterLink to="/terms" className="text-xs text-blue-400 hover:underline font-semibold flex items-center gap-1">
-                <span>Ketentuan Layanan</span>
+                <span>{lang === 'id' ? 'Ketentuan Layanan' : 'Terms of Service'}</span>
                 <ExternalLink className="h-3 w-3" />
               </RouterLink>
             </div>
@@ -535,10 +625,12 @@ export function LandingPage() {
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-xs font-bold text-purple-400">
               <HelpCircle className="h-4 w-4" />
-              <span>Pertanyaan Sering Diajukan</span>
+              <span>{lang === 'id' ? 'Pertanyaan Sering Diajukan' : 'Frequently Asked Questions'}</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-black text-white">Frequently Asked Questions (FAQ)</h2>
-            <p className="text-slate-400 text-xs sm:text-sm">Temukan jawaban lengkap seputar penggunaan, keamanan, dan integrasi drive9.</p>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              {lang === 'id' ? 'Temukan jawaban lengkap seputar penggunaan, keamanan, dan integrasi drive9.' : 'Find full answers regarding usage, security, and drive9 integration.'}
+            </p>
           </div>
 
           <div className="space-y-3.5 sm:space-y-4">
@@ -599,19 +691,21 @@ export function LandingPage() {
           <div className="flex h-14 w-14 sm:h-16 sm:w-16 mx-auto items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
             <Zap className="h-7 w-7 sm:h-8 sm:w-8" />
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-white">Siap Mengelola Storage Google Drive Anda?</h2>
+          <h2 className="text-2xl sm:text-4xl font-black text-white">
+            {lang === 'id' ? 'Siap Mengelola Storage Google Drive Anda?' : 'Ready to Manage Your Google Drive Storage?'}
+          </h2>
           <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto">
-            Hubungkan akun Google Drive Anda dalam hitungan detik dan mulai nikmati pengalaman manajemen penyimpanan cloud modern.
+            {lang === 'id' ? 'Hubungkan akun Google Drive Anda dalam hitungan detik dan mulai nikmati pengalaman manajemen penyimpanan cloud modern.' : 'Connect your Google Drive accounts in seconds and start enjoying a modern cloud storage management experience.'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <RouterLink to="/login" className="w-full sm:w-auto">
               <Button className="w-full sm:w-auto h-12 px-8 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 rounded-xl">
-                Sign In dengan Google
+                {lang === 'id' ? 'Masuk dengan Google' : 'Sign In with Google'}
               </Button>
             </RouterLink>
             <RouterLink to="/register" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full sm:w-auto h-12 px-8 text-xs font-bold border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 rounded-xl">
-                Daftar Akun
+                {lang === 'id' ? 'Daftar Akun' : 'Create Account'}
               </Button>
             </RouterLink>
           </div>
@@ -628,11 +722,11 @@ export function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-semibold">
-            <a href="#purpose" className="hover:text-slate-300 transition-colors">App Purpose</a>
-            <a href="#features" className="hover:text-slate-300 transition-colors">Features</a>
-            <RouterLink to="/privacy" className="hover:text-slate-300 transition-colors">Privacy Policy</RouterLink>
-            <RouterLink to="/terms" className="hover:text-slate-300 transition-colors">Terms of Service</RouterLink>
-            <RouterLink to="/login" className="hover:text-slate-300 transition-colors">Dashboard Login</RouterLink>
+            <a href="#purpose" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Tujuan Aplikasi' : 'App Purpose'}</a>
+            <a href="#features" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Fitur' : 'Features'}</a>
+            <RouterLink to="/privacy" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'}</RouterLink>
+            <RouterLink to="/terms" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Ketentuan Layanan' : 'Terms of Service'}</RouterLink>
+            <RouterLink to="/login" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Login Dashboard' : 'Dashboard Login'}</RouterLink>
           </div>
         </div>
       </footer>
