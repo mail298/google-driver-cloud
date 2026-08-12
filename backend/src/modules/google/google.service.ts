@@ -10,7 +10,13 @@ export function createOAuthClient(config: ProviderConfig) {
   const redirectUri = (process.env.GOOGLE_REDIRECT_URI && process.env.GOOGLE_REDIRECT_URI.trim())
     ? process.env.GOOGLE_REDIRECT_URI.trim()
     : config.redirectUri
-  return new google.auth.OAuth2(decryptText(config.clientIdEncrypted), decryptText(config.clientSecretEncrypted), redirectUri)
+  const clientId = (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_ID.trim())
+    ? process.env.GOOGLE_CLIENT_ID.trim()
+    : decryptText(config.clientIdEncrypted)
+  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_CLIENT_SECRET.trim())
+    ? process.env.GOOGLE_CLIENT_SECRET.trim()
+    : decryptText(config.clientSecretEncrypted)
+  return new google.auth.OAuth2(clientId, clientSecret, redirectUri)
 }
 
 const providerConfigCache = new Map<string, { config: ProviderConfig; expires: number }>()
