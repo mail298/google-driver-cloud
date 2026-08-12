@@ -65,3 +65,13 @@ const getEnv = () => {
 
 export const env = getEnv()
 
+const DEFAULT_JWT_SECRET = '$2a$10$3OOX0YLB52DERef3Q/jn9ei0zTME0ieZrcYQ4mflZ.BPgTMszTgsq'
+const DEFAULT_ENCRYPTION_KEY = 'uf2Tqd29Y6l2RFhM9xLQ0bvmfRjyroxjQI2HRsQH3rdjdE1SgvVvMjkwZJxlXrMb'
+
+if (env.JWT_ACCESS_SECRET === DEFAULT_JWT_SECRET) {
+  console.warn('[SECURITY WARNING] JWT_ACCESS_SECRET is using the default hardcoded value! Set a unique secret in your environment variables.')
+}
+if (env.TOKEN_ENCRYPTION_KEY === DEFAULT_ENCRYPTION_KEY) {
+  console.warn('[SECURITY WARNING] TOKEN_ENCRYPTION_KEY is using the default hardcoded value! Set a unique key in your environment variables.')
+}
+

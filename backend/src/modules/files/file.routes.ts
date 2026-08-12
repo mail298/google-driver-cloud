@@ -303,6 +303,59 @@ fileRouter.post('/sync-google', async (req: AuthRequest, res, next) => {
   }
 })
 
+fileRouter.post('/batch-download', async (req: AuthRequest, res, next) => {
+  try {
+    const body = batchFileSchema.parse(req.body)
+    const files = await prisma.file.findMany({
+      where: { id: { in: body.fileIds }, userId: req.user!.id, status: 'active' },
+      include: { connectedAccount: true }
+    })
+    if (files.length === 0) return res.status(404).json({ code: 'FILES_NOT_FOUND', message: 'No files found.' })
+
+    res.setHeader('Content-Type', 'application/zip')
+    res.setHeader('Content-Disposition', 'attachment; filename="9drive-download.zip"')
+
+    const archive = new ZipArchive({ zlib: { level: 9 } })
+    archive.on('error', (err: any) => {
+      throw err
+    })
+    archive.pipe(res)
+
+    for (const file of files) {
+      try {
+        let stream: Readable
+        let fileName = file.name
+        if (file.provider === 's3') {
+          const config = await getS3ConfigForAccount(file.connectedAccountId)
+          const client = createS3Client(config)
+          const response = await client.send(new GetObjectCommand({ Bucket: config.bucket, Key: file.providerFileId }))
+          stream = response.Body as Readable
+        } else {
+          const auth = await getAuthedGoogleClient(file.connectedAccount)
+          const headers = normalizeHeaders(await auth.getRequestHeaders())
+          const exportTarget = googleDownloadExportMimeTypes[file.mimeType]
+          if (exportTarget) {
+            fileName = withExtension(file.name, exportTarget.extension)
+          }
+          const url = exportTarget
+            ? `https://www.googleapis.com/drive/v3/files/${file.providerFileId}/export?mimeType=${encodeURIComponent(exportTarget.mimeType)}`
+            : `https://www.googleapis.com/drive/v3/files/${file.providerFileId}?alt=media`
+          const response = await fetch(url, { headers })
+          if (!response.ok || !response.body) continue
+          stream = Readable.fromWeb(response.body as any)
+        }
+        archive.append(stream, { name: fileName })
+      } catch (err) {
+        console.error(`Failed to add file ${file.name} to zip:`, err)
+      }
+    }
+
+    await archive.finalize()
+  } catch (error) {
+    return next(error)
+  }
+})
+
 fileRouter.get('/:id', async (req: AuthRequest, res, next) => {
   try {
     const fileId = String(req.params.id)
@@ -414,7 +467,7 @@ fileRouter.get('/:id/view-url', async (req: AuthRequest, res, next) => {
     const auth = await getAuthedGoogleClient(file.connectedAccount)
     const drive = google.drive({ version: 'v3', auth })
 
-    // Automatically set permission to public writer when retrieving/copying the view URL!
+    // Set permission to public reader when retrieving the Google Drive view URL.
     try {
       await drive.permissions.create({
         fileId: file.providerFileId,
@@ -448,90 +501,19 @@ fileRouter.delete('/:id', async (req: AuthRequest, res, next) => {
   try {
     const fileId = String(req.params.id)
     const file = await prisma.file.findFirstOrThrow({
-      where: { id: fileId, userId: req.user!.id },
-      include: { connectedAccount: true }
+      where: { id: fileId, userId: req.user!.id, status: 'active' },
     })
 
-    if (file.provider === 's3') {
-      await deleteS3Object(file).catch((err: any) => {
-        console.warn(`S3 delete warning for file ${file.id}:`, err?.message || err)
-      })
-    } else if (file.connectedAccount) {
-      try {
-        const auth = await getAuthedGoogleClient(file.connectedAccount)
-        const drive = google.drive({ version: 'v3', auth })
-        await drive.files.delete({ fileId: file.providerFileId })
-      } catch (gErr: any) {
-        console.warn(`Google Drive delete warning for file ${file.id} (${file.providerFileId}):`, gErr?.message || gErr)
-      }
-    }
+    // Soft-delete: move to trash. Permanent deletion (from Drive + DB) happens via DELETE /batch/permanent.
+    await prisma.file.update({
+      where: { id: file.id },
+      data: { status: 'deleted', deletedAt: new Date() }
+    })
 
-    await prisma.file.delete({ where: { id: file.id } })
-
-    if (file.connectedAccountId) {
-      if (file.provider === 's3') {
-        await syncS3Quota(file.connectedAccountId).catch(() => undefined)
-      } else {
-        await syncGoogleQuota(file.connectedAccountId).catch(() => undefined)
-      }
-    }
-
-    await createAuditLog(req.user!.id, 'PERMANENT_DELETE_FILE', 'file', file.id, { name: file.name })
+    await createAuditLog(req.user!.id, 'DELETE_FILE', 'file', file.id, { name: file.name })
     return res.json({ status: 'ok' })
   } catch (error) {
     return next(error)
   }
 })
 
-fileRouter.post('/batch-download', async (req: AuthRequest, res, next) => {
-  try {
-    const body = batchFileSchema.parse(req.body)
-    const files = await prisma.file.findMany({
-      where: { id: { in: body.fileIds }, userId: req.user!.id, status: 'active' },
-      include: { connectedAccount: true }
-    })
-    if (files.length === 0) return res.status(404).json({ code: 'FILES_NOT_FOUND', message: 'No files found.' })
-
-    res.setHeader('Content-Type', 'application/zip')
-    res.setHeader('Content-Disposition', 'attachment; filename="9drive-download.zip"')
-
-    const archive = new ZipArchive({ zlib: { level: 9 } })
-    archive.on('error', (err: any) => {
-      throw err
-    })
-    archive.pipe(res)
-
-    for (const file of files) {
-      try {
-        let stream: Readable
-        let fileName = file.name
-        if (file.provider === 's3') {
-          const config = await getS3ConfigForAccount(file.connectedAccountId)
-          const client = createS3Client(config)
-          const response = await client.send(new GetObjectCommand({ Bucket: config.bucket, Key: file.providerFileId }))
-          stream = response.Body as Readable
-        } else {
-          const auth = await getAuthedGoogleClient(file.connectedAccount)
-          const headers = normalizeHeaders(await auth.getRequestHeaders())
-          const exportTarget = googleDownloadExportMimeTypes[file.mimeType]
-          if (exportTarget) {
-            fileName = withExtension(file.name, exportTarget.extension)
-          }
-          const url = exportTarget
-            ? `https://www.googleapis.com/drive/v3/files/${file.providerFileId}/export?mimeType=${encodeURIComponent(exportTarget.mimeType)}`
-            : `https://www.googleapis.com/drive/v3/files/${file.providerFileId}?alt=media`
-          const response = await fetch(url, { headers })
-          if (!response.ok || !response.body) continue
-          stream = Readable.fromWeb(response.body as any)
-        }
-        archive.append(stream, { name: fileName })
-      } catch (err) {
-        console.error(`Failed to add file ${file.name} to zip:`, err)
-      }
-    }
-
-    await archive.finalize()
-  } catch (error) {
-    return next(error)
-  }
-})

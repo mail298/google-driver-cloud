@@ -56,7 +56,7 @@ export function logError(req: Request, error: unknown, status = 500): ErrorLogEn
     status,
     code,
     message,
-    stack: process.env.NODE_ENV !== 'production' ? errObj.stack : errObj.stack
+    stack: process.env.NODE_ENV !== 'production' ? errObj.stack : errObj.stack?.split('\n')[0]
   }
 
   // Console output formatted JSON

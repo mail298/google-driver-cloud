@@ -1,5 +1,6 @@
 import cors from 'cors'
 import { Router } from 'express'
+import type { ConnectedAccount, File } from '@prisma/client'
 import { prisma } from '../../config/prisma.js'
 import { hashToken } from '../../utils/crypto.js'
 import { streamProviderFile } from '../files/stream-file.js'
@@ -7,10 +8,12 @@ import { streamProviderFile } from '../files/stream-file.js'
 export const publicRouter = Router()
 publicRouter.use(cors({ origin: '*' }))
 
-const shareCache = new Map<string, { file: any; expires: number }>()
+type FileWithAccount = File & { connectedAccount: ConnectedAccount }
+// Cache using proper Prisma types — avoids any and ensures type safety
+const shareCache = new Map<string, { file: FileWithAccount; expires: number }>()
 const CACHE_TTL_MS = 60_000 // 60 seconds cache for public share tokens
 
-async function findSharedFile(token: string) {
+async function findSharedFile(token: string): Promise<FileWithAccount> {
   const cached = shareCache.get(token)
   if (cached && cached.expires > Date.now()) {
     return cached.file
