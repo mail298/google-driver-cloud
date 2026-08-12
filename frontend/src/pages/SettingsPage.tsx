@@ -415,7 +415,7 @@ export function SettingsPage() {
       {message ? <p className="mt-4 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">{message}</p> : null}
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_280px]">
         <div className="grid gap-4">
-          <Card className="p-4">
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex items-center gap-3.5">
               {!profileImageUrl || avatarError ? (
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-lg font-bold text-white shadow-sm border border-blue-400/20 sm:h-14 sm:w-14">
@@ -429,14 +429,17 @@ export function SettingsPage() {
                   onError={() => setAvatarError(true)}
                 />
               )}
-              <div className="flex-1"><h2 className="text-lg font-bold">{user?.name ?? 'User'}</h2><p className="text-xs text-slate-500 mt-0.5">{user?.email ?? '-'}</p></div>
+              <div className="flex-1">
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">{user?.name ?? 'User'}</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{user?.email ?? '-'}</p>
+              </div>
             </div>
           </Card>
 
-          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800">
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
                 <div>
@@ -608,56 +611,119 @@ export function SettingsPage() {
             </form>
           </Card>
 
-          <Card className="overflow-hidden p-3.5">
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-2.5"><Cloud className="h-5 w-5 text-blue-600" /><h2 className="text-[16px] font-bold">Google Drive</h2></div>
-                <p className="mt-1 text-[13px] text-slate-500">Connect one or more Google Drive accounts. 9Drive will route uploads to account with enough space.</p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
+                  <Cloud className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">Google Drive</h2>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Connect one or more Google Drive accounts. 9Drive will route uploads to account with enough space.</p>
+                </div>
               </div>
-              <Button className="w-full sm:w-32" size="sm" onClick={connectDrive} disabled={connecting}><Link2 className="h-4 w-4" />{connecting ? 'Opening...' : 'Connect Drive'}</Button>
+              <Button className="w-full sm:w-36 font-bold" size="sm" onClick={connectDrive} disabled={connecting}>
+                <Link2 className="h-4 w-4 mr-1.5" />
+                {connecting ? 'Opening...' : 'Connect Drive'}
+              </Button>
             </div>
           </Card>
 
-          <Card className="overflow-hidden p-3.5">
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-2.5"><Database className="h-5 w-5 text-blue-600" /><h2 className="text-[16px] font-bold">S3 Compatible</h2></div>
-                <p className="mt-1 text-[13px] text-slate-500">Connect AWS S3, Cloudflare R2, MinIO, Wasabi, Backblaze B2, or custom endpoint storage.</p>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
+                  <Database className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">S3 Compatible</h2>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Connect AWS S3, Cloudflare R2, MinIO, Wasabi, Backblaze B2, or custom endpoint storage.</p>
+                </div>
               </div>
-              <Button className="w-full sm:w-32" size="sm" variant="outline" onClick={() => setS3Open(true)}><Database className="h-4 w-4" />Connect S3</Button>
+              <Button className="w-full sm:w-36 font-bold" size="sm" variant="outline" onClick={() => setS3Open(true)}>
+                <Database className="h-4 w-4 mr-1.5" />
+                Connect S3
+              </Button>
             </div>
           </Card>
 
-          <Card className="p-4">
-            <h2 className="text-[16px] font-bold">Connected Storage Accounts</h2>
-            <div className="mt-3.5 grid gap-3">
-              {accounts.length === 0 ? <p className="text-xs text-slate-500">No connected storage account yet.</p> : <>
-                <label className="grid gap-1.5 text-xs font-semibold text-slate-500">Choose Account<select className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm focus:outline-none" value={selectedAccount?.id ?? ''} onChange={(event) => setSelectedAccountId(event.target.value)}>{accounts.map((account) => <option key={account.id} value={account.id}>{providerLabel(account.provider)} - {account.displayName || account.email} ({account.status})</option>)}</select></label>
-                {selectedAccount ? <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="min-w-0"><p className="break-all font-semibold text-sm">{selectedAccount.displayName || selectedAccount.email}</p><p className="text-xs text-slate-500 mt-0.5">{providerLabel(selectedAccount.provider)} · {selectedAccount.status}</p></div>
-                    <div className="grid grid-cols-2 gap-2 sm:flex"><Button className="w-full" size="sm" variant="outline" onClick={() => sync(selectedAccount.id)} disabled={syncingAccountId === selectedAccount.id}><RefreshCw className={syncingAccountId === selectedAccount.id ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />{syncingAccountId === selectedAccount.id ? 'Syncing...' : 'Sync'}</Button><Button className="w-full" size="sm" variant="danger" onClick={() => setAccountToDisconnect(selectedAccount)}><Trash2 className="h-4 w-4" />Disconnect</Button></div>
-                  </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
-                    <div className="rounded-xl bg-white dark:bg-slate-950 p-2 border border-slate-100 dark:border-slate-800"><p className="font-extrabold text-slate-950">{formatBytes(selectedAccount.storageAccount?.usedBytes)}</p><p className="mt-0.5 text-[10px] text-slate-500">Used</p></div>
-                    <div className="rounded-xl bg-white dark:bg-slate-950 p-2 border border-slate-100 dark:border-slate-800"><p className="font-extrabold text-slate-950">{storageLimitLabel(selectedAccount)}</p><p className="mt-0.5 text-[10px] text-slate-500">Total</p></div>
-                    <div className="rounded-xl bg-white dark:bg-slate-950 p-2 border border-slate-100 dark:border-slate-800"><p className="font-extrabold text-slate-950">{availableLabel(selectedAccount)}</p><p className="mt-0.5 text-[10px] text-slate-500">Free</p></div>
-                  </div>
-                </div> : null}
-              </>}
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
+                <HardDrive className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">Connected Storage Accounts</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Manage and monitor connected storage accounts.</p>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3">
+              {accounts.length === 0 ? (
+                <p className="text-xs text-slate-500">No connected storage account yet.</p>
+              ) : (
+                <>
+                  <label className="grid gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Choose Account
+                    <select className="h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600" value={selectedAccount?.id ?? ''} onChange={(event) => setSelectedAccountId(event.target.value)}>
+                      {accounts.map((account) => (
+                        <option key={account.id} value={account.id}>{providerLabel(account.provider)} - {account.displayName || account.email} ({account.status})</option>
+                      ))}
+                    </select>
+                  </label>
+                  {selectedAccount ? (
+                    <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
+                          <p className="break-all font-bold text-sm text-slate-900 dark:text-slate-100">{selectedAccount.displayName || selectedAccount.email}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">{providerLabel(selectedAccount.provider)} · {selectedAccount.status}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 sm:flex">
+                          <Button className="w-full font-bold" size="sm" variant="outline" onClick={() => sync(selectedAccount.id)} disabled={syncingAccountId === selectedAccount.id}>
+                            <RefreshCw className={syncingAccountId === selectedAccount.id ? 'h-4 w-4 animate-spin mr-1' : 'h-4 w-4 mr-1'} />
+                            {syncingAccountId === selectedAccount.id ? 'Syncing...' : 'Sync'}
+                          </Button>
+                          <Button className="w-full font-bold" size="sm" variant="danger" onClick={() => setAccountToDisconnect(selectedAccount)}>
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Disconnect
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="mt-3.5 grid grid-cols-3 gap-2 text-center text-xs">
+                        <div className="rounded-xl bg-white dark:bg-slate-950 p-2.5 border border-slate-200/60 dark:border-slate-800">
+                          <p className="font-extrabold text-slate-950 dark:text-slate-100 text-sm">{formatBytes(selectedAccount.storageAccount?.usedBytes)}</p>
+                          <p className="mt-0.5 text-[10px] font-semibold text-slate-500">Used</p>
+                        </div>
+                        <div className="rounded-xl bg-white dark:bg-slate-950 p-2.5 border border-slate-200/60 dark:border-slate-800">
+                          <p className="font-extrabold text-slate-950 dark:text-slate-100 text-sm">{storageLimitLabel(selectedAccount)}</p>
+                          <p className="mt-0.5 text-[10px] font-semibold text-slate-500">Total</p>
+                        </div>
+                        <div className="rounded-xl bg-white dark:bg-slate-950 p-2.5 border border-slate-200/60 dark:border-slate-800">
+                          <p className="font-extrabold text-slate-950 dark:text-slate-100 text-sm">{availableLabel(selectedAccount)}</p>
+                          <p className="mt-0.5 text-[10px] font-semibold text-slate-500">Free</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : null}
+                </>
+              )}
             </div>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5 mb-4">
               <div className="flex items-center gap-2.5">
-                <Cloud className="h-5 w-5 text-blue-600" />
-                <h2 className="text-[17px] font-bold">Google OAuth Credentials</h2>
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
+                  <Cloud className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">Google OAuth Credentials</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Configure global Google OAuth app keys for drive authentication.</p>
+                </div>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs font-semibold"
+                className="h-8 text-xs font-bold shrink-0"
                 type="button"
                 onClick={() => setShowGoogleHelp(!showGoogleHelp)}
               >
@@ -666,15 +732,15 @@ export function SettingsPage() {
             </div>
 
             {showGoogleHelp && (
-              <div className="mb-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 p-3.5 text-[13px] leading-relaxed text-slate-600 border border-slate-100 dark:border-slate-800">
-                <p className="font-bold text-slate-800 dark:text-slate-200 mb-1.5">How to setup Google credentials:</p>
+              <div className="mb-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 p-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800">
+                <p className="font-bold text-slate-800 dark:text-slate-100 mb-2">How to setup Google credentials:</p>
                 <ol className="list-decimal pl-4 space-y-1.5">
-                  <li>Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google Cloud Console</a>.</li>
+                  <li>Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-semibold">Google Cloud Console</a>.</li>
                   <li>Enable the <strong>Google Drive API</strong> in your project.</li>
                   <li>Go to <strong>APIs & Services &gt; Credentials</strong>, click <strong>Create Credentials &gt; OAuth client ID</strong>.</li>
                   <li>Set application type to <strong>Web application</strong>.</li>
                   <li>Add this exact URL under <strong>Authorized redirect URIs</strong>:
-                    <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] bg-white dark:bg-slate-950 p-1.5 rounded border border-slate-200 dark:border-slate-800 select-all overflow-x-auto">
+                    <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] bg-white dark:bg-slate-950 p-2 rounded-xl border border-slate-200 dark:border-slate-800 select-all overflow-x-auto">
                       {googleRedirectUri || defaultRedirectUri}
                     </div>
                   </li>
@@ -683,80 +749,90 @@ export function SettingsPage() {
               </div>
             )}
 
-            <form onSubmit={saveGoogleConfig} className="grid gap-3.5">
-              <label className="grid gap-1.5 text-xs font-bold text-slate-500">
-                Client ID
-                <input
-                  className="h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm focus:border-blue-600 focus:outline-none"
+            <form onSubmit={saveGoogleConfig} className="grid gap-4 max-w-lg">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Client ID
+                </label>
+                <Input
                   placeholder="Enter Google Client ID"
                   value={googleClientId}
                   onChange={(e) => setGoogleClientId(e.target.value)}
                   required
                 />
-              </label>
+              </div>
 
-              <label className="grid gap-1.5 text-xs font-bold text-slate-500">
-                Client Secret {hasSecret && <span className="font-normal text-emerald-600">(Already Configured)</span>}
-                <input
-                  className="h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm focus:border-blue-600 focus:outline-none"
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Client Secret {hasSecret && <span className="font-normal text-emerald-600 dark:text-emerald-400 ml-1">(Already Configured)</span>}
+                </label>
+                <Input
                   type="password"
                   placeholder={hasSecret ? "••••••••••••••••••••••••" : "Enter Google Client Secret"}
                   value={googleClientSecret}
                   onChange={(e) => setGoogleClientSecret(e.target.value)}
                   required={!hasSecret}
                 />
-              </label>
+              </div>
 
-              <label className="grid gap-1.5 text-xs font-bold text-slate-500">
-                Redirect URI (Optional)
-                <input
-                  className="h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm focus:border-blue-600 focus:outline-none"
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Redirect URI (Optional)
+                </label>
+                <Input
                   placeholder={defaultRedirectUri}
                   value={googleRedirectUri}
                   onChange={(e) => setGoogleRedirectUri(e.target.value)}
                 />
-              </label>
+              </div>
 
               <div className="flex justify-end mt-1">
-                <Button type="submit" disabled={savingGoogleConfig} size="sm">
+                <Button type="submit" disabled={savingGoogleConfig} size="sm" className="font-bold bg-blue-600 hover:bg-blue-700 text-white">
                   {savingGoogleConfig ? 'Saving...' : 'Save Credentials'}
                 </Button>
               </div>
             </form>
           </Card>
 
-          <Card className="overflow-hidden p-3.5">
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex flex-col gap-3.5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <RefreshCw className="h-5 w-5 text-blue-600" />
-                  <h2 className="text-[16px] font-bold">System Update</h2>
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
+                  <RefreshCw className="h-5 w-5" />
                 </div>
-                <p className="mt-1 text-[13px] text-slate-500">
-                  Pull the latest code from GitHub. Dev servers will automatically restart.
-                </p>
+                <div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">System Update</h2>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                    Pull the latest code from GitHub. Dev servers will automatically restart.
+                  </p>
+                </div>
               </div>
               <Button
-                className="w-full sm:w-32"
+                className="w-full sm:w-36 font-bold"
                 variant="outline"
                 size="sm"
                 onClick={runSystemUpdate}
                 disabled={updatingSystem}
               >
-                <RefreshCw className={updatingSystem ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+                <RefreshCw className={updatingSystem ? 'h-4 w-4 animate-spin mr-1.5' : 'h-4 w-4 mr-1.5'} />
                 {updatingSystem ? 'Updating...' : 'Update Code'}
               </Button>
             </div>
           </Card>
 
-          <Card className="overflow-hidden p-3.5">
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800 shadow-sm">
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
                 <div className="flex items-center gap-2.5">
-                  <Database className="h-5 w-5 text-blue-600" />
-                  <h2 className="text-[16px] font-bold">Backup & Restore Database</h2>
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400 shrink-0">
+                    <Database className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">Backup & Restore Database</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Save or restore MySQL system database backup</p>
+                  </div>
                 </div>
-                <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">MySQL Database Backup</span>
+                <span className="hidden sm:inline-flex text-[11px] text-slate-400 font-bold uppercase tracking-wider">MySQL Backup</span>
               </div>
 
               <div className="grid gap-5 sm:grid-cols-2">
