@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, type FormEvent } from 'react'
-import { Bell, Cloud, Database, Globe, HardDrive, Link2, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react'
+import { Bell, Cloud, Database, Globe, HardDrive, Info, Link2, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -426,9 +426,22 @@ export function SettingsPage() {
               <ShieldCheck className="h-5 w-5 text-blue-600" />
               <h2 className="text-[16px] font-bold">Ubah Password Akun</h2>
             </div>
-            <p className="text-[13px] text-slate-500 mb-4">
+            <p className="text-[13px] text-slate-500 mb-3">
               Perbarui password akun 9Drive Anda agar bisa digunakan untuk login manual via email.
             </p>
+
+            <div className="mb-4 rounded-2xl border border-blue-200/80 bg-blue-50/80 p-3 text-xs text-blue-900 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-200">
+              <div className="flex items-start gap-2.5">
+                <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-bold text-xs">Petunjuk Pengguna Google / Gmail:</p>
+                  <p className="text-[11px] opacity-90 leading-relaxed">
+                    Jika Anda daftar via <strong>Continue with Google</strong>, Anda belum memiliki password manual. Kolom <strong>Password Saat Ini</strong> bisa dikosongkan. Setelah disimpan, Anda dapat login secara manual (Email & Password) maupun via tombol Google.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {passwordMsg ? (
               <div className={cn('mb-4 rounded-xl p-3 text-xs font-semibold border', passwordSuccess ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800')}>
                 {passwordMsg}
