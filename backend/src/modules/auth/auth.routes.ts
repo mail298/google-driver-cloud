@@ -120,7 +120,7 @@ authRouter.get('/google/callback', async (req, res) => {
     const existingUserBefore = await prisma.user.findUnique({ where: { email } })
     const user = await prisma.user.upsert({
       where: { email },
-      create: { email, name, passwordHash: await hashPassword(randomToken(32)) },
+      create: { email, name, passwordHash: '!google_oauth_no_password' },
       update: { name },
     })
     const clientIp = getClientIp(req)
@@ -228,10 +228,21 @@ authRouter.post('/change-password', requireAuth, async (req: AuthRequest, res, n
     const body = changePasswordSchema.parse(req.body)
     const user = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id } })
 
+    const isGoogleUnset = user.passwordHash === '!google_oauth_no_password'
+
     if (body.currentPassword) {
-      const isValid = await verifyPassword(user.passwordHash, body.currentPassword)
-      if (!isValid) {
-        return res.status(400).json({ code: 'AUTH_INVALID_CURRENT_PASSWORD', message: 'Current password does not match.' })
+      // User provided currentPassword — verify it against passwordHash (if not initial google unset)
+      if (!isGoogleUnset) {
+        const isValid = await verifyPassword(user.passwordHash, body.currentPassword)
+        if (!isValid) {
+          return res.status(400).json({ code: 'AUTH_INVALID_CURRENT_PASSWORD', message: 'Current password does not match.' })
+        }
+      }
+    } else {
+      // User did NOT provide currentPassword
+      // If the account already has a password set (not Google unset), currentPassword is REQUIRED!
+      if (!isGoogleUnset) {
+        return res.status(400).json({ code: 'AUTH_CURRENT_PASSWORD_REQUIRED', message: 'Current password is required to update your password.' })
       }
     }
 
