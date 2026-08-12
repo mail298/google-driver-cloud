@@ -217,3 +217,29 @@ authRouter.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
     return next(error)
   }
 })
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().optional(),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters long.'),
+})
+
+authRouter.post('/change-password', requireAuth, async (req: AuthRequest, res, next) => {
+  try {
+    const body = changePasswordSchema.parse(req.body)
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id } })
+
+    if (body.currentPassword) {
+      const isValid = await verifyPassword(user.passwordHash, body.currentPassword)
+      if (!isValid) {
+        return res.status(400).json({ code: 'AUTH_INVALID_CURRENT_PASSWORD', message: 'Current password does not match.' })
+      }
+    }
+
+    const newPasswordHash = await hashPassword(body.newPassword)
+    await prisma.user.update({ where: { id: user.id }, data: { passwordHash: newPasswordHash } })
+
+    return res.json({ status: 'ok', message: 'Password updated successfully.' })
+  } catch (error) {
+    return next(error)
+  }
+})

@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef, type FormEvent } from 'react'
-import { Bell, Cloud, Database, Globe, HardDrive, Link2, RefreshCw, Trash2 } from 'lucide-react'
+import { Bell, Cloud, Database, Globe, HardDrive, Link2, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { DummyModal } from '@/components/drive/DummyModal'
 import { PageHeader } from '@/components/drive/PageHeader'
 import { apiFetch, formatBytes, API_URL } from '@/lib/api'
 import { getGravatarUrl } from '@/lib/gravatar'
 import { getStoredUser, getAccessToken, clearAuthSession } from '@/lib/auth'
+import { cn } from '@/lib/utils'
 
 type ConnectedAccount = { id: string; provider: string; email: string; displayName?: string | null; status: string; storageAccount?: { totalBytes: string | null; usedBytes: string; availableBytes: string | null; lastSyncedAt: string | null } | null }
 
@@ -66,6 +68,45 @@ export function SettingsPage() {
   const [restoreFile, setRestoreFile] = useState<File | null>(null)
   const [restoreMessage, setRestoreMessage] = useState('')
   const [restoreSuccess, setRestoreSuccess] = useState(false)
+  // Change Password states
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [passwordMsg, setPasswordMsg] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
+
+  async function handleChangePassword(e: FormEvent) {
+    e.preventDefault()
+    if (newPassword.length < 8) {
+      setPasswordMsg('Password baru minimal 8 karakter.')
+      setPasswordSuccess(false)
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMsg('Konfirmasi password tidak cocok.')
+      setPasswordSuccess(false)
+      return
+    }
+    setChangingPassword(true)
+    setPasswordMsg('')
+    try {
+      const res = await apiFetch<{ message: string }>('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword: currentPassword || undefined, newPassword }),
+      })
+      setPasswordMsg(res.message || 'Password berhasil diperbarui!')
+      setPasswordSuccess(true)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (error) {
+      setPasswordMsg(error instanceof Error ? error.message : 'Gagal memperbarui password.')
+      setPasswordSuccess(false)
+    } finally {
+      setChangingPassword(false)
+    }
+  }
 
   async function downloadBackup() {
     setDownloadingBackup(true)
@@ -378,6 +419,55 @@ export function SettingsPage() {
               )}
               <div className="flex-1"><h2 className="text-lg font-bold">{user?.name ?? 'User'}</h2><p className="text-xs text-slate-500 mt-0.5">{user?.email ?? '-'}</p></div>
             </div>
+          </Card>
+
+          <Card className="p-4">
+            <div className="flex items-center gap-2.5 mb-2">
+              <ShieldCheck className="h-5 w-5 text-blue-600" />
+              <h2 className="text-[16px] font-bold">Ubah Password Akun</h2>
+            </div>
+            <p className="text-[13px] text-slate-500 mb-4">
+              Perbarui password akun 9Drive Anda agar bisa digunakan untuk login manual via email.
+            </p>
+            {passwordMsg ? (
+              <div className={cn('mb-4 rounded-xl p-3 text-xs font-semibold border', passwordSuccess ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800')}>
+                {passwordMsg}
+              </div>
+            ) : null}
+            <form onSubmit={handleChangePassword} className="grid gap-3 max-w-md">
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Password Saat Ini (opsional jika login awal via Google)</label>
+                <Input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Password Baru (min. 8 karakter)</label>
+                <Input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Konfirmasi Password Baru</label>
+                <Input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <Button type="submit" size="sm" className="w-fit font-bold mt-1" disabled={changingPassword}>
+                {changingPassword ? 'Menyimpan...' : 'Simpan Password Baru'}
+              </Button>
+            </form>
           </Card>
 
           <Card className="overflow-hidden p-3.5">
