@@ -10,7 +10,7 @@ ENV VITE_RECAPTCHA_SITE_KEY=$VITE_RECAPTCHA_SITE_KEY
 ENV VITE_CDN_SUBDOMAINS=$VITE_CDN_SUBDOMAINS
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit
 
 COPY . .
 RUN npm run build
