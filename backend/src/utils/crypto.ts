@@ -19,7 +19,10 @@ export function decryptText(value: string) {
     decipher.setAuthTag(Buffer.from(tagRaw, 'base64'))
     return Buffer.concat([decipher.update(Buffer.from(encryptedRaw, 'base64')), decipher.final()]).toString('utf8')
   } catch {
-    throw new Error('Failed to decrypt storage token (TOKEN_ENCRYPTION_KEY mismatch). Please reconnect your Google Drive account.')
+    const err: any = new Error('Failed to decrypt storage token (TOKEN_ENCRYPTION_KEY mismatch). Please reconnect your Google Drive account.')
+    err.status = 400
+    err.code = 'TOKEN_DECRYPT_FAILED'
+    throw err
   }
 }
 
