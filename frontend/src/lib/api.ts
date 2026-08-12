@@ -2,7 +2,7 @@ import { clearAuthSession, getAccessToken, getRefreshToken, setAccessToken } fro
 
 const isProd = import.meta.env.PROD
 const rawApiUrl = import.meta.env.VITE_API_URL
-export const API_URL = (rawApiUrl && rawApiUrl !== 'http://localhost:4000' && !rawApiUrl.includes('ikan212.com'))
+export const API_URL = (rawApiUrl && rawApiUrl !== 'http://localhost:4000' && !rawApiUrl.includes('wn-cdn.net'))
   ? rawApiUrl
   : (isProd ? 'https://drive9-backend.wn-cdn.net' : 'http://localhost:4000')
 
