@@ -7,7 +7,10 @@ const googleDriveFolderMimeType = 'application/vnd.google-apps.folder'
 const appFolderName = '9drive'
 
 export function createOAuthClient(config: ProviderConfig) {
-  return new google.auth.OAuth2(decryptText(config.clientIdEncrypted), decryptText(config.clientSecretEncrypted), config.redirectUri)
+  const redirectUri = (process.env.GOOGLE_REDIRECT_URI && process.env.GOOGLE_REDIRECT_URI.trim())
+    ? process.env.GOOGLE_REDIRECT_URI.trim()
+    : config.redirectUri
+  return new google.auth.OAuth2(decryptText(config.clientIdEncrypted), decryptText(config.clientSecretEncrypted), redirectUri)
 }
 
 const providerConfigCache = new Map<string, { config: ProviderConfig; expires: number }>()

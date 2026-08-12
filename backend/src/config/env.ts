@@ -29,6 +29,9 @@ const envSchema = z.object({
   HTTPS_PROXY: z.string().optional(),
   GLOBAL_PROXY_URL: z.string().optional(),
   CDN_SUBDOMAINS: z.string().optional(),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().optional(),
 })
 
 const getEnv = () => {
