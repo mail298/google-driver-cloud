@@ -71,11 +71,11 @@ services:
       MYSQL_USER: ${MYSQL_USER:-9drive}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-this-database-password}
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD:-root} || exit 1"]
-      interval: 10s
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
       timeout: 5s
       retries: 10
-      start_period: 20s
+      start_period: 10s
     volumes:
       - mysql_data:/var/lib/mysql
 
