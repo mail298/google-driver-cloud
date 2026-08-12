@@ -22,7 +22,7 @@ RUN npm ci --prefer-offline --no-audit --progress=false
 COPY tsconfig.json ./
 COPY src ./src
 
-RUN DATABASE_URL="${DATABASE_URL:-mysql://root:root@mysql:3306/9drive}" FRONTEND_URL="${FRONTEND_URL:-https://drive9.wn-cdn.net}" JWT_ACCESS_SECRET="${JWT_ACCESS_SECRET:-change-this-jwt-secret-at-least-32-chars}" TOKEN_ENCRYPTION_KEY="${TOKEN_ENCRYPTION_KEY:-change-this-encryption-key-32bytes!}" npx prisma generate && npm run build
+RUN npx prisma generate && npm run build
 
 EXPOSE 80 4000
 
