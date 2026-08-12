@@ -79,13 +79,13 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
           }
         ],
         tips: isEn
-          ? ['You can connect more than 1 Google Drive account in Settings.', 'All access tokens are encrypted for maximum security.']
-          : ['Anda dapat menghubungkan lebih dari 1 akun Google Drive di menu Setting.', 'Semua file di-enkripsi token aksesnya demi keamanan maksimal.']
+          ? ['You can connect multiple Google Drive & S3 accounts in Settings.', 'All access tokens are encrypted for maximum security.']
+          : ['Anda dapat menghubungkan lebih dari 1 akun Google Drive di menu Setting.', 'Semua token akses disimpan secara tersandi (encrypted) demi keamanan maksimal.']
       }
     },
     {
       id: 'all-files',
-      title: isEn ? 'All Files' : 'All Files',
+      title: isEn ? 'All Files' : 'Semua File',
       subtitle: isEn ? 'File & Folder Management Hub' : 'Pusat Pengelolaan File & Folder',
       icon: FileArchive,
       badge: isEn ? 'Main' : 'Utama',
@@ -102,24 +102,24 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
             icon: Upload
           },
           {
-            title: isEn ? 'Google Drive Sync Button' : 'Tombol Sinkronkan (Sync)',
+            title: isEn ? 'Google Drive Sync' : 'Tombol Sinkronkan (Sync)',
             desc: isEn
-              ? 'Scans Google Drive 9drive folder to discover external uploads and sync metadata without reviving trashed files.'
-              : 'Memindai folder 9drive di Google Drive untuk mendeteksi file baru dan menyinkronkan data tanpa mengembalikan file terhapus.',
+              ? 'Scans Google Drive 9drive folder to discover new external uploads while preserving your trashed files.'
+              : 'Memindai folder 9drive di Google Drive untuk mendeteksi file baru tanpa mengembalikan file yang berada di Tempat Sampah.',
             icon: RefreshCw
           },
           {
             title: isEn ? 'Checkbox & Batch Actions' : 'Checkbox & Batch Actions',
             desc: isEn
-              ? 'Check multiple items to Move, Delete, or Download ZIP simultaneously.'
-              : 'Centang beberapa file untuk melakukan Move (Pindah), Delete (Hapus), atau Download ZIP secara serentak.',
+              ? 'Select multiple items to Move, Soft-Delete, or Download combined ZIP archives in 1 click.'
+              : 'Centang beberapa file sekaligus untuk Pindah (Move), Hapus ke Trash, atau Download ZIP gabungan dalam 1 klik.',
             icon: CheckCircle
           },
           {
-            title: isEn ? 'Smart Move Validation' : 'Smart Move Validation',
+            title: isEn ? 'Safe Soft-Delete' : 'Penghapusan Aman (Soft-Delete)',
             desc: isEn
-              ? 'When moving items, current folder or selected subfolders are automatically greyed-out (disabled).'
-              : 'Saat memindahkan file, folder lokasi saat ini atau subfolder terpilih otomatis di-hitam-putihkan (disabled) agar tidak salah pilih.',
+              ? 'Deleting files moves them safely to Recycle Bin (Trash). Items can be restored anytime before permanent deletion.'
+              : 'File yang dihapus akan dipindahkan secara aman ke Tempat Sampah (Trash) dan dapat dipulihkan kapan saja.',
             icon: FolderInput
           }
         ],
@@ -127,18 +127,18 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
           ? [
               'Click "Sync" button if you added files directly via Google Drive web to update 9Drive database instantly.',
               'Files moved to Trash in 9Drive remain safely in Recycle Bin and will not be resurrected when clicking Sync.',
-              'Right-click any file/folder card to open quick context menu (Rename, Move, Share, Delete).'
+              'Right-click any file/folder card to open context menu (Rename, Move, Share, Preview Token, Delete).'
             ]
           : [
               'Klik tombol "Sinkron" jika Anda menambah file langsung melalui Google Drive web untuk memperbarui database 9Drive.',
-              'File yang sudah dihapus ke Tempat Sampah akan tetap berada di Tempat Sampah dan tidak akan muncul kembali saat tombol Sync diklik.',
-              'Klik kanan pada kartu file/folder untuk membuka context menu cepat (Rename, Move, Share, Delete).'
+              'File yang berada di Tempat Sampah tetap aman di Tempat Sampah dan tidak akan dimunculkan kembali saat mengklik Sinkron.',
+              'Klik kanan pada kartu file/folder untuk membuka menu cepat (Rename, Move, Share, Preview Token, Delete).'
             ]
       }
     },
     {
       id: 'quota',
-      title: isEn ? 'Quota Tracker' : 'Quota Tracker',
+      title: isEn ? 'Quota Tracker' : 'Pemantau Kuota',
       subtitle: isEn ? 'Connected Accounts Storage Monitor' : 'Pemantau Kuota Akun Terhubung',
       icon: Gauge,
       badge: 'Storage',
@@ -172,7 +172,7 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
     },
     {
       id: 'shared',
-      title: isEn ? 'Shared With Me' : 'Shared With Me',
+      title: isEn ? 'Shared With Me' : 'Dibagikan ke Saya',
       subtitle: isEn ? 'Shared Files & Folders' : 'File & Folder Berbagi',
       icon: Share2,
       badge: isEn ? 'Collaboration' : 'Kolaborasi',
@@ -188,23 +188,23 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
           },
           {
             title: isEn ? 'Public Web Preview Links' : 'Link Publik Web View',
-            desc: isEn ? 'Generate public preview links without requiring user login.' : 'Generasi link preview cepat untuk dibagikan ke publik tanpa memerlukan login.',
+            desc: isEn ? 'Generate secure public preview links (read-only) without requiring user login.' : 'Generasi link preview cepat (hak akses read-only) untuk dibagikan ke publik tanpa memerlukan login.',
             icon: BookOpen
           },
           {
-            title: isEn ? 'Direct HTML Stream Links' : 'Direct HTML Stream Link',
-            desc: isEn ? 'Copy direct video/image/audio stream URLs for embedding in your HTML landing pages.' : 'Salin URL direct stream video/gambar/audio untuk disematkan langsung ke landing page HTML Anda.',
+            title: isEn ? 'Direct Stream Links' : 'Direct Stream Link',
+            desc: isEn ? 'Copy direct video/image/audio stream URLs for embedding in your web applications or landing pages.' : 'Salin URL direct stream video/gambar/audio untuk disematkan langsung ke aplikasi web atau landing page Anda.',
             icon: Sparkles
           }
         ],
         tips: isEn
-          ? ['Click "Share" button on any file to get direct HTML5 stream links (MP4, MP3, PNG).']
-          : ['Klik tombol "Share" pada file untuk mendapatkan link stream HTML5 langsung (MP4, MP3, PNG).']
+          ? ['Click "Share" or "Public View Link" on any file to copy safe read-only preview & stream links.']
+          : ['Klik tombol "Share" atau "Public View Link" pada file untuk menyalin link preview & stream read-only yang aman.']
       }
     },
     {
       id: 'other-menus',
-      title: isEn ? 'Starred, Trash & Activity' : 'Starred & Trash & Logs',
+      title: isEn ? 'Starred, Trash & Activity' : 'Starred, Trash & Log',
       subtitle: isEn ? 'Favorites, Trash & Audit Logs' : 'Favorit, Tempat Sampah & Aktivitas',
       icon: Trash2,
       badge: isEn ? 'System' : 'Sistem',
@@ -219,19 +219,27 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
             icon: Star
           },
           {
-            title: isEn ? 'Recycle Bin (Trash)' : 'Recycle Bin (Trash)',
-            desc: isEn ? 'Deleted files are safely moved here. You can Restore or Permanently Delete them.' : 'File yang dihapus akan disimpan sementara di sini. Anda dapat memilih untuk Restore (Pulihkan) atau Hapus Permanen.',
+            title: isEn ? 'Recycle Bin (Trash)' : 'Recycle Bin (Tempat Sampah)',
+            desc: isEn
+              ? 'Deleted files are safely moved here (soft-delete). You can Restore them anytime or Permanently Delete them.'
+              : 'File yang dihapus disimpan sementara di sini (soft-delete). Anda dapat memulihkannya (Restore) atau Menghapus Permanen.',
             icon: Trash2
           },
           {
-            title: isEn ? 'Activity Log' : 'Activity Log',
-            desc: isEn ? 'Automatic audit log recording uploads, moves, folder creations, and deletions.' : 'Catatan log audit otomatis yang merekam setiap aktivitas upload, pemindahan, pembuatan folder, dan penghapusan.',
+            title: isEn ? 'Activity Log' : 'Activity Log (Log Aktivitas)',
+            desc: isEn ? 'Automatic audit log recording uploads, moves, folder creations, restorations, and deletions.' : 'Catatan log audit otomatis yang merekam setiap aktivitas upload, pemindahan, pembuatan folder, pemulihan, dan penghapusan.',
             icon: History
           }
         ],
         tips: isEn
-          ? ['Files in Recycle Bin still count towards storage quota until permanently deleted.']
-          : ['File yang berada di Recycle Bin masih menggunakan kuota hingga Anda menghapusnya secara permanen.']
+          ? [
+              'Restoring a file from Recycle Bin returns it immediately to your All Files folder.',
+              'Only clicking "Permanent Delete" inside Trash will remove the physical file from Google Drive and free up quota.'
+            ]
+          : [
+              'Memulihkan file dari Tempat Sampah akan mengembalikannya secara langsung ke folder All Files Anda.',
+              'Hanya dengan mengklik "Hapus Permanen" di Tempat Sampah file fisik di Google Drive akan benar-benar terhapus dan membebaskan kuota.'
+            ]
       }
     },
     {
@@ -252,7 +260,7 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
           },
           {
             title: isEn ? 'Developer API Keys' : 'API Keys Developer',
-            desc: isEn ? 'Create secret API Tokens to upload files automatically from external scripts or landing page forms.' : 'Buat API Token rahasia untuk mengupload file secara otomatis dari aplikasi external, website, atau form landing page.',
+            desc: isEn ? 'Create secret API Tokens with granular scopes (files:read, files:upload) for external apps or uploader scripts.' : 'Buat API Token rahasia dengan scope terstruktur (files:read, files:upload) untuk mengupload file dari aplikasi external.',
             icon: Braces
           },
           {
@@ -262,8 +270,8 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
           }
         ],
         tips: isEn
-          ? ['Use API Keys to integrate 9Drive with automated file uploader scripts.']
-          : ['Gunakan API Key jika Anda ingin mengintegrasikan 9Drive dengan script pengunggah otomatis.']
+          ? ['Use API Keys to integrate 9Drive with automated file uploader scripts or web forms.']
+          : ['Gunakan API Key jika Anda ingin mengintegrasikan 9Drive dengan script pengunggah otomatis atau form website.']
       }
     }
   ]
