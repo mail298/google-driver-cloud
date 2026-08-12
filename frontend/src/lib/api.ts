@@ -2,7 +2,7 @@ import { clearAuthSession, getAccessToken, getRefreshToken, setAccessToken } fro
 
 const isProd = import.meta.env.PROD
 const rawApiUrl = import.meta.env.VITE_API_URL
-export const API_URL = (rawApiUrl && rawApiUrl !== 'http://localhost:4000')
+export const API_URL = (rawApiUrl && rawApiUrl !== 'http://localhost:4000' && !rawApiUrl.includes('ikan212.com'))
   ? rawApiUrl
   : (isProd ? 'https://drive9-backend.wn-cdn.net' : 'http://localhost:4000')
 
@@ -12,15 +12,19 @@ type ApiOptions = RequestInit & { skipAuth?: boolean; retry?: boolean }
 async function refreshAccessToken() {
   const refreshToken = getRefreshToken()
   if (!refreshToken) return false
-  const response = await fetch(`${API_URL}/auth/refresh`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
-  })
-  if (!response.ok) return false
-  const data = await response.json() as { accessToken: string }
-  setAccessToken(data.accessToken)
-  return true
+  try {
+    const response = await fetch(`${API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    })
+    if (!response.ok) return false
+    const data = await response.json() as { accessToken: string }
+    setAccessToken(data.accessToken)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promise<T> {
@@ -29,7 +33,12 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   if (!options.skipAuth && token) headers.set('Authorization', `Bearer ${token}`)
   if (options.body && !(options.body instanceof FormData) && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
 
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers })
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}${path}`, { ...options, headers })
+  } catch (err) {
+    throw new Error(`Gagal terhubung ke Backend API (${API_URL}). Pastikan backend & SSL aktif.`)
+  }
   if (response.status === 401 && options.retry !== false && !options.skipAuth && await refreshAccessToken()) {
     return apiFetch<T>(path, { ...options, retry: false })
   }
