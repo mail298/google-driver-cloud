@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, type FormEvent } from 'react'
-import { AlertCircle, Bell, CheckCircle2, Cloud, Database, Eye, EyeOff, Globe, HardDrive, Info, Link2, Lock, RefreshCw, ShieldAlert, ShieldCheck, Trash2, XCircle } from 'lucide-react'
+import { AlertCircle, Bell, CheckCircle2, Cloud, Database, Eye, EyeOff, Globe, HardDrive, Info, Link2, RefreshCw, ShieldAlert, ShieldCheck, Trash2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -434,10 +434,13 @@ export function SettingsPage() {
           </Card>
 
           <Card className="p-4">
-            <div className="flex items-center gap-2.5 mb-2">
-              <ShieldCheck className="h-5 w-5 text-blue-600" />
-              <h2 className="text-[16px] font-bold">{t('pwd_title')}</h2>
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+              <div className="flex items-center gap-2.5">
+                <ShieldCheck className="h-5 w-5 text-blue-600" />
+                <h2 className="text-[17px] font-bold">{t('pwd_title')}</h2>
+              </div>
             </div>
+
             <p className="text-[13px] text-slate-500 mb-3">
               {t('pwd_desc')}
             </p>
@@ -473,19 +476,17 @@ export function SettingsPage() {
             ) : null}
 
             {/* Change Password Form */}
-            <form onSubmit={handleChangePassword} className="grid gap-3 max-w-md">
+            <form onSubmit={handleChangePassword} className="grid gap-3.5">
               {/* Current Password Field */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  {t('pwd_current_label')}
-                </label>
+              <label className="grid gap-1.5 text-xs font-bold text-slate-500">
+                {t('pwd_current_label')}
                 <div className="relative">
                   <Input
                     type={showCurrent ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="pr-10"
+                    className="pr-10 text-slate-900 dark:text-slate-100"
                   />
                   <button
                     type="button"
@@ -496,14 +497,12 @@ export function SettingsPage() {
                     {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t('pwd_hint_current')}</p>
-              </div>
+                <span className="font-normal text-[11px] text-slate-400 dark:text-slate-400">{t('pwd_hint_current')}</span>
+              </label>
 
               {/* New Password Field */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  {t('pwd_new_label')}
-                </label>
+              <label className="grid gap-1.5 text-xs font-bold text-slate-500">
+                {t('pwd_new_label')}
                 <div className="relative">
                   <Input
                     type={showNew ? 'text' : 'password'}
@@ -511,7 +510,7 @@ export function SettingsPage() {
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="pr-10"
+                    className="pr-10 text-slate-900 dark:text-slate-100"
                   />
                   <button
                     type="button"
@@ -524,24 +523,22 @@ export function SettingsPage() {
                 </div>
                 {newPassword.length > 0 ? (
                   newPassword.length >= 8 ? (
-                    <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                    <span className="font-bold flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
                       <CheckCircle2 className="h-3.5 w-3.5" /> {t('pwd_req_min_met')}
-                    </p>
+                    </span>
                   ) : (
-                    <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-amber-600 dark:text-amber-400">
+                    <span className="font-bold flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400">
                       <AlertCircle className="h-3.5 w-3.5" /> {t('pwd_req_min_not_met')} ({newPassword.length}/8)
-                    </p>
+                    </span>
                   )
                 ) : (
-                  <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t('pwd_hint_new')}</p>
+                  <span className="font-normal text-[11px] text-slate-400 dark:text-slate-400">{t('pwd_hint_new')}</span>
                 )}
-              </div>
+              </label>
 
               {/* Confirm New Password Field */}
-              <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">
-                  {t('pwd_confirm_label')}
-                </label>
+              <label className="grid gap-1.5 text-xs font-bold text-slate-500">
+                {t('pwd_confirm_label')}
                 <div className="relative">
                   <Input
                     type={showConfirm ? 'text' : 'password'}
@@ -549,7 +546,7 @@ export function SettingsPage() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
                     required
-                    className="pr-10"
+                    className="pr-10 text-slate-900 dark:text-slate-100"
                   />
                   <button
                     type="button"
@@ -562,36 +559,27 @@ export function SettingsPage() {
                 </div>
                 {confirmPassword.length > 0 ? (
                   confirmPassword === newPassword ? (
-                    <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                    <span className="font-bold inline-flex items-center gap-1 text-[11px] text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 w-fit">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" /> {t('pwd_match_success')}
-                    </p>
+                    </span>
                   ) : (
-                    <p className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800">
+                    <span className="font-bold inline-flex items-center gap-1 text-[11px] text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded-md border border-rose-200 dark:border-rose-800 w-fit">
                       <XCircle className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" /> {t('pwd_match_error')}
-                    </p>
+                    </span>
                   )
                 ) : null}
-              </div>
+              </label>
 
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                size="sm"
-                className="w-fit font-bold mt-1 shadow-sm disabled:opacity-50"
-                disabled={changingPassword || newPassword.length < 8 || (confirmPassword.length > 0 && confirmPassword !== newPassword)}
-              >
-                {changingPassword ? (
-                  <>
-                    <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                    {t('pwd_btn_saving')}
-                  </>
-                ) : (
-                  <>
-                    <Lock className="h-3.5 w-3.5 mr-1.5" />
-                    {t('pwd_btn_save')}
-                  </>
-                )}
-              </Button>
+              {/* Submit Button aligned to right bottom corner */}
+              <div className="flex justify-end mt-1">
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={changingPassword || newPassword.length < 8 || (confirmPassword.length > 0 && confirmPassword !== newPassword)}
+                >
+                  {changingPassword ? t('pwd_btn_saving') : t('pwd_btn_save')}
+                </Button>
+              </div>
             </form>
           </Card>
 
