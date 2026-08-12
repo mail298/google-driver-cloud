@@ -276,7 +276,7 @@ connectedAccountRouter.get('/google/callback', async (req, res, next) => {
       },
     })
     await prisma.oauthState.update({ where: { id: oauthState.id }, data: { usedAt: new Date() } })
-    await syncGoogleQuota(account.id)
+    await syncGoogleQuota(account.id).catch(() => undefined)
     return res.redirect(`${env.FRONTEND_URL}/google-connected?status=success`)
   } catch (error) {
     console.error('Google OAuth callback failed:', error)
