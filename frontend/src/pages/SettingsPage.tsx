@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/drive/PageHeader'
 import { apiFetch, formatBytes, API_URL } from '@/lib/api'
 import { getGravatarUrl } from '@/lib/gravatar'
 import { getStoredUser, getAccessToken, clearAuthSession } from '@/lib/auth'
+import { useLanguage } from '@/context/LanguageContext'
 import { cn } from '@/lib/utils'
 
 type ConnectedAccount = { id: string; provider: string; email: string; displayName?: string | null; status: string; storageAccount?: { totalBytes: string | null; usedBytes: string; availableBytes: string | null; lastSyncedAt: string | null } | null }
@@ -28,6 +29,7 @@ function availableLabel(account: ConnectedAccount) {
 }
 
 export function SettingsPage() {
+  const { t } = useLanguage()
   const user = getStoredUser()
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([])
   const [message, setMessage] = useState('')
@@ -79,29 +81,36 @@ export function SettingsPage() {
   async function handleChangePassword(e: FormEvent) {
     e.preventDefault()
     if (newPassword.length < 8) {
-      setPasswordMsg('Password baru minimal 8 karakter.')
+      setPasswordMsg(t('pwd_err_min'))
       setPasswordSuccess(false)
       return
     }
     if (newPassword !== confirmPassword) {
-      setPasswordMsg('Konfirmasi password tidak cocok.')
+      setPasswordMsg(t('pwd_err_mismatch'))
       setPasswordSuccess(false)
       return
     }
     setChangingPassword(true)
     setPasswordMsg('')
     try {
-      const res = await apiFetch<{ message: string }>('/auth/change-password', {
+      await apiFetch<{ message: string }>('/auth/change-password', {
         method: 'POST',
         body: JSON.stringify({ currentPassword: currentPassword || undefined, newPassword }),
       })
-      setPasswordMsg(res.message || 'Password berhasil diperbarui!')
+      setPasswordMsg(t('pwd_success'))
       setPasswordSuccess(true)
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
-    } catch (error) {
-      setPasswordMsg(error instanceof Error ? error.message : 'Gagal memperbarui password.')
+    } catch (error: any) {
+      const code = error?.code
+      if (code === 'AUTH_CURRENT_PASSWORD_REQUIRED') {
+        setPasswordMsg(t('pwd_err_current_required'))
+      } else if (code === 'AUTH_INVALID_CURRENT_PASSWORD') {
+        setPasswordMsg(t('pwd_err_current_invalid'))
+      } else {
+        setPasswordMsg(error instanceof Error ? error.message : t('pwd_err_current_invalid'))
+      }
       setPasswordSuccess(false)
     } finally {
       setChangingPassword(false)
@@ -424,19 +433,19 @@ export function SettingsPage() {
           <Card className="p-4">
             <div className="flex items-center gap-2.5 mb-2">
               <ShieldCheck className="h-5 w-5 text-blue-600" />
-              <h2 className="text-[16px] font-bold">Ubah Password Akun</h2>
+              <h2 className="text-[16px] font-bold">{t('pwd_title')}</h2>
             </div>
             <p className="text-[13px] text-slate-500 mb-3">
-              Perbarui password akun 9Drive Anda agar bisa digunakan untuk login manual via email.
+              {t('pwd_desc')}
             </p>
 
             <div className="mb-4 rounded-2xl border border-blue-200/80 bg-blue-50/80 p-3 text-xs text-blue-900 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-200">
               <div className="flex items-start gap-2.5">
                 <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="font-bold text-xs">Petunjuk Pengguna Google / Gmail:</p>
+                  <p className="font-bold text-xs">{t('pwd_google_info_title')}</p>
                   <p className="text-[11px] opacity-90 leading-relaxed">
-                    Jika Anda daftar via <strong>Continue with Google</strong>, Anda belum memiliki password manual. Kolom <strong>Password Saat Ini</strong> bisa dikosongkan. Setelah disimpan, Anda dapat login secara manual (Email & Password) maupun via tombol Google.
+                    {t('pwd_google_info_desc')}
                   </p>
                 </div>
               </div>
@@ -449,7 +458,7 @@ export function SettingsPage() {
             ) : null}
             <form onSubmit={handleChangePassword} className="grid gap-3 max-w-md">
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Password Saat Ini (opsional jika login awal via Google)</label>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">{t('pwd_current_label')}</label>
                 <Input
                   type="password"
                   value={currentPassword}
@@ -458,7 +467,7 @@ export function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Password Baru (min. 8 karakter)</label>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">{t('pwd_new_label')}</label>
                 <Input
                   type="password"
                   value={newPassword}
@@ -468,7 +477,7 @@ export function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Konfirmasi Password Baru</label>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">{t('pwd_confirm_label')}</label>
                 <Input
                   type="password"
                   value={confirmPassword}
@@ -478,7 +487,7 @@ export function SettingsPage() {
                 />
               </div>
               <Button type="submit" size="sm" className="w-fit font-bold mt-1" disabled={changingPassword}>
-                {changingPassword ? 'Menyimpan...' : 'Simpan Password Baru'}
+                {changingPassword ? t('pwd_btn_saving') : t('pwd_btn_save')}
               </Button>
             </form>
           </Card>

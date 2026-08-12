@@ -159,6 +159,22 @@ export const translations: Dictionary = {
   quota_used_storage: { id: 'Terpakai', en: 'Used Storage' },
   quota_available: { id: 'Tersedia', en: 'Available' },
   quota_accounts: { id: 'Akun Terhubung', en: 'Connected Accounts' },
+
+  // Change Password Form & Messages
+  pwd_title: { id: 'Ubah Password Akun', en: 'Change Account Password' },
+  pwd_desc: { id: 'Perbarui password akun 9Drive Anda agar bisa digunakan untuk login manual via email.', en: 'Update your 9Drive account password to enable manual email login.' },
+  pwd_google_info_title: { id: 'Petunjuk Pengguna Google / Gmail:', en: 'Tip for Google / Gmail Users:' },
+  pwd_google_info_desc: { id: 'Jika Anda daftar via Continue with Google, Anda belum memiliki password manual. Kolom Password Saat Ini bisa dikosongkan. Setelah disimpan, Anda dapat login secara manual (Email & Password) maupun via tombol Google.', en: 'If you signed up via Continue with Google, you do not have a manual password yet. Leave Current Password empty. Once saved, you can log in using either Email & Password or Google.' },
+  pwd_current_label: { id: 'Password Saat Ini (opsional jika login awal via Google)', en: 'Current Password (optional if initial login via Google)' },
+  pwd_new_label: { id: 'Password Baru (min. 8 karakter)', en: 'New Password (min. 8 characters)' },
+  pwd_confirm_label: { id: 'Konfirmasi Password Baru', en: 'Confirm New Password' },
+  pwd_btn_save: { id: 'Simpan Password Baru', en: 'Save New Password' },
+  pwd_btn_saving: { id: 'Menyimpan...', en: 'Saving...' },
+  pwd_err_min: { id: 'Password baru minimal 8 karakter.', en: 'New password must be at least 8 characters long.' },
+  pwd_err_mismatch: { id: 'Konfirmasi password tidak cocok.', en: 'Password confirmation does not match.' },
+  pwd_err_current_required: { id: 'Password saat ini wajib diisi.', en: 'Current password is required to update your password.' },
+  pwd_err_current_invalid: { id: 'Password saat ini tidak cocok.', en: 'Current password does not match.' },
+  pwd_success: { id: 'Password berhasil diperbarui!', en: 'Password updated successfully!' },
 }
 
 type LanguageContextType = {
