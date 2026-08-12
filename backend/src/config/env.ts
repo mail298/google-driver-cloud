@@ -57,6 +57,9 @@ const getEnv = () => {
     HTTPS_PROXY: process.env.HTTPS_PROXY,
     GLOBAL_PROXY_URL: process.env.GLOBAL_PROXY_URL,
     CDN_SUBDOMAINS: process.env.CDN_SUBDOMAINS,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
   }
 }
 
