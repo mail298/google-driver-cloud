@@ -9,7 +9,7 @@ ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_RECAPTCHA_SITE_KEY=$VITE_RECAPTCHA_SITE_KEY
 ENV VITE_CDN_SUBDOMAINS=$VITE_CDN_SUBDOMAINS
 
-ENV NODE_OPTIONS="--max-old-space-size=512"
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 COPY package*.json ./
 RUN npm ci --prefer-offline --no-audit --progress=false
