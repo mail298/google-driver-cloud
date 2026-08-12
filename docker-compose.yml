@@ -11,6 +11,8 @@ services:
       - backend
     expose:
       - "80"
+    ports:
+      - "80"
     labels:
       - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "gatus.enable=true"
@@ -47,6 +49,9 @@ services:
     volumes:
       - backend_logs:/app/logs
     expose:
+      - "80"
+      - "4000"
+    ports:
       - "80"
       - "4000"
     healthcheck:
