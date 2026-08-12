@@ -175,6 +175,8 @@ export const translations: Dictionary = {
   pwd_err_current_required: { id: 'Password saat ini wajib diisi.', en: 'Current password is required to update your password.' },
   pwd_err_current_invalid: { id: 'Password saat ini tidak cocok.', en: 'Current password does not match.' },
   pwd_success: { id: 'Password berhasil diperbarui!', en: 'Password updated successfully!' },
+  pwd_hint_current: { id: '💡 Kosongkan jika Anda daftar via Google dan ini pertama kali membuat password.', en: '💡 Leave blank if you signed up via Google and this is your first time setting a password.' },
+  pwd_hint_new: { id: '🔒 Gunakan minimal 8 karakter.', en: '🔒 Must be at least 8 characters long.' },
 }
 
 type LanguageContextType = {

@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, type FormEvent } from 'react'
-import { Bell, Cloud, Database, Globe, HardDrive, Info, Link2, RefreshCw, ShieldCheck, Trash2 } from 'lucide-react'
+import { Bell, CheckCircle2, Cloud, Database, Eye, EyeOff, Globe, HardDrive, Info, Key, Link2, Lock, RefreshCw, ShieldAlert, ShieldCheck, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -74,6 +74,9 @@ export function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showCurrent, setShowCurrent] = useState(false)
+  const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [changingPassword, setChangingPassword] = useState(false)
   const [passwordMsg, setPasswordMsg] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState(false)
@@ -430,16 +433,24 @@ export function SettingsPage() {
             </div>
           </Card>
 
-          <Card className="p-4">
-            <div className="flex items-center gap-2.5 mb-2">
-              <ShieldCheck className="h-5 w-5 text-blue-600" />
-              <h2 className="text-[16px] font-bold">{t('pwd_title')}</h2>
+          <Card className="p-5 sm:p-6 transition-all border border-slate-200/80 dark:border-slate-800">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-400/10 dark:text-blue-400">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-slate-100">{t('pwd_title')}</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{t('pwd_desc')}</p>
+                </div>
+              </div>
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-1 text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                <Key className="h-3 w-3" /> Security
+              </span>
             </div>
-            <p className="text-[13px] text-slate-500 mb-3">
-              {t('pwd_desc')}
-            </p>
 
-            <div className="mb-4 rounded-2xl border border-blue-200/80 bg-blue-50/80 p-3 text-xs text-blue-900 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-200">
+            {/* Info Box Banner */}
+            <div className="mt-3 mb-5 rounded-2xl border border-blue-200/80 bg-blue-50/80 p-3.5 text-xs text-blue-900 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-200">
               <div className="flex items-start gap-2.5">
                 <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                 <div className="space-y-1">
@@ -451,43 +462,120 @@ export function SettingsPage() {
               </div>
             </div>
 
+            {/* Error / Success Alert Box */}
             {passwordMsg ? (
-              <div className={cn('mb-4 rounded-xl p-3 text-xs font-semibold border', passwordSuccess ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800')}>
-                {passwordMsg}
+              <div className={cn(
+                'mb-5 flex items-center gap-2.5 rounded-2xl p-3.5 text-xs font-bold border transition-all animate-in fade-in duration-150',
+                passwordSuccess
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800/60'
+                  : 'bg-rose-50 text-rose-800 border-rose-200/80 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800/60'
+              )}>
+                {passwordSuccess ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                ) : (
+                  <ShieldAlert className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
+                )}
+                <span>{passwordMsg}</span>
               </div>
             ) : null}
-            <form onSubmit={handleChangePassword} className="grid gap-3 max-w-md">
+
+            {/* Change Password Form */}
+            <form onSubmit={handleChangePassword} className="grid gap-4 max-w-lg">
+              {/* Current Password Field */}
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">{t('pwd_current_label')}</label>
-                <Input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="••••••••"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {t('pwd_current_label')}
+                  </label>
+                </div>
+                <div className="relative">
+                  <Input
+                    type={showCurrent ? 'text' : 'password'}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t('pwd_hint_current')}</p>
               </div>
+
+              {/* New Password Field */}
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">{t('pwd_new_label')}</label>
-                <Input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {t('pwd_new_label')}
+                  </label>
+                </div>
+                <div className="relative">
+                  <Input
+                    type={showNew ? 'text' : 'password'}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">{t('pwd_hint_new')}</p>
               </div>
+
+              {/* Confirm New Password Field */}
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">{t('pwd_confirm_label')}</label>
-                <Input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {t('pwd_confirm_label')}
+                  </label>
+                </div>
+                <div className="relative">
+                  <Input
+                    type={showConfirm ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    aria-label="Toggle password visibility"
+                  >
+                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
-              <Button type="submit" size="sm" className="w-fit font-bold mt-1" disabled={changingPassword}>
-                {changingPassword ? t('pwd_btn_saving') : t('pwd_btn_save')}
+
+              {/* Submit Button */}
+              <Button type="submit" size="sm" className="w-fit font-bold bg-blue-600 hover:bg-blue-700 text-white mt-1 shadow-sm" disabled={changingPassword}>
+                {changingPassword ? (
+                  <>
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    {t('pwd_btn_saving')}
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-3.5 w-3.5 mr-1.5" />
+                    {t('pwd_btn_save')}
+                  </>
+                )}
               </Button>
             </form>
           </Card>
