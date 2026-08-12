@@ -2,6 +2,8 @@ FROM node:20-alpine AS base
 
 WORKDIR /app
 
+RUN apk add --no-cache openssl ca-certificates
+
 ENV NODE_OPTIONS="--max-old-space-size=512"
 ARG DATABASE_URL=mysql://root:root@mysql:3306/9drive
 ARG FRONTEND_URL=https://drive9.wn-cdn.net
