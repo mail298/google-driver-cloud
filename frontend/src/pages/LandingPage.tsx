@@ -308,7 +308,8 @@ export function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mx-auto max-w-3xl text-sm sm:text-lg text-slate-300 font-medium leading-relaxed px-2"
           >
-            <strong className="text-white font-black">drive9</strong> adalah platform <strong>Google Drive Storage Gateway</strong> yang berfungsi untuk mengunggah file, mengorganisir folder virtual, memantau kuota penyimpanan multi-akun, dan mengintegrasikan API Key pengembang. Seluruh file yang diunggah dialirkan (streamed) secara aman langsung ke folder khusus <code className="text-blue-400 font-mono font-bold">9drive</code> di akun Google Drive pengguna.
+            <strong className="text-white font-black text-base sm:text-xl">drive9 Application Purpose & Overview:</strong><br />
+            <span className="text-slate-200">drive9 is a secure <strong>Google Drive Storage Gateway & Virtual Cloud Storage Manager</strong> application. It allows users to register an account, securely connect their Google Drive accounts via OAuth 2.0, organize files in virtual folders, monitor storage quota across multiple connected accounts, stream file uploads directly to a dedicated <code className="text-blue-400 font-mono font-bold">9drive</code> Google Drive folder, and manage encrypted API keys for cloud automation.</span>
           </motion.p>
 
           <motion.div
