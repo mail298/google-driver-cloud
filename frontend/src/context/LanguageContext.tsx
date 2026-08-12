@@ -181,6 +181,29 @@ export const translations: Dictionary = {
   pwd_match_error: { id: '✕ Password tidak cocok', en: '✕ Passwords do not match' },
   pwd_req_min_met: { id: '✓ Minimal 8 karakter terpenuhi', en: '✓ At least 8 characters met' },
   pwd_req_min_not_met: { id: '✕ Minimal 8 karakter', en: '✕ At least 8 characters required' },
+
+  // Register & Login Pages
+  auth_register_title: { id: 'Daftar Akun', en: 'Register' },
+  auth_register_subtitle: { id: 'Buat akun gateway penyimpanan Anda.', en: 'Create your storage gateway account.' },
+  auth_name_label: { id: 'Nama Lengkap', en: 'Full Name' },
+  auth_email_label: { id: 'Email', en: 'Email' },
+  auth_password_label: { id: 'Password', en: 'Password' },
+  auth_captcha_required: { id: 'Silakan selesaikan verifikasi captcha terlebih dahulu.', en: 'Please complete the captcha verification.' },
+  auth_btn_create: { id: 'Buat Akun', en: 'Create Account' },
+  auth_btn_creating: { id: 'Membuat Akun...', en: 'Creating Account...' },
+  auth_or: { id: 'atau', en: 'or' },
+  auth_google_btn: { id: 'Lanjutkan dengan Google & Hubungkan Drive', en: 'Continue with Google and connect Drive' },
+  auth_google_login_btn: { id: 'Lanjutkan dengan Google', en: 'Continue with Google' },
+  auth_google_redirecting: { id: 'Mengarahkan ke Google...', en: 'Redirecting to Google...' },
+  auth_already_registered: { id: 'Sudah punya akun?', en: 'Already registered?' },
+  auth_login_link: { id: 'Masuk', en: 'Login' },
+
+  auth_login_title: { id: 'Masuk Akun', en: 'Login' },
+  auth_login_subtitle: { id: 'Masuk ke akun 9Drive Anda.', en: 'Sign in to your 9Drive account.' },
+  auth_btn_login: { id: 'Masuk', en: 'Sign In' },
+  auth_btn_logging_in: { id: 'Memproses...', en: 'Signing In...' },
+  auth_no_account: { id: 'Belum punya akun?', en: "Don't have an account?" },
+  auth_register_link: { id: 'Daftar Sekarang', en: 'Register Now' },
 }
 
 type LanguageContextType = {
