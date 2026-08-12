@@ -11,7 +11,10 @@ import { streamProviderFile } from './stream-file.js'
 import { googleDownloadExportMimeTypes, normalizeHeaders, withExtension } from './stream-google-file.js'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { Readable } from 'node:stream'
-import { ZipArchive } from 'archiver'
+import type { Archiver } from 'archiver'
+// ZipArchive is available at runtime but not typed as a named export — use require
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { ZipArchive } = require('archiver') as { ZipArchive: new (opts?: object) => Archiver }
 import { createAuditLog } from '../../utils/audit.js'
 import { buildCdnPreviewUrl } from '../../utils/cdn.js'
 
@@ -358,7 +361,7 @@ fileRouter.post('/:id/public-permission', requireAuth, async (req: AuthRequest, 
     await drive.permissions.create({
       fileId: file.providerFileId,
       requestBody: {
-        role: 'writer',
+        role: 'reader',
         type: 'anyone'
       }
     })
@@ -416,7 +419,7 @@ fileRouter.get('/:id/view-url', async (req: AuthRequest, res, next) => {
       await drive.permissions.create({
         fileId: file.providerFileId,
         requestBody: {
-          role: 'writer',
+          role: 'reader',
           type: 'anyone'
         }
       })

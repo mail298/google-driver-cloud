@@ -205,7 +205,11 @@ export async function syncGoogleAppFolderFiles(accountId: string, userId: string
     }
   }
 
-  const missingFileIds = existingFiles.filter((file) => !driveFileIds.has(file.providerFileId)).map((file) => file.id)
+  // Only hard-delete active files that no longer exist in Google Drive.
+  // Soft-deleted files (status: 'deleted') are preserved — they exist in the user's recycle bin.
+  const missingFileIds = existingFiles
+    .filter((file) => file.status === 'active' && !driveFileIds.has(file.providerFileId))
+    .map((file) => file.id)
   if (missingFileIds.length > 0) {
     const result = await prisma.file.deleteMany({ where: { id: { in: missingFileIds }, userId } })
     deleted = result.count

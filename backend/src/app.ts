@@ -18,7 +18,7 @@ import { auditLogRouter } from './modules/audit-logs/audit-log.routes.js'
 import { systemRouter } from './modules/system/system.routes.js'
 
 export const app = express()
-app.set('trust proxy', true)
+app.set('trust proxy', 1)
 
 const rawFrontendUrls = (env.FRONTEND_URL || '').split(',').map((u) => u.trim().replace(/\/$/, '')).filter(Boolean)
 app.use(
@@ -29,7 +29,7 @@ app.use(
       if (rawFrontendUrls.length === 0 || rawFrontendUrls.includes(cleanOrigin) || rawFrontendUrls.includes('*')) {
         return callback(null, true)
       }
-      return callback(null, true)
+      return callback(new Error(`CORS: origin ${cleanOrigin} not allowed`))
     },
     credentials: true,
   })
