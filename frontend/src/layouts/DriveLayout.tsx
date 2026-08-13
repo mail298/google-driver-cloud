@@ -58,10 +58,10 @@ function SystemInfoDropdown({ storage }: { storage: any }) {
   const activeGoogle = storage?.accounts?.filter((a: any) => a.provider === 'google_drive' && a.status === 'connected') ?? []
 
   return (
-    <div className="absolute right-0 top-12 z-50 w-[min(calc(100vw-2rem),22rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-950/15">
-      <div className="border-b border-slate-200 px-4 py-3 bg-slate-50/50">
-        <p className="text-sm font-extrabold text-slate-950">Workspace Status & Info</p>
-        <p className="text-xs text-slate-500">Overview of your connections & guidelines</p>
+    <div className="absolute right-0 top-12 z-50 w-[min(calc(100vw-2rem),22rem)] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-950/15">
+      <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-800/50">
+        <p className="text-sm font-extrabold text-slate-950 dark:text-slate-100">Workspace Status & Info</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Overview of your connections & guidelines</p>
       </div>
       <div className="max-h-96 overflow-y-auto p-4 space-y-4">
         {/* Connection status */}
@@ -164,7 +164,7 @@ function Sidebar({
   }, [user?.email])
 
   return (
-    <aside className="flex h-full w-64 flex-col border-slate-200/60 bg-slate-50/40 backdrop-blur-xl p-4 lg:border-r">
+    <aside className="flex h-full w-64 flex-col border-slate-200/60 dark:border-slate-700/40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl p-4 lg:border-r">
       <div className="flex items-center gap-2.5 pb-3 pt-1">
         <BrandLogo className="h-8 w-8" />
         <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">9Drive</span>
@@ -288,20 +288,20 @@ function Sidebar({
         ))}
       </nav>
 
-      <div className="mt-auto border-t border-slate-200/60 pt-4 text-[13px]">
+      <div className="mt-auto border-t border-slate-200/60 dark:border-slate-700/40 pt-4 text-[13px]">
         <div className="mb-3 space-y-1.5">
           {items.map(([label, value, color]) => (
-            <div key={label} className="flex items-center justify-between text-slate-500 font-medium">
+            <div key={label} className="flex items-center justify-between text-slate-500 dark:text-slate-400 font-medium">
               <span className="flex items-center gap-1.5"><span className={cn('h-1.5 w-1.5 rounded-full', color)} />{label}</span>
-              <span className="font-semibold text-slate-700">{value}</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">{value}</span>
             </div>
           ))}
         </div>
-        <div className="flex justify-between text-sm font-bold text-slate-700">
+        <div className="flex justify-between text-sm font-bold text-slate-700 dark:text-slate-300">
           <span>{formatBytes(storage?.usedBytes)} used</span>
-          <span className="text-slate-400">{formatBytes(storage?.totalBytes)}</span>
+          <span className="text-slate-400 dark:text-slate-500">{formatBytes(storage?.totalBytes)}</span>
         </div>
-        <div className="my-2 h-1.5 rounded-full bg-slate-200/60 overflow-hidden">
+        <div className="my-2 h-1.5 rounded-full bg-slate-200/60 dark:bg-slate-700/60 overflow-hidden">
           <div className="h-full rounded-full bg-blue-600 transition-all duration-300" style={{ width: `${progress}%` }} />
         </div>
         <Button variant="danger" size="sm" className="mt-3 w-full justify-start h-10 px-3 text-[13px] font-bold" onClick={onLogout}>
@@ -521,13 +521,13 @@ export function DriveLayout() {
   }, [])
 
   return (
-    <main className="min-h-screen w-full overflow-x-hidden bg-white">
-      <div className="flex min-h-screen w-full flex-col bg-white lg:h-screen lg:overflow-hidden lg:flex-row">
+    <main className="min-h-screen w-full overflow-x-hidden bg-[var(--bg-gradient)] dark:bg-[var(--bg-gradient)]">
+      <div className="flex min-h-screen w-full flex-col lg:h-screen lg:overflow-hidden lg:flex-row">
         <div className="hidden lg:block lg:h-screen lg:shrink-0">
           <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} />
         </div>
         <div className={cn('fixed inset-0 z-40 bg-slate-950/40 transition-opacity lg:hidden', sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0')} onClick={() => setSidebarOpen(false)} />
-        <div className={cn('fixed inset-y-0 left-0 z-50 transform bg-white shadow-2xl transition-transform duration-300 ease-out lg:hidden', sidebarOpen ? 'translate-x-0' : '-translate-x-full')}>
+        <div className={cn('fixed inset-y-0 left-0 z-50 transform shadow-2xl transition-transform duration-300 ease-out lg:hidden', sidebarOpen ? 'translate-x-0' : '-translate-x-full')}>
           <div className="absolute right-4 top-4 z-10">
             <Button variant="outline" size="icon" aria-label="Close sidebar" onClick={() => setSidebarOpen(false)}>
               <X className="h-5 w-5" />
@@ -535,7 +535,7 @@ export function DriveLayout() {
           </div>
           <Sidebar user={user} storage={storage} breakdown={breakdown} accounts={accounts} onLogout={logout} onNavigate={() => setSidebarOpen(false)} />
         </div>
-        <section className="min-w-0 flex-1 p-4 sm:p-6 lg:h-screen lg:overflow-y-auto lg:p-8">
+        <section className="min-w-0 flex-1 p-4 sm:p-6 lg:h-screen lg:overflow-y-auto lg:p-8 bg-transparent">
           <header className="flex w-full min-w-0 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center justify-between gap-2 lg:hidden">
               <div className="flex items-center gap-2 min-w-0">
