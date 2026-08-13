@@ -249,10 +249,11 @@ export function LandingPage() {
     <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
       <Seo title={lang === 'id' ? 'drive9 - Gateway CDN, Streaming Video & Cloud Storage Virtual' : 'drive9 - CDN Gateway, Video Streaming & Cloud Storage Gateway'} />
 
-      {/* ── Navigation Bar (Fully Mobile & Bilingual Optimized) ───────────────── */}
-      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3">
-          <div className="flex items-center gap-2.5">
+      {/* ── Navigation Bar (Fully Mobile & Desktop Optimized) ───────────────── */}
+      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3.5">
+          {/* Brand Logo */}
+          <RouterLink to="/" className="flex items-center gap-2.5 group shrink-0">
             <img
               src="/logo.png"
               alt="drive9 logo - Google Drive Storage & CDN Gateway"
@@ -260,35 +261,36 @@ export function LandingPage() {
               height="40"
               fetchPriority="high"
               loading="eager"
-              className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain shadow-lg shadow-blue-500/25 ring-1 ring-white/20 bg-slate-900/80 p-1 shrink-0"
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain shadow-lg shadow-blue-500/20 ring-1 ring-white/10 bg-slate-900/90 p-1 transition-transform group-hover:scale-105"
             />
-            <div className="flex items-center">
-              <span className="text-lg sm:text-xl font-black tracking-tight text-white">drive9</span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
-                {lang === 'id' ? 'Gateway CDN & Storage' : 'CDN & Storage Gateway'}
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-black tracking-tight text-white group-hover:text-blue-400 transition-colors">drive9</span>
+              <span className="hidden xl:inline-flex text-[10px] font-extrabold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                {lang === 'id' ? 'Gateway CDN & Cloud' : 'CDN & Cloud Gateway'}
               </span>
             </div>
-          </div>
+          </RouterLink>
 
-          <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-xs font-bold uppercase tracking-wider text-slate-400">
-            <a href="#purpose" className="hover:text-white transition-colors">{lang === 'id' ? 'Tujuan Aplikasi' : 'App Purpose'}</a>
-            <a href="#cdn-streaming" className="hover:text-white transition-colors">{lang === 'id' ? 'CDN & Streaming' : 'CDN & Streaming'}</a>
-            <a href="#features" className="hover:text-white transition-colors">{lang === 'id' ? 'Fitur' : 'Features'}</a>
-            <a href="#security" className="hover:text-white transition-colors">{lang === 'id' ? 'Keamanan' : 'Security'}</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            <RouterLink to="/privacy" className="hover:text-white transition-colors">{lang === 'id' ? 'Privasi' : 'Privacy'}</RouterLink>
-            <RouterLink to="/terms" className="hover:text-white transition-colors">{lang === 'id' ? 'Syarat & Ketentuan' : 'Terms'}</RouterLink>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden md:flex items-center gap-5 lg:gap-7 text-xs lg:text-sm font-medium text-slate-300">
+            <a href="#purpose" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Tujuan' : 'Purpose'}</a>
+            <a href="#cdn-streaming" className="hover:text-white hover:font-semibold transition-colors">CDN & Streaming</a>
+            <a href="#features" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Fitur' : 'Features'}</a>
+            <a href="#security" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Keamanan' : 'Security'}</a>
+            <a href="#faq" className="hover:text-white hover:font-semibold transition-colors">FAQ</a>
+            <RouterLink to="/terms" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Syarat & Privasi' : 'Terms & Privacy'}</RouterLink>
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          {/* Desktop CTA & Language Switcher */}
+          <div className="hidden md:flex items-center gap-3 shrink-0">
             <LanguageSwitcher />
             <RouterLink to="/login">
-              <Button variant="outline" className="h-9 px-4 text-xs font-bold border border-slate-700/80 bg-slate-900/90 text-white hover:bg-slate-800 hover:text-white transition-all rounded-xl shadow-sm">
+              <Button variant="outline" className="h-9 px-4 text-xs font-bold border border-slate-700/80 bg-slate-900/80 text-slate-200 hover:bg-slate-800 hover:text-white transition-all rounded-xl shadow-sm">
                 {lang === 'id' ? 'Masuk' : 'Sign In'}
               </Button>
             </RouterLink>
             <RouterLink to="/register">
-              <Button className="h-9 px-4 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 transition-all rounded-xl">
+              <Button className="h-9 px-4 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 transition-all rounded-xl">
                 {lang === 'id' ? 'Mulai Gratis' : 'Get Started'}
               </Button>
             </RouterLink>
@@ -298,7 +300,7 @@ export function LandingPage() {
           <div className="flex md:hidden items-center gap-2">
             <LanguageSwitcher />
             <RouterLink to="/login">
-              <Button size="sm" className="h-8 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-lg">
+              <Button size="sm" className="h-8 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-sm">
                 {lang === 'id' ? 'Masuk' : 'Sign In'}
               </Button>
             </RouterLink>
@@ -306,7 +308,7 @@ export function LandingPage() {
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
-              className="p-2 text-slate-400 hover:text-white rounded-lg bg-slate-900 border border-slate-800 focus:outline-none"
+              className="p-2 text-slate-300 hover:text-white rounded-xl bg-slate-900/90 border border-slate-800 focus:outline-none transition-colors"
             >
               {mobileMenuOpen ? <X className="h-5 w-5 text-blue-400" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -326,8 +328,8 @@ export function LandingPage() {
               <div className="flex flex-col space-y-3 text-sm font-semibold text-slate-300">
                 <a href="#purpose" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Tujuan Aplikasi' : 'App Purpose'}</a>
                 <a href="#cdn-streaming" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'CDN & Streaming Video' : 'CDN & Video Streaming'}</a>
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Fitur & Keunggulan' : 'Features'}</a>
-                <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Keamanan Data' : 'Security'}</a>
+                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Fitur & Keunggulan' : 'Features & Benefits'}</a>
+                <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Keamanan Data' : 'Data Security'}</a>
                 <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">FAQ</a>
                 <RouterLink to="/privacy" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'}</RouterLink>
                 <RouterLink to="/terms" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Ketentuan Layanan' : 'Terms of Service'}</RouterLink>
@@ -335,12 +337,12 @@ export function LandingPage() {
               <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
                 <RouterLink to="/login" onClick={() => setMobileMenuOpen(false)}>
                   <Button variant="outline" className="w-full h-10 text-xs font-bold border border-slate-700 bg-slate-900 text-white rounded-xl">
-                    {lang === 'id' ? 'Masuk dengan Google' : 'Sign In with Google'}
+                    {lang === 'id' ? 'Masuk ke Dashboard' : 'Sign In to Dashboard'}
                   </Button>
                 </RouterLink>
                 <RouterLink to="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full h-10 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl">
-                    {lang === 'id' ? 'Daftar Gratis' : 'Get Started Free'}
+                  <Button className="w-full h-10 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-md shadow-blue-600/30">
+                    {lang === 'id' ? 'Daftar Akun Gratis' : 'Get Started Free'}
                   </Button>
                 </RouterLink>
               </div>
