@@ -29,10 +29,10 @@ type BackendFolder = { id: string; name: string; color: string; iconUrl?: string
 type ConnectedAccount = { id: string; provider: string; email: string; displayName?: string | null; status: string }
 
 const sizeActiveClasses: Record<FolderSizeScale, string> = {
-  xs: 'bg-white text-slate-800 dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/30 shadow-sm dark:shadow-none',
-  sm: 'bg-white text-slate-800 dark:bg-orange-500/20 dark:text-orange-300 dark:border-orange-500/30 shadow-sm dark:shadow-none',
-  md: 'bg-white text-slate-800 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30 shadow-sm dark:shadow-none',
-  lg: 'bg-white text-slate-800 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30 shadow-sm dark:shadow-none'
+  xs: 'bg-blue-600 text-white shadow-sm border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-600',
+  sm: 'bg-blue-600 text-white shadow-sm border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-600',
+  md: 'bg-blue-600 text-white shadow-sm border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-600',
+  lg: 'bg-blue-600 text-white shadow-sm border-blue-600 dark:bg-blue-600 dark:text-white dark:border-blue-600'
 }
 
 type FileViewMode = 'list' | 'grid'
@@ -908,15 +908,16 @@ export function AllFilesPage() {
         className="relative min-h-[620px] w-full min-w-0"
       >
         <PageHeader title={activeFolder ? <span className="block min-w-0 truncate"><button className="text-blue-600 hover:underline" onClick={closeFolder}>{t('nav_all_files')}</button>{folderBreadcrumbs.map((folder, index) => <span key={folder.id}><span className="text-slate-400"> / </span>{index === folderBreadcrumbs.length - 1 ? <span>{folder.name}</span> : <button className="text-blue-600 hover:underline" onClick={() => folder.id && openFolderById(folder.id)}>{folder.name}</button>}</span>)}</span> : t('nav_all_files')} />
-        {/* Action buttons row — visible on mobile/tablet, hidden on desktop (desktop uses header slot) */}
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 lg:hidden">
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <Button size="sm" onClick={() => setUploadOpen(true)} className="h-9 px-3 text-xs font-bold shadow-sm">
-              <Upload className="h-3.5 w-3.5 mr-1" />
+        
+        {/* Upper Action Bar */}
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 lg:hidden">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="sm" onClick={() => setUploadOpen(true)} className="h-9 px-3.5 text-xs font-extrabold">
+              <Upload className="mr-1.5 h-4 w-4" />
               {t('toolbar_upload')}
             </Button>
             <Button size="sm" variant="outline" onClick={() => setFolderOpen(true)} className="h-9 px-3 text-xs font-bold">
-              <FolderPlus className="h-3.5 w-3.5 mr-1" />
+              <FolderPlus className="mr-1.5 h-4 w-4 text-amber-500" />
               {t('toolbar_new_folder')}
             </Button>
             <Button size="sm" variant="outline" disabled={syncingDrive} onClick={syncGoogleDrive} className="h-9 px-3 text-xs font-bold">
@@ -924,16 +925,18 @@ export function AllFilesPage() {
               {syncingDrive ? t('toolbar_syncing') : t('toolbar_sync')}
             </Button>
           </div>
-          <div className="flex items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-800/80">
+          <div className="flex items-center gap-0.5 rounded-xl border border-slate-200/80 bg-slate-100/90 dark:border-slate-800 dark:bg-slate-900/90 p-1 shadow-inner">
             {(['xs', 'sm', 'md', 'lg'] as FolderSizeScale[]).map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => changeFolderSize(s)}
-                className={[
+                className={cn(
                   'rounded-lg px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide transition-all border border-transparent',
-                  folderSizeScale === s ? sizeActiveClasses[s] : 'text-slate-400 hover:text-slate-600 dark:text-slate-400 dark:hover:text-slate-200'
-                ].join(' ')}
+                  folderSizeScale === s
+                    ? sizeActiveClasses[s]
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
+                )}
                 aria-label={`Folder size ${s}`}
               >
                 {s}
@@ -941,6 +944,7 @@ export function AllFilesPage() {
             ))}
           </div>
         </div>
+
         {message ? <p className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-300">{message}</p> : null}
         {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/80 p-5 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">{t('folder_no_folders')}</p>)}
         {!activeFolder && moreFolders.length > 0 ? <>
