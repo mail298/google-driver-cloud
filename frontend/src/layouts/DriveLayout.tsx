@@ -179,7 +179,7 @@ function Sidebar({
       >
         <div
           onClick={() => setUserMenuOpen((prev) => !prev)}
-          className="flex items-center gap-2.5 cursor-pointer rounded-xl p-1.5 -mx-1.5 hover:bg-slate-200/60 transition-colors group select-none"
+          className="flex items-center gap-2.5 cursor-pointer rounded-xl p-1.5 -mx-1.5 hover:bg-slate-200/60 dark:hover:bg-slate-800/60 transition-colors group select-none"
         >
           {!profileImageUrl || avatarError ? (
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-xs font-bold text-white shadow-sm border border-blue-400/20">
@@ -189,18 +189,18 @@ function Sidebar({
             <img
               src={profileImageUrl}
               alt="User avatar"
-              className="h-8 w-8 rounded-full border border-slate-200 object-cover"
+              className="h-8 w-8 rounded-full border border-slate-200 dark:border-slate-700 object-cover"
               onError={() => setAvatarError(true)}
             />
           )}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[14px] font-bold text-slate-900 leading-none">{user?.name ?? 'User'}</p>
-            <p className="truncate text-[11px] text-slate-500 mt-1">{user?.email ?? 'Loading...'}</p>
+            <p className="truncate text-[14px] font-bold text-slate-900 dark:text-slate-100 leading-none">{user?.name ?? 'User'}</p>
+            <p className="truncate text-[11px] text-slate-500 dark:text-slate-400 mt-1">{user?.email ?? 'Loading...'}</p>
           </div>
           <div
             className={cn(
-              "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition-all",
-              userMenuOpen && "bg-slate-200 text-slate-900"
+              "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-all",
+              userMenuOpen && "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
             )}
             title={t('nav_connected_accounts')}
           >
@@ -282,7 +282,7 @@ function Sidebar({
             {item.label}
           </button>
         ) : (
-          <NavLink key={item.label} to={item.href} onClick={onNavigate} className={({ isActive }) => cn('inline-flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[13px] font-bold transition-all border border-transparent', isActive ? 'bg-blue-600/10 text-blue-600 border-blue-600/10 shadow-sm' : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900')}>
+          <NavLink key={item.label} to={item.href} onClick={onNavigate} className={({ isActive }) => cn('inline-flex h-10 items-center gap-2.5 rounded-xl px-3.5 text-[13px] font-bold transition-all border border-transparent', isActive ? 'bg-blue-600/10 text-blue-600 border-blue-600/10 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30 shadow-sm' : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/60 dark:hover:text-slate-100')}>
             <item.icon className="h-4 w-4" />
             {item.label}
           </NavLink>

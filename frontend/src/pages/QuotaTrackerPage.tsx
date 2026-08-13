@@ -213,29 +213,29 @@ export function QuotaTrackerPage() {
       <Card className="mt-6 p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 className="text-lg font-extrabold">Upload Routing</h2>
-            <p className="mt-1 text-sm text-slate-500">Choose how new uploads pick connected storage accounts.</p>
+            <h2 className="text-lg font-extrabold text-slate-900 dark:text-slate-100">Upload Routing</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Choose how new uploads pick connected storage accounts.</p>
           </div>
-          <label className="grid gap-2 text-sm font-semibold lg:w-64">Routing mode<select className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm" value={routingPolicy.mode} onChange={(event) => saveRoutingPolicy({ ...routingPolicy, mode: event.target.value as RoutingMode }).catch((error) => setMessage(error instanceof Error ? error.message : 'Failed to update routing policy'))}><option value="most_available">Most available</option><option value="round_robin">Round robin</option><option value="priority">Priority order</option></select></label>
+          <label className="grid gap-2 text-sm font-semibold text-slate-800 dark:text-slate-200 lg:w-64">Routing mode<select className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100" value={routingPolicy.mode} onChange={(event) => saveRoutingPolicy({ ...routingPolicy, mode: event.target.value as RoutingMode }).catch((error) => setMessage(error instanceof Error ? error.message : 'Failed to update routing policy'))}><option value="most_available">Most available</option><option value="round_robin">Round robin</option><option value="priority">Priority order</option></select></label>
         </div>
         <div className="mt-4 grid gap-3">
-          {orderedAccounts().map((account, index) => <div key={account.id} className="flex flex-col gap-3 rounded-xl bg-slate-50 p-3 sm:flex-row sm:items-center sm:justify-between">
+          {orderedAccounts().map((account, index) => <div key={account.id} className="flex flex-col gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 dark:border dark:border-slate-800/80 p-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600"><ProviderIcon provider={account.provider} /></div>
-              <div><p className="font-semibold">{account.displayName || account.email}</p><p className="text-sm text-slate-500">{providerLabel(account.provider)} · {formatBytes(account.storageAccount?.usedBytes)} used · {availableLabel(account)} free</p></div>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm"><ProviderIcon provider={account.provider} /></div>
+              <div><p className="font-semibold text-slate-900 dark:text-slate-100">{account.displayName || account.email}</p><p className="text-sm text-slate-500 dark:text-slate-400">{providerLabel(account.provider)} · {formatBytes(account.storageAccount?.usedBytes)} used · {availableLabel(account)} free</p></div>
             </div>
             <div className="flex gap-2"><Button variant="outline" size="sm" onClick={() => moveAccount(account.id, -1)} disabled={index === 0}>Up</Button><Button variant="outline" size="sm" onClick={() => moveAccount(account.id, 1)} disabled={index === accounts.length - 1}>Down</Button></div>
           </div>)}
-          {accounts.length === 0 ? <p className="text-sm text-slate-500">Connect storage accounts to configure routing.</p> : null}
+          {accounts.length === 0 ? <p className="text-sm text-slate-500 dark:text-slate-400">Connect storage accounts to configure routing.</p> : null}
         </div>
       </Card>
 
       <div className="mt-6 grid gap-5 md:grid-cols-2">
         {accounts.length === 0 ? (
           <Card className="col-span-full p-8 text-center">
-            <Cloud className="mx-auto h-10 w-10 text-blue-600" />
-            <h2 className="mt-4 text-xl font-extrabold">No connected drives</h2>
-            <p className="mt-2 text-sm text-slate-500">Connect Google Drive or S3-compatible storage to start tracking quota.</p>
+            <Cloud className="mx-auto h-10 w-10 text-blue-600 dark:text-blue-400" />
+            <h2 className="mt-4 text-xl font-extrabold text-slate-900 dark:text-slate-100">No connected drives</h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Connect Google Drive or S3-compatible storage to start tracking quota.</p>
             <Button className="mt-5" onClick={connectDrive}><Link2 className="h-4 w-4" />Connect Drive</Button>
           </Card>
         ) : accounts.map((account) => {
@@ -245,18 +245,18 @@ export function QuotaTrackerPage() {
             <Card key={account.id} className="overflow-hidden p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white"><ProviderIcon provider={account.provider} /></div>
-                  <div><h2 className="font-extrabold">{providerLabel(account.provider)}</h2><p className="text-sm text-slate-500">{account.email}</p></div>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md"><ProviderIcon provider={account.provider} /></div>
+                  <div><h2 className="font-extrabold text-slate-900 dark:text-slate-100">{providerLabel(account.provider)}</h2><p className="text-sm text-slate-500 dark:text-slate-400">{account.email}</p></div>
                 </div>
                 <div className="flex gap-2"><Button variant="outline" size="icon" onClick={() => sync(account.id)} disabled={syncingAccountId === account.id}><RefreshCw className={syncingAccountId === account.id ? 'h-5 w-5 animate-spin' : 'h-5 w-5'} /></Button></div>
               </div>
               <div className="mt-6">
                 <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2 font-semibold"><span className={cn('h-3 w-3 rounded-full', color.split(' ')[0])} />storage</span>
-                  <span className="font-bold">{percent}%</span>
+                  <span className="flex items-center gap-2 font-semibold text-slate-700 dark:text-slate-300"><span className={cn('h-3 w-3 rounded-full', color.split(' ')[0])} />storage</span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">{percent}%</span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-100"><div className={cn('h-full rounded-full', color.split(' ')[0])} style={{ width: `${percent}%` }} /></div>
-                <div className="mt-3 flex items-center justify-between text-sm text-slate-500"><span>{formatBytes(account.storageAccount?.usedBytes)} / {storageLimitLabel(account)}</span><span>Available {availableLabel(account)}</span></div>
+                <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div className={cn('h-full rounded-full', color.split(' ')[0])} style={{ width: `${percent}%` }} /></div>
+                <div className="mt-3 flex items-center justify-between text-sm text-slate-500 dark:text-slate-400"><span>{formatBytes(account.storageAccount?.usedBytes)} / {storageLimitLabel(account)}</span><span>Available {availableLabel(account)}</span></div>
               </div>
             </Card>
           )

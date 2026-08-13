@@ -942,8 +942,8 @@ export function AllFilesPage() {
             ))}
           </div>
         </div>
-        {message ? <p className="mt-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">{message}</p> : null}
-        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">{t('folder_no_folders')}</p>)}
+        {message ? <p className="mt-3 rounded-xl border border-blue-200 bg-blue-50 p-3 text-sm text-blue-700 dark:border-blue-800/60 dark:bg-blue-950/40 dark:text-blue-300">{message}</p> : null}
+        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl border border-slate-200/80 bg-slate-50/80 p-5 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">{t('folder_no_folders')}</p>)}
         {!activeFolder && moreFolders.length > 0 ? <>
           <h2 className="mt-4 font-extrabold text-slate-700 dark:text-slate-200">{t('folder_header_more_folders')}</h2>
           <FolderGrid items={moreFolders} sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />

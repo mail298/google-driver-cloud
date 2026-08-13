@@ -140,31 +140,31 @@ export function ActivityLogPage() {
       />
 
       {error && (
-        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700">
+        <div className="mt-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300">
           <AlertTriangle className="h-5 w-5 shrink-0" />
           <p className="text-sm font-semibold">{error}</p>
         </div>
       )}
 
-      <Card className="mt-8 overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
-        <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4">
-          <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <History className="h-5 w-5 text-slate-500" />
+      <Card className="mt-8 overflow-hidden border border-slate-200 bg-white shadow-xl shadow-slate-900/5 dark:border-slate-800 dark:bg-slate-900/90">
+        <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <History className="h-5 w-5 text-slate-500 dark:text-slate-400" />
             Recent Activity Trail
           </h2>
         </div>
 
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800/80">
           {loading ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-              <RefreshCw className="h-8 w-8 animate-spin text-blue-600 mb-2" />
+            <div className="flex flex-col items-center justify-center py-12 text-slate-500 dark:text-slate-400">
+              <RefreshCw className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mb-2" />
               <p className="text-sm">Loading activity logs...</p>
             </div>
           ) : logs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-slate-400">
-              <History className="h-12 w-12 stroke-[1.5] mb-3 text-slate-300" />
-              <p className="font-semibold text-slate-600">No activity yet</p>
-              <p className="text-sm text-slate-400 mt-1">Actions you perform on your folders and files will appear here.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
+              <History className="h-12 w-12 stroke-[1.5] mb-3 text-slate-300 dark:text-slate-600" />
+              <p className="font-semibold text-slate-600 dark:text-slate-300">No activity yet</p>
+              <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">Actions you perform on your folders and files will appear here.</p>
             </div>
           ) : (
             logs.map((log) => {
@@ -172,17 +172,17 @@ export function ActivityLogPage() {
               const EntityIcon = log.entityType === 'folder' ? Folder : FileText
 
               return (
-                <div key={log.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 hover:bg-slate-50 transition-colors">
+                <div key={log.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
                   <div className="flex items-start gap-4">
                     <div className={cn("flex h-9 w-9 items-center justify-center rounded-xl border font-bold shrink-0", badge.bg)}>
                       <badge.icon className="h-4 w-4" />
                     </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-bold text-slate-900 uppercase tracking-wider text-[11px] px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50">
+                        <span className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] px-2 py-0.5 rounded-full border border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
                           {badge.label}
                         </span>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                           <EntityIcon className="h-3.5 w-3.5" />
                           <span>{log.entityType}</span>
                         </div>
@@ -193,7 +193,7 @@ export function ActivityLogPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-slate-400 self-end sm:self-center">
+                  <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 self-end sm:self-center">
                     <Clock className="h-3.5 w-3.5" />
                     <span>{formatDate(log.createdAt)}</span>
                   </div>
