@@ -12,21 +12,21 @@
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-bold: #0f172a;
-  --card-bg: rgba(255, 255, 255, 0.55);
-  --card-border: rgba(255, 255, 255, 0.7);
-  --sidebar-bg: rgba(255, 255, 255, 0.5);
-  --sidebar-border: rgba(255, 255, 255, 0.6);
-  --input-bg: rgba(255, 255, 255, 0.6);
+  --card-bg: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(226, 232, 240, 0.8);
+  --sidebar-bg: rgba(255, 255, 255, 0.75);
+  --sidebar-border: rgba(226, 232, 240, 0.8);
+  --input-bg: rgba(255, 255, 255, 0.9);
   --input-border: rgba(203, 213, 225, 0.8);
-  --input-focus-bg: rgba(255, 255, 255, 0.95);
-  --shadow-color: rgba(0, 0, 0, 0.03);
-  --shadow-hover: rgba(0, 0, 0, 0.06);
-  --active-nav-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%);
+  --input-focus-bg: #ffffff;
+  --shadow-color: rgba(0, 0, 0, 0.04);
+  --shadow-hover: rgba(0, 0, 0, 0.08);
+  --active-nav-bg: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
   --active-nav-text: #1d4ed8;
   --active-nav-border: #3b82f6;
   --button-shadow: rgba(59, 130, 246, 0.25);
   --button-hover-shadow: rgba(59, 130, 246, 0.35);
-  --outline-btn-bg: rgba(255, 255, 255, 0.4);
+  --outline-btn-bg: rgba(255, 255, 255, 0.8);
   --outline-btn-border: rgba(203, 213, 225, 0.8);
 }
 
@@ -37,24 +37,24 @@
     radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 55%),
     #090d16;
   --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
+  --text-secondary: #cbd5e1;
   --text-bold: #f8fafc;
-  --card-bg: rgba(18, 24, 43, 0.65);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --sidebar-bg: rgba(10, 15, 28, 0.75);
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --input-bg: rgba(255, 255, 255, 0.05);
-  --input-border: rgba(255, 255, 255, 0.12);
-  --input-focus-bg: rgba(255, 255, 255, 0.1);
-  --shadow-color: rgba(0, 0, 0, 0.35);
-  --shadow-hover: rgba(0, 0, 0, 0.5);
-  --active-nav-bg: linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(244, 63, 94, 0.08) 100%);
-  --active-nav-text: #f8fafc;
+  --card-bg: rgba(18, 24, 43, 0.75);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --sidebar-bg: rgba(10, 15, 28, 0.85);
+  --sidebar-border: rgba(255, 255, 255, 0.12);
+  --input-bg: rgba(255, 255, 255, 0.06);
+  --input-border: rgba(255, 255, 255, 0.15);
+  --input-focus-bg: rgba(255, 255, 255, 0.12);
+  --shadow-color: rgba(0, 0, 0, 0.4);
+  --shadow-hover: rgba(0, 0, 0, 0.6);
+  --active-nav-bg: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(244, 63, 94, 0.1) 100%);
+  --active-nav-text: #ffffff;
   --active-nav-border: #6366f1;
   --button-shadow: rgba(99, 102, 241, 0.35);
   --button-hover-shadow: rgba(99, 102, 241, 0.5);
-  --outline-btn-bg: rgba(255, 255, 255, 0.04);
-  --outline-btn-border: rgba(255, 255, 255, 0.12);
+  --outline-btn-bg: rgba(255, 255, 255, 0.05);
+  --outline-btn-border: rgba(255, 255, 255, 0.15);
 }
 
 :root {
@@ -279,4 +279,59 @@ aside .card button.text-orange-600:hover {
   border-color: rgba(239, 68, 68, 0.3);
   color: #ff8787;
   transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   🌙 DARK MODE GLOBAL CONTRAST ENHANCEMENTS
+   ========================================================================== */
+.dark {
+  color-scheme: dark;
+}
+
+.dark .text-slate-950,
+.dark .text-slate-900,
+.dark .text-slate-800,
+.dark .text-slate-700,
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+  color: #f8fafc !important;
+}
+
+.dark .text-slate-600,
+.dark .text-slate-500 {
+  color: #cbd5e1 !important;
+}
+
+.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+.dark nav a:not(.active),
+.dark aside a:not(.active) {
+  color: #cbd5e1 !important;
+}
+
+.dark nav a:not(.active):hover,
+.dark aside a:not(.active):hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark .bg-slate-50,
+.dark .bg-slate-100 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .bg-slate-200 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-100,
+.dark .border-slate-200\/60 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
