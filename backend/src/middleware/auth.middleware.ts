@@ -2,8 +2,21 @@ import type { NextFunction, Request, Response } from 'express'
 import { prisma } from '../config/prisma.js'
 import { verifyAccessToken } from '../utils/jwt.js'
 
+/**
+ * AuthRequest — request type where `user` may or may not be set.
+ * Use for middleware that optionally reads user identity.
+ */
 export type AuthRequest = Request & {
   user?: { id: string; sessionId: string }
+}
+
+/**
+ * AuthenticatedRequest — request type where `user` is guaranteed to be set.
+ * Use in route handlers that are protected by `requireAuth`.
+ * This avoids the need for `req.user!` non-null assertions everywhere.
+ */
+export type AuthenticatedRequest = Request & {
+  user: { id: string; sessionId: string }
 }
 
 export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {

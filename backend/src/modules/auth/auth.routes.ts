@@ -3,12 +3,13 @@ import { google } from 'googleapis'
 import { z } from 'zod'
 import { prisma } from '../../config/prisma.js'
 import { env } from '../../config/env.js'
-import { requireAuth, type AuthRequest } from '../../middleware/auth.middleware.js'
+import { requireAuth, type AuthRequest, type AuthenticatedRequest } from '../../middleware/auth.middleware.js'
 import { hashPassword, verifyPassword } from '../../utils/password.js'
 import { encryptText, hashToken, randomToken } from '../../utils/crypto.js'
 import { signAccessToken } from '../../utils/jwt.js'
 import { createOAuthClient, syncGoogleQuota } from '../google/google.service.js'
 import { notifyUserLogin, notifyUserRegistration } from '../../services/telegram.service.js'
+import { getClientIp } from '../../utils/ip.js'
 
 export const authRouter = Router()
 
@@ -41,13 +42,7 @@ async function verifyCaptcha(token: string | undefined) {
   return Boolean(data.success)
 }
 
-function getClientIp(req: any): string {
-  const cfIp = req.header('cf-connecting-ip')
-  if (cfIp) return String(cfIp).trim()
-  const xForwarded = req.header('x-forwarded-for')
-  if (xForwarded) return String(xForwarded).split(',')[0].trim()
-  return String(req.ip || 'unknown').trim()
-}
+
 
 authRouter.post('/register', async (req, res, next) => {
   try {
@@ -200,18 +195,20 @@ authRouter.post('/refresh', async (req, res, next) => {
   }
 })
 
-authRouter.post('/logout', requireAuth, async (req: AuthRequest, res, next) => {
+authRouter.post('/logout', requireAuth, async (req, res, next) => {
+  const authReq = req as AuthenticatedRequest
   try {
-    await prisma.userSession.update({ where: { id: req.user!.sessionId }, data: { revokedAt: new Date() } })
+    await prisma.userSession.update({ where: { id: authReq.user.sessionId }, data: { revokedAt: new Date() } })
     return res.json({ status: 'ok' })
   } catch (error) {
     return next(error)
   }
 })
 
-authRouter.get('/me', requireAuth, async (req: AuthRequest, res, next) => {
+authRouter.get('/me', requireAuth, async (req, res, next) => {
+  const authReq = req as AuthenticatedRequest
   try {
-    const user = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id }, select: { id: true, name: true, email: true, status: true } })
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: authReq.user.id }, select: { id: true, name: true, email: true, status: true } })
     return res.json({ user })
   } catch (error) {
     return next(error)
@@ -223,10 +220,11 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(8, 'New password must be at least 8 characters long.'),
 })
 
-authRouter.post('/change-password', requireAuth, async (req: AuthRequest, res, next) => {
+authRouter.post('/change-password', requireAuth, async (req, res, next) => {
+  const authReq = req as AuthenticatedRequest
   try {
     const body = changePasswordSchema.parse(req.body)
-    const user = await prisma.user.findUniqueOrThrow({ where: { id: req.user!.id } })
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: authReq.user.id } })
 
     const isGoogleUnset = user.passwordHash === '!google_oauth_no_password'
 

@@ -1,10 +1,6 @@
 import { clearAuthSession, getAccessToken, getRefreshToken, setAccessToken } from '@/lib/auth'
 
-const isProd = import.meta.env.PROD
-const rawApiUrl = import.meta.env.VITE_API_URL
-export const API_URL = (rawApiUrl && rawApiUrl !== 'http://localhost:4000' && !rawApiUrl.includes('wn-cdn.net'))
-  ? rawApiUrl
-  : (isProd ? 'https://drive9-backend.wn-cdn.net' : 'http://localhost:4000')
+export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:4000').replace(/\/$/, '')
 
 
 type ApiOptions = RequestInit & { skipAuth?: boolean; retry?: boolean }
@@ -44,7 +40,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: response.statusText }))
+    const error = await response.json().catch(() => ({ code: undefined, message: response.statusText }))
     if (response.status === 401 && !options.skipAuth) clearAuthSession()
     if (response.status === 403 && error.code === 'IP_NOT_ALLOWED') {
       try {
@@ -56,7 +52,10 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
         sessionStorage.removeItem('ip_blocked_msg')
       } catch { }
     }
-    throw new Error(error.message ?? 'Request failed')
+    // Forward both message AND code so pages can translate based on error code
+    const apiErr = new Error(error.message ?? 'Request failed')
+    ;(apiErr as any).code = error.code
+    throw apiErr
   } else {
     try {
       sessionStorage.removeItem('ip_blocked_msg')
@@ -76,8 +75,8 @@ export function formatBytes(input: string | number | bigint | null | undefined) 
   return `${(bytes / 1024 ** index).toFixed(index === 0 ? 0 : 2)} ${units[index]}`
 }
 
-export function formatDate(value: string) {
-  return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
+export function formatDate(value: string, locale = 'en') {
+  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value))
 }
 
 export function formatCdnUrl(originalUrl: string, keyId?: string) {

@@ -32,7 +32,7 @@ const RobotsPage = lazy(() => import('@/pages/RobotsPage').then(m => ({ default:
 
 function RouteLoader() {
   return (
-    <div className="min-h-screen bg-[#030712] flex items-center justify-center">
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <div className="flex flex-col items-center gap-3 text-slate-400">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         <span className="text-xs font-mono font-medium tracking-wider">Loading drive9...</span>
