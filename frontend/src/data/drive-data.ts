@@ -1,3 +1,16 @@
+/**
+ * drive-data.ts
+ *
+ * MOCK / DEMO DATA — used only for landing page showcases and Storybook previews.
+ * These are NOT real file/folder records from the API.
+ *
+ * Pages that display actual data (AllFilesPage, SharedPage, etc.) fetch from
+ * the API at runtime and do NOT import these constants.
+ *
+ * If you are building a new UI component and need placeholder data,
+ * import from here. Do NOT use this data as a fallback for real API responses.
+ */
+
 export type FolderItem = {
   id?: string
   name: string
@@ -29,6 +42,10 @@ export type FileItem = {
   folderId?: string | null
   folderName?: string | null
 }
+
+// ---------------------------------------------------------------------------
+// Mock data — for landing page previews only
+// ---------------------------------------------------------------------------
 
 export const folders: FolderItem[] = [
   { name: 'Campaign Assets', updated: 'Last updated 2 days ago', color: 'text-lime-500' },

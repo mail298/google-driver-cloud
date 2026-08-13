@@ -908,7 +908,7 @@ export function AllFilesPage() {
         className="relative min-h-[620px] w-full min-w-0"
       >
         <PageHeader title={activeFolder ? <span className="block min-w-0 truncate"><button className="text-blue-600 hover:underline" onClick={closeFolder}>{t('nav_all_files')}</button>{folderBreadcrumbs.map((folder, index) => <span key={folder.id}><span className="text-slate-400"> / </span>{index === folderBreadcrumbs.length - 1 ? <span>{folder.name}</span> : <button className="text-blue-600 hover:underline" onClick={() => folder.id && openFolderById(folder.id)}>{folder.name}</button>}</span>)}</span> : t('nav_all_files')} />
-        
+
         {/* Upper Action Bar */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 lg:hidden">
           <div className="flex flex-wrap items-center gap-2">
@@ -1173,8 +1173,8 @@ export function AllFilesPage() {
         title={totalSelectedCount > 0 ? 'Hapus Item Terpilih' : 'Hapus File'}
         description={
           totalSelectedCount > 0
-            ? `Hapus ${totalSelectedCount} item (${selectedFileIds.size} file, ${selectedFolderIds.size} folder) dari 9Drive?`
-            : `Hapus ${activeFile?.name ?? 'file'} dari 9Drive?`
+            ? `Hapus ${totalSelectedCount} item (${selectedFileIds.size} file, ${selectedFolderIds.size} folder) dari Drive9?`
+            : `Hapus ${activeFile?.name ?? 'file'} dari Drive9?`
         }
         onClose={() => setDeleteOpen(false)}
       >
@@ -1327,9 +1327,9 @@ export function AllFilesPage() {
               <div className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-4 dark:border-slate-800 dark:bg-slate-900/50 min-w-0 overflow-hidden">
                 <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 min-w-0">
                   <Copy className="h-4 w-4 shrink-0 text-slate-400" />
-                  <span>9Drive Web View Page</span>
+                  <span>Drive9 Web View Page</span>
                 </label>
-                <p className="text-xs text-slate-500 mb-2 leading-relaxed">Opens full 9Drive preview interface with download button.</p>
+                <p className="text-xs text-slate-500 mb-2 leading-relaxed">Opens full Drive9 preview interface with download button.</p>
                 <div className="flex flex-col sm:flex-row gap-2 min-w-0">
                   <Input value={webViewPageUrl} readOnly className="flex-1 min-w-0 font-mono text-xs bg-white dark:bg-slate-950" />
                   <Button

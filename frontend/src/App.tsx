@@ -21,9 +21,9 @@ function safeLazy<T extends React.ComponentType<any>>(
       const page = await importFn()
       return 'default' in page ? (page as { default: T }) : { default: Object.values(page)[0] as T }
     } catch (error) {
-      const chunkRetry = sessionStorage.getItem('chunk_retry_terms')
+      const chunkRetry = sessionStorage.getItem('app_chunk_retry')
       if (!chunkRetry) {
-        sessionStorage.setItem('chunk_retry_terms', 'true')
+        sessionStorage.setItem('app_chunk_retry', 'true')
         window.location.reload()
       }
       throw error
@@ -74,18 +74,18 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       return (
         <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center font-sans">
           <div className="max-w-md space-y-4">
-            <h2 className="text-xl font-bold text-white">Gagal Memuat Halaman</h2>
+            <h2 className="text-xl font-bold text-white">Page Failed to Load</h2>
             <p className="text-xs text-slate-400">
-              Terjadi pembaruan atau kendala jaringan saat memuat halaman. Silakan muat ulang.
+              A network issue or app update interrupted the page load. Please reload.
             </p>
             <button
               onClick={() => {
-                sessionStorage.removeItem('chunk_retry_terms')
+                sessionStorage.removeItem('app_chunk_retry')
                 window.location.reload()
               }}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-colors"
             >
-              Muat Ulang Halaman (F5)
+              Reload Page (F5)
             </button>
           </div>
         </div>
@@ -100,7 +100,7 @@ function RouteLoader() {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <div className="flex flex-col items-center gap-3 text-slate-400">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-        <span className="text-xs font-mono font-medium tracking-wider">Loading drive9...</span>
+        <span className="text-xs font-mono font-medium tracking-wider">Loading Drive9...</span>
       </div>
     </div>
   )

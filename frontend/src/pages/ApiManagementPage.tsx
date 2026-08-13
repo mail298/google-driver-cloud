@@ -586,7 +586,7 @@ print(response.json())`
                           <td className="p-3 font-mono font-bold text-blue-500">folderId</td>
                           <td className="p-3 font-mono">string</td>
                           <td className="p-3 text-slate-400">Optional</td>
-                          <td className="p-3">ID folder virtual spesifik di 9Drive.</td>
+                          <td className="p-3">ID folder virtual spesifik di Drive9.</td>
                         </tr>
                       </>
                     ) : (
@@ -779,7 +779,7 @@ print(response.json())`
                       <td className="p-3 font-mono font-bold text-blue-500">folderId</td>
                       <td className="p-3 font-mono">string</td>
                       <td className="p-3 text-slate-400">Optional</td>
-                      <td className="p-3">UUID spesifik folder virtual di 9Drive.</td>
+                      <td className="p-3">UUID spesifik folder virtual di Drive9.</td>
                     </tr>
                     <tr>
                       <td className="p-3 font-mono font-bold text-blue-500">q</td>

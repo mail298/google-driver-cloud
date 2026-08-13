@@ -54,9 +54,9 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   }, [token])
 
   useEffect(() => {
-    document.title = file ? `${file.name} | 9Drive` : 'Shared file | 9Drive'
+    document.title = file ? `${file.name} | Drive9` : 'Shared file | Drive9'
     return () => {
-      document.title = '9Drive'
+      document.title = 'Drive9'
     }
   }, [file])
 

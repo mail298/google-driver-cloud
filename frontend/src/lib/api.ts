@@ -33,7 +33,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
   try {
     response = await fetch(`${API_URL}${path}`, { ...options, headers })
   } catch (err) {
-    throw new Error(`Gagal terhubung ke Backend API (${API_URL}). Pastikan backend & SSL aktif.`)
+    throw new Error(`Failed to connect to backend API (${API_URL}). Please ensure the backend server is running and SSL is active.`)
   }
   if (response.status === 401 && options.retry !== false && !options.skipAuth && await refreshAccessToken()) {
     return apiFetch<T>(path, { ...options, retry: false })
@@ -54,7 +54,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}): Promi
     }
     // Forward both message AND code so pages can translate based on error code
     const apiErr = new Error(error.message ?? 'Request failed')
-    ;(apiErr as any).code = error.code
+      ; (apiErr as any).code = error.code
     throw apiErr
   } else {
     try {

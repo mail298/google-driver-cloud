@@ -13,7 +13,7 @@ export function ForbiddenPage() {
 
       {/* Main Glassmorphic Card */}
       <div className="relative w-full max-w-sm sm:max-w-md rounded-3xl border border-rose-500/20 bg-slate-900/60 p-8 sm:p-10 text-center backdrop-blur-2xl shadow-2xl shadow-rose-950/30 transition-all duration-300">
-        
+
         {/* Top Floating Badge & Shield Icon */}
         <div className="relative mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-b from-rose-500/20 to-red-600/10 border border-rose-500/30 shadow-lg shadow-rose-500/10">
           <div className="absolute -inset-1 rounded-2xl bg-rose-500/20 blur-sm animate-pulse" />
@@ -42,7 +42,7 @@ export function ForbiddenPage() {
           </span>
           <span className="flex items-center gap-1.5">
             <Server className="h-3.5 w-3.5 text-slate-400" />
-            9Drive Security System
+            Drive9 Security System
           </span>
         </div>
       </div>

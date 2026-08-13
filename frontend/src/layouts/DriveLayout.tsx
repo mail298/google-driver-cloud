@@ -168,7 +168,7 @@ function Sidebar({
     <aside className="flex h-full w-64 flex-col border-slate-200/60 dark:border-slate-700/40 bg-slate-50/60 dark:bg-slate-900/80 backdrop-blur-xl p-4 lg:border-r">
       <div className="flex items-center gap-2.5 pb-3 pt-1">
         <BrandLogo className="h-8 w-8" />
-        <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">9Drive</span>
+        <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Drive9</span>
       </div>
 
       {/* User & Connected Accounts Section with Hover & Click Menu */}
@@ -545,7 +545,7 @@ export function DriveLayout() {
                 </Button>
                 <div className="flex items-center gap-2 shrink-0">
                   <BrandLogo className="h-8 w-8 shrink-0" />
-                  <span className="text-lg font-extrabold tracking-tight shrink-0 whitespace-nowrap">9Drive</span>
+                  <span className="text-lg font-extrabold tracking-tight shrink-0 whitespace-nowrap">Drive9</span>
                 </div>
               </div>
               <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -638,7 +638,7 @@ export function DriveLayout() {
                 {headerActions}
               </div>
             ) : null}
-             <div className="relative hidden flex-wrap gap-2 items-center lg:flex shrink-0">
+            <div className="relative hidden flex-wrap gap-2 items-center lg:flex shrink-0">
               <LanguageSwitcher />
               <Button variant="outline" size="icon" title={t('nav_user_guide')} aria-label={t('nav_user_guide')} onClick={() => setOnboardingOpen(true)}>
                 <HelpCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />

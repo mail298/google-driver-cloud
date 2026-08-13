@@ -55,7 +55,7 @@ systemRouter.post('/telegram-test', requireAuth, async (_req, res, next) => {
   try {
     const analytics = await getSystemAnalytics()
     const text = [
-      `👤 <b>9Drive Telegram Test Notification</b>`,
+      `👤 <b>Drive9 Telegram Test Notification</b>`,
       `✅ Telegram Bot integration is working properly!`,
       `📊 <b>Total Registered Users:</b> ${analytics.totalUsers}`
     ].join('\n')
@@ -104,7 +104,7 @@ systemRouter.post('/update', requireAuth, (req, res, next) => {
     if (gitError) {
       return res.status(400).json({
         code: 'GIT_NOT_FOUND',
-        message: 'Git is not installed inside the app container. Since you are running 9Drive in Docker, please update by running:\n\n1. ssh root@103.65.237.136\n2. cd 9drive\n3. git pull\n4. docker-compose down && docker-compose up -d --build\n\ndirectly in your VPS host terminal.'
+        message: 'Git is not installed inside the app container. Since you are running Drive9 in Docker, please update by running:\n\n1. SSH into your VPS host terminal\n2. cd <your-Drive9-directory>\n3. git pull\n4. docker compose down && docker compose up -d --build\n\ndirectly in your VPS host terminal.'
       })
     }
 

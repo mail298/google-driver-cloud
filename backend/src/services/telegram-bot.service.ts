@@ -56,7 +56,7 @@ async function pollTelegramUpdates(botToken: string, targetChatId: string) {
     try {
       const url = `https://api.telegram.org/bot${botToken}/getUpdates?offset=${lastUpdateId + 1}&timeout=20`
       const res = await fetch(url)
-      
+
       if (!res.ok) {
         // Wait 5s on HTTP error (e.g. 401 Unauthorized token) before retrying
         console.error(`[TELEGRAM_BOT] getUpdates failed with status ${res.status}`)
@@ -120,7 +120,7 @@ async function handleTelegramMessage(botToken: string, targetChatId: string, mes
 
   if (command === '/start' || command === '/help') {
     const helpMsg = [
-      `🤖 <b>9Drive Telegram Bot Helper</b>`,
+      `🤖 <b>Drive9 Telegram Bot Helper</b>`,
       `━━━━━━━━━━━━━━━━━━`,
       `<b>Available Commands:</b>`,
       `• <code>/addip &lt;ip&gt;</code> - Add IP to Whitelist`,

@@ -1,8 +1,8 @@
 ![9Drive cover](https://i.ibb.co.com/35BySv1C/image.png)
 
-# 9Drive
+# Drive9
 
-9Drive is a storage gateway web app for connecting multiple Google Drive accounts into one virtual storage dashboard. Users can register with email/password or Google, automatically connect their first Google Drive account during Google sign-in, track quota, upload files into a dedicated `9drive` Drive folder, organize files with virtual folders, preview files, sync MySQL from Google Drive, and let the backend route uploads to the Drive account with enough free space.
+Drive9 is a storage gateway web app for connecting multiple Google Drive accounts into one virtual storage dashboard. Users can register with email/password or Google, automatically connect their first Google Drive account during Google sign-in, track quota, upload files into a dedicated `9drive` Drive folder, organize files with virtual folders, preview files, sync MySQL from Google Drive, and let the backend route uploads to the Drive account with enough free space.
 
 ## Features
 
@@ -170,7 +170,7 @@ Important:
 - Do not commit `backend/.env`.
 - Google OAuth credentials are used by the seed script, then stored encrypted in the database.
 
-## 4. Frontend Environment
+## 3. Frontend Environment
 
 Create or confirm `frontend/.env`:
 
@@ -181,7 +181,7 @@ VITE_RECAPTCHA_SITE_KEY=
 
 Captcha is disabled when `VITE_RECAPTCHA_SITE_KEY` or backend `RECAPTCHA_SECRET_KEY` is empty. Set both values to enable captcha on registration.
 
-## 5. Run Prisma Migrations
+## 4. Run Prisma Migrations
 
 ```bash
 cd backend
@@ -194,7 +194,7 @@ If Prisma client generation is blocked on Windows by a running Node process, sto
 npx prisma generate
 ```
 
-## 6. Google Cloud Setup
+## 5. Google Cloud Setup
 
 Google setup is done in Google Cloud Console, not Google Search Console. Google Search Console is for website indexing/search ownership. OAuth and Drive API are managed in Google Cloud Console.
 
@@ -328,7 +328,7 @@ Client ID
 Client Secret
 ```
 
-### 6.5 Seed Google OAuth Config
+### 5.5 Seed Google OAuth Config
 
 Put values into `backend/.env`:
 
@@ -347,7 +347,7 @@ npm run seed:google-config
 
 This stores the Google OAuth config as a global encrypted provider config in MySQL. Google sign-in uses the same config and automatically connects the first Drive account. Logged-in users can still click `Connect Drive` in Settings to add more Drive accounts.
 
-## 7. Run Development Servers
+## 6. Run Development Servers
 
 Start backend:
 
@@ -683,7 +683,7 @@ Request format is `multipart/form-data`.
 
 **1. cURL Command:**
 ```bash
-curl -X POST https://googledrivebackend.ikan212.com/api/v1/uploads \
+curl -X POST https://<your-backend-url>/api/v1/uploads \
   -H "Authorization: Bearer 9d_live_your_secret_api_key_here" \
   -F "file=@/path/to/local/document.pdf"
 ```
@@ -693,7 +693,7 @@ curl -X POST https://googledrivebackend.ikan212.com/api/v1/uploads \
 const formData = new FormData();
 formData.append('file', fileInput.files[0]);
 
-const response = await fetch('https://googledrivebackend.ikan212.com/api/v1/uploads', {
+const response = await fetch('https://<your-backend-url>/api/v1/uploads', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer 9d_live_your_secret_api_key_here'
@@ -709,7 +709,7 @@ console.log(result);
 ```python
 import requests
 
-url = "https://googledrivebackend.ikan212.com/api/v1/uploads"
+url = "https://<your-backend-url>/api/v1/uploads"
 headers = {
     "Authorization": "Bearer 9d_live_your_secret_api_key_here"
 }

@@ -10,19 +10,24 @@ const execAsync = promisify(exec)
 
 setupGlobalProxy()
 
-app.listen(env.APP_PORT, async () => {
-  console.log(`Backend running on http://localhost:${env.APP_PORT}`)
-
+async function main() {
+  // Run migrations and seed BEFORE accepting connections,
+  // so the server never starts with a stale or uninitialized schema.
   try {
     console.log('[DB] Running database migrations...')
     await execAsync('npx prisma migrate deploy')
-    console.log('[DB] Database migrations completed successfully.')
+    console.log('[DB] Migrations completed successfully.')
 
     await execAsync('npm run seed:google-config:docker')
   } catch (err) {
     console.error('[DB] Migration/seed error:', err)
+    // Continue startup even if seed fails; migration errors are logged above.
   }
 
-  startTelegramBotListener()
-})
+  app.listen(env.APP_PORT, () => {
+    console.log(`[Server] Drive9 backend running on http://localhost:${env.APP_PORT}`)
+    startTelegramBotListener()
+  })
+}
 
+main()

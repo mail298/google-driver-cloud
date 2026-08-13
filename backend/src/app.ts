@@ -16,6 +16,7 @@ import { apiKeyRouter } from './modules/api-keys/api-key.routes.js'
 import { publicApiRouter } from './modules/public-api/public-api.routes.js'
 import { auditLogRouter } from './modules/audit-logs/audit-log.routes.js'
 import { systemRouter } from './modules/system/system.routes.js'
+import { authRateLimit, generalRateLimit, publicApiRateLimit } from './middleware/rate-limit.middleware.js'
 
 export const app = express()
 app.set('trust proxy', 1)
@@ -35,6 +36,7 @@ app.use(
   })
 )
 app.use(express.json({ limit: '1mb' }))
+app.use(generalRateLimit)
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 
@@ -98,13 +100,13 @@ app.get('/sitemap.xml', (req, res) => {
   return res.send(xml)
 })
 
-app.use('/api', publicApiRouter)
+app.use('/api', publicApiRateLimit, publicApiRouter)
 app.use('/share', publicRouter)
 
 // IP Whitelist protection for Dashboard & Admin Auth API routes
 app.use(ipWhitelistMiddleware)
 
-app.use('/auth', authRouter)
+app.use('/auth', authRateLimit, authRouter)
 app.use('/api-keys', apiKeyRouter)
 app.use('/provider-configs', providerConfigRouter)
 app.use('/connected-accounts', connectedAccountRouter)

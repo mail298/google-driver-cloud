@@ -9,20 +9,32 @@ export const publicRouter = Router()
 publicRouter.use(cors({ origin: '*' }))
 
 type FileWithAccount = File & { connectedAccount: ConnectedAccount }
-// Cache using proper Prisma types — avoids any and ensures type safety
-const shareCache = new Map<string, { file: FileWithAccount; expires: number }>()
-const CACHE_TTL_MS = 60_000 // 60 seconds cache for public share tokens
 
+// Short-lived in-memory cache to avoid redundant DB lookups for the same token
+// within a short time window (e.g. video range requests hitting the same token).
+const shareCache = new Map<string, { file: FileWithAccount; expires: number }>()
+const CACHE_TTL_MS = 60_000 // 60 seconds
+
+/**
+ * Look up a shared file by its token.
+ * Only queries by tokenHash — the raw token is never stored or compared directly.
+ */
 async function findSharedFile(token: string): Promise<FileWithAccount> {
   const cached = shareCache.get(token)
   if (cached && cached.expires > Date.now()) {
     return cached.file
   }
 
+  const tokenHash = hashToken(token)
   const share = await prisma.fileShare.findFirst({
-    where: { enabled: true, AND: [{ OR: [{ token }, { tokenHash: hashToken(token) }] }, { OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] }] },
+    where: {
+      tokenHash,
+      enabled: true,
+      OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
+    },
     include: { file: { include: { connectedAccount: true } } },
   })
+
   if (!share || share.file.status !== 'active') throw new Error('Shared file not found')
 
   shareCache.set(token, { file: share.file, expires: Date.now() + CACHE_TTL_MS })
@@ -32,7 +44,15 @@ async function findSharedFile(token: string): Promise<FileWithAccount> {
 publicRouter.get('/files/:token', async (req, res, next) => {
   try {
     const file = await findSharedFile(String(req.params.token))
-    return res.json({ file: { id: file.id, name: file.name, mimeType: file.mimeType, sizeBytes: file.sizeBytes.toString(), createdAt: file.createdAt } })
+    return res.json({
+      file: {
+        id: file.id,
+        name: file.name,
+        mimeType: file.mimeType,
+        sizeBytes: file.sizeBytes.toString(),
+        createdAt: file.createdAt,
+      },
+    })
   } catch (error) {
     return next(error)
   }

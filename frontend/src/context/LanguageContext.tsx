@@ -94,7 +94,7 @@ export const translations: Dictionary = {
   // API Keys Page
   api_gateway_badge: { id: 'DEVELOPER API GATEWAY v1', en: 'DEVELOPER API GATEWAY v1' },
   api_title: { id: 'API Keys & Dokumentasi Developer', en: 'API Keys & Developer Documentation' },
-  api_subtitle: { id: 'Integrasikan 9Drive ke aplikasi web, script, atau landing page Anda. Upload file langsung ke folder virtual tanpa konfigurasi.', en: 'Integrate 9Drive into your web apps, scripts, or landing pages. Upload files directly into virtual folders with zero config.' },
+  api_subtitle: { id: 'Integrasikan Drive9 ke aplikasi web, script, atau landing page Anda. Upload file langsung ke folder virtual tanpa konfigurasi.', en: 'Integrate Drive9 into your web apps, scripts, or landing pages. Upload files directly into virtual folders with zero config.' },
   api_btn_create: { id: 'Buat API Key', en: 'Create API Key' },
   api_stat_active: { id: 'Key Aktif', en: 'Active Keys' },
   api_stat_used: { id: 'Key Digunakan', en: 'Used Keys' },
@@ -165,7 +165,7 @@ export const translations: Dictionary = {
 
   // Change Password Form & Messages
   pwd_title: { id: 'Ubah Password Akun', en: 'Change Account Password' },
-  pwd_desc: { id: 'Perbarui password akun 9Drive Anda agar bisa digunakan untuk login manual via email.', en: 'Update your 9Drive account password to enable manual email login.' },
+  pwd_desc: { id: 'Perbarui password akun Drive9 Anda agar bisa digunakan untuk login manual via email.', en: 'Update your Drive9 account password to enable manual email login.' },
   pwd_google_info_title: { id: 'Petunjuk Pengguna Google / Gmail:', en: 'Tip for Google / Gmail Users:' },
   pwd_google_info_desc: { id: 'Jika Anda daftar via Continue with Google, Anda belum memiliki password manual. Kolom Password Saat Ini bisa dikosongkan. Setelah disimpan, Anda dapat login secara manual (Email & Password) maupun via tombol Google.', en: 'If you signed up via Continue with Google, you do not have a manual password yet. Leave Current Password empty. Once saved, you can log in using either Email & Password or Google.' },
   pwd_current_label: { id: 'Password Saat Ini (opsional jika login awal via Google)', en: 'Current Password (optional if initial login via Google)' },
@@ -202,7 +202,7 @@ export const translations: Dictionary = {
   auth_login_link: { id: 'Masuk', en: 'Login' },
 
   auth_login_title: { id: 'Masuk Akun', en: 'Login' },
-  auth_login_subtitle: { id: 'Masuk ke akun 9Drive Anda.', en: 'Sign in to your 9Drive account.' },
+  auth_login_subtitle: { id: 'Masuk ke akun Drive9 Anda.', en: 'Sign in to your Drive9 account.' },
   auth_btn_login: { id: 'Masuk', en: 'Sign In' },
   auth_btn_logging_in: { id: 'Memproses...', en: 'Signing In...' },
   auth_no_account: { id: 'Belum punya akun?', en: "Don't have an account?" },

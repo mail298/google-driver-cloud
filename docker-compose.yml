@@ -30,6 +30,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-mysql://root:${MYSQL_ROOT_PASSWORD:-root}@mysql:3306/${MYSQL_DATABASE:-9drive}?connection_limit=10&connect_timeout=30}
       APP_PORT: ${APP_PORT:-80}
       FRONTEND_URL: ${FRONTEND_URL:-https://drive9.wn-cdn.net}
+      # SECURITY: Override these defaults in your .env file before going to production!
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-$$2a$$10$$3OOX0YLB52DERef3Q/jn9ei0zTME0ieZrcYQ4mflZ.BPgTMszTgsq}
       TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-uf2Tqd29Y6l2RFhM9xLQ0bvmfRjyroxjQI2HRsQH3rdjdE1SgvVvMjkwZJxlXrMb}
       ACCESS_TOKEN_TTL_SECONDS: ${ACCESS_TOKEN_TTL_SECONDS:-3600}
