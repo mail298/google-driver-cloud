@@ -204,6 +204,26 @@ export const translations: Dictionary = {
   auth_btn_logging_in: { id: 'Memproses...', en: 'Signing In...' },
   auth_no_account: { id: 'Belum punya akun?', en: "Don't have an account?" },
   auth_register_link: { id: 'Daftar Sekarang', en: 'Register Now' },
+
+  // API Error Codes & Server Messages Translation
+  AUTH_EMAIL_TAKEN: { id: 'Email sudah terdaftar.', en: 'Email already registered.' },
+  'Email already registered.': { id: 'Email sudah terdaftar.', en: 'Email already registered.' },
+  CAPTCHA_FAILED: { id: 'Silakan selesaikan verifikasi captcha terlebih dahulu.', en: 'Please complete the captcha verification.' },
+  'Captcha verification failed.': { id: 'Silakan selesaikan verifikasi captcha terlebih dahulu.', en: 'Captcha verification failed.' },
+  AUTH_INVALID_CREDENTIALS: { id: 'Email atau password salah.', en: 'Invalid email or password.' },
+  'Invalid email or password.': { id: 'Email atau password salah.', en: 'Invalid email or password.' },
+  AUTH_SESSION_EXPIRED: { id: 'Sesi login telah berakhir. Silakan login kembali.', en: 'Session expired. Please log in again.' },
+  'Refresh token expired.': { id: 'Sesi login telah berakhir. Silakan login kembali.', en: 'Refresh token expired.' },
+  AUTH_GOOGLE_HANDOFF_INVALID: { id: 'Sesi login Google telah kedaluwarsa.', en: 'Google login session expired.' },
+  'Google login session expired.': { id: 'Sesi login Google telah kedaluwarsa.', en: 'Google login session expired.' },
+  AUTH_CURRENT_PASSWORD_REQUIRED: { id: 'Password saat ini wajib diisi untuk mengubah password.', en: 'Current password is required to update your password.' },
+  'Current password is required to update your password.': { id: 'Password saat ini wajib diisi untuk mengubah password.', en: 'Current password is required to update your password.' },
+  AUTH_INVALID_CURRENT_PASSWORD: { id: 'Password saat ini tidak cocok.', en: 'Current password does not match.' },
+  'Current password does not match.': { id: 'Password saat ini tidak cocok.', en: 'Current password does not match.' },
+  'Register failed': { id: 'Pendaftaran akun gagal.', en: 'Register failed.' },
+  'Login failed': { id: 'Masuk akun gagal.', en: 'Login failed.' },
+  'Google register failed': { id: 'Pendaftaran via Google gagal.', en: 'Google register failed.' },
+  'Google login failed': { id: 'Login via Google gagal.', en: 'Google login failed.' },
 }
 
 type LanguageContextType = {
