@@ -100,19 +100,19 @@ export function SettingsPage() {
         method: 'POST',
         body: JSON.stringify({ currentPassword: currentPassword || undefined, newPassword }),
       })
-      setPasswordMsg(t('pwd_success'))
+      setPasswordMsg('pwd_success')
       setPasswordSuccess(true)
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
     } catch (error: any) {
-      const code = error?.code
-      if (code === 'AUTH_CURRENT_PASSWORD_REQUIRED') {
-        setPasswordMsg(t('pwd_err_current_required'))
-      } else if (code === 'AUTH_INVALID_CURRENT_PASSWORD') {
-        setPasswordMsg(t('pwd_err_current_invalid'))
+      const code = error?.code || error?.message
+      if (code === 'AUTH_CURRENT_PASSWORD_REQUIRED' || code === 'Current password is required to update your password.') {
+        setPasswordMsg('pwd_err_current_required')
+      } else if (code === 'AUTH_INVALID_CURRENT_PASSWORD' || code === 'Current password does not match.') {
+        setPasswordMsg('pwd_err_current_invalid')
       } else {
-        setPasswordMsg(error instanceof Error ? error.message : t('pwd_err_current_invalid'))
+        setPasswordMsg(error instanceof Error ? error.message : 'pwd_err_current_invalid')
       }
       setPasswordSuccess(false)
     } finally {
@@ -471,7 +471,7 @@ export function SettingsPage() {
                 ) : (
                   <ShieldAlert className="h-4 w-4 shrink-0 text-rose-600 dark:text-rose-400" />
                 )}
-                <span>{passwordMsg}</span>
+                <span>{t(passwordMsg)}</span>
               </div>
             ) : null}
 
