@@ -344,18 +344,18 @@ export function OnboardingModal({
         {/* Left Sidebar Navigation */}
         <div className="w-full lg:w-72 border-b lg:border-b-0 lg:border-r border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-950/40 p-4 shrink-0 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3.5 pr-8 lg:pr-0">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-md">
                 <BookOpen className="h-4 w-4" />
               </div>
-              <div>
-                <h3 className="text-sm font-extrabold tracking-tight">{isEn ? '9Drive User Guide' : 'Petunjuk 9Drive'}</h3>
-                <p className="text-[11px] text-slate-500">{isEn ? 'Dashboard Complete Tour' : 'Panduan Lengkap Dashboard'}</p>
+              <div className="min-w-0">
+                <h3 className="text-sm font-extrabold tracking-tight truncate">{isEn ? '9Drive User Guide' : 'Petunjuk 9Drive'}</h3>
+                <p className="text-[11px] text-slate-500 truncate">{isEn ? 'Dashboard Complete Tour' : 'Panduan Lengkap Dashboard'}</p>
               </div>
             </div>
 
-            {/* Steps Tab List */}
-            <div className="grid grid-cols-3 lg:grid-cols-1 gap-1.5 overflow-x-auto lg:overflow-visible py-1">
+            {/* Steps Tab List: Horizontal scrollable pills on mobile, full list on lg */}
+            <div className="flex items-center gap-1.5 overflow-x-auto lg:flex-col lg:items-stretch lg:overflow-visible py-1 scrollbar-none">
               {steps.map((s, index) => {
                 const isActive = index === currentStepIndex
                 return (
@@ -364,7 +364,7 @@ export function OnboardingModal({
                     type="button"
                     onClick={() => setCurrentStepIndex(index)}
                     className={cn(
-                      'flex items-center gap-2.5 rounded-2xl px-3 py-2.5 text-left text-xs font-bold transition-all border min-w-0',
+                      'flex items-center gap-2.5 rounded-xl lg:rounded-2xl px-2.5 py-1.5 lg:px-3 lg:py-2.5 text-left text-xs font-bold transition-all border shrink-0 lg:shrink min-w-0',
                       isActive
                         ? 'bg-blue-600/10 border-blue-600/30 text-blue-600 dark:text-blue-400 shadow-sm'
                         : 'border-transparent text-slate-500 hover:bg-slate-200/50 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200'
@@ -372,9 +372,9 @@ export function OnboardingModal({
                   >
                     <span
                       className={cn(
-                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-xs font-extrabold',
+                        'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-extrabold transition-colors',
                         isActive
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-blue-600 text-white shadow-sm'
                           : 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                       )}
                     >
@@ -396,7 +396,7 @@ export function OnboardingModal({
         </div>
 
         {/* Right Main Content Area */}
-        <div className="flex-1 flex flex-col justify-between p-5 sm:p-7 overflow-y-auto min-w-0">
+        <div className="flex-1 flex flex-col justify-between p-4 sm:p-7 overflow-y-auto min-w-0">
           <div>
             {/* Header Tag */}
             <div className="flex items-center justify-between gap-2 mb-3">
@@ -444,7 +444,7 @@ export function OnboardingModal({
 
             {/* Tips Banner */}
             {step.content.tips && step.content.tips.length > 0 && (
-              <div className="mt-5 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-900 dark:text-amber-200">
+              <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-3.5 text-xs text-amber-900 dark:text-amber-200">
                 <p className="font-extrabold flex items-center gap-1.5 mb-1 text-amber-700 dark:text-amber-400">
                   <Info className="h-4 w-4 shrink-0" /> {isEn ? 'Usage Tips:' : 'Tips Penggunaan:'}
                 </p>
@@ -457,40 +457,40 @@ export function OnboardingModal({
             )}
           </div>
 
-          {/* Footer Controls */}
-          <div className="mt-7 pt-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3">
+          {/* Footer Controls - No truncation on mobile */}
+          <div className="mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-2.5 flex-wrap sm:flex-nowrap">
             <Button
               type="button"
               variant="outline"
               size="sm"
               disabled={isFirstStep}
               onClick={handlePrev}
-              className="font-bold text-xs"
+              className="font-bold text-xs shrink-0"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               {isEn ? 'Previous' : 'Sebelumnya'}
             </Button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={handleComplete}
-                className="text-xs font-semibold text-slate-400 hover:text-slate-600"
+                className="text-xs font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 shrink-0"
               >
-                {isEn ? 'Skip Guide' : 'Lewati Panduan'}
+                {isEn ? 'Skip' : 'Lewati'}
               </Button>
               <Button
                 type="button"
                 size="sm"
                 onClick={handleNext}
-                className="font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md"
+                className="font-bold text-xs bg-blue-600 hover:bg-blue-700 text-white shadow-md shrink-0 px-3.5"
               >
                 {isLastStep ? (
                   <>
                     <CheckCircle className="h-4 w-4 mr-1" />
-                    {isEn ? 'Done & Got It' : 'Selesai & Paham'}
+                    {isEn ? 'Done' : 'Selesai'}
                   </>
                 ) : (
                   <>
