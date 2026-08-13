@@ -55,48 +55,49 @@ type StorageBreakdown = {
 }
 
 function SystemInfoDropdown({ storage }: { storage: any }) {
+  const { t } = useLanguage()
   const activeGoogle = storage?.accounts?.filter((a: any) => a.provider === 'google_drive' && a.status === 'connected') ?? []
 
   return (
     <div className="absolute right-0 top-12 z-50 w-[min(calc(100vw-2rem),22rem)] overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl shadow-slate-950/15">
       <div className="border-b border-slate-200 dark:border-slate-800 px-4 py-3 bg-slate-50/50 dark:bg-slate-800/50">
-        <p className="text-sm font-extrabold text-slate-950 dark:text-slate-100">Workspace Status & Info</p>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Overview of your connections & guidelines</p>
+        <p className="text-sm font-extrabold text-slate-950 dark:text-slate-100">{t('sys_info_title')}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{t('sys_info_subtitle')}</p>
       </div>
       <div className="max-h-96 overflow-y-auto p-4 space-y-4">
         {/* Connection status */}
         <div>
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Connection Status</h4>
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> {t('sys_info_conn_status')}</h4>
           <div className="mt-2 space-y-2">
-            <div className="flex items-center justify-between text-xs rounded-xl bg-slate-50 p-2.5 border border-slate-100">
-              <span className="font-semibold text-slate-700">Google Drive accounts</span>
-              <span className={activeGoogle.length > 0 ? "text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-bold border border-emerald-100" : "text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full font-bold border border-amber-100"}>
-                {activeGoogle.length} Connected
+            <div className="flex items-center justify-between text-xs rounded-xl bg-slate-50 p-2.5 border border-slate-100 dark:bg-slate-800 dark:border-slate-700">
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{t('sys_info_google_accounts')}</span>
+              <span className={activeGoogle.length > 0 ? "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold border border-emerald-100 dark:border-emerald-800" : "text-amber-600 bg-amber-50 dark:bg-amber-950/50 dark:text-amber-400 px-2 py-0.5 rounded-full font-bold border border-amber-100 dark:border-amber-800"}>
+                {activeGoogle.length} {t('sys_info_connected')}
               </span>
             </div>
             {activeGoogle.map((acc: any) => (
-              <p key={acc.id} className="text-[11px] text-slate-500 truncate px-2.5">— {acc.email}</p>
+              <p key={acc.id} className="text-[11px] text-slate-500 dark:text-slate-400 truncate px-2.5">— {acc.email}</p>
             ))}
           </div>
         </div>
 
         {/* Database & engine status */}
         <div>
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><HardDrive className="h-3.5 w-3.5 text-blue-500" /> Storage Engine</h4>
-          <div className="mt-2 text-xs text-slate-600 space-y-1 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-            <p>• <b>DB Type:</b> MySQL Database</p>
-            <p>• <b>Upload Folder:</b> Google Drive dedicated <code>9drive</code></p>
-            <p>• <b>Max Upload Size:</b> 5 GB per stream</p>
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><HardDrive className="h-3.5 w-3.5 text-blue-500" /> {t('sys_info_storage_engine')}</h4>
+          <div className="mt-2 text-xs text-slate-600 dark:text-slate-300 space-y-1 bg-slate-50 dark:bg-slate-800 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
+            <p>• <b>DB:</b> MySQL Database</p>
+            <p>• <b>Drive Folder:</b> <code>9drive</code></p>
+            <p>• <b>Max Upload:</b> 5 GB / stream</p>
           </div>
         </div>
 
         {/* Tips & Guides */}
         <div>
-          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><Info className="h-3.5 w-3.5 text-indigo-500" /> Usage Tips</h4>
-          <ul className="mt-2 text-[11px] text-slate-500 list-disc list-inside space-y-1 pl-1">
-            <li>Virtual folders exist in your MySQL database.</li>
-            <li>Physical files are always uploaded straight to Google Drive.</li>
-            <li>Use the Sync button to fetch changes made directly on Drive.</li>
+          <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5"><Info className="h-3.5 w-3.5 text-indigo-500" /> {t('sys_info_tips')}</h4>
+          <ul className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 list-disc list-inside space-y-1 pl-1">
+            <li>{t('sys_info_tip1')}</li>
+            <li>{t('sys_info_tip2')}</li>
+            <li>{t('sys_info_tip3')}</li>
           </ul>
         </div>
       </div>
@@ -567,23 +568,23 @@ export function DriveLayout() {
             <div className="relative w-full min-w-0 flex-1 lg:max-w-sm xl:max-w-xl">
               <form onSubmit={searchFiles} className="relative w-full">
                 <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-500" />
-                <Input value={searchValue} onChange={(event) => setSearchValue(event.target.value)} placeholder="Search Documents" className="pl-11 pr-12" />
+                <Input value={searchValue} onChange={(event) => setSearchValue(event.target.value)} placeholder={t('header_search_placeholder')} className="pl-11 pr-12" />
                 <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} className={cn("absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900 transition-colors dark:text-slate-400 dark:hover:text-slate-100", filtersOpen && "text-blue-600 hover:text-blue-700 dark:text-blue-400")} aria-label="Search filters"><SlidersHorizontal className="h-5 w-5" /></button>
               </form>
 
               {filtersOpen && (
                 <div className="absolute left-0 top-12 z-50 w-[calc(100vw-2rem)] sm:w-[500px] md:w-[540px] max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white/95 p-4 sm:p-5 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/95 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
-                    <span className="text-sm font-extrabold text-slate-950 dark:text-slate-100">Advanced Search Filters</span>
-                    <button type="button" onClick={clearFilters} className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">Clear All</button>
+                    <span className="text-sm font-extrabold text-slate-950 dark:text-slate-100">{t('header_advanced_filters')}</span>
+                    <button type="button" onClick={clearFilters} className="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">{t('header_clear_all')}</button>
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
                     {/* File Kind */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">File Type</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('header_file_type')}</label>
                       <select value={filterKind} onChange={(e) => setFilterKind(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800">
-                        <option value="">All Types</option>
+                        <option value="">{t('header_all_types')}</option>
                         <option value="image">Image</option>
                         <option value="video">Video</option>
                         <option value="pdf">PDF</option>
@@ -594,9 +595,9 @@ export function DriveLayout() {
 
                     {/* Connected Account */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Connected Account</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('header_connected_account')}</label>
                       <select value={filterAccountId} onChange={(e) => setFilterAccountId(e.target.value)} className="mt-1 block w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800">
-                        <option value="">All Accounts</option>
+                        <option value="">{t('header_all_accounts')}</option>
                         {accounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>{acc.email} ({acc.provider})</option>
                         ))}
@@ -605,28 +606,28 @@ export function DriveLayout() {
 
                     {/* Size range */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Size Range (MB)</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('header_size_range')}</label>
                       <div className="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2">
                         <input type="number" placeholder="Min" value={filterMinSize} onChange={(e) => setFilterMinSize(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
-                        <span className="text-slate-400 text-xs font-semibold text-center sm:text-left">to</span>
+                        <span className="text-slate-400 text-xs font-semibold text-center sm:text-left">-</span>
                         <input type="number" placeholder="Max" value={filterMaxSize} onChange={(e) => setFilterMaxSize(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
                       </div>
                     </div>
 
                     {/* Date range */}
                     <div>
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Date Range</label>
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t('header_date_range')}</label>
                       <div className="mt-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2">
                         <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
-                        <span className="text-slate-400 text-xs font-semibold text-center sm:text-left">to</span>
+                        <span className="text-slate-400 text-xs font-semibold text-center sm:text-left">-</span>
                         <input type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} className="block w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1.5 text-xs sm:text-sm text-slate-900 focus:border-blue-500 focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-100 dark:focus:bg-slate-800" />
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-5 flex justify-end gap-2 border-t border-slate-100 pt-4 dark:border-slate-800">
-                    <Button variant="outline" size="sm" type="button" onClick={() => setFiltersOpen(false)}>Cancel</Button>
-                    <Button variant="default" size="sm" type="button" onClick={applyFilters}>Apply Filters</Button>
+                    <Button variant="outline" size="sm" type="button" onClick={() => setFiltersOpen(false)}>{t('header_cancel')}</Button>
+                    <Button variant="default" size="sm" type="button" onClick={applyFilters}>{t('header_apply_filters')}</Button>
                   </div>
                 </div>
               )}

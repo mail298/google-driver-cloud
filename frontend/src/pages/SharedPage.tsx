@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { apiFetch, formatBytes, formatDate } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { useLanguage } from '@/context/LanguageContext'
 
 type InviteTarget = { id: string; name: string; type: 'file' | 'folder'; mimeType?: string; sizeBytes?: string }
 type Invite = {
@@ -26,6 +27,7 @@ function ResourceIcon({ type }: { type: 'file' | 'folder' }) {
 }
 
 export function SharedPage() {
+  const { t } = useLanguage()
   const [sentInvites, setSentInvites] = useState<Invite[]>([])
   const [receivedInvites, setReceivedInvites] = useState<Invite[]>([])
   const [message, setMessage] = useState('')
@@ -51,18 +53,18 @@ export function SharedPage() {
 
   return (
     <>
-      <PageHeader title="Shared" description="Files and folders shared with members or shared with you." />
+      <PageHeader title={t('shared_title')} description={t('shared_subtitle')} />
       {message ? <p className="mt-5 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">{message}</p> : null}
       <div className="mt-8 grid gap-4 md:grid-cols-3">
-        <MetricCard label="Shared Resources" value={String(sentInvites.length + receivedInvites.length)} icon={Users} />
-        <MetricCard label="Accepted Members" value={String(acceptedCount)} icon={UserCheck} />
-        <MetricCard label="Pending Invites" value={String(pendingCount)} icon={Clock} />
+        <MetricCard label={t('shared_stat_resources')} value={String(sentInvites.length + receivedInvites.length)} icon={Users} />
+        <MetricCard label={t('shared_stat_accepted')} value={String(acceptedCount)} icon={UserCheck} />
+        <MetricCard label={t('shared_stat_pending')} value={String(pendingCount)} icon={Clock} />
       </div>
 
       <Card className="mt-8 p-5">
-        <h2 className="font-extrabold">Shared With You</h2>
+        <h2 className="font-extrabold">{t('shared_with_you')}</h2>
         <div className="mt-4 grid gap-3">
-          {receivedInvites.length === 0 ? <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No files or folders have been shared with you yet.</p> : receivedInvites.map((invite) => (
+          {receivedInvites.length === 0 ? <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{t('shared_no_received')}</p> : receivedInvites.map((invite) => (
             <div key={invite.id} className="flex flex-col gap-3 rounded-xl bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <ResourceIcon type={invite.targetType} />
@@ -75,9 +77,9 @@ export function SharedPage() {
       </Card>
 
       <Card className="mt-6 p-5">
-        <h2 className="font-extrabold">Resources You Shared</h2>
+        <h2 className="font-extrabold">{t('shared_by_you')}</h2>
         <div className="mt-4 grid gap-3">
-          {sentInvites.length === 0 ? <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No files or folders shared yet. Use Invite Members from the top bar.</p> : sentInvites.map((invite) => (
+          {sentInvites.length === 0 ? <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{t('shared_no_sent')}</p> : sentInvites.map((invite) => (
             <div key={invite.id} className="flex flex-col gap-3 rounded-xl bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <ResourceIcon type={invite.targetType} />

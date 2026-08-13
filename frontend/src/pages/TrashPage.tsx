@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { PageHeader } from '@/components/drive/PageHeader'
 import { apiFetch, formatBytes } from '@/lib/api'
+import { useLanguage } from '@/context/LanguageContext'
 
 type TrashFile = {
   id: string
@@ -19,6 +20,7 @@ type TrashFile = {
 }
 
 export function TrashPage() {
+  const { t } = useLanguage()
   const [files, setFiles] = useState<TrashFile[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
@@ -113,8 +115,8 @@ export function TrashPage() {
   return (
     <>
       <PageHeader
-        title="Recycle Bin"
-        description="Manage deleted files. Restore them to active folders or delete them permanently."
+        title={t('trash_title')}
+        description={t('trash_subtitle')}
         actions={
           selectedIds.size > 0 ? (
             <>

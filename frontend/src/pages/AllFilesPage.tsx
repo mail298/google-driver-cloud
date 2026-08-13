@@ -834,14 +834,14 @@ export function AllFilesPage() {
         {/* Divider */}
         <div className="hidden sm:block h-6 w-px bg-slate-200" />
         <Button size="sm" onClick={() => setUploadOpen(true)}>
-          <Upload className="h-3.5 w-3.5" />Upload
+          <Upload className="h-3.5 w-3.5" />{t('toolbar_upload')}
         </Button>
         <Button size="sm" variant="outline" onClick={() => setFolderOpen(true)}>
-          <FolderPlus className="h-3.5 w-3.5" />New Folder
+          <FolderPlus className="h-3.5 w-3.5" />{t('toolbar_new_folder')}
         </Button>
         <Button size="sm" variant="outline" disabled={syncingDrive} onClick={syncGoogleDrive}>
           <RefreshCw className={syncingDrive ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />
-          {syncingDrive ? 'Syncing...' : 'Sync'}
+          {syncingDrive ? t('toolbar_syncing') : t('toolbar_sync')}
         </Button>
       </div>
     )
@@ -892,10 +892,10 @@ export function AllFilesPage() {
             <Upload className="h-12 w-12 text-white" />
           </div>
           <h2 className="text-3xl font-extrabold text-white tracking-tight drop-shadow-md">
-            Drop files here to upload instantly
+            {t('upload_drop_title')}
           </h2>
           <p className="mt-2 text-sm font-semibold text-blue-100 bg-slate-900/80 px-5 py-2 rounded-full border border-blue-400/30 shadow-lg">
-            Destination: <b className="text-white">{activeFolder ? activeFolder.name : 'All Files (Root)'}</b> • Target Storage: <b className="text-emerald-400">Automatic (Default)</b>
+            {t('upload_destination')}: <b className="text-white">{activeFolder ? activeFolder.name : t('move_modal_root')}</b> • {t('upload_target_storage')}: <b className="text-emerald-400">{t('upload_automatic')}</b>
           </p>
         </div>
       )}
@@ -908,21 +908,21 @@ export function AllFilesPage() {
         onDrop={handlePageDrop}
         className="relative min-h-[620px] w-full min-w-0"
       >
-        <PageHeader title={activeFolder ? <span className="block min-w-0 truncate"><button className="text-blue-600 hover:underline" onClick={closeFolder}>All Files</button>{folderBreadcrumbs.map((folder, index) => <span key={folder.id}><span className="text-slate-400"> / </span>{index === folderBreadcrumbs.length - 1 ? <span>{folder.name}</span> : <button className="text-blue-600 hover:underline" onClick={() => folder.id && openFolderById(folder.id)}>{folder.name}</button>}</span>)}</span> : 'All Files'} />
+        <PageHeader title={activeFolder ? <span className="block min-w-0 truncate"><button className="text-blue-600 hover:underline" onClick={closeFolder}>{t('nav_all_files')}</button>{folderBreadcrumbs.map((folder, index) => <span key={folder.id}><span className="text-slate-400"> / </span>{index === folderBreadcrumbs.length - 1 ? <span>{folder.name}</span> : <button className="text-blue-600 hover:underline" onClick={() => folder.id && openFolderById(folder.id)}>{folder.name}</button>}</span>)}</span> : t('nav_all_files')} />
         {/* Action buttons row — visible on mobile/tablet, hidden on desktop (desktop uses header slot) */}
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2.5 lg:hidden">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <Button size="sm" onClick={() => setUploadOpen(true)} className="h-9 px-3 text-xs font-bold shadow-sm">
               <Upload className="h-3.5 w-3.5 mr-1" />
-              Upload
+              {t('toolbar_upload')}
             </Button>
             <Button size="sm" variant="outline" onClick={() => setFolderOpen(true)} className="h-9 px-3 text-xs font-bold">
               <FolderPlus className="h-3.5 w-3.5 mr-1" />
-              New Folder
+              {t('toolbar_new_folder')}
             </Button>
             <Button size="sm" variant="outline" disabled={syncingDrive} onClick={syncGoogleDrive} className="h-9 px-3 text-xs font-bold">
               <RefreshCw className={syncingDrive ? 'h-3.5 w-3.5 mr-1 animate-spin' : 'h-3.5 w-3.5 mr-1'} />
-              {syncingDrive ? 'Syncing...' : 'Sync'}
+              {syncingDrive ? t('toolbar_syncing') : t('toolbar_sync')}
             </Button>
           </div>
           <div className="flex items-center gap-0.5 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-800 dark:bg-slate-800/80">
@@ -943,13 +943,13 @@ export function AllFilesPage() {
           </div>
         </div>
         {message ? <p className="mt-3 rounded-xl bg-blue-50 p-3 text-sm text-blue-700">{message}</p> : null}
-        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No folders yet. Click New Folder to organize uploads.</p>)}
+        {!activeFolder && (recentFolders.length > 0 ? <FolderGrid items={recentFolders} mobileTwoColumns sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} /> : <p className="mt-4 rounded-xl bg-slate-50 p-5 text-sm text-slate-500">{t('folder_no_folders')}</p>)}
         {!activeFolder && moreFolders.length > 0 ? <>
-          <h2 className="mt-4 font-extrabold text-slate-700">More Folders</h2>
+          <h2 className="mt-4 font-extrabold text-slate-700 dark:text-slate-200">{t('folder_header_more_folders')}</h2>
           <FolderGrid items={moreFolders} sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
         </> : null}
         {activeFolder && folders.length > 0 ? <>
-          <h2 className="mt-4 font-extrabold text-slate-700">Folders</h2>
+          <h2 className="mt-4 font-extrabold text-slate-700 dark:text-slate-200">{t('folder_header_folders')}</h2>
           <FolderGrid items={folders} sizeScale={folderSizeScale} onFolderMenu={openFolderMenu} onFolderOpen={openFolder} onDropItem={handleDropItem} />
         </> : null}
         <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -996,7 +996,7 @@ export function AllFilesPage() {
         {cutFolder ? <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-700"><ClipboardPaste className="mr-2 inline h-4 w-4" />Cut folder: {cutFolder.name}. Press Ctrl+V or right-click empty area to paste here.</p> : null}
         {files.length === 0 ? (
           <Card className="mt-3 p-5 bg-white/10 backdrop-blur-sm border border-white/20 dark:bg-transparent dark:border-0 dark:p-0 dark:shadow-none">
-            <p className="text-sm text-slate-500">{searchQuery ? `No files found for "${searchQuery}".` : activeFolder ? 'No files in this folder yet.' : 'No uploaded files yet. Connect Google Drive in Settings, then upload a file.'}</p>
+            <p className="text-sm text-slate-500">{searchQuery ? t('files_no_files_found').replace('{query}', searchQuery) : activeFolder ? t('files_no_files_folder') : t('files_no_files_root')}</p>
           </Card>
         ) : (
           <Card className="mt-3 p-4 sm:p-5 bg-white/10 backdrop-blur-sm border border-white/20 dark:bg-transparent dark:border-0 dark:p-0 dark:shadow-none">

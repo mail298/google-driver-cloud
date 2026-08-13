@@ -52,28 +52,9 @@ export const translations: Dictionary = {
   folder_header_folders: { id: 'Folder', en: 'Folders' },
   folder_header_more_folders: { id: 'Folder Lainnya', en: 'More Folders' },
   folder_no_folders: { id: 'Belum ada folder. Klik Folder Baru untuk mengorganisasi file.', en: 'No folders yet. Click New Folder to organize uploads.' },
-
-  // Move Modal
-  move_modal_title: { id: 'Pindahkan ke Folder', en: 'Move to Folder' },
-  move_modal_moving: { id: 'Memindahkan...', en: 'Moving...' },
-  move_modal_current_folder: { id: 'Folder saat ini', en: 'Current folder' },
-  move_modal_selected_folder: { id: 'Folder terpilih', en: 'Selected folder' },
-  move_modal_subfolder: { id: 'Subfolder dari item terpilih', en: 'Subfolder of selected item' },
-  move_modal_root: { id: 'Semua File (Root)', en: 'All Files (Root)' },
-  move_modal_cancel: { id: 'Batal', en: 'Cancel' },
-  move_modal_submit: { id: 'Pindahkan', en: 'Move' },
-
-  // Delete Modal
-  delete_modal_title: { id: 'Hapus Item Terpilih', en: 'Delete Selected Items' },
-  delete_modal_confirm: { id: 'Apakah Anda yakin ingin memindahkan item ini ke Tempat Sampah?', en: 'Are you sure you want to move these items to Recycle Bin?' },
-  delete_modal_cancel: { id: 'Batal', en: 'Cancel' },
-  delete_modal_submit: { id: 'Hapus', en: 'Delete' },
-
-  // Upload Overlay
-  upload_drop_title: { id: 'Lepaskan file di sini untuk mengupload secara langsung', en: 'Drop files here to upload instantly' },
-  upload_destination: { id: 'Tujuan', en: 'Destination' },
-  upload_target_storage: { id: 'Penyimpanan Target', en: 'Target Storage' },
-  upload_automatic: { id: 'Otomatis (Default)', en: 'Automatic (Default)' },
+  files_no_files_found: { id: 'Tidak ada file yang ditemukan untuk "{query}".', en: 'No files found for "{query}".' },
+  files_no_files_folder: { id: 'Belum ada file di folder ini.', en: 'No files in this folder yet.' },
+  files_no_files_root: { id: 'Belum ada file diupload. Hubungkan Google Drive di Pengaturan, lalu upload file.', en: 'No uploaded files yet. Connect Google Drive in Settings, then upload a file.' },
 
   // System Info Dropdown
   sys_info_title: { id: 'Status & Info Workspace', en: 'Workspace Status & Info' },
@@ -82,6 +63,28 @@ export const translations: Dictionary = {
   sys_info_google_accounts: { id: 'Akun Google Drive', en: 'Google Drive accounts' },
   sys_info_storage_engine: { id: 'Mesin Penyimpanan', en: 'Storage Engine' },
   sys_info_tips: { id: 'Tips Penggunaan', en: 'Usage Tips' },
+  sys_info_connected: { id: 'Terhubung', en: 'Connected' },
+  sys_info_db_type: { id: 'Tipe Database: Database MySQL', en: 'DB Type: MySQL Database' },
+  sys_info_upload_folder: { id: 'Folder Upload: Khusus Google Drive 9drive', en: 'Upload Folder: Google Drive dedicated 9drive' },
+  sys_info_max_size: { id: 'Ukuran Max Upload: 5 GB per stream', en: 'Max Upload Size: 5 GB per stream' },
+  sys_info_tip1: { id: 'Folder virtual tersimpan di database MySQL Anda.', en: 'Virtual folders exist in your MySQL database.' },
+  sys_info_tip2: { id: 'File fisik selalu diupload langsung ke Google Drive.', en: 'Physical files are always uploaded straight to Google Drive.' },
+  sys_info_tip3: { id: 'Gunakan tombol Sinkron untuk mengambil perubahan dari Google Drive.', en: 'Use the Sync button to fetch changes made directly on Drive.' },
+
+  // Shared Page
+  shared_title: { id: 'Dibagikan', en: 'Shared' },
+  shared_subtitle: { id: 'File dan folder yang dibagikan dengan anggota atau dibagikan kepada Anda.', en: 'Files and folders shared with members or shared with you.' },
+  shared_stat_resources: { id: 'Sumber Daya Dibagikan', en: 'Shared Resources' },
+  shared_stat_accepted: { id: 'Anggota Diterima', en: 'Accepted Members' },
+  shared_stat_pending: { id: 'Undangan Menunggu', en: 'Pending Invites' },
+  shared_with_you: { id: 'Dibagikan Kepada Anda', en: 'Shared With You' },
+  shared_no_received: { id: 'Belum ada file atau folder yang dibagikan kepada Anda.', en: 'No files or folders have been shared with you yet.' },
+  shared_by_you: { id: 'Sumber Daya Yang Anda Bagikan', en: 'Resources You Shared' },
+  shared_no_sent: { id: 'Belum ada file atau folder yang dibagikan.', en: 'No files or folders shared yet.' },
+
+  // Trash Page
+  trash_title: { id: 'Tempat Sampah', en: 'Recycle Bin' },
+  trash_subtitle: { id: 'Kelola dan pulihkan file yang telah dihapus.', en: 'Manage and restore deleted files.' },
 
   // Language Switcher Label
   lang_switcher_title: { id: 'Bahasa / Language', en: 'Language / Bahasa' },

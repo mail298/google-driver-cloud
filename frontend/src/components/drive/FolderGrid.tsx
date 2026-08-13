@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { FolderItem } from '@/data/drive-data'
 import { FolderVisual } from '@/components/drive/FolderVisual'
+import { useLanguage } from '@/context/LanguageContext'
 
 export type FolderSizeScale = 'xs' | 'sm' | 'md' | 'lg'
 
@@ -54,6 +55,7 @@ export function FolderGrid({
   onFolderOpen?: (folder: FolderItem) => void
   onDropItem?: (fileId: string, folderId: string) => void
 }) {
+  const { t } = useLanguage()
   const cfg = scaleConfig[sizeScale] || scaleConfig.md
 
   return (
@@ -109,8 +111,8 @@ export function FolderGrid({
                   {folder.name}
                 </span>
               </div>
-              <span className="shrink-0 font-medium text-slate-400 dark:text-slate-500">
-                Folder
+              <span className="shrink-0 font-medium text-slate-400 dark:text-slate-500 capitalize">
+                {t('toolbar_folder')}
               </span>
             </div>
           </Card>
