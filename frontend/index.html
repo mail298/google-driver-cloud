@@ -119,7 +119,16 @@
 
 <body>
   <div id="root">
-    <!-- Static SSR Fallback for SEO Crawlers (Screaming Frog, Googlebot, Bingbot) -->
+    <div style="min-height: 100vh; background-color: #030712; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-family: system-ui, -apple-system, sans-serif;">
+      <div style="text-align: center;">
+        <img src="/logo.png" alt="drive9" style="width: 44px; height: 44px; margin: 0 auto 12px; display: block; border-radius: 12px;" />
+        <p style="font-size: 14px; font-weight: 700; color: #f8fafc; margin: 0; letter-spacing: -0.02em;">drive9</p>
+      </div>
+    </div>
+  </div>
+
+  <noscript>
+    <!-- Static SSR Fallback for Search Engine Crawlers without JavaScript -->
     <header>
       <nav aria-label="Navigasi Utama">
         <a href="/" aria-label="Halaman Utama drive9">drive9 Storage Gateway</a>
@@ -183,7 +192,7 @@
     <footer>
       <p>© 2026 drive9. All rights reserved.</p>
     </footer>
-  </div>
+  </noscript>
 
   <script type="module" src="/src/main.tsx"></script>
 </body>
