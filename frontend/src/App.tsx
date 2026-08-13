@@ -3,32 +3,97 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { DriveLayout } from '@/layouts/DriveLayout'
 import { LandingPage } from '@/pages/LandingPage'
+import { PrivacyPage } from '@/pages/PrivacyPage'
+import { TermsPage } from '@/pages/TermsPage'
 import { UploadProvider } from '@/context/UploadContext'
 import { LanguageProvider } from '@/context/LanguageContext'
 import { apiFetch } from '@/lib/api'
 import { getAccessToken } from '@/lib/auth'
 import { Loader2 } from 'lucide-react'
+import { Component, type ErrorInfo, type ReactNode } from 'react'
 
-// Code Splitting (Lazy Loading non-landing routes for ultra-fast initial load speed)
-const AllFilesPage = lazy(() => import('@/pages/AllFilesPage').then(m => ({ default: m.AllFilesPage })))
-const ArchivedPage = lazy(() => import('@/pages/ArchivedPage').then(m => ({ default: m.ArchivedPage })))
-const LoginPage = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })))
-const GoogleAuthPage = lazy(() => import('@/pages/GoogleAuthPage').then(m => ({ default: m.GoogleAuthPage })))
-const GoogleConnectedPage = lazy(() => import('@/pages/GoogleConnectedPage').then(m => ({ default: m.GoogleConnectedPage })))
-const QuotaTrackerPage = lazy(() => import('@/pages/QuotaTrackerPage').then(m => ({ default: m.QuotaTrackerPage })))
-const RecentPage = lazy(() => import('@/pages/RecentPage').then(m => ({ default: m.RecentPage })))
-const RegisterPage = lazy(() => import('@/pages/RegisterPage').then(m => ({ default: m.RegisterPage })))
-const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
-const SharedPage = lazy(() => import('@/pages/SharedPage').then(m => ({ default: m.SharedPage })))
-const StarredPage = lazy(() => import('@/pages/StarredPage').then(m => ({ default: m.StarredPage })))
-const PublicFilePage = lazy(() => import('@/pages/PublicFilePage').then(m => ({ default: m.PublicFilePage })))
-const ApiManagementPage = lazy(() => import('@/pages/ApiManagementPage').then(m => ({ default: m.ApiManagementPage })))
-const TrashPage = lazy(() => import('@/pages/TrashPage').then(m => ({ default: m.TrashPage })))
-const ActivityLogPage = lazy(() => import('@/pages/ActivityLogPage').then(m => ({ default: m.ActivityLogPage })))
-const PrivacyPage = lazy(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
-const TermsPage = lazy(() => import('@/pages/TermsPage').then(m => ({ default: m.TermsPage })))
-const SitemapPage = lazy(() => import('@/pages/SitemapPage').then(m => ({ default: m.SitemapPage })))
-const RobotsPage = lazy(() => import('@/pages/RobotsPage').then(m => ({ default: m.RobotsPage })))
+// Helper for safe lazy loading with chunk error auto-retry
+function safeLazy<T extends React.ComponentType<any>>(
+  importFn: () => Promise<{ default: T } | { [key: string]: any }>
+) {
+  return lazy(async () => {
+    try {
+      const page = await importFn()
+      return 'default' in page ? (page as { default: T }) : { default: Object.values(page)[0] as T }
+    } catch (error) {
+      const chunkRetry = sessionStorage.getItem('chunk_retry_terms')
+      if (!chunkRetry) {
+        sessionStorage.setItem('chunk_retry_terms', 'true')
+        window.location.reload()
+      }
+      throw error
+    }
+  })
+}
+
+// Code Splitting (Lazy Loading dashboard routes for ultra-fast initial load speed)
+const AllFilesPage = safeLazy(() => import('@/pages/AllFilesPage'))
+const ArchivedPage = safeLazy(() => import('@/pages/ArchivedPage'))
+const LoginPage = safeLazy(() => import('@/pages/LoginPage'))
+const GoogleAuthPage = safeLazy(() => import('@/pages/GoogleAuthPage'))
+const GoogleConnectedPage = safeLazy(() => import('@/pages/GoogleConnectedPage'))
+const QuotaTrackerPage = safeLazy(() => import('@/pages/QuotaTrackerPage'))
+const RecentPage = safeLazy(() => import('@/pages/RecentPage'))
+const RegisterPage = safeLazy(() => import('@/pages/RegisterPage'))
+const SettingsPage = safeLazy(() => import('@/pages/SettingsPage'))
+const SharedPage = safeLazy(() => import('@/pages/SharedPage'))
+const StarredPage = safeLazy(() => import('@/pages/StarredPage'))
+const PublicFilePage = safeLazy(() => import('@/pages/PublicFilePage'))
+const ApiManagementPage = safeLazy(() => import('@/pages/ApiManagementPage'))
+const TrashPage = safeLazy(() => import('@/pages/TrashPage'))
+const ActivityLogPage = safeLazy(() => import('@/pages/ActivityLogPage'))
+const SitemapPage = safeLazy(() => import('@/pages/SitemapPage'))
+const RobotsPage = safeLazy(() => import('@/pages/RobotsPage'))
+
+interface ErrorBoundaryProps {
+  children: ReactNode
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean
+}
+
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = { hasError: false }
+
+  public static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true }
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('App routing error caught by ErrorBoundary:', error, errorInfo)
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center font-sans">
+          <div className="max-w-md space-y-4">
+            <h2 className="text-xl font-bold text-white">Gagal Memuat Halaman</h2>
+            <p className="text-xs text-slate-400">
+              Terjadi pembaruan atau kendala jaringan saat memuat halaman. Silakan muat ulang.
+            </p>
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('chunk_retry_terms')
+                window.location.reload()
+              }}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-colors"
+            >
+              Muat Ulang Halaman (F5)
+            </button>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 function RouteLoader() {
   return (
@@ -54,40 +119,42 @@ function App() {
   return (
     <LanguageProvider>
       <UploadProvider>
-        <Suspense fallback={<RouteLoader />}>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="privacy" element={<PrivacyPage />} />
-            <Route path="terms" element={<TermsPage />} />
-            <Route path="sitemap.xml" element={<SitemapPage />} />
-            <Route path="robots.txt" element={<RobotsPage />} />
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="google-auth" element={<GoogleAuthPage />} />
-            <Route path="google-connected" element={<GoogleConnectedPage />} />
-            <Route path="public/files/:token" element={<PublicFilePage />} />
-            <Route path="public/files/:token/embed" element={<PublicFilePage embed />} />
-            <Route path="files/:token" element={<PublicFilePage />} />
-            <Route path="files/:token/embed" element={<PublicFilePage embed />} />
-            <Route path="file/:token" element={<PublicFilePage />} />
-            <Route path="file/:token/embed" element={<PublicFilePage embed />} />
-            <Route element={<ProtectedRoute />}>
-              <Route element={<DriveLayout />}>
-                <Route path="all-files" element={<AllFilesPage />} />
-                <Route path="quota" element={<QuotaTrackerPage />} />
-                <Route path="shared" element={<SharedPage />} />
-                <Route path="recent" element={<RecentPage />} />
-                <Route path="starred" element={<StarredPage />} />
-                <Route path="archived" element={<ArchivedPage />} />
-                <Route path="trash" element={<TrashPage />} />
-                <Route path="activity" element={<ActivityLogPage />} />
-                <Route path="settings" element={<SettingsPage />} />
-                <Route path="api" element={<ApiManagementPage />} />
+        <ErrorBoundary>
+          <Suspense fallback={<RouteLoader />}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="privacy" element={<PrivacyPage />} />
+              <Route path="terms" element={<TermsPage />} />
+              <Route path="sitemap.xml" element={<SitemapPage />} />
+              <Route path="robots.txt" element={<RobotsPage />} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
+              <Route path="google-auth" element={<GoogleAuthPage />} />
+              <Route path="google-connected" element={<GoogleConnectedPage />} />
+              <Route path="public/files/:token" element={<PublicFilePage />} />
+              <Route path="public/files/:token/embed" element={<PublicFilePage embed />} />
+              <Route path="files/:token" element={<PublicFilePage />} />
+              <Route path="files/:token/embed" element={<PublicFilePage embed />} />
+              <Route path="file/:token" element={<PublicFilePage />} />
+              <Route path="file/:token/embed" element={<PublicFilePage embed />} />
+              <Route element={<ProtectedRoute />}>
+                <Route element={<DriveLayout />}>
+                  <Route path="all-files" element={<AllFilesPage />} />
+                  <Route path="quota" element={<QuotaTrackerPage />} />
+                  <Route path="shared" element={<SharedPage />} />
+                  <Route path="recent" element={<RecentPage />} />
+                  <Route path="starred" element={<StarredPage />} />
+                  <Route path="archived" element={<ArchivedPage />} />
+                  <Route path="trash" element={<TrashPage />} />
+                  <Route path="activity" element={<ActivityLogPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="api" element={<ApiManagementPage />} />
+                </Route>
               </Route>
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        </ErrorBoundary>
       </UploadProvider>
     </LanguageProvider>
   )
