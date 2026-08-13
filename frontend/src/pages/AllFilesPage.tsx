@@ -955,10 +955,14 @@ export function AllFilesPage() {
         <div className="mt-4 flex flex-col gap-2 sm:mt-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             {totalVisibleCount > 0 ? (
-              <label className="inline-flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 shadow-sm cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-all select-none">
+              <label className={cn(
+                "inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold shadow-sm cursor-pointer transition-all select-none",
+                isAllVisibleSelected
+                  ? "border-blue-500/50 bg-blue-50/70 text-blue-700 dark:border-blue-500/40 dark:bg-blue-950/50 dark:text-blue-300"
+                  : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800/90 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700"
+              )}>
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-blue-600 rounded cursor-pointer"
                   checked={isAllVisibleSelected}
                   onChange={toggleAllVisibleItems}
                 />
