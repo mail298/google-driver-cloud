@@ -448,6 +448,67 @@ export function LandingPage() {
             </RouterLink>
           </motion.div>
 
+          {/* ── Official Google OAuth Verification Disclosure Card ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.75 }}
+            className="mx-auto max-w-4xl rounded-3xl border-2 border-blue-500/40 bg-slate-900/95 p-6 sm:p-8 text-left shadow-2xl backdrop-blur-xl my-6 space-y-4"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/logo.png"
+                  alt="drive9 application logo"
+                  className="h-10 w-10 rounded-xl bg-slate-950 p-1 border border-blue-500/30 object-contain"
+                />
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-400">
+                    {lang === 'id' ? 'Identitas Aplikasi Resmi' : 'Official Application Identity'}
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-black text-white">
+                    {lang === 'id' ? 'Nama Aplikasi: ' : 'Application Name: '}
+                    <span className="text-blue-400 font-mono">drive9</span>
+                  </h2>
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Google Drive Storage Gateway</span>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <Info className="h-4 w-4 text-blue-400 shrink-0" />
+                <span>{lang === 'id' ? 'Tujuan & Fungsi Utama Aplikasi drive9:' : 'drive9 Application Purpose & Overview:'}</span>
+              </h3>
+              <p>
+                <strong className="text-white">drive9</strong> {lang === 'id'
+                  ? 'adalah platform web Gateway Penyimpanan Google Drive & Proxy Media CDN. Aplikasi ini memungkinkan pengguna terdaftar untuk menghubungkan akun Google Drive mereka guna mengunggah file, mengorganisir folder virtual, memutar video streaming tanpa buffering, serta memantau total kuota penyimpanan secara terpusat.'
+                  : 'is a web application that operates as a Google Drive Storage Gateway & CDN Media Proxy. It allows registered users to securely connect their Google Drive accounts, upload and organize files within virtual folders, stream media buffer-free, and monitor multi-account storage quotas in a unified dashboard.'}
+              </p>
+              <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
+                <span className="text-xs font-bold text-blue-400 block">
+                  {lang === 'id' ? 'Penggunaan Scope Google Drive API:' : 'Google Drive API Scope Disclosure:'}
+                </span>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  {lang === 'id'
+                    ? 'Saat Anda menghubungkan akun Google, drive9 meminta akses Google Drive Scope ('
+                    : 'When connecting your Google account, drive9 requests Google Drive Scope access ('}
+                  <code className="text-purple-300 font-mono font-bold">https://www.googleapis.com/auth/drive</code>
+                  {lang === 'id'
+                    ? ') khusus untuk membuat folder khusus bernama '
+                    : ') solely to create a dedicated folder named '}
+                  <code className="text-indigo-300 font-mono font-bold">9drive</code>
+                  {lang === 'id'
+                    ? ' di Google Drive Anda dan mengalirkan file secara langsung (stream upload/download) tanpa pernah menyimpan file fisik pada server perantara.'
+                    : ' inside your Google Drive and stream files directly (upload/download streaming) without storing any physical files on intermediate servers.'}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Key Metrics / Highlights */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
