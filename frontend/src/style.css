@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (.dark &);
 
 :root, :root.light {
   --bg-gradient:
@@ -298,40 +298,51 @@ aside .card button.text-orange-600:hover {
 .dark h4,
 .dark h5,
 .dark h6 {
-  color: #f8fafc !important;
+  color: #f8fafc;
 }
 
 .dark .text-slate-600,
 .dark .text-slate-500 {
-  color: #cbd5e1 !important;
+  color: #cbd5e1;
 }
 
 .dark .text-slate-400 {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 .dark nav a:not(.active),
 .dark aside a:not(.active) {
-  color: #cbd5e1 !important;
+  color: #cbd5e1;
 }
 
 .dark nav a:not(.active):hover,
 .dark aside a:not(.active):hover {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.dark .bg-slate-50,
-.dark .bg-slate-100 {
-  background-color: rgba(255, 255, 255, 0.05) !important;
+.dark .bg-slate-50:not(:hover),
+.dark .bg-slate-100:not(:hover) {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
-.dark .bg-slate-200 {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+.dark .bg-slate-200:not(:hover) {
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .dark .border-slate-200,
 .dark .border-slate-100,
 .dark .border-slate-200\/60 {
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.1);
 }
+
+/* File/Folder Selection Highlight in Dark Mode */
+.dark .file-selected {
+  background: rgba(249, 115, 22, 0.15) !important;
+  border-color: rgba(249, 115, 22, 0.35) !important;
+}
+
+.dark tr:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
