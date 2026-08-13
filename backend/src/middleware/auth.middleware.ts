@@ -22,7 +22,8 @@ export type AuthenticatedRequest = Request & {
 export async function requireAuth(req: AuthRequest, res: Response, next: NextFunction) {
   try {
     const authHeader = req.header('Authorization')
-    const rawToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined
+    const queryToken = typeof req.query.token === 'string' ? req.query.token : undefined
+    const rawToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : queryToken
 
     if (!rawToken) return res.status(401).json({ code: 'AUTH_REQUIRED', message: 'Bearer token required.' })
     const payload = verifyAccessToken(rawToken)
