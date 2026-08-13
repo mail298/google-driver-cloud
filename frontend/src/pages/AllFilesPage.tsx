@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, type DragEvent, type FormEvent, type Mouse
 import { useSearchParams } from 'react-router-dom'
 import { Archive, CheckCircle, ClipboardPaste, Code2, Copy, Download, FolderInput, FolderPlus, LayoutGrid, List, RefreshCw, Star, Trash2, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
 import { DummyModal } from '@/components/drive/DummyModal'
 import { EmptyAreaContextMenu } from '@/components/drive/EmptyAreaContextMenu'
 import { FileContextMenu } from '@/components/drive/FileContextMenu'
@@ -999,17 +998,17 @@ export function AllFilesPage() {
         </div>
         {cutFolder ? <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold text-amber-700"><ClipboardPaste className="mr-2 inline h-4 w-4" />Cut folder: {cutFolder.name}. Press Ctrl+V or right-click empty area to paste here.</p> : null}
         {files.length === 0 ? (
-          <Card className="mt-3 p-5 bg-white/10 backdrop-blur-sm border border-white/20 dark:bg-transparent dark:border-0 dark:p-0 dark:shadow-none">
+          <div className="mt-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-8 text-center bg-white/40 dark:bg-slate-900/40">
             <p className="text-sm text-slate-500">{searchQuery ? t('files_no_files_found').replace('{query}', searchQuery) : activeFolder ? t('files_no_files_folder') : t('files_no_files_root')}</p>
-          </Card>
+          </div>
+        ) : fileViewMode === 'grid' ? (
+          <div className="mt-4">
+            <FileGrid files={files} selectedFileIds={selectedFileIds} sizeScale={folderSizeScale} onToggleFile={toggleFileSelection} onFileContextMenu={openContext} />
+          </div>
         ) : (
-          <Card className="mt-3 p-4 sm:p-5 bg-white/10 backdrop-blur-sm border border-white/20 dark:bg-transparent dark:border-0 dark:p-0 dark:shadow-none">
-            {fileViewMode === 'grid' ? (
-              <FileGrid files={files} selectedFileIds={selectedFileIds} sizeScale={folderSizeScale} onToggleFile={toggleFileSelection} onFileContextMenu={openContext} />
-            ) : (
-              <FileTable files={files} selectedFileIds={selectedFileIds} allSelected={allVisibleSelected} onToggleFile={toggleFileSelection} onToggleAll={toggleAllVisibleFiles} onFileContextMenu={openContext} />
-            )}
-          </Card>
+          <div className="mt-4">
+            <FileTable files={files} selectedFileIds={selectedFileIds} allSelected={allVisibleSelected} onToggleFile={toggleFileSelection} onToggleAll={toggleAllVisibleFiles} onFileContextMenu={openContext} />
+          </div>
         )}
       </div>
       <EmptyAreaContextMenu x={emptyContextMenu.x} y={emptyContextMenu.y} open={emptyContextMenu.open} canPasteFolder={Boolean(cutFolder)} onClose={() => setEmptyContextMenu({ x: 0, y: 0, open: false })} onUpload={() => { setUploadOpen(true); setEmptyContextMenu({ x: 0, y: 0, open: false }) }} onCreateFolder={() => { setFolderOpen(true); setEmptyContextMenu({ x: 0, y: 0, open: false }) }} onPasteFolder={() => { pasteFolder().catch((error) => setMessage(error instanceof Error ? error.message : 'Failed to paste folder')); setEmptyContextMenu({ x: 0, y: 0, open: false }) }} />
