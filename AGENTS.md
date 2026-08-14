@@ -42,43 +42,61 @@ Stack:
 - express-rate-limit for auth/public API rate limiting
 
 Important files:
-- `backend/src/server.ts`: server entrypoint — runs migrations BEFORE app.listen.
-- `backend/src/app.ts`: Express app, route mounting, CORS, rate limiting.
+- `backend/src/server.ts`: server entrypoint — runs migrations BEFORE app.listen, then starts Telegram bot listener.
+- `backend/src/app.ts`: Express app, route mounting, CORS, rate limiting, robots.txt and sitemap.xml generation.
 - `backend/src/config/env.ts`: environment validation via Zod (single source of truth, no duplicate fallback).
-- `backend/src/config/prisma.ts`: Prisma client.
-- `backend/src/config/proxy.ts`: global HTTP proxy setup.
-- `backend/prisma/schema.prisma`: database schema.
+- `backend/src/config/prisma.ts`: Prisma client singleton.
+- `backend/src/config/proxy.ts`: global HTTP proxy setup via undici/https-proxy-agent.
+- `backend/prisma/schema.prisma`: database schema — 16 migrations.
 - `backend/src/middleware/auth.middleware.ts`: bearer auth (AuthRequest / AuthenticatedRequest types).
-- `backend/src/middleware/error.middleware.ts`: JSON error responses + Telegram notification.
+- `backend/src/middleware/error.middleware.ts`: JSON error responses + Telegram error notification.
 - `backend/src/middleware/rate-limit.middleware.ts`: authRateLimit, publicApiRateLimit, generalRateLimit.
 - `backend/src/middleware/api-key.middleware.ts`: API key authentication for external uploads.
-- `backend/src/middleware/ip-whitelist.middleware.ts`: IP whitelist enforcement.
-- `backend/src/modules/**`: feature route modules and provider services.
-- `backend/src/modules/files/stream-google-file.ts`: Google file preview/download streaming.
-- `backend/src/modules/files/stream-file.ts`: provider-agnostic stream dispatcher.
-- `backend/src/modules/public/public.routes.ts`: public shared file routes — tokenHash-only lookup.
+- `backend/src/middleware/ip-whitelist.middleware.ts`: IP whitelist enforcement for dashboard routes.
+- `backend/src/modules/auth/auth.routes.ts`: all auth endpoints (email/pass + Google OAuth flow).
+- `backend/src/modules/files/file.routes.ts`: file CRUD, share, preview-token, batch ops, sync.
+- `backend/src/modules/files/stream-google-file.ts`: Google file preview/download streaming via undici.
+- `backend/src/modules/files/stream-file.ts`: provider-agnostic stream dispatcher (Google or S3).
+- `backend/src/modules/folders/folder.routes.ts`: virtual folder CRUD, nested hierarchy.
+- `backend/src/modules/uploads/upload.routes.ts`: multipart upload (internal) + resumable chunked upload.
+- `backend/src/modules/connected-accounts/connected-account.routes.ts`: Google Drive account connect/disconnect/sync.
+- `backend/src/modules/provider-configs/provider-config.routes.ts`: global Google OAuth config management.
+- `backend/src/modules/storage/storage.routes.ts`: storage summary and breakdown.
+- `backend/src/modules/invites/invite.routes.ts`: file/folder share invites.
+- `backend/src/modules/api-keys/api-key.routes.ts`: API key management (create, list, revoke).
+- `backend/src/modules/public/public.routes.ts`: public shared file routes — tokenHash-only lookup, no auth.
+- `backend/src/modules/public-api/public-api.routes.ts`: external upload API (rate-limited, API-key auth).
+- `backend/src/modules/audit-logs/audit-log.routes.ts`: audit log query.
+- `backend/src/modules/system/system.routes.ts`: analytics, error logs, IP whitelist mgmt, update trigger, DB backup/restore, Telegram test.
 - `backend/src/modules/google/google.service.ts`: Google OAuth, Drive API, quota sync, file sync.
 - `backend/src/modules/s3/s3.service.ts`: S3-compatible storage client, upload, quota sync.
 - `backend/src/scripts/seed-google-config.ts`: stores encrypted global Google OAuth config.
 - `backend/src/scripts/seed-google-config-if-present.ts`: Docker auto-seed (only when real credentials are set).
 - `backend/src/scripts/reset-user-password.ts`: CLI user password reset tool.
-- `backend/src/utils/crypto.ts`: AES-256-GCM encrypt/decrypt, SHA-256 hash, random token.
-- `backend/src/utils/logger.ts`: JSON error log with async write queue.
+- `backend/src/scripts/test-s3-connection.ts`: S3 connectivity smoke test.
+- `backend/src/scripts/test-api-upload.ts`: external API upload smoke test.
+- `backend/src/utils/crypto.ts`: AES-256-GCM encrypt/decrypt, SHA-256 hash, random token generation.
+- `backend/src/utils/logger.ts`: JSON error log with async write queue to `backend/logs/`.
 - `backend/src/utils/cdn.ts`: SHA-256 hash-based CDN subdomain round-robin selector.
-- `backend/src/utils/ip-whitelist.store.ts`: IP whitelist persistence (file-based, DB-backed).
+- `backend/src/utils/ip-whitelist.store.ts`: IP whitelist persistence (file-based + DB-backed via AllowedIp model).
+- `backend/src/utils/ip.ts`: real client IP extraction (x-forwarded-for aware).
+- `backend/src/utils/jwt.ts`: JWT sign/verify helpers.
+- `backend/src/utils/password.ts`: Argon2 hash/verify wrappers.
 - `backend/src/utils/audit.ts`: audit log creation helper.
-- `backend/src/services/mail.service.ts`: SMTP email service for password reset (MIME plain-text + HTML).
-- `backend/src/services/telegram.service.ts`: Telegram HTTP notifications.
+- `backend/src/services/mail.service.ts`: SMTP email service for password reset (clean plain-text inbox style + HTML fallback).
+- `backend/src/services/telegram.service.ts`: Telegram HTTP notifications for errors.
 - `backend/src/services/telegram-bot.service.ts`: Telegram bot command handler (/addip, /delip, /whitelist).
 
 Commands:
-- `cd backend && npm run dev`: start development server.
-- `cd backend && npm run build`: typecheck/build backend.
+- `cd backend && npm run dev`: start development server (tsx watch).
+- `cd backend && npm run build`: typecheck/build backend (tsc).
 - `cd backend && npm run start`: run compiled backend from `dist/server.js`.
-- `cd backend && npm run start:deploy`: run migrations then start compiled backend.
-- `cd backend && npm run prisma:migrate`: run Prisma dev migration.
+- `cd backend && npm run start:deploy`: run `db:migrate:deploy` then `node dist/server.js` (production combined).
+- `cd backend && npm run db:migrate:deploy`: run Prisma production migrations (no reset).
+- `cd backend && npm run prisma:migrate`: run Prisma dev migration (creates new migration).
 - `cd backend && npm run prisma:generate`: regenerate Prisma client.
-- `cd backend && npm run seed:google-config`: store encrypted Google OAuth config.
+- `cd backend && npm run seed:google-config`: store encrypted Google OAuth config in DB.
+- `cd backend && npm run seed:google-config:docker`: auto-seed only when real credentials are set (used by Docker startup).
 - `cd backend && npm run reset-password -- <email> <newPassword>`: reset user password directly from CLI.
 - `cd backend && npm run test:s3`: test S3 connection.
 - `cd backend && npm run test:api-upload`: test external API upload.
@@ -155,34 +173,64 @@ Important files:
 - `frontend/src/main.tsx`: React entrypoint.
 - `frontend/src/App.tsx`: route registration, code splitting (safeLazy), ErrorBoundary, LanguageProvider.
 - `frontend/src/layouts/DriveLayout.tsx`: protected app shell, sidebar, header search, storage sidebar stats.
-- `frontend/src/pages/AllFilesPage.tsx`: core file/folder UI, uploads, context menus, preview, share/invite modals.
-- `frontend/src/pages/SharedPage.tsx`: shared links and invites UI.
-- `frontend/src/pages/QuotaTrackerPage.tsx`: connected-account quota UI.
-- `frontend/src/pages/SettingsPage.tsx`: Google/S3 account management, routing policy, API credentials, system update.
+- `frontend/src/pages/LandingPage.tsx`: public marketing landing page.
+- `frontend/src/pages/LoginPage.tsx`: email/password login form.
+- `frontend/src/pages/RegisterPage.tsx`: email/password registration form with optional reCAPTCHA.
 - `frontend/src/pages/ForgotPasswordPage.tsx`: password reset request form.
 - `frontend/src/pages/ResetPasswordPage.tsx`: token verification and new password submission form.
-- `frontend/src/pages/GoogleAuthPage.tsx`: Google auth handoff exchange page.
-- `frontend/src/pages/PublicFilePage.tsx`: public shared file viewer/embed page.
-- `frontend/src/pages/ApiManagementPage.tsx`: API key management and in-app developer documentation.
+- `frontend/src/pages/GoogleAuthPage.tsx`: Google OAuth handoff token exchange page.
+- `frontend/src/pages/GoogleConnectedPage.tsx`: confirmation page after Google Drive account connected.
+- `frontend/src/pages/AllFilesPage.tsx`: core file/folder UI, uploads, context menus, preview, share/invite modals.
+- `frontend/src/pages/QuotaTrackerPage.tsx`: connected-account quota UI.
+- `frontend/src/pages/SharedPage.tsx`: shared links and invites UI.
 - `frontend/src/pages/TrashPage.tsx`: soft-deleted files with restore/permanent-delete.
 - `frontend/src/pages/ActivityLogPage.tsx`: audit log viewer.
-- `frontend/src/components/auth/GoogleLogo.tsx`: Google button logo.
+- `frontend/src/pages/SettingsPage.tsx`: Google/S3 account management, routing policy, API credentials, system update, DB backup/restore.
+- `frontend/src/pages/ApiManagementPage.tsx`: API key management and in-app developer documentation.
+- `frontend/src/pages/PublicFilePage.tsx`: public shared file viewer/embed page (no auth required).
+- `frontend/src/pages/PrivacyPage.tsx`: privacy policy page.
+- `frontend/src/pages/TermsPage.tsx`: terms of service page.
+- `frontend/src/pages/ForbiddenPage.tsx`: IP-blocked / 403 forbidden page.
+- `frontend/src/pages/RecentPage.tsx`: recent files placeholder (sidebar nav).
+- `frontend/src/pages/StarredPage.tsx`: starred files placeholder (sidebar nav).
+- `frontend/src/pages/ArchivedPage.tsx`: archived files placeholder (sidebar nav).
+- `frontend/src/pages/SitemapPage.tsx`: frontend sitemap.xml proxy route.
+- `frontend/src/pages/RobotsPage.tsx`: frontend robots.txt proxy route.
+- `frontend/src/components/auth/GoogleLogo.tsx`: Google button SVG logo.
 - `frontend/src/components/auth/ProtectedRoute.tsx`: access token check + IP-blocked event handler.
 - `frontend/src/components/common/Seo.tsx`: per-page SEO meta tags.
-- `frontend/src/components/drive/**`: drive-specific UI components.
 - `frontend/src/components/drive/OnboardingModal.tsx`: multi-step interactive user guide modal.
-- `frontend/src/components/drive/LanguageSwitcher.tsx`: ID/EN toggle.
-- `frontend/src/components/ui/**`: reusable UI primitives (Button, Card, Input).
+- `frontend/src/components/drive/LanguageSwitcher.tsx`: ID/EN language toggle.
+- `frontend/src/components/drive/BrandLogo.tsx`: Drive9 brand logo component.
+- `frontend/src/components/drive/AvatarStack.tsx`: stacked user avatar display.
+- `frontend/src/components/drive/FileTable.tsx`: list-view file table with sortable columns.
+- `frontend/src/components/drive/FileGrid.tsx`: grid-view file card layout.
+- `frontend/src/components/drive/FileIcon.tsx`: file type icon resolver.
+- `frontend/src/components/drive/FileContextMenu.tsx`: right-click context menu for files.
+- `frontend/src/components/drive/FolderContextMenu.tsx`: right-click context menu for folders.
+- `frontend/src/components/drive/EmptyAreaContextMenu.tsx`: right-click context menu for empty canvas area.
+- `frontend/src/components/drive/FolderGrid.tsx`: grid-view folder card layout.
+- `frontend/src/components/drive/FolderVisual.tsx`: animated folder visual component.
+- `frontend/src/components/drive/FileDetailsDrawer.tsx`: slide-in file details side drawer.
+- `frontend/src/components/drive/DummyModal.tsx`: placeholder modal for unimplemented features.
+- `frontend/src/components/drive/MetricCard.tsx`: stat/metric card for quota and analytics.
+- `frontend/src/components/drive/PageHeader.tsx`: consistent page title/header component.
+- `frontend/src/components/ui/button.tsx`: Button UI primitive (CVA variants).
+- `frontend/src/components/ui/card.tsx`: Card UI primitive.
+- `frontend/src/components/ui/input.tsx`: Input UI primitive.
 - `frontend/src/lib/api.ts`: apiFetch helper, token refresh retry, formatBytes, formatDate, formatCdnUrl.
 - `frontend/src/lib/auth.ts`: localStorage-based auth session management.
 - `frontend/src/lib/file-utils.ts`: file type detection, icon mapping, MIME type utilities.
 - `frontend/src/lib/gravatar.ts`: Gravatar URL generator.
 - `frontend/src/lib/plyr.ts`: video preview player (Plyr) dynamic loader.
 - `frontend/src/lib/preview.ts`: preview URL helpers.
+- `frontend/src/lib/utils.ts`: `cn()` utility (clsx + tailwind-merge).
 - `frontend/src/context/LanguageContext.tsx`: i18n context — flat key-value translation dictionary (id/en).
 - `frontend/src/context/UploadContext.tsx`: resumable chunked upload state and logic (5MB chunks).
 - `frontend/src/data/drive-data.ts`: **MOCK DATA ONLY** — for landing page previews, not real API data.
-- `frontend/src/style.css`: Tailwind import and global styles.
+- `frontend/src/style.css`: Tailwind v4 import and global styles.
+- `frontend/public/`: static assets — favicon.svg, logo.png, PWA icons, robots.txt, sitemap.xml.
+- `frontend/vite.config.ts`: Vite config — React plugin, VitePWA, path alias `@/`, manual chunk splitting.
 
 Commands:
 - `cd frontend && npm run dev`: start Vite dev server.

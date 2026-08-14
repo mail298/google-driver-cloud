@@ -8,27 +8,41 @@ Drive9 is a storage gateway web app for connecting multiple Google Drive account
 
 - Google Drive and S3-compatible storage gateway in one virtual storage dashboard.
 - S3-compatible storage support with custom endpoints for providers like MinIO, Cloudflare R2, Wasabi, Backblaze B2, and AWS S3.
-- Direct upload stream to Google Drive. Files are not stored on the server.
+- Direct upload stream to Google Drive and S3. Files are never stored on the server disk.
 - Google Drive uploads are stored under a root `9drive` folder.
 - Direct upload stream to S3-compatible storage through the backend without exposing storage credentials to the frontend.
 - Upload routing policies with most-available, round-robin, and priority-order modes.
+- Resumable chunked uploads (5MB chunks) with progress panel.
 - Multi-Language Support (i18n): Toggle seamlessly between Bahasa Indonesia 🇮🇩 and English 🇺🇸 across the entire application and interactive guide.
 - External upload API (`POST /api/v1/uploads`) with optional `sizeBytes` auto-calculated from stream buffer.
 - Real-time hard deletion & 1:1 database synchronization with Google Drive & S3.
 - Interactive multi-step user guide modal with step-by-step feature tours for all dashboard pages.
 - API key management with one-time secret display, hashed key storage, last-used tracking, and revocation.
 - Email/password auth plus Google sign-in/register with automatic first Drive connection.
-- Multi-account storage quota summary.
+- Multi-account storage quota summary and breakdown.
 - Quota tracker page.
 - Manual sync from the Google Drive `9drive` folder back into MySQL.
-- Virtual folders.
+- Virtual folders with nested hierarchy.
+- Recycle bin / trash with restore and permanent delete.
 - File preview, download, rename, move, and delete actions.
-- In-app API documentation with cURL and JavaScript upload examples.
+- File sharing via public share links (tokenHash-based, optional expiry).
+- File invite system with Viewer/Editor roles.
+- In-app API documentation with cURL, JavaScript, and Python upload examples.
 - Bottom-right upload progress panel.
-- Bearer token authentication.
+- Bearer token authentication with refresh token rotation.
 - Global Google OAuth config stored encrypted in DB (can be set via seed command or directly in Settings UI).
 - Automated system updates via `update.sh` directly from the Settings UI (PM2 setup).
+- DB backup and restore via Settings UI.
 - Optional reCAPTCHA on email/password registration.
+- Self-service password reset via secure email link (15-min single-use tokens).
+- Admin CLI password reset tool (`npm run reset-password`).
+- Audit log viewer for tracking all user actions.
+- IP whitelist enforcement with Telegram bot management commands.
+- Telegram bot integration (/addip, /delip, /whitelist) and error notifications.
+- CDN multi-subdomain round-robin for fast media streaming (Cloudflare compatible).
+- Dark mode / Light mode toggle.
+- Gravatar avatar integration.
+- PWA support (installable, service worker, offline-capable).
 - MySQL database with Prisma migrations.
 - Express + TypeScript backend.
 - React + Vite frontend.
@@ -48,8 +62,40 @@ Live preview: https://9drive.zenhosta.com
 ## Project Structure
 
 ```txt
-backend/   Express API, Prisma schema, Google Drive integration
-frontend/  Vite React app
+9drive/
+├── backend/              Express API, TypeScript, Prisma, MySQL, auth, Google Drive, S3
+│   ├── prisma/             Prisma schema + 16 migrations
+│   ├── src/
+│   │   ├── config/         env validation, Prisma client, proxy setup
+│   │   ├── middleware/     auth, error, rate-limit, api-key, ip-whitelist
+│   │   ├── modules/        feature modules (auth, files, folders, uploads, ...)
+│   │   ├── services/       mail, telegram, telegram-bot
+│   │   ├── utils/          crypto, logger, cdn, ip, jwt, password, audit, ip-whitelist.store
+│   │   ├── scripts/        seed-google-config, reset-user-password, test-s3, test-api-upload
+│   │   ├── app.ts          Express app with all route mounts
+│   │   └── server.ts       Entrypoint: runs migrations → seeds → listens
+│   ├── Dockerfile
+│   └── package.json
+├── frontend/             Vite React app, protected dashboard UI
+│   ├── public/             favicon, PWA icons, robots.txt, sitemap.xml
+│   ├── src/
+│   │   ├── components/     auth, common, drive, ui primitives
+│   │   ├── context/        LanguageContext (i18n), UploadContext
+│   │   ├── data/           mock data for landing page only
+│   │   ├── layouts/        DriveLayout (protected app shell)
+│   │   ├── lib/            api, auth, file-utils, gravatar, plyr, preview, utils
+│   │   ├── pages/          23 pages (landing, auth, dashboard, public, legal)
+│   │   ├── App.tsx         route registration + code splitting
+│   │   └── style.css       Tailwind v4 import + global styles
+│   ├── vite.config.ts    VitePWA, path alias, manual chunk splitting
+│   ├── Dockerfile
+│   └── nginx.conf
+├── docker-compose.yml    MySQL, backend, and nginx-served frontend services
+├── .env.docker.example   Docker environment template
+├── setup.ps1             Windows automated setup (keys, deps, Prisma)
+├── setup.sh              Linux/macOS automated setup
+├── update.sh             Automated system update (git pull, build, migrate, pm2 restart)
+└── README.md
 ```
 
 ## Requirements
@@ -204,14 +250,14 @@ Open Google Cloud Console:
 https://console.cloud.google.com/
 ```
 
-### 6.1 Create Or Select Project
+### 5.1 Create Or Select Project
 
 1. Open Google Cloud Console.
 2. Click project selector in top bar.
 3. Create a new project or select an existing project.
 4. Remember the project name because OAuth client and Drive API must be in the same project.
 
-### 6.2 Enable Google Drive API
+### 5.2 Enable Google Drive API
 
 1. Go to:
 
@@ -241,7 +287,7 @@ If Google Drive API is disabled, you will see an error like:
 Google Drive API has not been used in project ... before or it is disabled.
 ```
 
-### 6.3 Configure OAuth Consent Screen
+### 5.3 Configure OAuth Consent Screen
 
 1. Go to:
 
@@ -288,7 +334,7 @@ Access blocked: app has not completed the Google verification process
 Error 403: access_denied
 ```
 
-### 6.4 Create OAuth Client
+### 5.4 Create OAuth Client
 
 1. Go to:
 
@@ -590,26 +636,39 @@ Delete
 
 ## API Overview
 
-Auth:
+Auth (rate-limited: 10 req/15min per IP):
 
 ```txt
 POST /auth/register
 POST /auth/login
-GET /auth/google/url
-GET /auth/google/callback
+POST /auth/change-password
+POST /auth/forgot-password
+POST /auth/verify-reset-token
+POST /auth/reset-password
+GET  /auth/google/url
+GET  /auth/google/callback
 POST /auth/google/exchange
 POST /auth/refresh
 POST /auth/logout
-GET /auth/me
+GET  /auth/me
 ```
 
-Google accounts:
+Provider configs:
 
 ```txt
-GET /connected-accounts/google/connect-url
-GET /connected-accounts/google/callback
-GET /connected-accounts
-POST /connected-accounts/:id/sync-quota
+POST   /provider-configs/google
+GET    /provider-configs
+DELETE /provider-configs/:id
+```
+
+Google connected accounts:
+
+```txt
+GET    /connected-accounts/google/connect-url
+GET    /connected-accounts/google/connect
+GET    /connected-accounts/google/callback
+GET    /connected-accounts
+POST   /connected-accounts/:id/sync-quota
 DELETE /connected-accounts/:id
 ```
 
@@ -617,43 +676,99 @@ Storage:
 
 ```txt
 GET /storage/summary
+GET /storage/breakdown
 ```
 
 Folders:
 
 ```txt
-GET /folders
-GET /folders/recent?limit=4
-POST /folders
+GET    /folders?parentId=<id>
+GET    /folders?all=1
+GET    /folders/recent?limit=4
+POST   /folders
+PATCH  /folders/:id
 DELETE /folders/:id
 ```
 
 Files:
 
 ```txt
-GET /files
-GET /files?folderId=<id>
-GET /files?q=<search>
-GET /files/shared-links
-GET /files/:id
-PATCH /files/:id
-PATCH /files/batch
+GET    /files
+GET    /files?folderId=<id>
+GET    /files?q=<search>
+GET    /files?kind=<image|video|pdf|doc|archive>
+GET    /files?accountId=<id>&minSize=<bytes>&maxSize=<bytes>&startDate=<iso>&endDate=<iso>
+GET    /files/shared-links
+GET    /files/:id
+PATCH  /files/:id
+PATCH  /files/batch
 DELETE /files/batch
-POST /files/sync-google
-POST /files/:id/share
+POST   /files/sync-google
+POST   /files/batch-download
+POST   /files/:id/share
 DELETE /files/:id/share
-POST /files/:id/preview-token
-GET /files/:id/view-url
-GET /files/:id/download
+POST   /files/:id/preview-token
+POST   /files/:id/public-permission
+GET    /files/:id/view-url
+GET    /files/:id/download
 DELETE /files/:id
-GET /files/preview/:token
+GET    /files/preview/:token
+```
+
+Invites:
+
+```txt
+GET    /invites
+POST   /invites
+DELETE /invites/:id
+```
+
+Public shared files (no auth required):
+
+```txt
+GET /share/files/:token
+GET /share/files/:token/download
+GET /share/files/:token/preview
 ```
 
 Uploads:
 
 ```txt
 POST /uploads
-POST /api/v1/uploads
+POST /uploads/resumable/init
+POST /uploads/resumable/chunk
+GET  /uploads/resumable/status/:sessionId
+```
+
+API Keys:
+
+```txt
+GET    /api-keys
+POST   /api-keys
+DELETE /api-keys/:id
+```
+
+Audit Logs:
+
+```txt
+GET /audit-logs
+```
+
+System:
+
+```txt
+GET    /system/analytics
+POST   /system/telegram-test
+GET    /system/error-logs
+GET    /system/error-logs/download
+DELETE /system/error-logs
+POST   /system/update
+GET    /system/update-log
+GET    /system/ip-whitelist
+POST   /system/ip-whitelist
+DELETE /system/ip-whitelist/:ip
+POST   /system/db-backup
+POST   /system/db-restore
 ```
 
 ### External Upload API (`POST /api/v1/uploads`)
