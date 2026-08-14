@@ -606,33 +606,270 @@ npm run start:deploy
 
 `npm run db:migrate:deploy` uses Prisma production migrations and does not reset the database. If Prisma reports migration drift, stop the deploy and repair migration history first; do not run `prisma migrate reset` on production.
 
-## 8. Manual Test Flow
+## Petunjuk Drive9 — Panduan Lengkap Dashboard
 
-1. Open frontend:
+Panduan ini menjelaskan cara menggunakan seluruh fitur Drive9 bagi pengguna baru maupun yang sudah berpengalaman.
 
-```txt
-http://localhost:5173
+---
+
+### 1. Mendaftar & Masuk
+
+#### Daftar dengan Email/Password
+1. Buka halaman utama dan klik **Register**.
+2. Isi **Nama**, **Email**, dan **Password** (minimal 8 karakter).
+3. Jika reCAPTCHA diaktifkan oleh admin, centang kotak verifikasi.
+4. Klik **Create Account**.
+
+#### Daftar / Masuk dengan Google
+1. Klik tombol **Continue with Google**.
+2. Pilih akun Google Anda dan setujui izin akses Google Drive.
+3. Setelah berhasil, akun Google Drive pertama Anda otomatis terhubung — tidak perlu langkah tambahan.
+
+#### Login Biasa
+1. Buka halaman **Login**.
+2. Masukkan email dan password lalu klik **Sign In**.
+
+#### Lupa Password
+1. Klik **Forgot Password** di halaman Login.
+2. Masukkan email Anda, lalu cek kotak masuk email.
+3. Klik tautan reset yang dikirimkan (berlaku **15 menit**, hanya bisa dipakai **1 kali**).
+4. Masukkan password baru dan konfirmasi.
+
+---
+
+### 2. Menghubungkan Akun Penyimpanan
+
+#### Menghubungkan Google Drive
+1. Buka **Settings** → bagian **Connected Accounts**.
+2. Klik **Connect Google Drive**.
+3. Pilih akun Google yang ingin dihubungkan dan setujui izin.
+4. Akun akan muncul di daftar dengan status **Connected**.
+5. Anda bisa menghubungkan **banyak akun Google Drive** sekaligus.
+
+#### Menghubungkan S3-Compatible Storage (MinIO, R2, Wasabi, Backblaze, AWS S3)
+1. Buka **Settings** → bagian **S3 Storage**.
+2. Klik **Add S3 Account**.
+3. Isi detail koneksi:
+   - **Name**: nama tampilan bebas
+   - **Bucket**: nama bucket
+   - **Region**: region penyimpanan
+   - **Endpoint**: URL endpoint (kosongkan untuk AWS S3 standar)
+   - **Access Key ID** dan **Secret Access Key**
+4. Klik **Save**. Drive9 akan memverifikasi koneksi sebelum menyimpan.
+
+#### Sinkronisasi Kuota
+- Di **Settings** atau **Quota Tracker**, klik ikon **Sync** di samping akun untuk memperbarui info kuota dari Google Drive / S3.
+
+---
+
+### 3. Mengelola File & Folder
+
+#### Melihat File
+- Buka **All Files** dari sidebar kiri.
+- Gunakan tombol **Grid** / **List** di pojok kanan atas untuk beralih tampilan.
+- Klik folder untuk masuk ke dalamnya. Breadcrumb di atas menampilkan lokasi Anda.
+
+#### Membuat Folder Baru
+1. Di halaman **All Files**, klik tombol **New Folder** atau klik kanan area kosong → **New Folder**.
+2. Ketik nama folder, lalu tekan Enter atau klik **Create**.
+3. Folder bisa bersarang (nested) tanpa batas kedalaman.
+
+#### Mengunggah File
+1. Klik tombol **Upload** atau seret file langsung ke area file.
+2. Panel upload muncul di pojok kanan bawah menampilkan progres tiap file.
+3. File diunggah langsung ke Google Drive / S3 — **tidak ada penyimpanan sementara di server**.
+4. Untuk file besar, upload dilakukan secara **chunked 5MB** dengan dukungan resume otomatis.
+
+#### Tindakan pada File (Klik Kanan)
+Klik kanan pada file untuk membuka menu konteks:
+
+| Aksi | Keterangan |
+|------|-----------|
+| **Preview** | Buka pratinjau gambar, video, PDF, atau dokumen |
+| **Download** | Unduh file ke komputer |
+| **Rename** | Ganti nama file |
+| **Move to Folder** | Pindahkan ke folder lain |
+| **Share** | Buat tautan publik untuk berbagi |
+| **Invite** | Undang pengguna lain dengan peran Viewer/Editor |
+| **Delete** | Hapus ke Recycle Bin |
+
+#### Tindakan pada Folder (Klik Kanan)
+| Aksi | Keterangan |
+|------|-----------|
+| **Rename** | Ganti nama folder |
+| **Delete** | Hapus folder beserta isinya ke Recycle Bin |
+
+#### Seleksi Banyak File (Batch)
+- Centang kotak di sebelah kiri file untuk memilih beberapa file sekaligus.
+- Tersedia aksi: **Download as ZIP**, **Move**, **Delete** (batch).
+
+#### Pencarian File
+- Gunakan kotak **Search** di header atas untuk mencari file berdasarkan nama.
+- Filter lanjutan: pencarian per jenis (`image`, `video`, `pdf`, `doc`, `archive`), per akun, ukuran, atau rentang tanggal.
+
+---
+
+### 4. Sinkronisasi Google Drive
+
+Jika Anda menambah atau menghapus file secara langsung di folder `9drive` di Google Drive:
+
+1. Buka **All Files**.
+2. Klik tombol **Sync Drive** (ikon sinkronisasi).
+3. Drive9 akan membandingkan data MySQL dengan isi Google Drive dan memperbarui catatan secara otomatis.
+
+---
+
+### 5. Berbagi File
+
+#### Tautan Publik (Share Link)
+1. Klik kanan file → **Share**.
+2. Aktifkan toggle **Public Link**.
+3. Salin tautan yang dihasilkan.
+4. Opsional: atur **tanggal kedaluwarsa** tautan.
+5. Siapa pun dengan tautan bisa melihat/mengunduh file tanpa login.
+
+#### Halaman File Publik
+- Tautan publik membuka halaman `/public/files/:token` yang menampilkan pratinjau dan tombol unduh.
+- Embed mode tersedia di `/public/files/:token/embed` untuk di-iframe ke website lain.
+
+#### Undangan (Invite)
+1. Klik kanan file atau folder → **Invite**.
+2. Masukkan **email** pengguna yang diundang.
+3. Pilih peran: **Viewer** (hanya lihat) atau **Editor** (bisa ubah).
+4. Klik **Send Invite**.
+5. Pengguna yang diundang bisa melihat file di halaman **Shared**.
+
+---
+
+### 6. Quota Tracker
+
+1. Buka **Quota** dari sidebar.
+2. Halaman ini menampilkan:
+   - Total kapasitas setiap akun yang terhubung
+   - Ruang yang sudah dipakai dan tersisa
+   - Grafik penggunaan per provider (Google Drive / S3)
+3. Klik **Sync** di samping akun untuk menyegarkan data kuota.
+
+---
+
+### 7. Shared (File yang Dibagikan)
+
+Buka **Shared** dari sidebar untuk melihat:
+- **My Shared Links**: tautan publik yang Anda buat beserta status aktif/kedaluwarsa.
+- **Invites Sent**: daftar undangan yang telah Anda kirim.
+- **Invites Received**: file/folder yang dibagikan kepada Anda oleh pengguna lain.
+
+---
+
+### 8. Recycle Bin (Trash)
+
+1. Buka **Trash** dari sidebar.
+2. File yang dihapus tampil di sini dengan tanggal penghapusan.
+3. **Restore**: klik kanan file → **Restore** untuk mengembalikan ke lokasi asal.
+4. **Hapus Permanen**: klik **Delete Forever** untuk menghapus dari Google Drive / S3 secara permanen.
+
+> ⚠️ Hapus permanen tidak bisa dibatalkan.
+
+---
+
+### 9. Activity Log
+
+1. Buka **Activity** dari sidebar.
+2. Lihat riwayat semua tindakan: upload, delete, rename, share, login, dll.
+3. Filter berdasarkan rentang waktu atau jenis aksi.
+
+---
+
+### 10. API Keys & Integrasi Eksternal
+
+Drive9 menyediakan API publik untuk mengunggah file dari aplikasi atau skrip eksternal.
+
+#### Membuat API Key
+1. Buka **API** dari sidebar.
+2. Klik **Create API Key**.
+3. Beri nama (contoh: `my-website-uploader`).
+4. Salin **secret key** yang ditampilkan — **hanya ditampilkan sekali**.
+5. Simpan key di tempat aman.
+
+#### Menggunakan API Key
+Sertakan key di header request:
+```http
+Authorization: Bearer 9d_live_your_secret_key_here
+```
+atau:
+```http
+X-API-Key: 9d_live_your_secret_key_here
 ```
 
-2. Register a user with email/password and captcha, or click `Continue with Google and connect Drive`.
-3. If using Google sign-in, approve Drive access once and confirm `/settings` already shows the connected account.
-4. If using email/password, open `Settings`, click `Connect Drive`, approve access, and confirm the account appears.
-5. Open `Quota Tracker`.
-6. Confirm quota appears.
-7. Open `All Files`.
-8. Create nested virtual folders.
-9. Upload a file and confirm it appears under Google Drive root folder `9drive`.
-10. Add or remove a file manually inside Google Drive folder `9drive`, then click `Sync Drive` in All Files.
-11. Watch bottom-right upload progress.
-12. Right-click file row for actions:
-
-```txt
-View
-Download
-Rename
-Move to Folder
-Delete
+#### Endpoint Upload Eksternal
+```bash
+POST /api/v1/uploads
 ```
+Form-data fields:
+- `file` (**wajib**): file yang diunggah
+- `fileName` (opsional): nama file kustom
+- `folderPath` (opsional): path folder tujuan, contoh `landingpage/submissions`
+- `mimeType` (opsional): MIME type file
+
+Jika folder belum ada, Drive9 **otomatis membuatnya**.
+
+Contoh cURL:
+```bash
+curl -X POST https://your-backend/api/v1/uploads \
+  -H "Authorization: Bearer 9d_live_your_secret_key" \
+  -F "file=@/path/to/document.pdf" \
+  -F "folderPath=laporan/2026"
+```
+
+---
+
+### 11. Settings
+
+Buka **Settings** dari sidebar untuk mengakses:
+
+| Bagian | Fungsi |
+|--------|--------|
+| **Google Credentials** | Atur Client ID & Secret Google OAuth (tanpa perlu seed script) |
+| **Connected Accounts** | Kelola akun Google Drive & S3 yang terhubung |
+| **Upload Routing** | Pilih kebijakan routing: *Most Available*, *Round Robin*, atau *Priority Order* |
+| **API Keys** | Buat, lihat, dan cabut API key |
+| **System Update** | Picu update otomatis dari GitHub dan pantau log rebuild |
+| **DB Backup & Restore** | Ekspor dan impor data MySQL |
+| **Dark / Light Mode** | Toggle tampilan gelap atau terang |
+
+#### Kebijakan Upload Routing
+- **Most Available**: upload ke akun dengan ruang tersisa terbesar.
+- **Round Robin**: gantian antar akun secara bergilir.
+- **Priority Order**: urutan akun ditentukan sendiri; akun pertama diprioritaskan.
+
+---
+
+### 12. Tampilan & Bahasa
+
+- **Dark / Light Mode**: klik ikon matahari/bulan di header.
+- **Bahasa**: klik tombol 🇮🇩 / 🇺🇸 di header untuk beralih antara Bahasa Indonesia dan English.
+
+---
+
+### 13. Panduan Interaktif (Onboarding)
+
+Saat pertama kali login, akan muncul **modal panduan interaktif** yang menjelaskan fitur-fitur utama step-by-step. Anda bisa menutupnya kapan saja. Untuk membukanya kembali:
+- Buka **Settings** → klik **Show Guide** (atau hapus key `Drive9:onboarding-completed` dari localStorage browser).
+
+---
+
+### 14. Troubleshooting Umum
+
+| Masalah | Solusi |
+|---------|--------|
+| Google Drive tidak muncul setelah connect | Tunggu beberapa detik, refresh halaman Settings |
+| Upload gagal di tengah jalan | Upload chunked otomatis melanjutkan dari chunk terakhir, coba klik Retry di panel upload |
+| File tidak muncul setelah upload manual ke Google Drive | Klik **Sync Drive** di halaman All Files |
+| Kuota tidak terupdate | Klik **Sync** di samping akun di Quota Tracker |
+| Lupa password | Gunakan fitur **Forgot Password** di halaman Login |
+| Tautan publik tidak bisa diakses | Cek apakah tautan sudah kedaluwarsa di halaman Shared |
+| Halaman meminta login terus | Coba logout → hapus cache browser → login ulang |
+
 
 ## API Overview
 
