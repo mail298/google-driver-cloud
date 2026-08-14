@@ -80,13 +80,13 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
         ],
         tips: isEn
           ? [
-              'You can connect multiple Google Drive & S3 accounts in Settings.',
-              'All access tokens are encrypted for maximum security.'
-            ]
+            'You can connect multiple Google Drive & S3 accounts in Settings.',
+            'All access tokens are encrypted for maximum security.'
+          ]
           : [
-              'Anda dapat menghubungkan beberapa akun Google Drive & S3 di menu Pengaturan.',
-              'Semua token akses disandi (encrypted) demi keamanan maksimal.'
-            ]
+            'Anda dapat menghubungkan beberapa akun Google Drive & S3 di menu Pengaturan.',
+            'Semua token akses disandi (encrypted) demi keamanan maksimal.'
+          ]
       }
     },
     {
@@ -133,15 +133,15 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
         ],
         tips: isEn
           ? [
-              'Click "Sync" button if you added files directly via Google Drive web to update Drive9 database instantly.',
-              'Files moved to Trash in Drive9 remain safely in Recycle Bin and will not be resurrected when clicking Sync.',
-              'Right-click any file/folder card to open context menu (Rename, Move, Share, Preview Token, Delete).'
-            ]
+            'Click "Sync" button if you added files directly via Google Drive web to update Drive9 database instantly.',
+            'Files moved to Trash in Drive9 remain safely in Recycle Bin and will not be resurrected when clicking Sync.',
+            'Right-click any file/folder card to open context menu (Rename, Move, Share, Preview Token, Delete).'
+          ]
           : [
-              'Klik tombol "Sinkron" jika Anda menambah file langsung melalui Google Drive web untuk memperbarui database Drive9.',
-              'File yang berada di Tempat Sampah tetap aman di Tempat Sampah dan tidak akan dimunculkan kembali saat mengklik Sinkron.',
-              'Klik kanan pada kartu file atau folder untuk membuka menu cepat (Rename, Move, Share, Preview Token, Delete).'
-            ]
+            'Klik tombol "Sinkron" jika Anda menambah file langsung melalui Google Drive web untuk memperbarui database Drive9.',
+            'File yang berada di Tempat Sampah tetap aman di Tempat Sampah dan tidak akan dimunculkan kembali saat mengklik Sinkron.',
+            'Klik kanan pada kartu file atau folder untuk membuka menu cepat (Rename, Move, Share, Preview Token, Delete).'
+          ]
       }
     },
     {
@@ -261,13 +261,13 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
         ],
         tips: isEn
           ? [
-              'Restoring a file from Recycle Bin returns it immediately to your All Files folder.',
-              'Only clicking "Permanent Delete" inside Trash will remove the physical file from Google Drive and free up quota.'
-            ]
+            'Restoring a file from Recycle Bin returns it immediately to your All Files folder.',
+            'Only clicking "Permanent Delete" inside Trash will remove the physical file from Google Drive and free up quota.'
+          ]
           : [
-              'Memulihkan file dari Tempat Sampah akan mengembalikannya secara langsung ke folder All Files Anda.',
-              'Hanya dengan mengklik "Hapus Permanen" di Tempat Sampah, file fisik di Google Drive akan terhapus secara permanen dan membebaskan kuota.'
-            ]
+            'Memulihkan file dari Tempat Sampah akan mengembalikannya secara langsung ke folder All Files Anda.',
+            'Hanya dengan mengklik "Hapus Permanen" di Tempat Sampah, file fisik di Google Drive akan terhapus secara permanen dan membebaskan kuota.'
+          ]
       }
     },
     {

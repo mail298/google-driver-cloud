@@ -35,6 +35,8 @@ function safeLazy<T extends React.ComponentType<any>>(
 const AllFilesPage = safeLazy(() => import('@/pages/AllFilesPage'))
 const ArchivedPage = safeLazy(() => import('@/pages/ArchivedPage'))
 const LoginPage = safeLazy(() => import('@/pages/LoginPage'))
+const ForgotPasswordPage = safeLazy(() => import('@/pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })))
+const ResetPasswordPage = safeLazy(() => import('@/pages/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })))
 const GoogleAuthPage = safeLazy(() => import('@/pages/GoogleAuthPage'))
 const GoogleConnectedPage = safeLazy(() => import('@/pages/GoogleConnectedPage'))
 const QuotaTrackerPage = safeLazy(() => import('@/pages/QuotaTrackerPage'))
@@ -129,6 +131,8 @@ function App() {
               <Route path="robots.txt" element={<RobotsPage />} />
               <Route path="login" element={<LoginPage />} />
               <Route path="register" element={<RegisterPage />} />
+              <Route path="forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="reset-password" element={<ResetPasswordPage />} />
               <Route path="google-auth" element={<GoogleAuthPage />} />
               <Route path="google-connected" element={<GoogleConnectedPage />} />
               <Route path="public/files/:token" element={<PublicFilePage />} />

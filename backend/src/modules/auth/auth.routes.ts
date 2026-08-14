@@ -9,6 +9,7 @@ import { encryptText, hashToken, randomToken } from '../../utils/crypto.js'
 import { signAccessToken } from '../../utils/jwt.js'
 import { createOAuthClient, syncGoogleQuota } from '../google/google.service.js'
 import { notifyUserLogin, notifyUserRegistration } from '../../services/telegram.service.js'
+import { sendPasswordResetEmail } from '../../services/mail.service.js'
 import { getClientIp } from '../../utils/ip.js'
 
 export const authRouter = Router()
@@ -17,6 +18,9 @@ const registerSchema = z.object({ name: z.string().min(2), email: z.string().ema
 const loginSchema = z.object({ email: z.string().email(), password: z.string().min(1) })
 const refreshSchema = z.object({ refreshToken: z.string().min(1) })
 const googleExchangeSchema = z.object({ token: z.string().min(1) })
+const forgotPasswordSchema = z.object({ email: z.string().email(), captchaToken: z.string().optional() })
+const verifyResetTokenSchema = z.object({ token: z.string().min(1) })
+const resetPasswordSchema = z.object({ token: z.string().min(1), password: z.string().min(8) })
 
 async function createSession(userId: string, req: AuthRequest) {
   const refreshToken = randomToken()
@@ -255,3 +259,123 @@ authRouter.post('/change-password', requireAuth, async (req, res, next) => {
     return next(error)
   }
 })
+
+authRouter.post('/forgot-password', async (req, res, next) => {
+  try {
+    const body = forgotPasswordSchema.parse(req.body)
+    if (body.captchaToken && !(await verifyCaptcha(body.captchaToken))) {
+      return res.status(400).json({ code: 'CAPTCHA_FAILED', message: 'Captcha verification failed.' })
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: body.email } })
+    if (user) {
+      const rawToken = randomToken(32)
+      const tokenHash = hashToken(rawToken)
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes TTL
+
+      await prisma.passwordReset.create({
+        data: {
+          userId: user.id,
+          tokenHash,
+          expiresAt,
+        },
+      })
+
+      // Send email in background (non-blocking for fast UI response)
+      sendPasswordResetEmail(user.email, user.name, rawToken).catch((err) => {
+        console.error('[MAIL] Error in sendPasswordResetEmail:', err)
+      })
+    }
+
+    // Always return generic success to prevent email enumeration
+    return res.json({
+      status: 'ok',
+      message: 'Jika email terdaftar, tautan pengaturan ulang kata sandi telah dikirim ke email Anda.',
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+authRouter.post('/verify-reset-token', async (req, res, next) => {
+  try {
+    const body = verifyResetTokenSchema.parse(req.body)
+    const tokenHash = hashToken(body.token)
+
+    const resetRecord = await prisma.passwordReset.findFirst({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+      include: {
+        user: { select: { email: true, name: true } },
+      },
+    })
+
+    if (!resetRecord) {
+      return res.status(400).json({
+        code: 'RESET_TOKEN_INVALID',
+        message: 'Tautan reset password tidak valid atau sudah kedaluwarsa.',
+      })
+    }
+
+    return res.json({
+      valid: true,
+      email: resetRecord.user.email,
+      name: resetRecord.user.name,
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+
+authRouter.post('/reset-password', async (req, res, next) => {
+  try {
+    const body = resetPasswordSchema.parse(req.body)
+    const tokenHash = hashToken(body.token)
+
+    const resetRecord = await prisma.passwordReset.findFirst({
+      where: {
+        tokenHash,
+        usedAt: null,
+        expiresAt: { gt: new Date() },
+      },
+    })
+
+    if (!resetRecord) {
+      return res.status(400).json({
+        code: 'RESET_TOKEN_INVALID',
+        message: 'Tautan reset password tidak valid atau sudah kedaluwarsa.',
+      })
+    }
+
+    // Mark reset token as used (single-use enforcement)
+    await prisma.passwordReset.update({
+      where: { id: resetRecord.id },
+      data: { usedAt: new Date() },
+    })
+
+    // Hash new password using Argon2
+    const newPasswordHash = await hashPassword(body.password)
+
+    // Update user password and revoke all active sessions for security
+    await prisma.user.update({
+      where: { id: resetRecord.userId },
+      data: { passwordHash: newPasswordHash },
+    })
+
+    await prisma.userSession.updateMany({
+      where: { userId: resetRecord.userId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    })
+
+    return res.json({
+      status: 'ok',
+      message: 'Kata sandi berhasil diperbarui. Silakan login kembali.',
+    })
+  } catch (error) {
+    return next(error)
+  }
+})
+

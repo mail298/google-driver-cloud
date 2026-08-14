@@ -91,6 +91,14 @@ export function LoginPage() {
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400"
+              >
+                {t('auth_forgot_password_link')}
+              </Link>
+            </div>
           </div>
 
           {error ? (

@@ -42,6 +42,12 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
   GOOGLE_REDIRECT_URI: z.string().optional(),
+  SMTP_HOST: z.string().optional(),
+  SMTP_PORT: z.coerce.number().default(587),
+  SMTP_SECURE: z.string().transform((v) => v === 'true' || v === '1').optional(),
+  SMTP_USER: z.string().optional(),
+  SMTP_PASS: z.string().optional(),
+  SMTP_FROM: z.string().default('Drive9 Storage <no-reply@drive9.wn-cdn.net>'),
 })
 
 // Parse and export — Zod handles all defaults and coercions in one place.

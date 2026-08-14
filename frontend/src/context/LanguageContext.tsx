@@ -207,6 +207,27 @@ export const translations: Dictionary = {
   auth_btn_logging_in: { id: 'Memproses...', en: 'Signing In...' },
   auth_no_account: { id: 'Belum punya akun?', en: "Don't have an account?" },
   auth_register_link: { id: 'Daftar Sekarang', en: 'Register Now' },
+  auth_forgot_password_link: { id: 'Lupa password?', en: 'Forgot password?' },
+  auth_back_to_login: { id: 'Kembali ke halaman login', en: 'Back to login' },
+
+  // Forgot & Reset Password
+  forgot_pwd_title: { id: 'Lupa Password', en: 'Forgot Password' },
+  forgot_pwd_subtitle: { id: 'Masukkan email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi.', en: 'Enter your email and we will send you a link to reset your password.' },
+  forgot_pwd_btn_send: { id: 'Kirim Tautan Reset', en: 'Send Reset Link' },
+  forgot_pwd_btn_sending: { id: 'Mengirim...', en: 'Sending...' },
+  forgot_pwd_sent_title: { id: 'Tautan Terkirim!', en: 'Link Sent!' },
+  forgot_pwd_sent_desc: { id: 'Jika email terdaftar, kami telah mengirimkan instruksi dan tautan reset password ke:', en: 'If the email is registered, we have sent instructions and a reset link to:' },
+  forgot_pwd_check_spam: { id: 'Periksa juga folder Spam/Junk jika tidak menemukan email di Kotak Masuk.', en: 'Also check your Spam/Junk folder if you do not see the email in your Inbox.' },
+  forgot_pwd_btn_resend: { id: 'Kirim Ulang Email', en: 'Resend Email' },
+
+  reset_pwd_title: { id: 'Buat Password Baru', en: 'Set New Password' },
+  reset_pwd_subtitle: { id: 'Masukkan password baru yang kuat untuk akun Drive9 Anda.', en: 'Enter a strong new password for your Drive9 account.' },
+  reset_pwd_btn_save: { id: 'Simpan Password Baru', en: 'Save New Password' },
+  reset_pwd_btn_saving: { id: 'Menyimpan...', en: 'Saving...' },
+  reset_pwd_success_title: { id: 'Password Berhasil Diubah!', en: 'Password Changed Successfully!' },
+  reset_pwd_success_desc: { id: 'Kata sandi akun Anda telah diperbarui. Silakan login menggunakan password baru Anda.', en: 'Your account password has been updated. Please login using your new password.' },
+  reset_pwd_invalid_token: { id: 'Tautan reset password tidak valid atau sudah kedaluwarsa.', en: 'Password reset link is invalid or has expired.' },
+  reset_pwd_request_new: { id: 'Minta tautan baru', en: 'Request a new link' },
 
   // API Error Codes & Server Messages Translation
   AUTH_EMAIL_TAKEN: { id: 'Email sudah terdaftar.', en: 'Email already registered.' },
@@ -223,6 +244,7 @@ export const translations: Dictionary = {
   'Current password is required to update your password.': { id: 'Password saat ini wajib diisi untuk mengubah password.', en: 'Current password is required to update your password.' },
   AUTH_INVALID_CURRENT_PASSWORD: { id: 'Password saat ini tidak cocok.', en: 'Current password does not match.' },
   'Current password does not match.': { id: 'Password saat ini tidak cocok.', en: 'Current password does not match.' },
+  RESET_TOKEN_INVALID: { id: 'Tautan reset password tidak valid atau sudah kedaluwarsa.', en: 'Password reset link is invalid or has expired.' },
   'Register failed': { id: 'Pendaftaran akun gagal.', en: 'Register failed.' },
   'Login failed': { id: 'Masuk akun gagal.', en: 'Login failed.' },
   'Google register failed': { id: 'Pendaftaran via Google gagal.', en: 'Google register failed.' },
