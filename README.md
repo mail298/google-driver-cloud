@@ -825,6 +825,46 @@ VITE_CDN_SUBDOMAINS=https://cdn1.yourdomain.com,https://cdn2.yourdomain.com,http
 
 ---
 
+## 15. Password Reset & SMTP Configuration (Optional)
+
+Drive9 provides a secure self-service password reset system (`/forgot-password` and `/reset-password`).
+
+### 15.1 Gmail SMTP Setup (Free & Fast)
+
+1. Open [Google Account Security](https://myaccount.google.com/security) and ensure **2-Step Verification** is enabled.
+2. Go to **App Passwords**: [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords).
+3. Under *App name*, type `Drive9` and click **Create**.
+4. Copy the generated **16-character code** (e.g. `abcd efgh ijkl mnop`).
+5. Add these environment variables to your `.env` (or Coolify environment):
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=abcdefghijklmnop
+SMTP_FROM="Drive9 Storage <your-email@gmail.com>"
+```
+
+> [!NOTE]
+> For Gmail SMTP, make sure the email address in `SMTP_FROM` matches `SMTP_USER` to prevent Google from rejecting or modifying the sender address.
+
+### 15.2 Fallback: Running Without SMTP
+If SMTP variables are left empty, Drive9 will not crash or fail. Instead, when a user requests a password reset, the secure reset link is automatically logged to the backend container console:
+```text
+[MAIL] SMTP is not configured. Reset link for user@example.com: https://yourdomain.com/reset-password?token=...
+```
+
+### 15.3 Emergency Password Reset CLI Tool
+Administrators can also reset any user password directly from the server terminal:
+
+```bash
+cd backend
+npm run reset-password -- user@example.com MyNewSecurePassword123
+```
+
+---
+
 ## Build
 
 Backend:
@@ -840,3 +880,4 @@ Frontend:
 cd frontend
 npm run build
 ```
+
