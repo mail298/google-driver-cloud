@@ -81,12 +81,29 @@ export async function sendPasswordResetEmail(email: string, userName: string, re
 </html>
 `
 
+  const text = `Halo ${userName},
+
+Kami menerima permintaan untuk mengatur ulang kata sandi akun Drive9 Anda.
+Silakan buka tautan berikut untuk membuat kata sandi baru:
+
+${resetUrl}
+
+Penting: Tautan ini hanya berlaku selama 15 menit dan hanya dapat digunakan 1 kali.
+Jika Anda tidak meminta reset kata sandi, abaikan email ini.
+
+Drive9 Cloud Storage Gateway
+`
+
   try {
     await mailer.sendMail({
       from: env.SMTP_FROM,
       to: email,
-      subject: '🔐 Reset Password Akun Drive9 Anda',
+      subject: 'Reset Password Akun Drive9',
+      text,
       html,
+      headers: {
+        'X-Entity-Ref-ID': resetToken,
+      },
     })
     return true
   } catch (error) {
