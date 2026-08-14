@@ -48,7 +48,10 @@ export function RegisterPage() {
           recaptchaWidgetId.current = window.grecaptcha.render(recaptchaRef.current, {
             sitekey: recaptchaSiteKey,
             callback: (token: string) => {
-              if (isMounted) setCaptchaToken(token)
+              if (isMounted) {
+                setCaptchaToken(token)
+                setError('')
+              }
             },
             'expired-callback': () => {
               if (isMounted) setCaptchaToken('')
