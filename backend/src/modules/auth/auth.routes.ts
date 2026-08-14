@@ -38,7 +38,10 @@ async function verifyCaptcha(token: string | undefined) {
   if (!token) return false
   const form = new URLSearchParams({ secret: env.RECAPTCHA_SECRET_KEY, response: token })
   const response = await fetch('https://www.google.com/recaptcha/api/siteverify', { method: 'POST', body: form })
-  const data = await response.json() as { success?: boolean }
+  const data = await response.json() as { success?: boolean; 'error-codes'?: string[] }
+  if (!data.success) {
+    console.error('[RECAPTCHA] Verification failed:', data['error-codes'] || data)
+  }
   return Boolean(data.success)
 }
 
