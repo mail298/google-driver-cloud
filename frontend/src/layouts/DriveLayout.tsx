@@ -356,7 +356,7 @@ export function DriveLayout() {
   })
 
   useEffect(() => {
-    const completed = localStorage.getItem('9drive:onboarding-completed')
+    const completed = localStorage.getItem('Drive9:onboarding-completed') || localStorage.getItem('9drive:onboarding-completed')
     if (completed !== 'true') {
       setOnboardingOpen(true)
     }

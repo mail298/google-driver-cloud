@@ -340,6 +340,7 @@ export function OnboardingModal({
 
   function handleComplete() {
     localStorage.setItem('Drive9:onboarding-completed', 'true')
+    localStorage.setItem('9drive:onboarding-completed', 'true')
     onClose()
   }
 
