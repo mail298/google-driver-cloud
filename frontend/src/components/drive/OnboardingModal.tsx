@@ -3,7 +3,6 @@ import {
   FileArchive,
   Gauge,
   Share2,
-  Star,
   Trash2,
   History,
   Settings,
@@ -53,39 +52,46 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
       content: {
         heading: isEn ? 'Welcome to Drive9 Storage Gateway' : 'Selamat Datang di Drive9 Storage Gateway',
         description: isEn
-          ? 'Drive9 is a smart storage gateway that unifies multiple Google Drive and S3 accounts into a single organized storage space.'
-          : 'Drive9 adalah gateway penyimpanan pintar yang menggabungkan beberapa akun Google Drive dan S3 milik Anda menjadi satu ruang penyimpanan besar yang terorganisir.',
+          ? 'Drive9 is a smart storage gateway that unifies multiple Google Drive and S3-compatible accounts (MinIO, Cloudflare R2, Wasabi, Backblaze B2) into a single organized dashboard.'
+          : 'Drive9 adalah gateway penyimpanan pintar yang menggabungkan beberapa akun Google Drive dan S3-compatible (MinIO, Cloudflare R2, Wasabi, Backblaze B2) menjadi satu dashboard penyimpanan yang terorganisir.',
         features: [
           {
-            title: isEn ? 'Direct Stream Upload' : 'Pengunggahan Direct Stream',
+            title: isEn ? 'Direct Stream Upload' : 'Unggah Direct Stream',
             desc: isEn
-              ? 'Files stream directly to Google Drive 9drive folder without consuming local server disk space.'
-              : 'Pengunggahan file di-stream langsung ke folder 9drive di Google Drive tanpa menggunakan ruang penyimpanan server lokal.',
+              ? 'Files stream directly to Google Drive or S3 — no temporary storage on the server disk.'
+              : 'File di-stream langsung ke Google Drive atau S3 — tidak ada penyimpanan sementara di server.',
             icon: Upload
           },
           {
-            title: isEn ? 'Virtual Folder Organization' : 'Organisasi Folder Virtual',
+            title: isEn ? 'Virtual Folder Organization' : 'Folder Virtual Fleksibel',
             desc: isEn
-              ? 'Create flexible folder structures in MySQL without affecting physical files in Google Drive.'
-              : 'Buat struktur folder fleksibel di MySQL tanpa mempengaruhi susunan fisik file Anda di Google Drive.',
+              ? 'Create nested folder structures in Drive9 without affecting the physical layout of files in Google Drive or S3.'
+              : 'Buat struktur folder bersarang di Drive9 tanpa mempengaruhi susunan fisik file di Google Drive atau S3.',
             icon: FolderInput
           },
           {
-            title: isEn ? 'Auto Quota Routing' : 'Routing Kuota Otomatis',
+            title: isEn ? 'Smart Upload Routing' : 'Routing Unggahan Otomatis',
             desc: isEn
-              ? 'Automatically routes uploads to the connected account with the most available free space.'
-              : 'Sistem secara otomatis mengarahkan unggahan baru ke akun terhubung yang memiliki sisa kuota terbesar.',
+              ? 'Three routing modes: Most Available (largest free space), Round Robin (rotation), or Priority Order (your custom order).'
+              : 'Tiga mode routing: Most Available (ruang terbesar), Round Robin (bergantian), atau Priority Order (urutan pilihan Anda).',
             icon: HardDrive
+          },
+          {
+            title: isEn ? 'Resumable Chunked Upload' : 'Upload Chunked & Lanjutkan',
+            desc: isEn
+              ? 'Large files are uploaded in 5MB chunks with automatic resume support if the connection drops.'
+              : 'File besar diunggah dalam potongan 5MB dengan dukungan lanjut-otomatis jika koneksi terputus.',
+            icon: RefreshCw
           }
         ],
         tips: isEn
           ? [
-            'You can connect multiple Google Drive & S3 accounts in Settings.',
-            'All access tokens are encrypted for maximum security.'
+            'Connect multiple Google Drive and S3 accounts in Settings to expand your total storage.',
+            'All OAuth tokens and API credentials are AES-256 encrypted before being saved to the database.'
           ]
           : [
-            'Anda dapat menghubungkan beberapa akun Google Drive & S3 di menu Pengaturan.',
-            'Semua token akses disandi (encrypted) demi keamanan maksimal.'
+            'Hubungkan beberapa akun Google Drive dan S3 di menu Pengaturan untuk memperluas total kapasitas penyimpanan.',
+            'Semua token OAuth dan kredensial API dienkripsi AES-256 sebelum disimpan ke database.'
           ]
       }
     },
@@ -97,50 +103,50 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
       badge: isEn ? 'Main' : 'Utama',
       color: 'from-indigo-600 to-violet-600 text-indigo-500',
       content: {
-        heading: isEn ? 'All Files - Manage Your Files & Folders' : 'Menu All Files - Kelola File & Folder Anda',
+        heading: isEn ? 'All Files — Manage Your Files & Folders' : 'Menu Semua File — Kelola File & Folder Anda',
         description: isEn
-          ? 'Main page to upload files, organize folders, preview media, and share files with others.'
-          : 'Halaman utama untuk mengunggah file, mengorganisasi folder, melihat pratinjau media, serta berbagi file dengan pengguna lain.',
+          ? 'Your main workspace: upload files, create nested folders, search, filter, preview media, and perform actions via the right-click context menu.'
+          : 'Ruang kerja utama Anda: unggah file, buat folder bertingkat, cari, filter, pratinjau media, dan lakukan tindakan via menu klik kanan.',
         features: [
           {
-            title: isEn ? 'Drag & Drop File Upload' : 'Unggah Drag & Drop',
+            title: isEn ? 'Drag & Drop Upload' : 'Unggah Drag & Drop',
             desc: isEn
-              ? 'Drag files from your computer into the browser to upload instantly.'
-              : 'Tarik file dari komputer Anda ke dalam browser untuk mengunggah secara langsung.',
+              ? 'Drag files from your computer directly into the browser window. Progress panel appears at the bottom-right corner.'
+              : 'Tarik file dari komputer ke jendela browser. Panel progres muncul di pojok kanan bawah layar.',
             icon: Upload
           },
           {
-            title: isEn ? 'Google Drive Sync' : 'Sinkronkan Google Drive',
+            title: isEn ? 'Right-Click Context Menu' : 'Menu Klik Kanan',
             desc: isEn
-              ? 'Scans Google Drive 9drive folder to discover new external uploads while preserving your trashed files.'
-              : 'Memindai folder 9drive di Google Drive untuk mendeteksi file baru tanpa memulihkan file yang berada di Tempat Sampah.',
-            icon: RefreshCw
-          },
-          {
-            title: isEn ? 'Checkbox & Batch Actions' : 'Aksi Masal (Batch Actions)',
-            desc: isEn
-              ? 'Select multiple items to Move, Soft-Delete, or Download combined ZIP archives in 1 click.'
-              : 'Pilih beberapa file sekaligus untuk dipindahkan, dihapus ke Tempat Sampah, atau diunduh sebagai arsip ZIP.',
+              ? 'Right-click any file or folder: Preview, Download, Rename, Move, Share (public link), Invite (user), or Delete.'
+              : 'Klik kanan file atau folder: Pratinjau, Unduh, Ganti Nama, Pindah, Bagikan (tautan publik), Undang (pengguna), atau Hapus.',
             icon: CheckCircle
           },
           {
-            title: isEn ? 'Safe Soft-Delete' : 'Penghapusan Aman (Soft-Delete)',
+            title: isEn ? 'Search & Filter' : 'Cari & Filter',
             desc: isEn
-              ? 'Deleting files moves them safely to Recycle Bin (Trash). Items can be restored anytime before permanent deletion.'
-              : 'File yang dihapus akan dipindahkan secara aman ke Tempat Sampah (Trash) dan dapat dipulihkan kapan saja.',
+              ? 'Search by name in the header. Filter by type (image, video, pdf, doc, archive), account, file size, or date range.'
+              : 'Cari berdasarkan nama di header. Filter berdasarkan jenis (gambar, video, pdf, dokumen, arsip), akun, ukuran, atau rentang tanggal.',
+            icon: ShieldCheck
+          },
+          {
+            title: isEn ? 'Batch Actions' : 'Aksi Massal',
+            desc: isEn
+              ? 'Select multiple files with checkboxes to Move, Delete, or Download as a ZIP archive in one click.'
+              : 'Centang beberapa file sekaligus untuk Pindah, Hapus, atau Unduh sebagai arsip ZIP dalam satu klik.',
             icon: FolderInput
           }
         ],
         tips: isEn
           ? [
-            'Click "Sync" button if you added files directly via Google Drive web to update Drive9 database instantly.',
-            'Files moved to Trash in Drive9 remain safely in Recycle Bin and will not be resurrected when clicking Sync.',
-            'Right-click any file/folder card to open context menu (Rename, Move, Share, Preview Token, Delete).'
+            'Click "Sync Drive" if you uploaded files directly via Google Drive web to update Drive9 database.',
+            'Files deleted in Drive9 go to Recycle Bin — they are NOT deleted from Google Drive until you click "Delete Forever" in Trash.',
+            'Switch between Grid and List view using the toggle button at the top-right of the file area.'
           ]
           : [
-            'Klik tombol "Sinkron" jika Anda menambah file langsung melalui Google Drive web untuk memperbarui database Drive9.',
-            'File yang berada di Tempat Sampah tetap aman di Tempat Sampah dan tidak akan dimunculkan kembali saat mengklik Sinkron.',
-            'Klik kanan pada kartu file atau folder untuk membuka menu cepat (Rename, Move, Share, Preview Token, Delete).'
+            'Klik tombol "Sinkron Drive" jika Anda mengunggah file langsung dari Google Drive web untuk memperbarui database Drive9.',
+            'File yang dihapus di Drive9 masuk ke Tempat Sampah — TIDAK terhapus dari Google Drive sampai Anda klik "Hapus Permanen" di Tempat Sampah.',
+            'Ganti tampilan Grid atau List menggunakan tombol toggle di pojok kanan atas area file.'
           ]
       }
     },
@@ -152,36 +158,44 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
       badge: isEn ? 'Storage' : 'Penyimpanan',
       color: 'from-emerald-600 to-teal-600 text-emerald-500',
       content: {
-        heading: isEn ? 'Quota Tracker - Monitor Storage Capacity' : 'Menu Quota Tracker - Pantau Kapasitas Penyimpanan',
+        heading: isEn ? 'Quota Tracker — Monitor Storage Capacity' : 'Menu Quota Tracker — Pantau Kapasitas Penyimpanan',
         description: isEn
-          ? 'Track remaining space and storage usage across all connected Google Drive and S3 accounts.'
-          : 'Lacak sisa kapasitas dan penggunaan penyimpanan gabungan dari seluruh akun Google Drive dan S3 yang terhubung.',
+          ? 'Track remaining capacity and usage across all connected Google Drive and S3 accounts in real time.'
+          : 'Lacak sisa kapasitas dan penggunaan penyimpanan dari seluruh akun Google Drive dan S3 yang terhubung secara real time.',
         features: [
           {
             title: isEn ? 'Total Quota Summary' : 'Ringkasan Total Kuota',
             desc: isEn
-              ? 'View aggregated used and free space across all connected accounts.'
-              : 'Lihat akumulasi ruang penyimpanan terpakai dan ruang bebas dari seluruh akun terhubung.',
+              ? 'See aggregated used space and free space across all accounts in one combined view.'
+              : 'Lihat akumulasi ruang terpakai dan ruang bebas dari seluruh akun dalam satu tampilan gabungan.',
             icon: Gauge
           },
           {
             title: isEn ? 'Per-Account Breakdown' : 'Rincian Per-Akun',
             desc: isEn
-              ? 'View connection status and storage breakdown for each Google Drive account.'
-              : 'Lihat status koneksi dan penggunaan penyimpanan pada masing-masing akun Google Drive.',
+              ? 'View connection status, used, free, and total quota individually for each Google Drive or S3 account.'
+              : 'Lihat status koneksi, ruang terpakai, ruang bebas, dan total kuota per akun Google Drive atau S3 secara individual.',
             icon: ShieldCheck
           },
           {
             title: isEn ? 'Sync Quota Button' : 'Tombol Sinkron Kuota',
             desc: isEn
-              ? 'Manually refresh storage quotas if you add or remove files directly on Google Drive.'
-              : 'Perbarui kapasitas kuota secara manual jika Anda menambahkan atau menghapus file langsung dari Google Drive.',
-            icon: Info
+              ? 'Refresh quota data manually from Google Drive or S3 after adding or removing files directly on the provider.'
+              : 'Segarkan data kuota secara manual dari Google Drive atau S3 setelah menambah atau menghapus file langsung dari provider.',
+            icon: RefreshCw
           }
         ],
         tips: isEn
-          ? ['If storage space is running low, you can add new Google Drive accounts in Settings.']
-          : ['Jika ruang penyimpanan hampir habis, Anda bisa menambahkan akun Google Drive baru di menu Pengaturan.']
+          ? [
+            'If storage is running low, go to Settings → Connected Accounts to add a new Google Drive or S3 account.',
+            'For S3 accounts, quota is estimated from files tracked in Drive9 since S3 does not report usage natively.',
+            'Quota data refreshes automatically when you upload or delete files through Drive9.'
+          ]
+          : [
+            'Jika penyimpanan hampir habis, pergi ke Pengaturan → Akun Terhubung untuk menambah akun Google Drive atau S3 baru.',
+            'Untuk akun S3, kuota dihitung berdasarkan file yang tercatat di Drive9 karena S3 tidak melaporkan penggunaan secara langsung.',
+            'Data kuota diperbarui otomatis saat Anda mengunggah atau menghapus file melalui Drive9.'
+          ]
       }
     },
     {
@@ -192,126 +206,155 @@ export function getOnboardingSteps(lang: 'id' | 'en'): OnboardingStep[] {
       badge: isEn ? 'Collaboration' : 'Kolaborasi',
       color: 'from-amber-600 to-orange-600 text-amber-500',
       content: {
-        heading: isEn ? 'Shared With Me - Collaboration & Permissions' : 'Menu Shared With Me - Kolaborasi & Hak Akses',
+        heading: isEn ? 'Shared — Collaboration & File Sharing' : 'Menu Shared — Kolaborasi & Berbagi File',
         description: isEn
-          ? 'Access files and folders shared by team members or public share links.'
-          : 'Kelola dan akses file atau folder yang dibagikan oleh anggota tim atau melalui tautan publik.',
+          ? 'Manage public share links you created, invitations you sent or received, and publicly shared files from other users.'
+          : 'Kelola tautan publik yang Anda buat, undangan yang Anda kirim atau terima, dan file yang dibagikan oleh pengguna lain kepada Anda.',
         features: [
           {
-            title: isEn ? 'Team Invites' : 'Undangan Akses Tim',
+            title: isEn ? 'Public Share Links' : 'Tautan Berbagi Publik',
             desc: isEn
-              ? 'Receive files and folders shared by team members with Viewer or Editor permissions.'
-              : 'Menerima file dan folder yang dibagikan oleh anggota tim Anda dengan peran Viewer atau Editor.',
-            icon: Share2
-          },
-          {
-            title: isEn ? 'Public Web Preview Links' : 'Tautan Pratinjau Publik',
-            desc: isEn
-              ? 'Generate secure public preview links (read-only) without requiring user login.'
-              : 'Buat tautan pratinjau publik yang aman (hanya-baca) tanpa memerlukan login.',
+              ? 'Generate secure read-only public links for any file. Set an optional expiry date. Anyone with the link can preview or download without logging in.'
+              : 'Buat tautan publik hanya-baca yang aman untuk file apapun. Atur tanggal kedaluwarsa opsional. Siapa pun dengan tautan dapat pratinjau atau unduh tanpa login.',
             icon: BookOpen
           },
           {
-            title: isEn ? 'Direct Stream Links' : 'Tautan Direct Stream',
+            title: isEn ? 'Embed Mode' : 'Mode Embed',
             desc: isEn
-              ? 'Copy direct video/image/audio stream URLs for embedding in your web applications or landing pages.'
-              : 'Salin URL direct stream video, gambar, atau audio untuk disematkan langsung ke aplikasi web Anda.',
+              ? 'Public file links also support /embed mode for direct iframe embedding into websites or landing pages.'
+              : 'Tautan file publik juga mendukung mode /embed untuk disematkan langsung via iframe ke website atau halaman landing.',
             icon: Sparkles
+          },
+          {
+            title: isEn ? 'User Invitations (Viewer / Editor)' : 'Undangan Pengguna (Viewer / Editor)',
+            desc: isEn
+              ? 'Invite specific users to access your files or folders with Viewer (read-only) or Editor permissions.'
+              : 'Undang pengguna tertentu untuk mengakses file atau folder Anda dengan peran Viewer (hanya lihat) atau Editor.',
+            icon: Share2
           }
         ],
         tips: isEn
-          ? ['Click "Share" or "Public View Link" on any file to copy safe read-only preview & stream links.']
-          : ['Klik tombol "Share" atau "Public View Link" pada file untuk menyalin tautan pratinjau & stream yang aman.']
+          ? [
+            'Right-click any file → Share to create a public link or set an expiry date.',
+            'Right-click any file or folder → Invite to send a Viewer/Editor invitation to another user.',
+            'Public links can be revoked anytime from the Shared page by disabling or deleting the link.'
+          ]
+          : [
+            'Klik kanan file → Bagikan untuk membuat tautan publik atau mengatur tanggal kedaluwarsa.',
+            'Klik kanan file atau folder → Undang untuk mengirim undangan Viewer/Editor ke pengguna lain.',
+            'Tautan publik dapat dicabut kapan saja dari halaman Shared dengan menonaktifkan atau menghapus tautan.'
+          ]
       }
     },
     {
       id: 'other-menus',
-      title: isEn ? 'Starred, Trash & Activity' : 'Berbintang, Tempat Sampah & Aktivitas',
-      subtitle: isEn ? 'Favorites, Trash & Audit Logs' : 'Favorit, Tempat Sampah & Log Aktivitas',
+      title: isEn ? 'Trash & Activity Log' : 'Tempat Sampah & Log Aktivitas',
+      subtitle: isEn ? 'Recycle Bin & Audit History' : 'Tempat Sampah & Riwayat Audit',
       icon: Trash2,
       badge: isEn ? 'System' : 'Sistem',
       color: 'from-rose-600 to-pink-600 text-rose-500',
       content: {
-        heading: isEn ? 'Starred, Recycle Bin, & Activity Log' : 'Menu Starred, Tempat Sampah, & Log Aktivitas',
+        heading: isEn ? 'Trash & Activity Log — Safety Net & Audit' : 'Tempat Sampah & Log Aktivitas — Jaring Pengaman & Audit',
         description: isEn
-          ? 'Helper pages for managing starred favorites, restoring deleted files, and auditing logs.'
-          : 'Halaman pendukung untuk mengelola file favorit, memulihkan file terhapus, serta melihat riwayat aktivitas.',
+          ? 'Deleted files land safely in Trash for recovery. The Activity Log records every action taken in Drive9 for full transparency.'
+          : 'File yang dihapus masuk ke Tempat Sampah untuk pemulihan. Log Aktivitas merekam setiap tindakan di Drive9 untuk transparansi penuh.',
         features: [
-          {
-            title: isEn ? 'Starred Items' : 'File Berbintang (Starred)',
-            desc: isEn
-              ? 'Star important files or folders for quick access from this page.'
-              : 'Tandai file atau folder penting agar dapat diakses dengan cepat dari menu ini.',
-            icon: Star
-          },
           {
             title: isEn ? 'Recycle Bin (Trash)' : 'Tempat Sampah (Trash)',
             desc: isEn
-              ? 'Deleted files are safely moved here (soft-delete). You can Restore them anytime or Permanently Delete them.'
-              : 'File yang dihapus disimpan sementara di sini (soft-delete). Anda dapat memulihkannya (Restore) atau menghapusnya secara permanen.',
+              ? 'Deleted files and folders stay here safely. Click Restore anytime to bring them back to All Files.'
+              : 'File dan folder yang dihapus tersimpan di sini dengan aman. Klik Pulihkan kapan saja untuk mengembalikannya ke Semua File.',
             icon: Trash2
           },
           {
-            title: isEn ? 'Activity Log' : 'Log Aktivitas (Activity Log)',
+            title: isEn ? 'Permanent Delete' : 'Hapus Permanen',
             desc: isEn
-              ? 'Automatic audit log recording uploads, moves, folder creations, restorations, and deletions.'
-              : 'Catatan audit otomatis yang merekam setiap aktivitas pengunggahan, pemindahan, pembuatan folder, pemulihan, dan penghapusan.',
+              ? 'Only "Delete Forever" in Trash physically removes the file from Google Drive / S3 and frees up quota. This cannot be undone.'
+              : 'Hanya "Hapus Permanen" di Tempat Sampah yang menghapus file secara fisik dari Google Drive / S3 dan membebaskan kuota. Ini tidak bisa dibatalkan.',
+            icon: ShieldCheck
+          },
+          {
+            title: isEn ? 'Activity Log' : 'Log Aktivitas',
+            desc: isEn
+              ? 'Automatic audit trail recording every upload, move, rename, share, restore, delete, and login event with timestamps.'
+              : 'Jejak audit otomatis yang merekam setiap unggahan, pemindahan, ganti nama, berbagi, pemulihan, penghapusan, dan login beserta waktu kejadian.',
             icon: History
           }
         ],
         tips: isEn
           ? [
-            'Restoring a file from Recycle Bin returns it immediately to your All Files folder.',
-            'Only clicking "Permanent Delete" inside Trash will remove the physical file from Google Drive and free up quota.'
+            'Restoring a file from Trash instantly returns it to your All Files — no re-upload needed.',
+            '"Delete Forever" is the only action that permanently removes a file from Google Drive and frees storage quota.',
+            'Use the Activity Log to audit which user performed which action and when — useful for teams.'
           ]
           : [
-            'Memulihkan file dari Tempat Sampah akan mengembalikannya secara langsung ke folder All Files Anda.',
-            'Hanya dengan mengklik "Hapus Permanen" di Tempat Sampah, file fisik di Google Drive akan terhapus secara permanen dan membebaskan kuota.'
+            'Memulihkan file dari Tempat Sampah langsung mengembalikannya ke Semua File — tidak perlu unggah ulang.',
+            '"Hapus Permanen" adalah satu-satunya tindakan yang benar-benar menghapus file dari Google Drive dan membebaskan kuota penyimpanan.',
+            'Gunakan Log Aktivitas untuk mengaudit siapa melakukan apa dan kapan — berguna untuk tim.'
           ]
       }
     },
     {
       id: 'settings-api',
       title: isEn ? 'Settings & API Keys' : 'Pengaturan & API Keys',
-      subtitle: isEn ? 'Account Connection & API Tokens' : 'Koneksi Akun & Token Developer',
+      subtitle: isEn ? 'Account Connection & Developer Tokens' : 'Koneksi Akun & Token Developer',
       icon: Settings,
       badge: isEn ? 'Configuration' : 'Konfigurasi',
       color: 'from-cyan-600 to-blue-600 text-cyan-500',
       content: {
-        heading: isEn ? 'Settings & API Keys - Configuration & Integrations' : 'Menu Pengaturan & API Keys - Konfigurasi & Integrasi',
+        heading: isEn ? 'Settings & API Keys — Configuration & Integrations' : 'Menu Pengaturan & API Keys — Konfigurasi & Integrasi',
         description: isEn
-          ? 'Manage Google Drive/S3 storage connections and API keys for external applications.'
-          : 'Pengaturan akun penyimpanan Google Drive/S3 dan kunci API untuk integrasi aplikasi eksternal.',
+          ? 'Connect Google Drive and S3 accounts, configure upload routing, create API keys for external integrations, manage system updates and backups.'
+          : 'Hubungkan akun Google Drive dan S3, atur routing unggahan, buat API key untuk integrasi eksternal, kelola pembaruan sistem dan backup.',
         features: [
           {
-            title: isEn ? 'Google OAuth Connection' : 'Koneksi Google OAuth',
+            title: isEn ? 'Connect Google Drive & S3' : 'Hubungkan Google Drive & S3',
             desc: isEn
-              ? 'Connect new Google Drive accounts with 1 click via official Google OAuth 2.0.'
-              : 'Tambahkan akun Google Drive baru dengan sekali klik melalui OAuth 2.0 resmi Google.',
-            icon: Settings
+              ? 'Add multiple Google Drive accounts via OAuth or S3-compatible storage (MinIO, R2, Wasabi, Backblaze, AWS S3) with custom endpoints.'
+              : 'Tambahkan beberapa akun Google Drive via OAuth atau penyimpanan S3-compatible (MinIO, R2, Wasabi, Backblaze, AWS S3) dengan endpoint kustom.',
+            icon: HardDrive
           },
           {
-            title: isEn ? 'Developer API Keys' : 'Kunci API Developer',
+            title: isEn ? 'Upload Routing Policy' : 'Kebijakan Routing Unggahan',
             desc: isEn
-              ? 'Create secret API Tokens with granular scopes (files:read, files:upload) for external apps or uploader scripts.'
-              : 'Buat API Token rahasia dengan scope terstruktur (files:read, files:upload) untuk mengunggah file dari aplikasi eksternal.',
+              ? 'Choose how uploads are distributed: Most Available (most free space), Round Robin (rotation), or Priority Order (your custom priority).'
+              : 'Pilih cara distribusi unggahan: Most Available (ruang terbesar), Round Robin (bergantian), atau Priority Order (prioritas pilihan Anda).',
+            icon: RefreshCw
+          },
+          {
+            title: isEn ? 'API Keys for External Apps' : 'API Key untuk Aplikasi Eksternal',
+            desc: isEn
+              ? 'Create secret API keys (shown only once) to upload files from external scripts, web forms, or applications via POST /api/v1/uploads.'
+              : 'Buat API key rahasia (ditampilkan sekali saja) untuk mengunggah file dari skrip eksternal, formulir web, atau aplikasi via POST /api/v1/uploads.',
             icon: Braces
           },
           {
-            title: isEn ? 'Profile & Theme Settings' : 'Pengaturan Profil & Tema',
+            title: isEn ? 'System Update & DB Backup' : 'Pembaruan Sistem & Backup DB',
             desc: isEn
-              ? 'Manage username, password, language preferences, and theme (Light / Dark).'
-              : 'Kelola nama pengguna, kata sandi, preferensi bahasa, dan tema tampilan (Light / Dark).',
+              ? 'Trigger automatic system updates from GitHub and monitor rebuild logs. Export and restore MySQL database backups directly from the UI.'
+              : 'Picu pembaruan sistem otomatis dari GitHub dan pantau log rebuild. Ekspor dan pulihkan backup database MySQL langsung dari UI.',
             icon: ShieldCheck
           }
         ],
         tips: isEn
-          ? ['Use API Keys to integrate Drive9 with automated file uploader scripts or web forms.']
-          : ['Gunakan API Key jika Anda ingin mengintegrasikan Drive9 dengan skrip pengunggah otomatis atau formulir website.']
+          ? [
+            'API Key secret is shown only once when created — save it immediately in a safe place.',
+            'Use API Keys to integrate Drive9 with automated upload scripts, website forms, or Telegram bots.',
+            'Change your password anytime from Settings → Profile section.',
+            'After connecting a new account, click "Sync Quota" in Quota Tracker to see its storage data.'
+          ]
+          : [
+            'Secret API Key hanya ditampilkan sekali saat dibuat — segera simpan di tempat yang aman.',
+            'Gunakan API Key untuk mengintegrasikan Drive9 dengan skrip unggah otomatis, formulir website, atau bot Telegram.',
+            'Ganti kata sandi kapan saja dari Pengaturan → bagian Profil.',
+            'Setelah menghubungkan akun baru, klik "Sinkron Kuota" di Quota Tracker untuk melihat data penyimpanannya.'
+          ]
       }
     }
   ]
 }
+
+
 
 export function OnboardingModal({
   open,
