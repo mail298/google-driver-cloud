@@ -38,6 +38,7 @@ Stack:
 - Google APIs client
 - AWS SDK v3 (S3-compatible: MinIO, R2, Wasabi, Backblaze, AWS S3)
 - Undici for Google file streaming
+- Nodemailer for password reset emails
 - express-rate-limit for auth/public API rate limiting
 
 Important files:
@@ -60,11 +61,13 @@ Important files:
 - `backend/src/modules/s3/s3.service.ts`: S3-compatible storage client, upload, quota sync.
 - `backend/src/scripts/seed-google-config.ts`: stores encrypted global Google OAuth config.
 - `backend/src/scripts/seed-google-config-if-present.ts`: Docker auto-seed (only when real credentials are set).
+- `backend/src/scripts/reset-user-password.ts`: CLI user password reset tool.
 - `backend/src/utils/crypto.ts`: AES-256-GCM encrypt/decrypt, SHA-256 hash, random token.
 - `backend/src/utils/logger.ts`: JSON error log with async write queue.
 - `backend/src/utils/cdn.ts`: SHA-256 hash-based CDN subdomain round-robin selector.
 - `backend/src/utils/ip-whitelist.store.ts`: IP whitelist persistence (file-based, DB-backed).
 - `backend/src/utils/audit.ts`: audit log creation helper.
+- `backend/src/services/mail.service.ts`: SMTP email service for password reset (MIME plain-text + HTML).
 - `backend/src/services/telegram.service.ts`: Telegram HTTP notifications.
 - `backend/src/services/telegram-bot.service.ts`: Telegram bot command handler (/addip, /delip, /whitelist).
 
@@ -76,6 +79,7 @@ Commands:
 - `cd backend && npm run prisma:migrate`: run Prisma dev migration.
 - `cd backend && npm run prisma:generate`: regenerate Prisma client.
 - `cd backend && npm run seed:google-config`: store encrypted Google OAuth config.
+- `cd backend && npm run reset-password -- <email> <newPassword>`: reset user password directly from CLI.
 - `cd backend && npm run test:s3`: test S3 connection.
 - `cd backend && npm run test:api-upload`: test external API upload.
 
@@ -96,6 +100,7 @@ Environment:
 - `IP_WHITELIST_SECRET_KEY` (optional; secret for whitelist management API)
 - `TELEGRAM_BOT_TOKEN` (optional; enables Telegram bot notifications)
 - `TELEGRAM_CHAT_ID` (optional; Telegram chat target for notifications)
+- `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` (optional; SMTP config for password reset)
 - `CDN_SUBDOMAINS` (optional; comma-separated CDN subdomain URLs for media streaming)
 - `HTTP_PROXY` / `HTTPS_PROXY` / `GLOBAL_PROXY_URL` (optional; proxy settings)
 
@@ -154,6 +159,8 @@ Important files:
 - `frontend/src/pages/SharedPage.tsx`: shared links and invites UI.
 - `frontend/src/pages/QuotaTrackerPage.tsx`: connected-account quota UI.
 - `frontend/src/pages/SettingsPage.tsx`: Google/S3 account management, routing policy, API credentials, system update.
+- `frontend/src/pages/ForgotPasswordPage.tsx`: password reset request form.
+- `frontend/src/pages/ResetPasswordPage.tsx`: token verification and new password submission form.
 - `frontend/src/pages/GoogleAuthPage.tsx`: Google auth handoff exchange page.
 - `frontend/src/pages/PublicFilePage.tsx`: public shared file viewer/embed page.
 - `frontend/src/pages/ApiManagementPage.tsx`: API key management and in-app developer documentation.
@@ -210,6 +217,10 @@ General:
 Auth (rate-limited: 10 req/15min per IP):
 - `POST /auth/register`
 - `POST /auth/login`
+- `POST /auth/change-password`
+- `POST /auth/forgot-password`
+- `POST /auth/verify-reset-token`
+- `POST /auth/reset-password`
 - `GET /auth/google/url`
 - `GET /auth/google/callback`
 - `POST /auth/google/exchange`
@@ -357,6 +368,8 @@ Docker notes:
 - DB backup and restore via Settings UI
 - PWA support (vite-plugin-pwa, manifest, service worker)
 - reCAPTCHA on email/password registration (optional)
+- Self-service password reset with email delivery (15-min single-use tokens, hash storage, plain-text MIME alternative, anti-spam headers)
+- Admin CLI user password reset tool (`npm run reset-password`)
 - Dark mode / Light mode toggle
 - Gravatar avatar integration
 
@@ -374,6 +387,7 @@ Before finishing schema changes:
 
 Manual smoke test:
 - Register/login.
+- Test Forgot Password flow (`/forgot-password`) and reset token verification (`/reset-password`).
 - Open Settings → Connect Google Drive.
 - Verify connected account appears.
 - Open Quota Tracker and sync quota.

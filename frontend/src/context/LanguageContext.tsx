@@ -211,13 +211,13 @@ export const translations: Dictionary = {
   auth_back_to_login: { id: 'Kembali ke halaman login', en: 'Back to login' },
 
   // Forgot & Reset Password
-  forgot_pwd_title: { id: 'Lupa Password', en: 'Forgot Password' },
-  forgot_pwd_subtitle: { id: 'Masukkan email Anda dan kami akan mengirimkan tautan untuk mengatur ulang kata sandi.', en: 'Enter your email and we will send you a link to reset your password.' },
+  forgot_pwd_title: { id: 'Lupa Kata Sandi', en: 'Forgot Password' },
+  forgot_pwd_subtitle: { id: 'Masukkan email Anda untuk menerima tautan pengaturan ulang kata sandi.', en: 'Enter your email address to receive a password reset link.' },
   forgot_pwd_btn_send: { id: 'Kirim Tautan Reset', en: 'Send Reset Link' },
   forgot_pwd_btn_sending: { id: 'Mengirim...', en: 'Sending...' },
-  forgot_pwd_sent_title: { id: 'Tautan Terkirim!', en: 'Link Sent!' },
-  forgot_pwd_sent_desc: { id: 'Jika email terdaftar, kami telah mengirimkan instruksi dan tautan reset password ke:', en: 'If the email is registered, we have sent instructions and a reset link to:' },
-  forgot_pwd_check_spam: { id: 'Periksa juga folder Spam/Junk jika tidak menemukan email di Kotak Masuk.', en: 'Also check your Spam/Junk folder if you do not see the email in your Inbox.' },
+  forgot_pwd_sent_title: { id: 'Tautan Berhasil Dikirim!', en: 'Reset Link Sent!' },
+  forgot_pwd_sent_desc: { id: 'Jika email terdaftar di sistem, tautan pengaturan ulang kata sandi telah dikirim ke:', en: 'If the email is registered, a password reset link has been sent to:' },
+  forgot_pwd_check_spam: { id: 'Cek juga folder Spam atau Promosi jika email tidak muncul di Kotak Masuk.', en: 'Please check your Spam or Promotions folder if the email does not appear in your Inbox.' },
   forgot_pwd_btn_resend: { id: 'Kirim Ulang Email', en: 'Resend Email' },
 
   reset_pwd_title: { id: 'Buat Password Baru', en: 'Set New Password' },
