@@ -10,12 +10,12 @@
   <meta http-equiv="Expires" content="0" />
 
   <!-- Primary Meta Tags -->
-  <title>drive9 - Google Drive Storage Gateway & Virtual Cloud Management</title>
-  <meta name="title" content="drive9 - Google Drive Storage Gateway & Virtual Cloud Management" />
+  <title>drive9 - Google Drive Storage Gateway, CDN Media & Video Streaming HTTP 206</title>
+  <meta name="title" content="drive9 - Google Drive Storage Gateway, CDN Media & Video Streaming HTTP 206" />
   <meta name="description"
-    content="drive9 adalah platform Google Drive Storage Gateway aman untuk mengoperasikan file streaming, mengorganisir folder virtual, memantau kuota multi-akun, dan mengintegrasikan API Key terenkripsi AES-256." />
+    content="Platform Google Drive Storage Gateway & CDN Media Proxy tercepat. Gabungkan kuota multi-akun Google Drive, stream video & audio tanpa buffering (HTTP 206 Partial Content), host aset web, dan integrasi API Key terenkripsi AES-256." />
   <meta name="keywords"
-    content="drive9, Google Drive gateway, cloud storage gateway, virtual cloud storage, Google Drive API, multi account Google Drive, file streaming cloud, Google Drive quota manager, API Key storage" />
+    content="drive9, Google Drive gateway, gabung Google Drive, multi account Google Drive storage, CDN Google Drive, stream video Google Drive tanpa buffering, direct link generator Google Drive, Google Drive API uploader, cloud storage gateway, virtual cloud storage, bypass limit Google Drive, storage calculator, API Key storage" />
   <meta name="author" content="drive9" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="google-site-verification" content="mJMLk318bNsdWsNYOhw6TuIE8_yMADXfIXCddcSbRp0" />
@@ -26,9 +26,9 @@
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://drive9.wn-cdn.net/" />
-  <meta property="og:title" content="drive9 - Google Drive Storage Gateway & Virtual Cloud Management" />
+  <meta property="og:title" content="drive9 - Google Drive Storage Gateway, CDN Media & Video Streaming HTTP 206" />
   <meta property="og:description"
-    content="drive9 adalah platform Google Drive Storage Gateway aman untuk mengoperasikan file streaming, mengorganisir folder virtual, dan memantau kuota multi-akun." />
+    content="Gabungkan kuota multi-akun Google Drive, streaming video MP4/WebM tanpa buffering (HTTP 206), dan sajikan aset website via CDN Google Drive terenkripsi." />
   <meta property="og:image" content="https://drive9.wn-cdn.net/logo.png" />
   <meta property="og:site_name" content="drive9" />
   <meta property="og:locale" content="id_ID" />
@@ -36,9 +36,9 @@
   <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image" />
   <meta property="twitter:url" content="https://drive9.wn-cdn.net/" />
-  <meta property="twitter:title" content="drive9 - Google Drive Storage Gateway & Virtual Cloud Management" />
+  <meta property="twitter:title" content="drive9 - Google Drive Storage Gateway, CDN Media & Video Streaming HTTP 206" />
   <meta property="twitter:description"
-    content="drive9 adalah platform Google Drive Storage Gateway aman untuk mengoperasikan file streaming, mengorganisir folder virtual, dan memantau kuota multi-akun." />
+    content="Gabungkan kuota multi-akun Google Drive, streaming video MP4/WebM tanpa buffering (HTTP 206), dan sajikan aset website via CDN Google Drive terenkripsi." />
   <meta property="twitter:image" content="https://drive9.wn-cdn.net/logo.png" />
 
   <!-- Fonts & Performance Preconnect -->
@@ -60,11 +60,22 @@
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "Organization",
+        "@id": "https://drive9.wn-cdn.net/#organization",
+        "name": "drive9",
+        "url": "https://drive9.wn-cdn.net/",
+        "logo": "https://drive9.wn-cdn.net/logo.png",
+        "sameAs": []
+      },
+      {
         "@type": "WebSite",
         "@id": "https://drive9.wn-cdn.net/#website",
         "url": "https://drive9.wn-cdn.net/",
         "name": "drive9",
-        "description": "Google Drive Storage Gateway & Virtual Cloud Management",
+        "description": "Google Drive Storage Gateway, High-Speed CDN Media Proxy & Video Streaming Platform",
+        "publisher": {
+          "@id": "https://drive9.wn-cdn.net/#organization"
+        },
         "inLanguage": "id"
       },
       {
@@ -73,11 +84,46 @@
         "name": "drive9 Storage Gateway",
         "operatingSystem": "All",
         "applicationCategory": "BusinessApplication",
+        "applicationSubCategory": "CloudStorageGateway",
         "offers": {
           "@type": "Offer",
           "price": "0",
           "priceCurrency": "USD"
-        }
+        },
+        "featureList": [
+          "Google Drive Multi-Account Aggregation",
+          "HTTP 206 Partial Content Video Streaming",
+          "Zero-Server-Disk Direct Streaming",
+          "Encrypted Developer API Keys",
+          "Nested Virtual Folders",
+          "CDN Media Delivery Proxy"
+        ]
+      },
+      {
+        "@type": "HowTo",
+        "@id": "https://drive9.wn-cdn.net/#howto",
+        "name": "Cara Menggabungkan Kuota Google Drive dan Menggunakan drive9 Gateway",
+        "description": "Panduan langkah demi langkah menghubungkan akun Google Drive, mengunggah file langsung ke cloud, dan menyajikan media streaming tanpa buffering.",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Hubungkan Akun Google Drive",
+            "text": "Masuk dan hubungkan satu atau lebih akun Google Drive Anda melalui autentikasi aman OAuth 2.0 resmi."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Unggah File atau Gunakan API Key",
+            "text": "Unggah file melalui dashboard virtual folder atau gunakan API Key REST untuk integrasi otomatis tanpa membebani disk server."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Sajikan Link CDN & Streaming Video",
+            "text": "Dapatkan link publik permanen untuk menyajikan gambar, dokumen, atau streaming video MP4 tanpa jeda buffering (HTTP 206)."
+          }
+        ]
       },
       {
         "@type": "FAQPage",
@@ -85,18 +131,34 @@
         "mainEntity": [
           {
             "@type": "Question",
-            "name": "Apa itu drive9?",
+            "name": "Apa itu drive9 dan untuk siapa platform ini dirancang?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "drive9 adalah platform Google Drive Storage Gateway yang memungkinkan Anda menghubungkan akun Google Drive, mengunggah dan mengelola file dalam folder khusus 9drive, melacak kuota penyimpanan, serta membuat API Key."
+              "text": "drive9 adalah platform Google Drive Storage Gateway & CDN Media Proxy berkecepatan tinggi yang memungkinkan Anda menggabungkan kapasitas multi-akun Google Drive, streaming video/audio tanpa buffering (HTTP 206), mengunggah file tanpa menggunakan ruang disk fisik server (Zero Disk Storage), dan mengintegrasikan API Key terenkripsi."
             }
           },
           {
             "@type": "Question",
-            "name": "Apakah file yang diunggah disimpan di server drive9?",
+            "name": "Bagaimana cara kerja Video & Audio Streaming tanpa buffering di drive9?",
             "acceptedAnswer": {
               "@type": "Answer",
-              "text": "Tidak. drive9 menggunakan arsitektur direct file streaming. Setiap file yang Anda unggah akan langsung dialirkan ke folder khusus 9drive di akun Google Drive milik Anda tanpa disimpan di disk fisik server drive9."
+              "text": "drive9 menggunakan protokol HTTP 206 Partial Content (Range Requests). Pemutar media (seperti Plyr atau video HTML5) hanya meminta bagian file yang sedang diputar, sehingga pengguna dapat melompat ke menit berapapun secara instan tanpa harus mengunduh file secara penuh."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bagaimana cara kerja Agregasi Kuota Multi-Akun Google Drive di drive9?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Anda dapat menghubungkan banyak akun Google Drive (misal 3 akun x 15 GB = 45 GB). Algoritma cerdas drive9 otomatis memeriksa sisa kapasitas tiap akun dan mengarahkan unggahan ke akun yang paling banyak memiliki ruang kosong."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Apakah file yang diunggah disimpan di disk server fisik drive9?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Tidak. drive9 menggunakan arsitektur direct streaming (Zero Disk Storage). Data langsung dialirkan dalam memori ke folder khusus 9drive di Google Drive Anda secara real-time."
             }
           }
         ]
@@ -135,8 +197,13 @@
     <header>
       <nav aria-label="Navigasi Utama">
         <a href="/" aria-label="Halaman Utama drive9">drive9 Storage Gateway</a>
-        <a href="#features" aria-label="Seksi Fitur">Features</a>
-        <a href="#security" aria-label="Seksi Keamanan">Security</a>
+        <a href="#how-it-works" aria-label="Cara Kerja">Cara Kerja</a>
+        <a href="#calculator" aria-label="Kalkulator Kuota">Kalkulator Kuota</a>
+        <a href="#cdn-streaming" aria-label="CDN & Streaming">CDN & Streaming</a>
+        <a href="#features" aria-label="Seksi Fitur">Fitur Lengkap</a>
+        <a href="#comparison" aria-label="Perbandingan Fitur">Perbandingan</a>
+        <a href="#use-cases" aria-label="Solusi & Kasus Penggunaan">Solusi</a>
+        <a href="#security" aria-label="Seksi Keamanan">Keamanan</a>
         <a href="#faq" aria-label="Seksi FAQ">FAQ</a>
         <a href="/privacy" aria-label="Kebijakan Privasi">Privacy Policy</a>
         <a href="/terms" aria-label="Ketentuan Layanan">Terms of Service</a>
@@ -145,50 +212,61 @@
 
     <main>
       <section>
-        <h1>Unified Cloud Storage via drive9</h1>
+        <h1>Google Drive Storage Gateway, High-Speed CDN Media & Video Streaming HTTP 206</h1>
         <p>
-          drive9 adalah platform gateway penyimpanan Google Drive yang memungkinkan pengguna menghubungkan akun Google
-          Drive, mengorganisir folder virtual, memantau kuota penyimpanan, dan mengunggah file secara langsung ke cloud
-          storage.
+          drive9 adalah platform gateway penyimpanan cloud terpadu yang memungkinkan Anda menghubungkan akun Google
+          Drive, menggabungkan kapasitas multi-akun, menyajikan aset website via CDN, streaming video tanpa buffering,
+          mengorganisir folder virtual, dan mengunggah file langsung ke folder khusus 9drive tanpa disk server perantara.
         </p>
+      </section>
+
+      <section id="how-it-works">
+        <h2>Cara Kerja drive9 dalam 3 Langkah Mudah</h2>
+        <article>
+          <h3>1. Hubungkan Akun Google Drive</h3>
+          <p>Login dan tautkan akun Google Drive Anda dengan autentikasi resmi OAuth 2.0 yang terenkripsi AES-256-GCM.</p>
+        </article>
+        <article>
+          <h3>2. Atur Folder Virtual & Kebijakan Routing Unggahan</h3>
+          <p>Organisir file dalam hierarki virtual folder yang cepat dan biarkan sistem otomatis memilih akun dengan sisa kuota terbanyak.</p>
+        </article>
+        <article>
+          <h3>3. Dapatkan Link CDN, Stream Video HTTP 206 & Integrasi API</h3>
+          <p>Sematkan direct image/video URL ke website Anda atau gunakan REST API Key untuk formulir upload otomatis.</p>
+        </article>
       </section>
 
       <section id="features">
         <h2>Fitur & Keunggulan drive9</h2>
-        <p>Dirancang untuk manajemen penyimpanan cloud berkecepatan tinggi dengan keamanan tingkat lanjut.</p>
         <article>
-          <h3>Direct Streamed Uploads</h3>
-          <p>Mengunggah file multipart dan resumable secara langsung ke Google Drive tanpa menampung file di disk server
-            lokal.</p>
+          <h3>Direct Streamed Uploads (Zero Disk Storage)</h3>
+          <p>Mengunggah file multipart dan resumable secara langsung ke Google Drive tanpa menampung file di disk server lokal.</p>
         </article>
         <article>
-          <h3>Folder Virtual Bersarang</h3>
-          <p>Organisir file dalam struktur folder virtual bersarang. Otomatis menyelesaikan path folder di Google Drive.
-          </p>
+          <h3>Streaming Video & Audio Tanpa Buffering (HTTP 206)</h3>
+          <p>Dukungan byte range requests untuk pemutaran video instan tanpa harus mengunduh file secara utuh.</p>
         </article>
         <article>
-          <h3>Developer API Keys</h3>
-          <p>Buat API Key dengan kontrol hak akses terisolasi untuk integrasi skrip backend.</p>
+          <h3>Agregasi Kuota Multi-Akun Cerdas</h3>
+          <p>Satukan kuota gratis beberapa akun Google Drive menjadi satu kesatuan pool penyimpanan cloud masif.</p>
+        </article>
+        <article>
+          <h3>Folder Virtual Bersarang & REST API Developer</h3>
+          <p>Hierarki virtual folder instan dan API Key berizin khusus (files:read, files:upload) untuk skrip dan aplikasi.</p>
         </article>
       </section>
 
       <section id="security">
-        <h2>Bagaimana drive9 Mengelola Data & Akses Google Drive Anda</h2>
+        <h2>Keamanan & Kepatuhan Privasi Data Google Drive</h2>
         <p>
           drive9 mengakses Google Drive semata-mata untuk membuat dan mengelola file dalam folder khusus bernama 9drive.
-          Enkripsi OAuth AES-256-GCM menjamin keamanan token pengguna.
+          Token OAuth dienkripsi dengan standar militer AES-256-GCM. Anda memegang kendali penuh untuk memutuskan koneksi kapan saja.
         </p>
       </section>
 
       <section id="faq">
         <h2>Frequently Asked Questions (FAQ)</h2>
-        <p>Temukan jawaban lengkap seputar penggunaan, keamanan, dan integrasi drive9.</p>
-      </section>
-
-      <section>
-        <h2>Siap Mengelola Storage Google Drive Anda?</h2>
-        <p>Hubungkan akun Google Drive Anda dalam hitungan detik dan mulai nikmati pengalaman manajemen penyimpanan
-          cloud modern.</p>
+        <p>Temukan jawaban lengkap seputar cara kerja, kuota multi-akun, streaming media, dan keamanan drive9.</p>
       </section>
     </main>
 

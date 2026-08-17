@@ -3,9 +3,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ShieldCheck,
-  UploadCloud,
   KeyRound,
-  FolderTree,
   ArrowRight,
   Lock,
   Database,
@@ -13,18 +11,23 @@ import {
   HelpCircle,
   ChevronDown,
   ExternalLink,
-  Cpu,
   Zap,
   Server,
   Menu,
   X,
-  Info,
   Globe,
   Video,
   Film,
   Sparkles,
   Layers,
-  Share2
+  Calculator,
+  Code2,
+  Copy,
+  Check,
+  Play,
+  HardDrive,
+  Check as CheckIcon,
+  Minus
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -241,13 +244,67 @@ export function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Interactive Storage Calculator State
+  const [accountCount, setAccountCount] = useState<number>(3)
+  const totalStorageGb = accountCount * 15
+  const estimatedS3Monthly = (totalStorageGb * 0.023).toFixed(2)
+
+  // Interactive Code Snippet Tabs State
+  const [activeCodeTab, setActiveCodeTab] = useState<'video' | 'curl' | 'js' | 'python'>('video')
+  const [copiedCode, setCopiedCode] = useState(false)
+
+  // Live Mockup Active State
+  const [mockActiveTab, setMockActiveTab] = useState<'files' | 'stream' | 'quota'>('files')
+
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index)
   }
 
+  const copySnippet = (text: string) => {
+    navigator.clipboard.writeText(text)
+    setCopiedCode(true)
+    setTimeout(() => setCopiedCode(false), 2000)
+  }
+
+  const codeSnippets = {
+    video: `<!-- Stream Video Tanpa Buffering (HTTP 206 Partial Content) -->
+<video controls width="100%" poster="https://drive9.wn-cdn.net/logo.png">
+  <source src="https://drive9.wn-cdn.net/share/files/pub_demo_video_token/preview" type="video/mp4" />
+  Browser Anda tidak mendukung tag video.
+</video>`,
+    curl: `# Unggah File Langsung via REST API Key (Zero Server Disk)
+curl -X POST https://drive9.wn-cdn.net/api/v1/uploads \\
+  -H "X-API-Key: d9_live_sec_abc123xyz" \\
+  -F "file=@/path/to/hero-banner.jpg" \\
+  -F "folderId=fld_landing_assets"`,
+    js: `// Upload dari Frontend / Form JavaScript
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+const response = await fetch('https://drive9.wn-cdn.net/api/v1/uploads', {
+  method: 'POST',
+  headers: {
+    'X-API-Key': 'd9_live_sec_abc123xyz'
+  },
+  body: formData
+});
+const data = await response.json();
+console.log('Public CDN URL:', data.viewUrl);`,
+    python: `# Python Automation / Database Backup Script
+import requests
+
+with open('backup_database_2026.sql.gz', 'rb') as f:
+    r = requests.post(
+        'https://drive9.wn-cdn.net/api/v1/uploads',
+        headers={'X-API-Key': 'd9_live_sec_abc123xyz'},
+        files={'file': f}
+    )
+print('Uploaded:', r.json())`
+  }
+
   return (
     <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
-      <Seo title={lang === 'id' ? 'drive9 - Gateway CDN, Streaming Video & Cloud Storage Virtual' : 'drive9 - CDN Gateway, Video Streaming & Cloud Storage Gateway'} />
+      <Seo title={lang === 'id' ? 'drive9 - Google Drive Gateway, CDN Media & Video Streaming HTTP 206' : 'drive9 - Google Drive Gateway, CDN Media & HTTP 206 Video Streaming'} />
 
       {/* ── Navigation Bar (Fully Mobile & Desktop Optimized) ───────────────── */}
       <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/85 backdrop-blur-xl">
@@ -273,12 +330,12 @@ export function LandingPage() {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-5 lg:gap-7 text-xs lg:text-sm font-medium text-slate-300">
-            <a href="#purpose" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Tujuan' : 'Purpose'}</a>
+            <a href="#how-it-works" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Cara Kerja' : 'How It Works'}</a>
+            <a href="#calculator" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Kalkulator Kuota' : 'Quota Calculator'}</a>
             <a href="#cdn-streaming" className="hover:text-white hover:font-semibold transition-colors">CDN & Streaming</a>
-            <a href="#features" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Fitur' : 'Features'}</a>
-            <a href="#security" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Keamanan' : 'Security'}</a>
+            <a href="#comparison" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Perbandingan' : 'Comparison'}</a>
+            <a href="#use-cases" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Solusi' : 'Use Cases'}</a>
             <a href="#faq" className="hover:text-white hover:font-semibold transition-colors">FAQ</a>
-            <RouterLink to="/terms" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Syarat & Privasi' : 'Terms & Privacy'}</RouterLink>
           </nav>
 
           {/* Desktop CTA & Language Switcher */}
@@ -326,10 +383,12 @@ export function LandingPage() {
               className="md:hidden overflow-hidden border-t border-slate-800/80 bg-[#030712]/98 backdrop-blur-2xl px-6 py-5 space-y-4"
             >
               <div className="flex flex-col space-y-3 text-sm font-semibold text-slate-300">
-                <a href="#purpose" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Tujuan Aplikasi' : 'App Purpose'}</a>
+                <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Cara Kerja (3 Langkah)' : 'How It Works'}</a>
+                <a href="#calculator" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Kalkulator Kuota Multi-Akun' : 'Storage Calculator'}</a>
                 <a href="#cdn-streaming" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'CDN & Streaming Video' : 'CDN & Video Streaming'}</a>
-                <a href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Fitur & Keunggulan' : 'Features & Benefits'}</a>
-                <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Keamanan Data' : 'Data Security'}</a>
+                <a href="#comparison" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Tabel Perbandingan' : 'Comparison Table'}</a>
+                <a href="#use-cases" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Solusi & Kasus Penggunaan' : 'Use Cases'}</a>
+                <a href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Keamanan & Kepatuhan' : 'Data Security'}</a>
                 <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">FAQ</a>
                 <RouterLink to="/privacy" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'}</RouterLink>
                 <RouterLink to="/terms" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Ketentuan Layanan' : 'Terms of Service'}</RouterLink>
@@ -384,16 +443,16 @@ export function LandingPage() {
           />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 text-center space-y-6 sm:space-y-8">
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 text-center space-y-6 sm:space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] backdrop-blur-md max-w-full text-center"
           >
-            <div className="h-2 w-2 rounded-full bg-blue-400 animate-pulse shrink-0" />
+            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
             <span className="text-[11px] sm:text-xs font-semibold text-slate-300 tracking-wide leading-tight">
-              {lang === 'id' ? 'drive9 - Gateway CDN Cepat, Stream Video & Gateway Cloud' : 'drive9 - High-Speed CDN Gateway, Video Streaming & Cloud Gateway'}
+              {lang === 'id' ? '🔥 Gabungkan Multi-Google Drive • Video Streaming HTTP 206 • CDN Aset' : '🔥 Multi-Google Drive Gateway • HTTP 206 Video Streaming • Media CDN'}
             </span>
           </motion.div>
 
@@ -403,9 +462,9 @@ export function LandingPage() {
             transition={{ duration: 0.8, delay: 0.35 }}
             className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight text-white leading-[1.12]"
           >
-            {lang === 'id' ? 'Penyimpanan Cloud & Gateway CDN Terpadu via ' : 'Unified Cloud Storage & CDN Gateway via '}
+            {lang === 'id' ? 'Google Drive Gateway, CDN & ' : 'Google Drive Gateway, CDN & '}
             <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-              drive9
+              {lang === 'id' ? 'Streaming Tanpa Batas' : 'Unlimited Streaming'}
             </span>
           </motion.h1>
 
@@ -415,18 +474,9 @@ export function LandingPage() {
             transition={{ duration: 0.8, delay: 0.5 }}
             className="mx-auto max-w-3xl text-sm sm:text-lg text-slate-300 font-medium leading-relaxed px-2"
           >
-            <strong className="text-white font-black text-base sm:text-xl">
-              {lang === 'id' ? 'Lebih Dari Sekadar Penyimpanan Cloud:' : 'More Than Just Cloud Storage:'}
-            </strong><br />
-            <span className="text-slate-200">
-              {lang === 'id'
-                ? 'drive9 adalah platform Gateway Penyimpanan Google Drive & Proxy Streaming Media CDN. Selain menyimpan dan mengorganisasi file dalam folder virtual, drive9 mengizinkan Anda menyajikan aset landing page/website via CDN, streaming video & audio tanpa buffering (HTTP 206), memantau kuota multi-akun, dan mengalirkan file langsung ke folder '
-                : 'drive9 is a Google Drive Storage Gateway & High-Speed CDN Media Streaming Proxy platform. Beyond storing files in virtual folders, drive9 empowers you to deliver landing page media via CDN, stream video & audio buffer-free (HTTP 206), manage multi-account storage pools, and stream uploads directly to '}
-              <code className="text-blue-400 font-mono font-bold">9drive</code>
-              {lang === 'id'
-                ? ' di akun Google Drive Anda.'
-                : ' in your Google Drive accounts.'}
-            </span>
+            {lang === 'id'
+              ? 'Gabungkan kuota beberapa akun Google Drive menjadi satu pool penyimpanan besar. Streaming video resolusi tinggi tanpa buffering (HTTP 206), sajikan aset gambar landing page via direct CDN link, dan unggah langsung tanpa menyentuh disk server fisik.'
+              : 'Unify multiple Google Drive accounts into one massive cloud storage cluster. Stream HD videos buffer-free (HTTP 206), deliver landing page media via direct CDN links, and upload directly without consuming server disk space.'}
           </motion.p>
 
           <motion.div
@@ -435,86 +485,171 @@ export function LandingPage() {
             transition={{ duration: 0.8, delay: 0.65 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2"
           >
-            <RouterLink to="/login" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto h-12 px-7 text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/25 transition-all rounded-xl flex items-center justify-center gap-2 ring-1 ring-white/20">
-                <span>{lang === 'id' ? 'Masuk dengan Google' : 'Sign In with Google'}</span>
+            <RouterLink to="/register" className="w-full sm:w-auto">
+              <Button className="w-full sm:w-auto h-12 px-8 text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/25 transition-all rounded-xl flex items-center justify-center gap-2 ring-1 ring-white/20">
+                <span>{lang === 'id' ? 'Mulai Gratis Sekarang' : 'Start Free Today'}</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </RouterLink>
-            <RouterLink to="/register" className="w-full sm:w-auto">
+            <a href="#how-it-works" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full sm:w-auto h-12 px-7 text-sm font-extrabold border border-slate-700 bg-slate-900/90 text-white hover:bg-slate-800 transition-all rounded-xl">
-                {lang === 'id' ? 'Buat Akun Gratis' : 'Create Free Account'}
+                {lang === 'id' ? 'Pelajari Cara Kerja' : 'See How It Works'}
               </Button>
-            </RouterLink>
+            </a>
           </motion.div>
 
-          {/* ── Official Google OAuth Verification Disclosure Card ── */}
+          {/* ── LIVE INTERACTIVE PRODUCT MOCKUP / DASHBOARD PREVIEW ── */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.75 }}
-            className="mx-auto max-w-4xl rounded-3xl border-2 border-blue-500/40 bg-slate-900/95 p-6 sm:p-8 text-left shadow-2xl backdrop-blur-xl my-6 space-y-4"
+            transition={{ duration: 0.9, delay: 0.8 }}
+            className="mt-10 mx-auto max-w-5xl rounded-3xl border border-slate-700/80 bg-slate-950/90 shadow-[0_20px_50px_rgba(37,99,235,0.15)] backdrop-blur-2xl overflow-hidden text-left"
           >
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/logo.png"
-                  alt="drive9 application logo"
-                  className="h-10 w-10 rounded-xl bg-slate-950 p-1 border border-blue-500/30 object-contain"
-                />
-                <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-blue-400">
-                    {lang === 'id' ? 'Identitas Aplikasi Resmi' : 'Official Application Identity'}
-                  </span>
-                  <h2 className="text-xl sm:text-2xl font-black text-white">
-                    {lang === 'id' ? 'Nama Aplikasi: ' : 'Application Name: '}
-                    <span className="text-blue-400 font-mono">drive9</span>
-                  </h2>
-                </div>
+            {/* Mockup Header Bar */}
+            <div className="flex items-center justify-between border-b border-slate-800/90 bg-slate-900/70 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-red-500/80" />
+                <div className="h-3 w-3 rounded-full bg-amber-500/80" />
+                <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
+                <span className="ml-2 text-xs font-mono font-bold text-slate-400">drive9.wn-cdn.net/dashboard</span>
               </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-                <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Google Drive Storage Gateway</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMockActiveTab('files')}
+                  className={cn(
+                    'px-2.5 py-1 text-xs rounded-lg font-bold transition-colors',
+                    mockActiveTab === 'files' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  {lang === 'id' ? 'Virtual Folder' : 'Virtual Folders'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMockActiveTab('stream')}
+                  className={cn(
+                    'px-2.5 py-1 text-xs rounded-lg font-bold transition-colors',
+                    mockActiveTab === 'stream' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  {lang === 'id' ? 'Stream Player' : 'Stream Player'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMockActiveTab('quota')}
+                  className={cn(
+                    'px-2.5 py-1 text-xs rounded-lg font-bold transition-colors',
+                    mockActiveTab === 'quota' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  {lang === 'id' ? 'Pool Multi-Akun' : 'Multi-Drive Pool'}
+                </button>
               </div>
             </div>
 
-            <div className="space-y-3 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                <Info className="h-4 w-4 text-blue-400 shrink-0" />
-                <span>{lang === 'id' ? 'Tujuan & Fungsi Utama Aplikasi drive9:' : 'drive9 Application Purpose & Overview:'}</span>
-              </h3>
-              <p>
-                <strong className="text-white">drive9</strong> {lang === 'id'
-                  ? 'adalah platform web Gateway Penyimpanan Google Drive & Proxy Media CDN. Aplikasi ini memungkinkan pengguna terdaftar untuk menghubungkan akun Google Drive mereka guna mengunggah file, mengorganisir folder virtual, memutar video streaming tanpa buffering, serta memantau total kuota penyimpanan secara terpusat.'
-                  : 'is a web application that operates as a Google Drive Storage Gateway & CDN Media Proxy. It allows registered users to securely connect their Google Drive accounts, upload and organize files within virtual folders, stream media buffer-free, and monitor multi-account storage quotas in a unified dashboard.'}
-              </p>
-              <div className="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5">
-                <span className="text-xs font-bold text-blue-400 block">
-                  {lang === 'id' ? 'Penggunaan Scope Google Drive API:' : 'Google Drive API Scope Disclosure:'}
-                </span>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  {lang === 'id'
-                    ? 'Saat Anda menghubungkan akun Google, drive9 meminta akses Google Drive Scope ('
-                    : 'When connecting your Google account, drive9 requests Google Drive Scope access ('}
-                  <code className="text-purple-300 font-mono font-bold">https://www.googleapis.com/auth/drive</code>
-                  {lang === 'id'
-                    ? ') khusus untuk membuat folder khusus bernama '
-                    : ') solely to create a dedicated folder named '}
-                  <code className="text-indigo-300 font-mono font-bold">9drive</code>
-                  {lang === 'id'
-                    ? ' di Google Drive Anda dan mengalirkan file secara langsung (stream upload/download) tanpa pernah menyimpan file fisik pada server perantara.'
-                    : ' inside your Google Drive and stream files directly (upload/download streaming) without storing any physical files on intermediate servers.'}
-                </p>
-              </div>
+            {/* Mockup Body Content */}
+            <div className="p-4 sm:p-6 space-y-4">
+              {mockActiveTab === 'files' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800">
+                    <span className="font-bold text-slate-200">/ 9drive / landingpage-assets /</span>
+                    <span className="text-emerald-400 font-mono font-semibold">● 3 Akun Terhubung (45 GB Total)</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <Video className="h-5 w-5 text-purple-400" />
+                        <div>
+                          <p className="text-xs font-bold text-slate-200">demo-hero-4k.mp4</p>
+                          <p className="text-[10px] text-slate-400">142 MB • HTTP 206 Ready</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 font-mono font-bold">CDN Stream</span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <Globe className="h-5 w-5 text-blue-400" />
+                        <div>
+                          <p className="text-xs font-bold text-slate-200">banner-promo.webp</p>
+                          <p className="text-[10px] text-slate-400">1.2 MB • Edge Cached</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 font-mono font-bold">Direct URL</span>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
+                      <div className="flex items-center gap-2.5">
+                        <Database className="h-5 w-5 text-emerald-400" />
+                        <div>
+                          <p className="text-xs font-bold text-slate-200">db-backup-daily.sql.gz</p>
+                          <p className="text-[10px] text-slate-400">850 MB • Scoped API Upload</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 font-mono font-bold">AES-256</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {mockActiveTab === 'stream' && (
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-purple-500/30 flex flex-col sm:flex-row items-center gap-4">
+                  <div className="h-28 w-full sm:w-48 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center relative overflow-hidden group">
+                    <div className="h-10 w-10 rounded-full bg-purple-600/90 text-white flex items-center justify-center shadow-lg">
+                      <Play className="h-5 w-5 ml-0.5" />
+                    </div>
+                    <span className="absolute bottom-1 right-2 text-[9px] font-mono bg-black/80 px-1.5 py-0.5 rounded text-white">04:30 / 1080p</span>
+                  </div>
+                  <div className="space-y-1.5 text-xs text-left">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-white text-sm">HTTP 206 Range Request Active</span>
+                      <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 rounded font-mono font-bold">Zero Buffering</span>
+                    </div>
+                    <p className="text-slate-300">
+                      {lang === 'id'
+                        ? 'Pengguna dapat melompat (seek) ke bagian video mana saja. Server hanya mengalirkan chunk byte yang diminta secara instan tanpa mengunduh keseluruhan file.'
+                        : 'Instant timestamp seeking without downloading full files. Streams only the requested byte chunk over standard HTTP Range headers.'}
+                    </p>
+                    <code className="text-[10px] text-purple-300 font-mono bg-slate-950 px-2 py-0.5 rounded block">
+                      Range: bytes=1048576-2097151 ➔ 206 Partial Content
+                    </code>
+                  </div>
+                </div>
+              )}
+
+              {mockActiveTab === 'quota' && (
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-white">Smart Upload Routing Engine</span>
+                    <span className="text-emerald-400 font-mono font-bold">Total Pool: 45 GB (11.2 GB Used)</span>
+                  </div>
+                  <div className="w-full h-2.5 rounded-full bg-slate-800 overflow-hidden flex">
+                    <div className="h-full bg-blue-500 w-[15%]" title="Account 1" />
+                    <div className="h-full bg-indigo-500 w-[10%]" title="Account 2" />
+                    <div className="h-full bg-purple-500 w-[8%]" title="Account 3" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] text-slate-300">
+                    <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+                      <span className="font-bold text-blue-400">Akun #1:</span> 15 GB (2.3 GB Digunakan)
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+                      <span className="font-bold text-indigo-400">Akun #2:</span> 15 GB (4.8 GB Digunakan)
+                    </div>
+                    <div className="p-2 rounded-lg bg-slate-950 border border-slate-800">
+                      <span className="font-bold text-purple-400">Akun #3:</span> 15 GB (4.1 GB Digunakan)
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
-          {/* Key Metrics / Highlights */}
+          {/* 4 Feature Badges */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-10 sm:pt-14 border-t border-slate-800/80 text-left"
+            transition={{ duration: 0.8, delay: 0.9 }}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-800/80 text-left"
           >
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-blue-500/40 transition-colors">
               <div className="flex items-center gap-2 text-blue-400 font-bold text-sm mb-1.5">
@@ -528,10 +663,10 @@ export function LandingPage() {
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-purple-500/40 transition-colors">
               <div className="flex items-center gap-2 text-purple-400 font-bold text-sm mb-1.5">
                 <Video className="h-4 w-4 shrink-0" />
-                <span>{lang === 'id' ? 'Streaming Tanpa Buffering' : 'Buffer-Free Streaming'}</span>
+                <span>{lang === 'id' ? 'Streaming HTTP 206' : 'HTTP 206 Streaming'}</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Dukungan HTTP 206 Partial Content untuk pemutaran video MP4 & audio tanpa jeda.' : 'HTTP 206 Partial Content support for instant, zero-buffer video & audio playback.'}
+                {lang === 'id' ? 'Putar video MP4 & audio tanpa buffering dan bisa seek ke detik mana saja.' : 'Instant zero-buffer MP4 video and audio playback with timestamp seeking.'}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-emerald-500/40 transition-colors">
@@ -540,80 +675,158 @@ export function LandingPage() {
                 <span>{lang === 'id' ? 'Pool Multi-Akun' : 'Multi-Account Pool'}</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Gabungkan kapasitas beberapa akun Google Drive secara otomatis dengan penyeimbang beban.' : 'Aggregate multi-account Google Drive storage with intelligent load balancing.'}
+                {lang === 'id' ? 'Gabungkan kapasitas beberapa akun Google Drive secara otomatis dengan load balancer.' : 'Aggregate multi-account Google Drive storage with intelligent load balancing.'}
               </p>
             </div>
             <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-amber-500/40 transition-colors">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-sm mb-1.5">
                 <KeyRound className="h-4 w-4 shrink-0" />
-                <span>{lang === 'id' ? 'Gateway API REST' : 'REST API Gateway'}</span>
+                <span>{lang === 'id' ? 'REST API Developer' : 'REST API Gateway'}</span>
               </div>
               <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'API Key terisolasi (' : 'Isolated API Keys ('}
-                <code className="text-amber-300 font-mono">files:read</code>, <code className="text-amber-300 font-mono">files:upload</code>
-                {lang === 'id' ? ') untuk skrip & aplikasi web.' : ') for scripts & web apps.'}
+                {lang === 'id' ? 'API Key terisolasi (files:read, files:upload) untuk skrip & formulir website.' : 'Isolated API Keys (files:read, files:upload) for scripts & web forms.'}
               </p>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* ── App Purpose & Google Drive API Scope Disclosure (Google Verification Compliant) ── */}
-      <section id="purpose" className="py-12 border-t border-slate-800/80 bg-slate-900/40 relative">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-6">
-          <div className="p-6 sm:p-8 rounded-3xl border border-blue-500/30 bg-slate-900/90 shadow-2xl backdrop-blur-xl space-y-5">
-            <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30 shrink-0">
-                <Info className="h-5 w-5" />
+      {/* ── SECTION 1: HOW IT WORKS (3-Step Workflow) ────────────────────────────── */}
+      <section id="how-it-works" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">
+              <Sparkles className="h-4 w-4" />
+              <span>{lang === 'id' ? 'Sederhana & Cepat' : 'Simple & Instant'}</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              {lang === 'id' ? 'Cara Kerja drive9 dalam 3 Langkah Mudah' : 'How drive9 Works in 3 Easy Steps'}
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              {lang === 'id' ? 'Tidak perlu konfigurasi server rumit. Mulai dalam waktu kurang dari 60 detik.' : 'No complex server configuration needed. Get started in less than 60 seconds.'}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="relative p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-4">
+              <div className="h-12 w-12 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-black text-lg">
+                1
               </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-black text-white">
-                  {lang === 'id' ? 'Tujuan Utama Aplikasi drive9' : 'drive9 Main Application Purpose'}
-                </h2>
-                <p className="text-xs text-blue-400 font-medium">
-                  {lang === 'id' ? 'Transparansi Scope & Verifikasi OAuth Google' : 'Google OAuth Verification & Scope Transparency Disclosure'}
-                </p>
+              <h3 className="text-xl font-bold text-white">
+                {lang === 'id' ? 'Hubungkan Akun Google Drive' : 'Connect Google Drive Accounts'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                {lang === 'id'
+                  ? 'Tautkan 1 atau lebih akun Google Drive Anda melalui OAuth 2.0 resmi. Token Anda dienkripsi simetris menggunakan AES-256-GCM.'
+                  : 'Link 1 or multiple Google Drive accounts via official OAuth 2.0. Your tokens are securely encrypted using symmetric AES-256-GCM.'}
+              </p>
+            </div>
+
+            <div className="relative p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-indigo-500/40 transition-all duration-300 space-y-4">
+              <div className="h-12 w-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-black text-lg">
+                2
+              </div>
+              <h3 className="text-xl font-bold text-white">
+                {lang === 'id' ? 'Unggah File via Direct Streaming' : 'Upload Files via Direct Streaming'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                {lang === 'id'
+                  ? 'Unggah file multipart atau resumable. File langsung dialirkan ke folder khusus "9drive" di cloud tanpa pernah disimpan di disk server fisik.'
+                  : 'Upload multipart or resumable files. Files stream directly to the dedicated "9drive" cloud folder without touching local server disks.'}
+              </p>
+            </div>
+
+            <div className="relative p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-4">
+              <div className="h-12 w-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center font-black text-lg">
+                3
+              </div>
+              <h3 className="text-xl font-bold text-white">
+                {lang === 'id' ? 'Sematkan CDN & Stream Video' : 'Embed CDN & Stream Media'}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                {lang === 'id'
+                  ? 'Dapatkan link publik permanen untuk gambar/dokumen landing page atau putar video streaming tanpa jeda buffering via HTTP 206 Range.'
+                  : 'Get permanent public links for landing page assets or play zero-buffer streaming videos powered by HTTP 206 Partial Content.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 2: INTERACTIVE STORAGE CALCULATOR ────────────────────────────── */}
+      <section id="calculator" className="py-16 sm:py-24 border-t border-slate-800/80 bg-gradient-to-b from-[#030712] via-slate-950 to-[#030712] relative">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-10">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400">
+              <Calculator className="h-4 w-4" />
+              <span>{lang === 'id' ? 'Simulasi Kapasitas & Hemat Biaya' : 'Storage Simulation & Savings'}</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              {lang === 'id' ? 'Kalkulator Kuota Multi-Akun Google Drive' : 'Multi-Account Storage Calculator'}
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              {lang === 'id'
+                ? 'Hitung berapa total kapasitas penyimpanan cloud yang Anda dapatkan dengan menggabungkan akun Google Drive gratis.'
+                : 'Calculate how much combined cloud storage pool you unlock by connecting free Google Drive accounts.'}
+            </p>
+          </div>
+
+          <div className="p-8 sm:p-10 rounded-3xl border-2 border-emerald-500/30 bg-slate-900/90 shadow-2xl backdrop-blur-xl space-y-8">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label htmlFor="account-slider" className="text-sm font-bold text-white flex items-center gap-2">
+                  <HardDrive className="h-4 w-4 text-emerald-400" />
+                  <span>{lang === 'id' ? 'Jumlah Akun Google Drive Terhubung:' : 'Connected Google Drive Accounts:'}</span>
+                </label>
+                <span className="text-xl font-black font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-xl">
+                  {accountCount} {lang === 'id' ? 'Akun' : 'Accounts'}
+                </span>
+              </div>
+              <input
+                id="account-slider"
+                type="range"
+                min="1"
+                max="20"
+                value={accountCount}
+                onChange={(e) => setAccountCount(Number(e.target.value))}
+                className="w-full h-3 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+              />
+              <div className="flex justify-between text-[11px] font-mono text-slate-500">
+                <span>1 Akun (15 GB)</span>
+                <span>5 Akun (75 GB)</span>
+                <span>10 Akun (150 GB)</span>
+                <span>20 Akun (300 GB)</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs sm:text-sm text-slate-300 leading-relaxed">
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>{lang === 'id' ? 'Untuk Apa drive9 Dibuat?' : 'What is drive9 built for?'}</span>
-                </h3>
-                <p className="text-slate-400">
-                  <strong className="text-slate-200">drive9</strong> {lang === 'id' ? 'adalah platform gateway penyimpanan cloud & proxy media CDN yang membantu pengguna mengunggah file, menyajikan aset website/landing page, memutar video streaming tanpa buffering, mengorganisir folder virtual, memantau sisa kuota multi-akun, serta mengelola API Key terenkripsi.' : 'is a cloud storage gateway & CDN media proxy platform designed to help users upload files, serve website/landing page assets, stream videos without buffering, organize virtual folders, monitor multi-account storage limits, and manage encrypted API Keys.'}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-800">
+              <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
+                <span className="text-xs font-semibold text-slate-400">{lang === 'id' ? 'Total Kapasitas Cloud Pool' : 'Total Cloud Storage Pool'}</span>
+                <p className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
+                  {totalStorageGb} GB
                 </p>
+                <span className="text-[10px] text-emerald-400 font-medium">{lang === 'id' ? '100% Gratis Tanpa Batas Waktu' : '100% Free Forever'}</span>
               </div>
 
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-blue-400 shrink-0" />
-                  <span>{lang === 'id' ? 'Bagaimana drive9 Menggunakan API Google Drive?' : 'How does drive9 use Google Drive API?'}</span>
-                </h3>
-                <p className="text-slate-400">
-                  {lang === 'id' ? 'Aplikasi ' : 'The '}
-                  <strong className="text-slate-200">drive9</strong>
-                  {lang === 'id' ? ' meminta akses scope Google Drive (' : ' app requests Google Drive scope access ('}
-                  <code className="text-purple-300 font-mono">https://www.googleapis.com/auth/drive</code>
-                  {lang === 'id' ? ') khusus untuk membuat folder bernama ' : ') solely to create a folder named '}
-                  <code className="text-indigo-300 font-mono font-bold">9drive</code>
-                  {lang === 'id' ? ' di Google Drive Anda dan mengalirkan file secara langsung (streaming langsung) tanpa pernah menyimpan file fisik di disk server.' : ' in your Google Drive and stream files directly without ever saving physical files on server disk.'}
+              <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
+                <span className="text-xs font-semibold text-slate-400">{lang === 'id' ? 'Estimasi Biaya S3 / Wasabi' : 'Est. AWS S3 / Wasabi Cost'}</span>
+                <p className="text-3xl sm:text-4xl font-black text-rose-400 line-through">
+                  ${estimatedS3Monthly} <span className="text-xs font-normal text-slate-400">/ bln</span>
                 </p>
+                <span className="text-[10px] text-emerald-400 font-bold">{lang === 'id' ? 'Hemat 100% dengan drive9' : 'Save 100% with drive9'}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── CDN & Video Streaming Showcase Section ────────────────────────────── */}
-      <section id="cdn-streaming" className="py-16 sm:py-24 border-t border-slate-800/80 bg-gradient-to-b from-[#030712] via-slate-950 to-[#030712] relative">
+      {/* ── SECTION 3: CDN & STREAMING MEDIA SHOWCASE ────────────────────────────── */}
+      <section id="cdn-streaming" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/40 relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-400">
               <Sparkles className="h-4 w-4" />
-              <span>{lang === 'id' ? 'Keunggulan Utama di Luar Storage' : 'Beyond Storage Advantages'}</span>
+              <span>{lang === 'id' ? 'Keunggulan Utama Media Web' : 'Web Media Advantages'}</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-black text-white leading-tight">
               {lang === 'id' ? 'Solusi CDN, Streaming Video & Hosting Aset Media Web' : 'CDN, Video Streaming & Web Asset Hosting Solutions'}
@@ -705,186 +918,250 @@ export function LandingPage() {
                 </span>
               </div>
             </motion.div>
-
-            {/* Smart Multi-Drive Quota Balancing Box */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="p-8 rounded-3xl border border-emerald-500/30 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-300 space-y-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Layers className="h-32 w-32 text-emerald-400" />
-              </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                <Layers className="h-7 w-7" />
-              </div>
-              <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                  {lang === 'id' ? 'Penyeimbang Beban Cerdas' : 'Smart Load Balancer'}
-                </span>
-                <h3 className="text-2xl font-black text-white">
-                  {lang === 'id' ? 'Agregasi Kuota Penyimpanan Multi-Akun' : 'Multi-Account Storage Aggregation'}
-                </h3>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                {lang === 'id'
-                  ? 'Hubungkan banyak akun Google Drive dan kumpulkan kapasitas gratisnya (misal 15 GB + 15 GB + 15 GB) menjadi satu kelompok penyimpanan masif. Algoritma cerdas drive9 otomatis mengarahkan unggahan ke akun yang paling senggang.'
-                  : 'Connect multiple Google Drive accounts and pool their free quota (e.g. 15 GB + 15 GB + 15 GB) into a massive storage cluster. drive9 smart algorithm automatically routes uploads to the account with the most available space.'}
-              </p>
-              <div className="pt-2 flex flex-wrap gap-2 text-xs font-mono font-bold text-slate-300">
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-emerald-300">
-                  {lang === 'id' ? 'Satu Pool Penyimpanan' : 'Unified Storage Pool'}
-                </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-blue-300">
-                  {lang === 'id' ? 'Rute Unggah Otomatis' : 'Auto Route Uploads'}
-                </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-purple-300">
-                  {lang === 'id' ? 'Pemantau Kuota' : 'Quota Monitor'}
-                </span>
-              </div>
-            </motion.div>
-
-            {/* Developer API Integration Box */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.45 }}
-              className="p-8 rounded-3xl border border-amber-500/30 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-300 space-y-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
-            >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <KeyRound className="h-32 w-32 text-amber-400" />
-              </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                <KeyRound className="h-7 w-7" />
-              </div>
-              <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                  {lang === 'id' ? 'API Key REST Pengembang' : 'Developer REST API Keys'}
-                </span>
-                <h3 className="text-2xl font-black text-white">
-                  {lang === 'id' ? 'Gateway API Form Unggah & Otomatisasi' : 'API Gateway for Upload Forms & Automation'}
-                </h3>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                {lang === 'id'
-                  ? 'Gunakan API Key terisolasi (files:upload & files:read) untuk mengintegrasikan formulir unggah file landing page, otomatisasi pencadangan skrip backend, atau pengiriman media aplikasi seluler dengan dokumentasi JSON interaktif.'
-                  : 'Use isolated API Keys (files:upload & files:read) to integrate landing page file upload forms, automated backend backup scripts, or mobile app media delivery with interactive JSON documentation.'}
-              </p>
-              <div className="pt-2 flex flex-wrap gap-2 text-xs font-mono font-bold text-slate-300">
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-amber-300">
-                  {lang === 'id' ? 'API Key Terisolasi' : 'Scoped API Keys'}
-                </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-blue-300">
-                  {lang === 'id' ? 'Endpoint Form Unggah' : 'Form Upload Endpoint'}
-                </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-emerald-300">
-                  {lang === 'id' ? 'Respon JSON' : 'JSON Responses'}
-                </span>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ── Features Section ──────────────────────────────────────── */}
-      <section id="features" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12 sm:space-y-16">
-          <div className="text-center max-w-2xl mx-auto space-y-3 sm:space-y-4">
+      {/* ── SECTION 4: COMPARISON MATRIX (drive9 vs GDrive Standar vs AWS S3 vs Cloudinary) ─── */}
+      <section id="comparison" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-900/30 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">
-              <Cpu className="h-4 w-4" />
-              <span>{lang === 'id' ? 'Fitur Gateway' : 'Gateway Features'}</span>
+              <Layers className="h-4 w-4" />
+              <span>{lang === 'id' ? 'Mengapa Memilih drive9' : 'Why Choose drive9'}</span>
             </div>
-            <h2 className="text-2xl sm:text-4xl font-black text-white">
-              {lang === 'id' ? 'Fitur & Keunggulan Lengkap drive9' : 'Complete drive9 Features & Capabilities'}
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              {lang === 'id' ? 'Tabel Perbandingan Fitur & Efisiensi' : 'Feature & Efficiency Comparison'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm">
-              {lang === 'id' ? 'Dirancang untuk manajemen penyimpanan cloud berkecepatan tinggi dengan keamanan tingkat lanjut.' : 'Built for high-speed cloud storage management with advanced security.'}
+              {lang === 'id' ? 'Lihat bagaimana drive9 memberikan keunggulan fleksibilitas dan efisiensi biaya dibandingkan opsi lainnya.' : 'See how drive9 delivers superior flexibility and cost efficiency compared to alternatives.'}
+            </p>
+          </div>
+
+          <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
+            <table className="w-full text-left text-xs sm:text-sm">
+              <thead className="border-b border-slate-800 bg-slate-950/80 text-slate-300 font-bold">
+                <tr>
+                  <th className="p-4 sm:p-5">{lang === 'id' ? 'Fitur / Kebutuhan' : 'Feature / Capability'}</th>
+                  <th className="p-4 sm:p-5 text-blue-400 font-black text-base">drive9</th>
+                  <th className="p-4 sm:p-5 text-slate-400">Google Drive Biasa</th>
+                  <th className="p-4 sm:p-5 text-slate-400">AWS S3 / Wasabi</th>
+                  <th className="p-4 sm:p-5 text-slate-400">Cloudinary</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-slate-300">
+                <tr className="hover:bg-slate-800/30">
+                  <td className="p-4 sm:p-5 font-semibold text-white">
+                    {lang === 'id' ? 'Agregasi Kuota Multi-Akun' : 'Multi-Account Quota Aggregation'}
+                  </td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? 'Otomatis & Cerdas' : 'Smart Auto'}</span>
+                  </td>
+                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                </tr>
+
+                <tr className="hover:bg-slate-800/30">
+                  <td className="p-4 sm:p-5 font-semibold text-white">
+                    {lang === 'id' ? 'Video Streaming HTTP 206 (Tanpa Buffering)' : 'HTTP 206 Video Streaming (Zero Buffer)'}
+                  </td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? 'Bawaan (Range Request)' : 'Native Range'}</span>
+                  </td>
+                  <td className="p-4 sm:p-5 text-rose-400 text-xs">{lang === 'id' ? 'Sering Kena Limit/Download' : 'Quota Limited'}</td>
+                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Ya (Bayar Egress Mahal)' : 'Yes (Costly Egress)'}</td>
+                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Ya (Batas Kuota Ketat)' : 'Yes (Strict Limits)'}</td>
+                </tr>
+
+                <tr className="hover:bg-slate-800/30">
+                  <td className="p-4 sm:p-5 font-semibold text-white">
+                    {lang === 'id' ? 'Zero Server Disk Storage (Streaming Langsung)' : 'Zero Server Disk Storage (Direct Stream)'}
+                  </td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? '100% Dalam Memori' : '100% In-Memory'}</span>
+                  </td>
+                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Perlu Konfigurasi SDK' : 'Needs SDK Config'}</td>
+                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Perlu SDK Khusus' : 'Requires SDK'}</td>
+                </tr>
+
+                <tr className="hover:bg-slate-800/30">
+                  <td className="p-4 sm:p-5 font-semibold text-white">
+                    {lang === 'id' ? 'Folder Virtual Tanpa Delay API' : 'Instant Virtual Folders (No API Delay)'}
+                  </td>
+                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? 'Cepat via Database MySQL' : 'Fast MySQL Nested'}</span>
+                  </td>
+                  <td className="p-4 sm:p-5 text-slate-400">{lang === 'id' ? 'Folder Fisik Lambat' : 'Slow Physical Folders'}</td>
+                  <td className="p-4 sm:p-5 text-slate-400">{lang === 'id' ? 'Prefix Key S3' : 'Key Prefix Only'}</td>
+                  <td className="p-4 sm:p-5 text-slate-400">{lang === 'id' ? 'Tag / Folder Terbatas' : 'Limited Folders'}</td>
+                </tr>
+
+                <tr className="hover:bg-slate-800/30">
+                  <td className="p-4 sm:p-5 font-semibold text-white">
+                    {lang === 'id' ? 'Biaya Berlangganan Dasar' : 'Base Subscription Cost'}
+                  </td>
+                  <td className="p-4 sm:p-5 font-black text-emerald-400">
+                    {lang === 'id' ? 'GRATIS (15GB/Akun)' : 'FREE (15GB/Account)'}
+                  </td>
+                  <td className="p-4 sm:p-5 text-slate-300">Gratis (15GB Single)</td>
+                  <td className="p-4 sm:p-5 text-rose-400 font-mono">Bayar per GB + Egress</td>
+                  <td className="p-4 sm:p-5 text-rose-400 font-mono">Tier Gratis Cepat Habis</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 5: USE CASES & SOLUTIONS ────────────────────────────── */}
+      <section id="use-cases" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-400">
+              <Zap className="h-4 w-4" />
+              <span>{lang === 'id' ? 'Kasus Penggunaan Riil' : 'Real-World Use Cases'}</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              {lang === 'id' ? 'Dirancang untuk Berbagai Kebutuhan Digital' : 'Engineered for Diverse Digital Workloads'}
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              {lang === 'id' ? 'Lihat bagaimana drive9 memecahkan masalah penyimpanan dan pengiriman media Anda.' : 'Discover how drive9 solves modern storage and content delivery challenges.'}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-4">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform">
-                <UploadCloud className="h-6 w-6 sm:h-7 sm:w-7" />
+            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-4">
+              <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
+                <Globe className="h-6 w-6" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {lang === 'id' ? 'Unggahan Direct Streaming' : 'Direct Streamed Uploads'}
+              <h3 className="text-xl font-bold text-white">
+                {lang === 'id' ? 'Web Developer & Pemilik Landing Page' : 'Web Developers & Landing Pages'}
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Mengunggah file multipart dan resumable secara langsung ke Google Drive tanpa menampung file di disk server lokal. Izin akses file publik otomatis disesuaikan.' : 'Upload multipart and resumable files directly to Google Drive without holding files on local server disk. Public file access permissions are automatically configured.'}
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                {lang === 'id'
+                  ? 'Host gambar banner, aset grafis produk, dan media web langsung via link publik permanen tanpa membebani hosting utama Anda.'
+                  : 'Host hero banners, product graphics, and website media via permanent public URLs without consuming web hosting bandwidth.'}
               </p>
             </div>
 
-            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-4">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-110 transition-transform">
-                <Video className="h-6 w-6 sm:h-7 sm:w-7" />
+            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-4">
+              <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                <Film className="h-6 w-6" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {lang === 'id' ? 'Streaming Media Tanpa Buffering' : 'Buffer-Free Media Streaming'}
+              <h3 className="text-xl font-bold text-white">
+                {lang === 'id' ? 'Kreator Video & Podcast Streaming' : 'Video Creators & Podcast Streaming'}
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Streaming video MP4/WebM dan audio secara efisien menggunakan permintaan rentang HTTP. Kompatibel dengan pemutar video populer seperti Plyr.' : 'Stream MP4/WebM videos and audio efficiently using HTTP Range requests. Fully compatible with modern video players like Plyr.'}
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                {lang === 'id'
+                  ? 'Sematkan video ke pemutar Plyr atau tag HTML5 video. Nikmati pemutaran instan dengan lompatan menit (timestamp seeking) tanpa buffering.'
+                  : 'Embed videos directly to Plyr or HTML5 players. Enjoy zero buffering with instantaneous timestamp seeking powered by HTTP 206.'}
               </p>
             </div>
 
-            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-emerald-500/40 transition-all duration-300 space-y-4">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-110 transition-transform">
-                <Globe className="h-6 w-6 sm:h-7 sm:w-7" />
+            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-emerald-500/40 transition-all duration-300 space-y-4">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                <Database className="h-6 w-6" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {lang === 'id' ? 'Host Aset CDN Landing Page' : 'CDN Landing Page Asset Host'}
+              <h3 className="text-xl font-bold text-white">
+                {lang === 'id' ? 'Otomatisasi Backup & Skrip Backend' : 'Automated Backups & Script Uploads'}
               </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Sajikan gambar banner, dokumen, dan media visual secara publik untuk landing page atau website tanpa membebankan server fisik Anda.' : 'Serve hero banners, docs, and visual media publicly for landing pages or websites without burdening your physical server.'}
-              </p>
-            </div>
-
-            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-indigo-500/40 transition-all duration-300 space-y-4">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-110 transition-transform">
-                <FolderTree className="h-6 w-6 sm:h-7 sm:w-7" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {lang === 'id' ? 'Folder Virtual Bersarang' : 'Nested Virtual Folders'}
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Organisir file dalam struktur folder virtual bersarang. Otomatis menyelesaikan dan mensinkronkan path folder di Google Drive saat diminta oleh client.' : 'Organize files in nested virtual folder structures. Automatically resolves and syncs folder paths in Google Drive upon request.'}
-              </p>
-            </div>
-
-            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-amber-500/40 transition-all duration-300 space-y-4">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:scale-110 transition-transform">
-                <KeyRound className="h-6 w-6 sm:h-7 sm:w-7" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {lang === 'id' ? 'API Key Pengembang' : 'Developer API Keys'}
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Buat API Key dengan kontrol hak akses terisolasi (' : 'Generate API Keys with isolated access scope controls ('}
-                <code className="text-amber-300 font-mono">files:read</code>, <code className="text-amber-300 font-mono">files:upload</code>
-                {lang === 'id' ? ') untuk integrasi skrip backend.' : ') for backend script integration.'}
-              </p>
-            </div>
-
-            <div className="group p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-cyan-500/40 transition-all duration-300 space-y-4">
-              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 group-hover:scale-110 transition-transform">
-                <Share2 className="h-6 w-6 sm:h-7 sm:w-7" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {lang === 'id' ? 'Tautan Berbagi & Token Pratinjau' : 'Shared Links & Preview Tokens'}
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                {lang === 'id' ? 'Buat Tautan Publik (Public Link), Token Pratinjau Terbatas (Preview Token), atau undang email pengguna lain dengan izin baca/tulis.' : 'Generate Public Shared Links, secure Preview Tokens, or invite users by email with read/write access.'}
+              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
+                {lang === 'id'
+                  ? 'Gunakan API Key terisolasi (files:upload) untuk mengirimkan file backup database, log server, atau unggahan formulir website secara otomatis.'
+                  : 'Use isolated API Keys (files:upload) to send automated database backups, server logs, or contact form uploads straight to Google Drive.'}
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Security & Purpose Section ────────────────────────────── */}
-      <section id="security" className="py-16 sm:py-24 border-t border-slate-800/80 bg-[#030712] relative">
+      {/* ── SECTION 6: INTERACTIVE API & CODE SNIPPETS ────────────────────────────── */}
+      <section className="py-16 sm:py-24 border-t border-slate-800/80 bg-[#030712] relative">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-10">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-400">
+              <Code2 className="h-4 w-4" />
+              <span>{lang === 'id' ? 'Integrasi Cepat Pengembang' : 'Developer-First Integration'}</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              {lang === 'id' ? 'Sematkan & Integrasikan dalam Hitungan Baris' : 'Embed & Integrate in Just a Few Lines'}
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm">
+              {lang === 'id' ? 'Contoh cuplikan kode siap pakai untuk HTML, cURL, JavaScript, dan Python.' : 'Ready-to-use code snippets for HTML, cURL, JavaScript, and Python.'}
+            </p>
+          </div>
+
+          <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-2xl">
+            {/* Code Tabs Header */}
+            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 sm:px-6 py-3">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('video')}
+                  className={cn(
+                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
+                    activeCodeTab === 'video' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  HTML Video (HTTP 206)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('curl')}
+                  className={cn(
+                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
+                    activeCodeTab === 'curl' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  cURL Upload
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('js')}
+                  className={cn(
+                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
+                    activeCodeTab === 'js' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  JavaScript / Fetch
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveCodeTab('python')}
+                  className={cn(
+                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
+                    activeCodeTab === 'python' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                  )}
+                >
+                  Python
+                </button>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => copySnippet(codeSnippets[activeCodeTab])}
+                className="h-8 px-2.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg gap-1.5"
+              >
+                {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                <span>{copiedCode ? (lang === 'id' ? 'Tersalin!' : 'Copied!') : (lang === 'id' ? 'Salin Kode' : 'Copy Code')}</span>
+              </Button>
+            </div>
+
+            {/* Code Content */}
+            <div className="p-4 sm:p-6 overflow-x-auto">
+              <pre className="font-mono text-xs sm:text-sm text-blue-300 leading-relaxed">
+                <code>{codeSnippets[activeCodeTab]}</code>
+              </pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 7: SECURITY & GOOGLE OAUTH TRANSPARENCY ────────────────────────────── */}
+      <section id="security" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/40 relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-bold text-emerald-400">
@@ -899,19 +1176,19 @@ export function LandingPage() {
               <code className="text-indigo-300 font-mono font-bold">9drive</code>. {lang === 'id' ? 'Kami menjaga privasi data Anda:' : 'We safeguard your data privacy:'}
             </p>
             <ul className="space-y-3 text-xs text-slate-300">
-              <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60">
+              <li className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/50 border border-slate-800/60">
                 <Lock className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
                 <span>
                   <strong>{lang === 'id' ? 'Enkripsi OAuth:' : 'OAuth Encryption:'}</strong> {lang === 'id' ? 'Token Akses & Pembaruan terenkripsi dengan algoritma AES-256-GCM sebelum disimpan di database.' : 'Access & Refresh tokens are encrypted with AES-256-GCM before saving to database.'}
                 </span>
               </li>
-              <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60">
+              <li className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/50 border border-slate-800/60">
                 <Database className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <span>
                   <strong>{lang === 'id' ? 'Tanpa Penyimpanan File Server:' : 'Zero Server File Storage:'}</strong> {lang === 'id' ? 'File unggahan langsung dialirkan ke penyimpanan cloud tanpa disimpan di penyimpanan lokal server.' : 'Uploaded files stream directly to cloud storage without saving to local server storage.'}
                 </span>
               </li>
-              <li className="flex items-start gap-3 p-3 rounded-xl bg-slate-900/50 border border-slate-800/60">
+              <li className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-900/50 border border-slate-800/60">
                 <CheckCircle2 className="h-4 w-4 text-purple-400 shrink-0 mt-0.5" />
                 <span>
                   <strong>{lang === 'id' ? 'Hak Pencabutan Akses:' : 'Access Revocation Rights:'}</strong> {lang === 'id' ? 'Anda dapat memutuskan koneksi akun Google kapan saja via menu Pengaturan atau Keamanan Google.' : 'You can disconnect your Google account anytime via Settings or Google Security.'}
@@ -924,17 +1201,17 @@ export function LandingPage() {
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4 text-blue-400" />
-                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">{lang === 'id' ? 'Informasi Aplikasi' : 'Application Information'}</span>
+                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-300">{lang === 'id' ? 'Informasi Kepatuhan Aplikasi' : 'Application Compliance Info'}</span>
               </div>
-              <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">drive9 v1.0</span>
+              <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">drive9 Gateway</span>
             </div>
             <div className="space-y-4 text-xs">
               <div>
-                <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Nama Aplikasi:' : 'App Name:'}</p>
+                <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Nama Aplikasi Resmi:' : 'Official App Name:'}</p>
                 <p className="font-mono text-blue-400 text-sm font-black">drive9</p>
               </div>
               <div>
-                <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Target Scope Google:' : 'Target Google Scope:'}</p>
+                <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Target Scope Google Drive:' : 'Target Google Scope:'}</p>
                 <p className="font-mono text-purple-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 break-all">https://www.googleapis.com/auth/drive</p>
               </div>
               <div>
@@ -960,7 +1237,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── FAQ Section (16 Frequently Asked Questions) ─────────────── */}
+      {/* ── SECTION 8: FAQ (16 Frequently Asked Questions) ─────────────── */}
       <section id="faq" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/40">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-10 sm:space-y-12">
           <div className="text-center space-y-3">
@@ -1026,7 +1303,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Call to Action Banner ──────────────────────────────────── */}
+      {/* ── SECTION 9: CALL TO ACTION BANNER ──────────────────────────────────── */}
       <section className="py-16 sm:py-20 border-t border-slate-800/80 bg-gradient-to-b from-slate-950 via-[#030712] to-blue-950/40 relative overflow-hidden">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6 relative z-10">
           <div className="flex h-14 w-14 sm:h-16 sm:w-16 mx-auto items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
@@ -1046,14 +1323,14 @@ export function LandingPage() {
             </RouterLink>
             <RouterLink to="/register" className="w-full sm:w-auto">
               <Button variant="outline" className="w-full sm:w-auto h-12 px-8 text-xs font-bold border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 rounded-xl">
-                {lang === 'id' ? 'Daftar Akun' : 'Create Account'}
+                {lang === 'id' ? 'Daftar Akun Gratis' : 'Create Free Account'}
               </Button>
             </RouterLink>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ────────────────────────────────────────────────── */}
+      {/* ── SECTION 10: FOOTER ────────────────────────────────────────────────── */}
       <footer className="border-t border-slate-800/80 bg-[#030712] py-10 text-xs text-slate-500">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
@@ -1063,9 +1340,11 @@ export function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-semibold">
-            <a href="#purpose" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Tujuan Aplikasi' : 'App Purpose'}</a>
+            <a href="#how-it-works" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Cara Kerja' : 'How It Works'}</a>
+            <a href="#calculator" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Kalkulator' : 'Calculator'}</a>
             <a href="#cdn-streaming" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'CDN & Streaming' : 'CDN & Streaming'}</a>
-            <a href="#features" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Fitur' : 'Features'}</a>
+            <a href="#comparison" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Perbandingan' : 'Comparison'}</a>
+            <a href="#use-cases" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Solusi' : 'Use Cases'}</a>
             <RouterLink to="/privacy" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'}</RouterLink>
             <RouterLink to="/terms" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Ketentuan Layanan' : 'Terms of Service'}</RouterLink>
             <RouterLink to="/login" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Masuk Dashboard' : 'Dashboard Login'}</RouterLink>
