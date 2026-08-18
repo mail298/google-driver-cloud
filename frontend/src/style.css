@@ -414,3 +414,12 @@ aside .card button.text-orange-600:hover {
   background-color: rgba(255, 255, 255, 0.06);
 }
 
+/* Custom Utilities for Responsive Elements */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+

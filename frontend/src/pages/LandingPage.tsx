@@ -71,7 +71,7 @@ function ElegantShape({
         ease: [0.23, 0.86, 0.39, 0.96] as const,
         opacity: { duration: 1.2 },
       }}
-      className={cn('absolute pointer-events-none', className)}
+      className={cn('absolute pointer-events-none max-w-full overflow-hidden', className)}
     >
       <motion.div
         animate={{
@@ -83,8 +83,8 @@ function ElegantShape({
           ease: 'easeInOut',
         }}
         style={{
-          width,
-          height,
+          width: `clamp(180px, 45vw, ${width}px)`,
+          height: `clamp(45px, 12vw, ${height}px)`,
         }}
         className="relative"
       >
@@ -134,7 +134,7 @@ const faqsId = [
     a: 'Ya. Saat pertama kali Anda mengunggah file atau menghubungkan akun, drive9 akan secara otomatis membuat folder induk khusus bernama "9drive" di Google Drive Anda. Seluruh file fisik yang diunggah melalui drive9 akan disimpan dengan rapi di dalam folder "9drive" tersebut, sehingga tidak mengotori direktori utama (root) Google Drive pribadi Anda.'
   },
   {
-    q: '8. Apa perbedaan antara Folder Virtual di drive9 dan folder fisik di Google Drive?',
+    q: '8. Apakah perbedaan antara Folder Virtual di drive9 dan folder fisik di Google Drive?',
     a: 'Folder Virtual di drive9 adalah struktur hierarki cerdas yang dikelola di database MySQL drive9. Anda dapat membuat folder bersarang (nested folders) secara instan tanpa perlu menunggu API Google Drive membuat folder fisik secara lambat. drive9 mengaitkan lokasi file secara logis dan otomatis menyinkronkan jalur direktori saat file diakses atau diunduh oleh pengguna.'
   },
   {
@@ -303,25 +303,25 @@ print('Uploaded:', r.json())`
   }
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
       <Seo title={lang === 'id' ? 'drive9 - Google Drive Gateway, CDN Media & Video Streaming HTTP 206' : 'drive9 - Google Drive Gateway, CDN Media & HTTP 206 Video Streaming'} />
 
       {/* ── Navigation Bar (Fully Mobile & Desktop Optimized) ───────────────── */}
-      <header className="sticky top-0 z-50 border-b border-slate-800/80 bg-[#030712]/85 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 py-3.5">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#030712]/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-6 py-3 sm:py-3.5">
           {/* Brand Logo */}
-          <RouterLink to="/" className="flex items-center gap-2.5 group shrink-0">
+          <RouterLink to="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0 min-w-0">
             <img
               src="/logo.png"
               alt="drive9 logo - Google Drive Storage & CDN Gateway"
-              width="40"
-              height="40"
+              width="36"
+              height="36"
               fetchPriority="high"
               loading="eager"
-              className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain shadow-lg shadow-blue-500/20 ring-1 ring-white/10 bg-slate-900/90 p-1 transition-transform group-hover:scale-105"
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl object-contain shadow-lg shadow-blue-500/20 ring-1 ring-white/10 bg-slate-900/90 p-1 transition-transform group-hover:scale-105 shrink-0"
             />
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-black tracking-tight text-white group-hover:text-blue-400 transition-colors">drive9</span>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-lg sm:text-xl font-black tracking-tight text-white group-hover:text-blue-400 transition-colors">drive9</span>
               <span className="hidden xl:inline-flex text-[10px] font-extrabold uppercase tracking-wider text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
                 {lang === 'id' ? 'Gateway CDN & Cloud' : 'CDN & Cloud Gateway'}
               </span>
@@ -329,7 +329,7 @@ print('Uploaded:', r.json())`
           </RouterLink>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-5 lg:gap-7 text-xs lg:text-sm font-medium text-slate-300">
+          <nav className="hidden md:flex items-center gap-4 lg:gap-7 text-xs lg:text-sm font-medium text-slate-300">
             <a href="#how-it-works" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Cara Kerja' : 'How It Works'}</a>
             <a href="#calculator" className="hover:text-white hover:font-semibold transition-colors">{lang === 'id' ? 'Kalkulator Kuota' : 'Quota Calculator'}</a>
             <a href="#cdn-streaming" className="hover:text-white hover:font-semibold transition-colors">CDN & Streaming</a>
@@ -339,25 +339,25 @@ print('Uploaded:', r.json())`
           </nav>
 
           {/* Desktop CTA & Language Switcher */}
-          <div className="hidden md:flex items-center gap-3 shrink-0">
+          <div className="hidden md:flex items-center gap-2.5 lg:gap-3 shrink-0">
             <LanguageSwitcher />
             <RouterLink to="/login">
-              <Button variant="outline" className="h-9 px-4 text-xs font-bold border border-slate-700/80 bg-slate-900/80 text-slate-200 hover:bg-slate-800 hover:text-white transition-all rounded-xl shadow-sm">
+              <Button variant="outline" className="h-9 px-3.5 lg:px-4 text-xs font-bold border border-slate-700/80 bg-slate-900/80 text-slate-200 hover:bg-slate-800 hover:text-white transition-all rounded-xl shadow-sm">
                 {lang === 'id' ? 'Masuk' : 'Sign In'}
               </Button>
             </RouterLink>
             <RouterLink to="/register">
-              <Button className="h-9 px-4 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 transition-all rounded-xl">
+              <Button className="h-9 px-3.5 lg:px-4 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 transition-all rounded-xl">
                 {lang === 'id' ? 'Mulai Gratis' : 'Get Started'}
               </Button>
             </RouterLink>
           </div>
 
           {/* Mobile Actions & Menu Toggle */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-1.5 sm:gap-2 shrink-0">
             <LanguageSwitcher />
             <RouterLink to="/login">
-              <Button size="sm" className="h-8 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-sm">
+              <Button size="sm" className="h-8 px-2.5 sm:px-3 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-sm">
                 {lang === 'id' ? 'Masuk' : 'Sign In'}
               </Button>
             </RouterLink>
@@ -365,7 +365,7 @@ print('Uploaded:', r.json())`
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle mobile menu"
-              className="p-2 text-slate-300 hover:text-white rounded-xl bg-slate-900/90 border border-slate-800 focus:outline-none transition-colors"
+              className="p-1.5 sm:p-2 text-slate-300 hover:text-white rounded-xl bg-slate-900/90 border border-slate-800 focus:outline-none transition-colors"
             >
               {mobileMenuOpen ? <X className="h-5 w-5 text-blue-400" /> : <Menu className="h-5 w-5" />}
             </button>
@@ -380,9 +380,9 @@ print('Uploaded:', r.json())`
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.25, ease: 'easeInOut' }}
-              className="md:hidden overflow-hidden border-t border-slate-800/80 bg-[#030712]/98 backdrop-blur-2xl px-6 py-5 space-y-4"
+              className="md:hidden overflow-hidden border-t border-slate-800/80 bg-[#030712]/98 backdrop-blur-2xl px-5 py-4 space-y-3.5"
             >
-              <div className="flex flex-col space-y-3 text-sm font-semibold text-slate-300">
+              <div className="flex flex-col space-y-2.5 text-sm font-semibold text-slate-300">
                 <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Cara Kerja (3 Langkah)' : 'How It Works'}</a>
                 <a href="#calculator" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Kalkulator Kuota Multi-Akun' : 'Storage Calculator'}</a>
                 <a href="#cdn-streaming" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'CDN & Streaming Video' : 'CDN & Video Streaming'}</a>
@@ -393,14 +393,14 @@ print('Uploaded:', r.json())`
                 <RouterLink to="/privacy" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Kebijakan Privasi' : 'Privacy Policy'}</RouterLink>
                 <RouterLink to="/terms" onClick={() => setMobileMenuOpen(false)} className="hover:text-blue-400 py-1 transition-colors">{lang === 'id' ? 'Ketentuan Layanan' : 'Terms of Service'}</RouterLink>
               </div>
-              <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2.5">
+              <div className="pt-3 border-t border-slate-800/80 flex flex-col gap-2">
                 <RouterLink to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" className="w-full h-10 text-xs font-bold border border-slate-700 bg-slate-900 text-white rounded-xl">
+                  <Button variant="outline" className="w-full h-9 text-xs font-bold border border-slate-700 bg-slate-900 text-white rounded-xl">
                     {lang === 'id' ? 'Masuk ke Dashboard' : 'Sign In to Dashboard'}
                   </Button>
                 </RouterLink>
                 <RouterLink to="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full h-10 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-md shadow-blue-600/30">
+                  <Button className="w-full h-9 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-md shadow-blue-600/30">
                     {lang === 'id' ? 'Daftar Akun Gratis' : 'Get Started Free'}
                   </Button>
                 </RouterLink>
@@ -411,7 +411,7 @@ print('Uploaded:', r.json())`
       </header>
 
       {/* ── Hero Section with 21st.dev Geometric Animated Shapes ─── */}
-      <section className="relative min-h-[85vh] flex items-center justify-center pt-12 sm:pt-16 pb-14 overflow-hidden">
+      <section className="relative min-h-[80vh] sm:min-h-[85vh] flex items-center justify-center pt-8 sm:pt-16 pb-12 sm:pb-16 overflow-hidden w-full">
         {/* Ambient Glow Gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 via-transparent to-purple-600/10 blur-3xl pointer-events-none" />
 
@@ -419,80 +419,84 @@ print('Uploaded:', r.json())`
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <ElegantShape
             delay={0.3}
-            width={600}
-            height={140}
+            width={550}
+            height={130}
             rotate={12}
             gradient="from-blue-500/[0.18]"
-            className="left-[-15%] md:left-[-5%] top-[15%] md:top-[18%]"
+            className="left-[-10%] md:left-[-5%] top-[10%] md:top-[18%]"
           />
           <ElegantShape
             delay={0.5}
-            width={500}
-            height={120}
+            width={450}
+            height={110}
             rotate={-15}
             gradient="from-indigo-500/[0.18]"
-            className="right-[-12%] md:right-[-2%] top-[65%] md:top-[70%]"
+            className="right-[-10%] md:right-[-2%] top-[65%] md:top-[70%]"
           />
           <ElegantShape
             delay={0.4}
-            width={320}
-            height={80}
+            width={300}
+            height={75}
             rotate={-8}
             gradient="from-purple-500/[0.15]"
-            className="left-[5%] md:left-[8%] bottom-[8%]"
+            className="left-[2%] md:left-[8%] bottom-[5%] md:bottom-[8%]"
           />
         </div>
 
-        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 text-center space-y-6 sm:space-y-8">
+        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 text-center space-y-5 sm:space-y-7 w-full">
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] backdrop-blur-md max-w-full text-center"
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/[0.12] backdrop-blur-md max-w-full text-center shadow-inner"
           >
             <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-            <span className="text-[11px] sm:text-xs font-semibold text-slate-300 tracking-wide leading-tight">
-              {lang === 'id' ? '🔥 Gabungkan Multi-Google Drive • Video Streaming HTTP 206 • CDN Aset' : '🔥 Multi-Google Drive Gateway • HTTP 206 Video Streaming • Media CDN'}
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-300 tracking-wide leading-tight break-words">
+              {lang === 'id' ? '🔥 Multi-Google Drive Gateway • HTTP 206 Streaming • CDN Media' : '🔥 Multi-Google Drive Gateway • HTTP 206 Video Streaming • Media CDN'}
             </span>
           </motion.div>
 
+          {/* Heading */}
           <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.35 }}
-            className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tight text-white leading-[1.12]"
+            transition={{ duration: 0.7, delay: 0.3 }}
+            className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.15] break-words"
           >
             {lang === 'id' ? 'Google Drive Gateway, CDN & ' : 'Google Drive Gateway, CDN & '}
-            <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent block sm:inline">
               {lang === 'id' ? 'Streaming Tanpa Batas' : 'Unlimited Streaming'}
             </span>
           </motion.h1>
 
+          {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="mx-auto max-w-3xl text-sm sm:text-lg text-slate-300 font-medium leading-relaxed px-2"
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="mx-auto max-w-3xl text-xs sm:text-base md:text-lg text-slate-300 font-medium leading-relaxed px-1 sm:px-2"
           >
             {lang === 'id'
               ? 'Gabungkan kuota beberapa akun Google Drive menjadi satu pool penyimpanan besar. Streaming video resolusi tinggi tanpa buffering (HTTP 206), sajikan aset gambar landing page via direct CDN link, dan unggah langsung tanpa menyentuh disk server fisik.'
               : 'Unify multiple Google Drive accounts into one massive cloud storage cluster. Stream HD videos buffer-free (HTTP 206), deliver landing page media via direct CDN links, and upload directly without consuming server disk space.'}
           </motion.p>
 
+          {/* CTA Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.65 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2"
+            transition={{ duration: 0.7, delay: 0.6 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full max-w-xs sm:max-w-none mx-auto"
           >
             <RouterLink to="/register" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto h-12 px-8 text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/25 transition-all rounded-xl flex items-center justify-center gap-2 ring-1 ring-white/20">
+              <Button className="w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-8 text-xs sm:text-sm font-extrabold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-xl shadow-blue-500/25 transition-all rounded-xl flex items-center justify-center gap-2 ring-1 ring-white/20">
                 <span>{lang === 'id' ? 'Mulai Gratis Sekarang' : 'Start Free Today'}</span>
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </RouterLink>
             <a href="#how-it-works" className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto h-12 px-7 text-sm font-extrabold border border-slate-700 bg-slate-900/90 text-white hover:bg-slate-800 transition-all rounded-xl">
+              <Button variant="outline" className="w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-7 text-xs sm:text-sm font-extrabold border border-slate-700 bg-slate-900/90 text-white hover:bg-slate-800 transition-all rounded-xl">
                 {lang === 'id' ? 'Pelajari Cara Kerja' : 'See How It Works'}
               </Button>
             </a>
@@ -500,26 +504,30 @@ print('Uploaded:', r.json())`
 
           {/* ── LIVE INTERACTIVE PRODUCT MOCKUP / DASHBOARD PREVIEW ── */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 35 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.8 }}
-            className="mt-10 mx-auto max-w-5xl rounded-3xl border border-slate-700/80 bg-slate-950/90 shadow-[0_20px_50px_rgba(37,99,235,0.15)] backdrop-blur-2xl overflow-hidden text-left"
+            transition={{ duration: 0.8, delay: 0.75 }}
+            className="mt-8 sm:mt-10 mx-auto w-full max-w-5xl rounded-2xl sm:rounded-3xl border border-slate-800/90 bg-slate-950/90 shadow-[0_20px_50px_rgba(37,99,235,0.15)] backdrop-blur-2xl overflow-hidden text-left"
           >
             {/* Mockup Header Bar */}
-            <div className="flex items-center justify-between border-b border-slate-800/90 bg-slate-900/70 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 rounded-full bg-red-500/80" />
-                <div className="h-3 w-3 rounded-full bg-amber-500/80" />
-                <div className="h-3 w-3 rounded-full bg-emerald-500/80" />
-                <span className="ml-2 text-xs font-mono font-bold text-slate-400">drive9.wn-cdn.net/dashboard</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/90 bg-slate-900/80 p-3 sm:px-4 sm:py-3 gap-2.5">
+              <div className="flex items-center justify-between sm:justify-start gap-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-red-500/80" />
+                  <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-amber-500/80" />
+                  <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-500/80" />
+                </div>
+                <span className="text-[11px] sm:text-xs font-mono font-bold text-slate-400 truncate max-w-[200px] sm:max-w-none">
+                  drive9.wn-cdn.net/dashboard
+                </span>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0">
                 <button
                   type="button"
                   onClick={() => setMockActiveTab('files')}
                   className={cn(
-                    'px-2.5 py-1 text-xs rounded-lg font-bold transition-colors',
-                    mockActiveTab === 'files' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'
+                    'whitespace-nowrap px-2.5 py-1 text-[11px] sm:text-xs rounded-lg font-bold transition-colors shrink-0',
+                    mockActiveTab === 'files' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white bg-slate-950/40'
                   )}
                 >
                   {lang === 'id' ? 'Virtual Folder' : 'Virtual Folders'}
@@ -528,8 +536,8 @@ print('Uploaded:', r.json())`
                   type="button"
                   onClick={() => setMockActiveTab('stream')}
                   className={cn(
-                    'px-2.5 py-1 text-xs rounded-lg font-bold transition-colors',
-                    mockActiveTab === 'stream' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
+                    'whitespace-nowrap px-2.5 py-1 text-[11px] sm:text-xs rounded-lg font-bold transition-colors shrink-0',
+                    mockActiveTab === 'stream' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white bg-slate-950/40'
                   )}
                 >
                   {lang === 'id' ? 'Stream Player' : 'Stream Player'}
@@ -538,8 +546,8 @@ print('Uploaded:', r.json())`
                   type="button"
                   onClick={() => setMockActiveTab('quota')}
                   className={cn(
-                    'px-2.5 py-1 text-xs rounded-lg font-bold transition-colors',
-                    mockActiveTab === 'quota' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+                    'whitespace-nowrap px-2.5 py-1 text-[11px] sm:text-xs rounded-lg font-bold transition-colors shrink-0',
+                    mockActiveTab === 'quota' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-white bg-slate-950/40'
                   )}
                 >
                   {lang === 'id' ? 'Pool Multi-Akun' : 'Multi-Drive Pool'}
@@ -548,69 +556,69 @@ print('Uploaded:', r.json())`
             </div>
 
             {/* Mockup Body Content */}
-            <div className="p-4 sm:p-6 space-y-4">
+            <div className="p-3.5 sm:p-6 space-y-3.5 sm:space-y-4">
               {mockActiveTab === 'files' && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400 pb-2 border-b border-slate-800">
-                    <span className="font-bold text-slate-200">/ 9drive / landingpage-assets /</span>
-                    <span className="text-emerald-400 font-mono font-semibold">● 3 Akun Terhubung (45 GB Total)</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] sm:text-xs text-slate-400 pb-2 border-b border-slate-800">
+                    <span className="font-bold text-slate-200 truncate">/ 9drive / landingpage-assets /</span>
+                    <span className="text-emerald-400 font-mono font-semibold shrink-0">● 3 Akun (45 GB Total)</span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <Video className="h-5 w-5 text-purple-400" />
-                        <div>
-                          <p className="text-xs font-bold text-slate-200">demo-hero-4k.mp4</p>
-                          <p className="text-[10px] text-slate-400">142 MB • HTTP 206 Ready</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3">
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <Video className="h-5 w-5 text-purple-400 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-200 truncate">demo-hero-4k.mp4</p>
+                          <p className="text-[10px] text-slate-400">142 MB • HTTP 206</p>
                         </div>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 font-mono font-bold">CDN Stream</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 font-mono font-bold shrink-0">CDN Stream</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <Globe className="h-5 w-5 text-blue-400" />
-                        <div>
-                          <p className="text-xs font-bold text-slate-200">banner-promo.webp</p>
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <Globe className="h-5 w-5 text-blue-400 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-200 truncate">banner-promo.webp</p>
                           <p className="text-[10px] text-slate-400">1.2 MB • Edge Cached</p>
                         </div>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 font-mono font-bold">Direct URL</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 font-mono font-bold shrink-0">Direct URL</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
-                        <Database className="h-5 w-5 text-emerald-400" />
-                        <div>
-                          <p className="text-xs font-bold text-slate-200">db-backup-daily.sql.gz</p>
-                          <p className="text-[10px] text-slate-400">850 MB • Scoped API Upload</p>
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 flex items-center justify-between gap-2 min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <Database className="h-5 w-5 text-emerald-400 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-slate-200 truncate">db-backup.sql.gz</p>
+                          <p className="text-[10px] text-slate-400">850 MB • Scoped API</p>
                         </div>
                       </div>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 font-mono font-bold">AES-256</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 font-mono font-bold shrink-0">AES-256</span>
                     </div>
                   </div>
                 </div>
               )}
 
               {mockActiveTab === 'stream' && (
-                <div className="p-4 rounded-2xl bg-slate-900/90 border border-purple-500/30 flex flex-col sm:flex-row items-center gap-4">
-                  <div className="h-28 w-full sm:w-48 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center relative overflow-hidden group">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-900/90 border border-purple-500/30 flex flex-col sm:flex-row items-center sm:items-start gap-3.5 sm:gap-4">
+                  <div className="h-32 sm:h-28 w-full sm:w-48 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center relative overflow-hidden group shrink-0">
                     <div className="h-10 w-10 rounded-full bg-purple-600/90 text-white flex items-center justify-center shadow-lg">
                       <Play className="h-5 w-5 ml-0.5" />
                     </div>
                     <span className="absolute bottom-1 right-2 text-[9px] font-mono bg-black/80 px-1.5 py-0.5 rounded text-white">04:30 / 1080p</span>
                   </div>
-                  <div className="space-y-1.5 text-xs text-left">
-                    <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-white text-sm">HTTP 206 Range Request Active</span>
+                  <div className="space-y-1.5 text-xs text-left min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-extrabold text-white text-sm">HTTP 206 Range Active</span>
                       <span className="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-300 rounded font-mono font-bold">Zero Buffering</span>
                     </div>
-                    <p className="text-slate-300">
+                    <p className="text-slate-300 text-xs leading-relaxed">
                       {lang === 'id'
                         ? 'Pengguna dapat melompat (seek) ke bagian video mana saja. Server hanya mengalirkan chunk byte yang diminta secara instan tanpa mengunduh keseluruhan file.'
                         : 'Instant timestamp seeking without downloading full files. Streams only the requested byte chunk over standard HTTP Range headers.'}
                     </p>
-                    <code className="text-[10px] text-purple-300 font-mono bg-slate-950 px-2 py-0.5 rounded block">
+                    <code className="text-[10px] text-purple-300 font-mono bg-slate-950 px-2 py-1 rounded block overflow-x-auto no-scrollbar">
                       Range: bytes=1048576-2097151 ➔ 206 Partial Content
                     </code>
                   </div>
@@ -618,8 +626,8 @@ print('Uploaded:', r.json())`
               )}
 
               {mockActiveTab === 'quota' && (
-                <div className="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-3">
-                  <div className="flex items-center justify-between text-xs">
+                <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
                     <span className="font-bold text-white">Smart Upload Routing Engine</span>
                     <span className="text-emerald-400 font-mono font-bold">Total Pool: 45 GB (11.2 GB Used)</span>
                   </div>
@@ -646,12 +654,12 @@ print('Uploaded:', r.json())`
 
           {/* 4 Feature Badges */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-10 border-t border-slate-800/80 text-left"
+            transition={{ duration: 0.7, delay: 0.9 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pt-8 sm:pt-10 border-t border-slate-800/80 text-left"
           >
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-blue-500/40 transition-colors">
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-blue-500/40 transition-colors">
               <div className="flex items-center gap-2 text-blue-400 font-bold text-sm mb-1.5">
                 <Globe className="h-4 w-4 shrink-0" />
                 <span>{lang === 'id' ? 'Host CDN Landing Page' : 'Landing Page CDN Host'}</span>
@@ -660,7 +668,7 @@ print('Uploaded:', r.json())`
                 {lang === 'id' ? 'Sajikan gambar, dokumen & aset statis landing page via link publik cepat.' : 'Serve landing page images, docs & static media assets via fast public URLs.'}
               </p>
             </div>
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-purple-500/40 transition-colors">
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-purple-500/40 transition-colors">
               <div className="flex items-center gap-2 text-purple-400 font-bold text-sm mb-1.5">
                 <Video className="h-4 w-4 shrink-0" />
                 <span>{lang === 'id' ? 'Streaming HTTP 206' : 'HTTP 206 Streaming'}</span>
@@ -669,7 +677,7 @@ print('Uploaded:', r.json())`
                 {lang === 'id' ? 'Putar video MP4 & audio tanpa buffering dan bisa seek ke detik mana saja.' : 'Instant zero-buffer MP4 video and audio playback with timestamp seeking.'}
               </p>
             </div>
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-emerald-500/40 transition-colors">
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-emerald-500/40 transition-colors">
               <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm mb-1.5">
                 <Layers className="h-4 w-4 shrink-0" />
                 <span>{lang === 'id' ? 'Pool Multi-Akun' : 'Multi-Account Pool'}</span>
@@ -678,7 +686,7 @@ print('Uploaded:', r.json())`
                 {lang === 'id' ? 'Gabungkan kapasitas beberapa akun Google Drive secara otomatis dengan load balancer.' : 'Aggregate multi-account Google Drive storage with intelligent load balancing.'}
               </p>
             </div>
-            <div className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-amber-500/40 transition-colors">
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/40 border border-slate-800/80 backdrop-blur-md hover:border-amber-500/40 transition-colors">
               <div className="flex items-center gap-2 text-amber-400 font-bold text-sm mb-1.5">
                 <KeyRound className="h-4 w-4 shrink-0" />
                 <span>{lang === 'id' ? 'REST API Developer' : 'REST API Gateway'}</span>
@@ -692,14 +700,14 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 1: HOW IT WORKS (3-Step Workflow) ────────────────────────────── */}
-      <section id="how-it-works" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+      <section id="how-it-works" className="py-14 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-10 sm:space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">
               <Sparkles className="h-4 w-4" />
               <span>{lang === 'id' ? 'Sederhana & Cepat' : 'Simple & Instant'}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
               {lang === 'id' ? 'Cara Kerja drive9 dalam 3 Langkah Mudah' : 'How drive9 Works in 3 Easy Steps'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm">
@@ -707,12 +715,12 @@ print('Uploaded:', r.json())`
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="relative p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-4">
-              <div className="h-12 w-12 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-black text-lg">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
+            <div className="relative p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-3.5 sm:space-y-4">
+              <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center font-black text-lg">
                 1
               </div>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-lg sm:text-xl font-bold text-white">
                 {lang === 'id' ? 'Hubungkan Akun Google Drive' : 'Connect Google Drive Accounts'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -722,11 +730,11 @@ print('Uploaded:', r.json())`
               </p>
             </div>
 
-            <div className="relative p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-indigo-500/40 transition-all duration-300 space-y-4">
-              <div className="h-12 w-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-black text-lg">
+            <div className="relative p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-indigo-500/40 transition-all duration-300 space-y-3.5 sm:space-y-4">
+              <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-black text-lg">
                 2
               </div>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-lg sm:text-xl font-bold text-white">
                 {lang === 'id' ? 'Unggah File via Direct Streaming' : 'Upload Files via Direct Streaming'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -736,11 +744,11 @@ print('Uploaded:', r.json())`
               </p>
             </div>
 
-            <div className="relative p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-4">
-              <div className="h-12 w-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center font-black text-lg">
+            <div className="relative p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-3.5 sm:space-y-4">
+              <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center font-black text-lg">
                 3
               </div>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-lg sm:text-xl font-bold text-white">
                 {lang === 'id' ? 'Sematkan CDN & Stream Video' : 'Embed CDN & Stream Media'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -754,14 +762,14 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 2: INTERACTIVE STORAGE CALCULATOR ────────────────────────────── */}
-      <section id="calculator" className="py-16 sm:py-24 border-t border-slate-800/80 bg-gradient-to-b from-[#030712] via-slate-950 to-[#030712] relative">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-10">
+      <section id="calculator" className="py-14 sm:py-24 border-t border-slate-800/80 bg-gradient-to-b from-[#030712] via-slate-950 to-[#030712] relative">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-8 sm:space-y-10">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-400">
               <Calculator className="h-4 w-4" />
               <span>{lang === 'id' ? 'Simulasi Kapasitas & Hemat Biaya' : 'Storage Simulation & Savings'}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
               {lang === 'id' ? 'Kalkulator Kuota Multi-Akun Google Drive' : 'Multi-Account Storage Calculator'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm">
@@ -771,14 +779,14 @@ print('Uploaded:', r.json())`
             </p>
           </div>
 
-          <div className="p-8 sm:p-10 rounded-3xl border-2 border-emerald-500/30 bg-slate-900/90 shadow-2xl backdrop-blur-xl space-y-8">
+          <div className="p-5 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border-2 border-emerald-500/30 bg-slate-900/90 shadow-2xl backdrop-blur-xl space-y-6 sm:space-y-8">
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <label htmlFor="account-slider" className="text-sm font-bold text-white flex items-center gap-2">
-                  <HardDrive className="h-4 w-4 text-emerald-400" />
+              <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2">
+                <label htmlFor="account-slider" className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+                  <HardDrive className="h-4 w-4 text-emerald-400 shrink-0" />
                   <span>{lang === 'id' ? 'Jumlah Akun Google Drive Terhubung:' : 'Connected Google Drive Accounts:'}</span>
                 </label>
-                <span className="text-xl font-black font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-xl">
+                <span className="self-start xs:self-auto text-lg sm:text-xl font-black font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-0.5 sm:py-1 rounded-xl">
                   {accountCount} {lang === 'id' ? 'Akun' : 'Accounts'}
                 </span>
               </div>
@@ -791,26 +799,26 @@ print('Uploaded:', r.json())`
                 onChange={(e) => setAccountCount(Number(e.target.value))}
                 className="w-full h-3 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-emerald-500"
               />
-              <div className="flex justify-between text-[11px] font-mono text-slate-500">
-                <span>1 Akun (15 GB)</span>
-                <span>5 Akun (75 GB)</span>
-                <span>10 Akun (150 GB)</span>
-                <span>20 Akun (300 GB)</span>
+              <div className="flex justify-between text-[10px] sm:text-xs font-mono text-slate-500">
+                <span>1 (15 GB)</span>
+                <span>5 (75 GB)</span>
+                <span>10 (150 GB)</span>
+                <span>20 (300 GB)</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-slate-800">
-              <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-slate-800">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
                 <span className="text-xs font-semibold text-slate-400">{lang === 'id' ? 'Total Kapasitas Cloud Pool' : 'Total Cloud Storage Pool'}</span>
-                <p className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
+                <p className="text-2xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">
                   {totalStorageGb} GB
                 </p>
                 <span className="text-[10px] text-emerald-400 font-medium">{lang === 'id' ? '100% Gratis Tanpa Batas Waktu' : '100% Free Forever'}</span>
               </div>
 
-              <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center space-y-1">
                 <span className="text-xs font-semibold text-slate-400">{lang === 'id' ? 'Estimasi Biaya S3 / Wasabi' : 'Est. AWS S3 / Wasabi Cost'}</span>
-                <p className="text-3xl sm:text-4xl font-black text-rose-400 line-through">
+                <p className="text-2xl sm:text-4xl font-black text-rose-400 line-through">
                   ${estimatedS3Monthly} <span className="text-xs font-normal text-slate-400">/ bln</span>
                 </p>
                 <span className="text-[10px] text-emerald-400 font-bold">{lang === 'id' ? 'Hemat 100% dengan drive9' : 'Save 100% with drive9'}</span>
@@ -821,14 +829,14 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 3: CDN & STREAMING MEDIA SHOWCASE ────────────────────────────── */}
-      <section id="cdn-streaming" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/40 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-4">
+      <section id="cdn-streaming" className="py-14 sm:py-24 border-t border-slate-800/80 bg-slate-950/40 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-10 sm:space-y-12">
+          <div className="text-center max-w-3xl mx-auto space-y-3 sm:space-y-4">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-400">
               <Sparkles className="h-4 w-4" />
               <span>{lang === 'id' ? 'Keunggulan Utama Media Web' : 'Web Media Advantages'}</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-black text-white leading-tight">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
               {lang === 'id' ? 'Solusi CDN, Streaming Video & Hosting Aset Media Web' : 'CDN, Video Streaming & Web Asset Hosting Solutions'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-base leading-relaxed">
@@ -838,26 +846,26 @@ print('Uploaded:', r.json())`
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             {/* CDN Feature Box */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="p-8 rounded-3xl border border-blue-500/30 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-300 space-y-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
+              className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-blue-500/30 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-300 space-y-5 sm:space-y-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
             >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Globe className="h-32 w-32 text-blue-400" />
+              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                <Globe className="h-28 sm:h-32 w-28 sm:w-32 text-blue-400" />
               </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                <Globe className="h-7 w-7" />
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                <Globe className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
               <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20">
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-blue-400 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/20 inline-block">
                   {lang === 'id' ? 'Host Aset CDN & Landing Page' : 'CDN & Landing Page Asset Host'}
                 </span>
-                <h3 className="text-2xl font-black text-white">
+                <h3 className="text-xl sm:text-2xl font-black text-white">
                   {lang === 'id' ? 'Hosting Aset Landing Page & Website' : 'Landing Page & Website Asset Hosting'}
                 </h3>
               </div>
@@ -867,13 +875,13 @@ print('Uploaded:', r.json())`
                   : 'Serve hero banners, product photos, graphics, CSS, JS, and docs directly to your landing page or web app via permanent public URLs. Relieve your main server load using Google reliable bandwidth.'}
               </p>
               <div className="pt-2 flex flex-wrap gap-2 text-xs font-mono font-bold text-slate-300">
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-blue-300">
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-blue-300 text-[11px]">
                   {lang === 'id' ? 'Link Sematan Publik' : 'Public Embed Link'}
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-emerald-300">
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-emerald-300 text-[11px]">
                   {lang === 'id' ? 'URL Gambar Langsung' : 'Direct Image URL'}
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-purple-300">
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-purple-300 text-[11px]">
                   {lang === 'id' ? 'Proxy Edge Cepat' : 'Fast Edge Proxy'}
                 </span>
               </div>
@@ -885,19 +893,19 @@ print('Uploaded:', r.json())`
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.15 }}
-              className="p-8 rounded-3xl border border-purple-500/30 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-300 space-y-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
+              className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-purple-500/30 bg-slate-900/60 hover:bg-slate-900/90 transition-all duration-300 space-y-5 sm:space-y-6 shadow-2xl backdrop-blur-xl relative overflow-hidden group"
             >
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Film className="h-32 w-32 text-purple-400" />
+              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
+                <Film className="h-28 sm:h-32 w-28 sm:w-32 text-purple-400" />
               </div>
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                <Video className="h-7 w-7" />
+              <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                <Video className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
               <div className="space-y-2">
-                <span className="text-[11px] font-extrabold uppercase tracking-widest text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/20">
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-purple-400 bg-purple-500/10 px-2.5 py-0.5 rounded-full border border-purple-500/20 inline-block">
                   HTTP 206 Partial Content
                 </span>
-                <h3 className="text-2xl font-black text-white">
+                <h3 className="text-xl sm:text-2xl font-black text-white">
                   {lang === 'id' ? 'Streaming Video & Audio Tanpa Buffering' : 'Buffer-Free Video & Audio Streaming'}
                 </h3>
               </div>
@@ -907,13 +915,13 @@ print('Uploaded:', r.json())`
                   : 'Automated with HTTP Range request (206 Partial Content) support. Viewers can instantly stream HD videos (MP4, WebM) or audio podcasts on web players (Plyr / HTML5 Video) without waiting for whole downloads.'}
               </p>
               <div className="pt-2 flex flex-wrap gap-2 text-xs font-mono font-bold text-slate-300">
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-purple-300">
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-purple-300 text-[11px]">
                   HTTP 206 Range
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-blue-300">
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-blue-300 text-[11px]">
                   {lang === 'id' ? 'Siap Pemutar Plyr' : 'Plyr Player Ready'}
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-slate-950 border border-slate-800 text-emerald-300">
+                <span className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-emerald-300 text-[11px]">
                   {lang === 'id' ? 'Tanpa Buffering' : 'Zero Buffering'}
                 </span>
               </div>
@@ -923,14 +931,14 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 4: COMPARISON MATRIX (drive9 vs GDrive Standar vs AWS S3 vs Cloudinary) ─── */}
-      <section id="comparison" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-900/30 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+      <section id="comparison" className="py-14 sm:py-24 border-t border-slate-800/80 bg-slate-900/30 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-10 sm:space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-bold text-blue-400">
               <Layers className="h-4 w-4" />
               <span>{lang === 'id' ? 'Mengapa Memilih drive9' : 'Why Choose drive9'}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
               {lang === 'id' ? 'Tabel Perbandingan Fitur & Efisiensi' : 'Feature & Efficiency Comparison'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm">
@@ -938,76 +946,76 @@ print('Uploaded:', r.json())`
             </p>
           </div>
 
-          <div className="overflow-x-auto rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
-            <table className="w-full text-left text-xs sm:text-sm">
+          <div className="overflow-x-auto rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur-xl shadow-2xl">
+            <table className="w-full min-w-[620px] text-left text-xs sm:text-sm">
               <thead className="border-b border-slate-800 bg-slate-950/80 text-slate-300 font-bold">
                 <tr>
-                  <th className="p-4 sm:p-5">{lang === 'id' ? 'Fitur / Kebutuhan' : 'Feature / Capability'}</th>
-                  <th className="p-4 sm:p-5 text-blue-400 font-black text-base">drive9</th>
-                  <th className="p-4 sm:p-5 text-slate-400">Google Drive Biasa</th>
-                  <th className="p-4 sm:p-5 text-slate-400">AWS S3 / Wasabi</th>
-                  <th className="p-4 sm:p-5 text-slate-400">Cloudinary</th>
+                  <th className="p-3.5 sm:p-5">{lang === 'id' ? 'Fitur / Kebutuhan' : 'Feature / Capability'}</th>
+                  <th className="p-3.5 sm:p-5 text-blue-400 font-black text-sm sm:text-base">drive9</th>
+                  <th className="p-3.5 sm:p-5 text-slate-400">Google Drive Biasa</th>
+                  <th className="p-3.5 sm:p-5 text-slate-400">AWS S3 / Wasabi</th>
+                  <th className="p-3.5 sm:p-5 text-slate-400">Cloudinary</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-slate-300">
                 <tr className="hover:bg-slate-800/30">
-                  <td className="p-4 sm:p-5 font-semibold text-white">
+                  <td className="p-3.5 sm:p-5 font-semibold text-white">
                     {lang === 'id' ? 'Agregasi Kuota Multi-Akun' : 'Multi-Account Quota Aggregation'}
                   </td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? 'Otomatis & Cerdas' : 'Smart Auto'}</span>
+                  <td className="p-3.5 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4 shrink-0" /> <span>{lang === 'id' ? 'Otomatis & Cerdas' : 'Smart Auto'}</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
-                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
-                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                  <td className="p-3.5 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                  <td className="p-3.5 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                  <td className="p-3.5 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
                 </tr>
 
                 <tr className="hover:bg-slate-800/30">
-                  <td className="p-4 sm:p-5 font-semibold text-white">
+                  <td className="p-3.5 sm:p-5 font-semibold text-white">
                     {lang === 'id' ? 'Video Streaming HTTP 206 (Tanpa Buffering)' : 'HTTP 206 Video Streaming (Zero Buffer)'}
                   </td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? 'Bawaan (Range Request)' : 'Native Range'}</span>
+                  <td className="p-3.5 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4 shrink-0" /> <span>{lang === 'id' ? 'Bawaan (Range Request)' : 'Native Range'}</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-rose-400 text-xs">{lang === 'id' ? 'Sering Kena Limit/Download' : 'Quota Limited'}</td>
-                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Ya (Bayar Egress Mahal)' : 'Yes (Costly Egress)'}</td>
-                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Ya (Batas Kuota Ketat)' : 'Yes (Strict Limits)'}</td>
+                  <td className="p-3.5 sm:p-5 text-rose-400 text-xs">{lang === 'id' ? 'Sering Limit' : 'Quota Limited'}</td>
+                  <td className="p-3.5 sm:p-5 text-slate-300">{lang === 'id' ? 'Ya (Bayar Egress)' : 'Yes (Costly Egress)'}</td>
+                  <td className="p-3.5 sm:p-5 text-slate-300">{lang === 'id' ? 'Ya (Batas Kuota)' : 'Yes (Strict Limits)'}</td>
                 </tr>
 
                 <tr className="hover:bg-slate-800/30">
-                  <td className="p-4 sm:p-5 font-semibold text-white">
+                  <td className="p-3.5 sm:p-5 font-semibold text-white">
                     {lang === 'id' ? 'Zero Server Disk Storage (Streaming Langsung)' : 'Zero Server Disk Storage (Direct Stream)'}
                   </td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? '100% Dalam Memori' : '100% In-Memory'}</span>
+                  <td className="p-3.5 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4 shrink-0" /> <span>{lang === 'id' ? '100% Dalam Memori' : '100% In-Memory'}</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
-                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Perlu Konfigurasi SDK' : 'Needs SDK Config'}</td>
-                  <td className="p-4 sm:p-5 text-slate-300">{lang === 'id' ? 'Perlu SDK Khusus' : 'Requires SDK'}</td>
+                  <td className="p-3.5 sm:p-5 text-slate-500"><Minus className="h-4 w-4" /></td>
+                  <td className="p-3.5 sm:p-5 text-slate-300">{lang === 'id' ? 'Perlu Konfigurasi' : 'Needs Config'}</td>
+                  <td className="p-3.5 sm:p-5 text-slate-300">{lang === 'id' ? 'Perlu SDK Khusus' : 'Requires SDK'}</td>
                 </tr>
 
                 <tr className="hover:bg-slate-800/30">
-                  <td className="p-4 sm:p-5 font-semibold text-white">
+                  <td className="p-3.5 sm:p-5 font-semibold text-white">
                     {lang === 'id' ? 'Folder Virtual Tanpa Delay API' : 'Instant Virtual Folders (No API Delay)'}
                   </td>
-                  <td className="p-4 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
-                    <CheckIcon className="h-4 w-4" /> <span>{lang === 'id' ? 'Cepat via Database MySQL' : 'Fast MySQL Nested'}</span>
+                  <td className="p-3.5 sm:p-5 font-bold text-emerald-400 flex items-center gap-1.5">
+                    <CheckIcon className="h-4 w-4 shrink-0" /> <span>{lang === 'id' ? 'Cepat via MySQL' : 'Fast MySQL Nested'}</span>
                   </td>
-                  <td className="p-4 sm:p-5 text-slate-400">{lang === 'id' ? 'Folder Fisik Lambat' : 'Slow Physical Folders'}</td>
-                  <td className="p-4 sm:p-5 text-slate-400">{lang === 'id' ? 'Prefix Key S3' : 'Key Prefix Only'}</td>
-                  <td className="p-4 sm:p-5 text-slate-400">{lang === 'id' ? 'Tag / Folder Terbatas' : 'Limited Folders'}</td>
+                  <td className="p-3.5 sm:p-5 text-slate-400">{lang === 'id' ? 'Folder Fisik Lambat' : 'Slow Physical'}</td>
+                  <td className="p-3.5 sm:p-5 text-slate-400">{lang === 'id' ? 'Prefix Key S3' : 'Key Prefix Only'}</td>
+                  <td className="p-3.5 sm:p-5 text-slate-400">{lang === 'id' ? 'Tag Terbatas' : 'Limited Tags'}</td>
                 </tr>
 
                 <tr className="hover:bg-slate-800/30">
-                  <td className="p-4 sm:p-5 font-semibold text-white">
+                  <td className="p-3.5 sm:p-5 font-semibold text-white">
                     {lang === 'id' ? 'Biaya Berlangganan Dasar' : 'Base Subscription Cost'}
                   </td>
-                  <td className="p-4 sm:p-5 font-black text-emerald-400">
+                  <td className="p-3.5 sm:p-5 font-black text-emerald-400">
                     {lang === 'id' ? 'GRATIS (15GB/Akun)' : 'FREE (15GB/Account)'}
                   </td>
-                  <td className="p-4 sm:p-5 text-slate-300">Gratis (15GB Single)</td>
-                  <td className="p-4 sm:p-5 text-rose-400 font-mono">Bayar per GB + Egress</td>
-                  <td className="p-4 sm:p-5 text-rose-400 font-mono">Tier Gratis Cepat Habis</td>
+                  <td className="p-3.5 sm:p-5 text-slate-300">Gratis (15GB Single)</td>
+                  <td className="p-3.5 sm:p-5 text-rose-400 font-mono">Bayar per GB + Egress</td>
+                  <td className="p-3.5 sm:p-5 text-rose-400 font-mono">Tier Gratis Terbatas</td>
                 </tr>
               </tbody>
             </table>
@@ -1016,14 +1024,14 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 5: USE CASES & SOLUTIONS ────────────────────────────── */}
-      <section id="use-cases" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+      <section id="use-cases" className="py-14 sm:py-24 border-t border-slate-800/80 bg-slate-950/60 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-10 sm:space-y-12">
           <div className="text-center max-w-3xl mx-auto space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-xs font-bold text-purple-400">
               <Zap className="h-4 w-4" />
               <span>{lang === 'id' ? 'Kasus Penggunaan Riil' : 'Real-World Use Cases'}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
               {lang === 'id' ? 'Dirancang untuk Berbagai Kebutuhan Digital' : 'Engineered for Diverse Digital Workloads'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm">
@@ -1031,12 +1039,12 @@ print('Uploaded:', r.json())`
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-4">
-              <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
-                <Globe className="h-6 w-6" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
+            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-blue-500/40 transition-all duration-300 space-y-3.5 sm:space-y-4">
+              <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
+                <Globe className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-lg sm:text-xl font-bold text-white">
                 {lang === 'id' ? 'Web Developer & Pemilik Landing Page' : 'Web Developers & Landing Pages'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -1046,11 +1054,11 @@ print('Uploaded:', r.json())`
               </p>
             </div>
 
-            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-4">
-              <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
-                <Film className="h-6 w-6" />
+            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-purple-500/40 transition-all duration-300 space-y-3.5 sm:space-y-4">
+              <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+                <Film className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-lg sm:text-xl font-bold text-white">
                 {lang === 'id' ? 'Kreator Video & Podcast Streaming' : 'Video Creators & Podcast Streaming'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -1060,11 +1068,11 @@ print('Uploaded:', r.json())`
               </p>
             </div>
 
-            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-emerald-500/40 transition-all duration-300 space-y-4">
-              <div className="h-12 w-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
-                <Database className="h-6 w-6" />
+            <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900/80 hover:border-emerald-500/40 transition-all duration-300 space-y-3.5 sm:space-y-4">
+              <div className="h-11 w-11 sm:h-12 sm:w-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                <Database className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
-              <h3 className="text-xl font-bold text-white">
+              <h3 className="text-lg sm:text-xl font-bold text-white">
                 {lang === 'id' ? 'Otomatisasi Backup & Skrip Backend' : 'Automated Backups & Script Uploads'}
               </h3>
               <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
@@ -1078,14 +1086,14 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 6: INTERACTIVE API & CODE SNIPPETS ────────────────────────────── */}
-      <section className="py-16 sm:py-24 border-t border-slate-800/80 bg-[#030712] relative">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-10">
+      <section className="py-14 sm:py-24 border-t border-slate-800/80 bg-[#030712] relative">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 space-y-8 sm:space-y-10">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-xs font-bold text-amber-400">
               <Code2 className="h-4 w-4" />
               <span>{lang === 'id' ? 'Integrasi Cepat Pengembang' : 'Developer-First Integration'}</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
               {lang === 'id' ? 'Sematkan & Integrasikan dalam Hitungan Baris' : 'Embed & Integrate in Just a Few Lines'}
             </h2>
             <p className="text-slate-400 text-xs sm:text-sm">
@@ -1093,16 +1101,16 @@ print('Uploaded:', r.json())`
             </p>
           </div>
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-2xl">
+          <div className="rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden shadow-2xl">
             {/* Code Tabs Header */}
-            <div className="flex items-center justify-between border-b border-slate-800 bg-slate-900/80 px-4 sm:px-6 py-3">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800 bg-slate-900/80 p-3 sm:px-6 sm:py-3 gap-2.5">
+              <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar pb-0.5 sm:pb-0">
                 <button
                   type="button"
                   onClick={() => setActiveCodeTab('video')}
                   className={cn(
-                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
-                    activeCodeTab === 'video' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                    'whitespace-nowrap px-3 py-1.5 text-xs rounded-xl font-bold transition-all shrink-0',
+                    activeCodeTab === 'video' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white bg-slate-950/50'
                   )}
                 >
                   HTML Video (HTTP 206)
@@ -1111,8 +1119,8 @@ print('Uploaded:', r.json())`
                   type="button"
                   onClick={() => setActiveCodeTab('curl')}
                   className={cn(
-                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
-                    activeCodeTab === 'curl' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                    'whitespace-nowrap px-3 py-1.5 text-xs rounded-xl font-bold transition-all shrink-0',
+                    activeCodeTab === 'curl' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-400 hover:text-white bg-slate-950/50'
                   )}
                 >
                   cURL Upload
@@ -1121,8 +1129,8 @@ print('Uploaded:', r.json())`
                   type="button"
                   onClick={() => setActiveCodeTab('js')}
                   className={cn(
-                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
-                    activeCodeTab === 'js' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                    'whitespace-nowrap px-3 py-1.5 text-xs rounded-xl font-bold transition-all shrink-0',
+                    activeCodeTab === 'js' ? 'bg-amber-600 text-white shadow-sm' : 'text-slate-400 hover:text-white bg-slate-950/50'
                   )}
                 >
                   JavaScript / Fetch
@@ -1131,8 +1139,8 @@ print('Uploaded:', r.json())`
                   type="button"
                   onClick={() => setActiveCodeTab('python')}
                   className={cn(
-                    'px-3 py-1.5 text-xs rounded-xl font-bold transition-all',
-                    activeCodeTab === 'python' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                    'whitespace-nowrap px-3 py-1.5 text-xs rounded-xl font-bold transition-all shrink-0',
+                    activeCodeTab === 'python' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-white bg-slate-950/50'
                   )}
                 >
                   Python
@@ -1143,7 +1151,7 @@ print('Uploaded:', r.json())`
                 variant="ghost"
                 size="sm"
                 onClick={() => copySnippet(codeSnippets[activeCodeTab])}
-                className="h-8 px-2.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg gap-1.5"
+                className="self-end sm:self-auto shrink-0 h-8 px-2.5 text-xs text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg gap-1.5"
               >
                 {copiedCode ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copiedCode ? (lang === 'id' ? 'Tersalin!' : 'Copied!') : (lang === 'id' ? 'Salin Kode' : 'Copy Code')}</span>
@@ -1151,7 +1159,7 @@ print('Uploaded:', r.json())`
             </div>
 
             {/* Code Content */}
-            <div className="p-4 sm:p-6 overflow-x-auto">
+            <div className="p-3.5 sm:p-6 overflow-x-auto">
               <pre className="font-mono text-xs sm:text-sm text-blue-300 leading-relaxed">
                 <code>{codeSnippets[activeCodeTab]}</code>
               </pre>
@@ -1161,9 +1169,9 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 7: SECURITY & GOOGLE OAUTH TRANSPARENCY ────────────────────────────── */}
-      <section id="security" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/40 relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
-          <div className="space-y-5">
+      <section id="security" className="py-14 sm:py-24 border-t border-slate-800/80 bg-slate-950/40 relative">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="space-y-4 sm:space-y-5">
             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3.5 py-1 text-xs font-bold text-emerald-400">
               <ShieldCheck className="h-4 w-4" />
               <span>{lang === 'id' ? 'Keamanan & Privasi OAuth Google' : 'Google OAuth Security & Privacy'}</span>
@@ -1197,7 +1205,7 @@ print('Uploaded:', r.json())`
             </ul>
           </div>
 
-          <div className="p-6 sm:p-8 rounded-3xl border border-slate-800 bg-slate-900/80 space-y-6 shadow-2xl backdrop-blur-xl">
+          <div className="p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-800 bg-slate-900/80 space-y-5 sm:space-y-6 shadow-2xl backdrop-blur-xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div className="flex items-center gap-2">
                 <Server className="h-4 w-4 text-blue-400" />
@@ -1205,14 +1213,14 @@ print('Uploaded:', r.json())`
               </div>
               <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">drive9 Gateway</span>
             </div>
-            <div className="space-y-4 text-xs">
+            <div className="space-y-3.5 sm:space-y-4 text-xs">
               <div>
                 <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Nama Aplikasi Resmi:' : 'Official App Name:'}</p>
                 <p className="font-mono text-blue-400 text-sm font-black">drive9</p>
               </div>
               <div>
                 <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Target Scope Google Drive:' : 'Target Google Scope:'}</p>
-                <p className="font-mono text-purple-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 break-all">https://www.googleapis.com/auth/drive</p>
+                <p className="font-mono text-purple-300 bg-slate-950 p-2.5 rounded-lg border border-slate-800 break-all text-[11px] sm:text-xs">https://www.googleapis.com/auth/drive</p>
               </div>
               <div>
                 <p className="font-bold text-slate-400 mb-1">{lang === 'id' ? 'Tujuan Folder Penyimpanan:' : 'Target Storage Folder:'}</p>
@@ -1238,8 +1246,8 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 8: FAQ (16 Frequently Asked Questions) ─────────────── */}
-      <section id="faq" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-950/40">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-10 sm:space-y-12">
+      <section id="faq" className="py-14 sm:py-24 border-t border-slate-800/80 bg-slate-950/40">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 space-y-8 sm:space-y-12">
           <div className="text-center space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-purple-500/30 bg-purple-500/10 px-3.5 py-1 text-xs font-bold text-purple-400">
               <HelpCircle className="h-4 w-4" />
@@ -1251,11 +1259,11 @@ print('Uploaded:', r.json())`
             </p>
           </div>
 
-          <div className="space-y-3.5 sm:space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="rounded-2xl border border-slate-800/80 bg-slate-900/60 overflow-hidden transition-all duration-200"
+                className="rounded-xl sm:rounded-2xl border border-slate-800/80 bg-slate-900/60 overflow-hidden transition-all duration-200"
               >
                 <button
                   type="button"
@@ -1263,17 +1271,17 @@ print('Uploaded:', r.json())`
                   aria-expanded={openFaq === idx}
                   aria-controls={`faq-answer-${idx}`}
                   id={`faq-button-${idx}`}
-                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 sm:gap-4 font-bold text-xs sm:text-sm text-slate-100 hover:text-blue-400 transition-colors cursor-pointer"
+                  className="w-full p-3.5 sm:p-5 text-left flex items-start justify-between gap-3 sm:gap-4 font-bold text-xs sm:text-sm text-slate-100 hover:text-blue-400 transition-colors cursor-pointer"
                 >
-                  <span className="flex items-center gap-2.5 sm:gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 text-xs font-mono font-bold border border-blue-500/20">
+                  <span className="flex items-start gap-2.5 sm:gap-3 flex-1 min-w-0">
+                    <span className="flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 text-[11px] sm:text-xs font-mono font-bold border border-blue-500/20 mt-0.5">
                       {idx + 1}
                     </span>
-                    <span>{faq.q}</span>
+                    <span className="leading-snug">{faq.q}</span>
                   </span>
                   <ChevronDown
                     className={cn(
-                      'h-4 w-4 text-slate-400 shrink-0 transition-transform duration-300',
+                      'h-4 w-4 text-slate-400 shrink-0 transition-transform duration-300 mt-1',
                       openFaq === idx ? 'rotate-180 text-blue-400' : ''
                     )}
                   />
@@ -1291,7 +1299,7 @@ print('Uploaded:', r.json())`
                       transition={{ duration: 0.3, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <div className="px-4 sm:px-5 pb-4 sm:pb-5 pt-1 text-xs text-slate-300 leading-relaxed border-t border-slate-800/50">
+                      <div className="px-3.5 sm:px-5 pb-4 sm:pb-5 pt-1 text-xs text-slate-300 leading-relaxed border-t border-slate-800/50">
                         {faq.a}
                       </div>
                     </motion.div>
@@ -1304,25 +1312,25 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 9: CALL TO ACTION BANNER ──────────────────────────────────── */}
-      <section className="py-16 sm:py-20 border-t border-slate-800/80 bg-gradient-to-b from-slate-950 via-[#030712] to-blue-950/40 relative overflow-hidden">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6 relative z-10">
-          <div className="flex h-14 w-14 sm:h-16 sm:w-16 mx-auto items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
-            <Zap className="h-7 w-7 sm:h-8 sm:w-8" />
+      <section className="py-14 sm:py-20 border-t border-slate-800/80 bg-gradient-to-b from-slate-950 via-[#030712] to-blue-950/40 relative overflow-hidden">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-5 sm:space-y-6 relative z-10">
+          <div className="flex h-12 w-12 sm:h-16 sm:w-16 mx-auto items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 ring-1 ring-white/20">
+            <Zap className="h-6 w-6 sm:h-8 sm:w-8" />
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-white">
             {lang === 'id' ? 'Siap Menggunakan drive9 Gateway CDN & Storage?' : 'Ready to Use drive9 CDN & Storage Gateway?'}
           </h2>
-          <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto">
+          <p className="text-slate-400 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
             {lang === 'id' ? 'Hubungkan akun Google Drive Anda dalam hitungan detik dan mulai nikmati pengalaman manajemen penyimpanan cloud, hosting aset CDN & streaming video modern.' : 'Connect your Google Drive accounts in seconds and start enjoying a modern cloud storage management, CDN asset hosting & video streaming experience.'}
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full max-w-xs sm:max-w-none mx-auto">
             <RouterLink to="/login" className="w-full sm:w-auto">
-              <Button className="w-full sm:w-auto h-12 px-8 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 rounded-xl">
+              <Button className="w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-8 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/25 rounded-xl">
                 {lang === 'id' ? 'Masuk dengan Google' : 'Sign In with Google'}
               </Button>
             </RouterLink>
             <RouterLink to="/register" className="w-full sm:w-auto">
-              <Button variant="outline" className="w-full sm:w-auto h-12 px-8 text-xs font-bold border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 rounded-xl">
+              <Button variant="outline" className="w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-8 text-xs font-bold border border-slate-700 bg-slate-900 text-white hover:bg-slate-800 rounded-xl">
                 {lang === 'id' ? 'Daftar Akun Gratis' : 'Create Free Account'}
               </Button>
             </RouterLink>
@@ -1331,15 +1339,15 @@ print('Uploaded:', r.json())`
       </section>
 
       {/* ── SECTION 10: FOOTER ────────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-800/80 bg-[#030712] py-10 text-xs text-slate-500">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+      <footer className="border-t border-slate-800/80 bg-[#030712] py-8 sm:py-10 text-xs text-slate-500">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 text-center md:text-left">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="drive9 logo" width="32" height="32" loading="lazy" className="h-8 w-8 rounded-lg object-contain bg-slate-900/80 p-0.5" />
+            <img src="/logo.png" alt="drive9 logo" width="32" height="32" loading="lazy" className="h-8 w-8 rounded-lg object-contain bg-slate-900/80 p-0.5 shrink-0" />
             <span className="font-extrabold text-white text-sm">drive9</span>
             <span>© 2026 drive9. All rights reserved.</span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-semibold">
+          <div className="flex flex-wrap items-center justify-center gap-3.5 sm:gap-6 font-semibold">
             <a href="#how-it-works" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Cara Kerja' : 'How It Works'}</a>
             <a href="#calculator" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'Kalkulator' : 'Calculator'}</a>
             <a href="#cdn-streaming" className="hover:text-slate-300 transition-colors">{lang === 'id' ? 'CDN & Streaming' : 'CDN & Streaming'}</a>
