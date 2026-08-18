@@ -30,10 +30,10 @@ systemRouter.post('/ip-whitelist', requireAuth, (req, res) => {
   return res.json({ status: 'success', message: result.message, ips: result.ips })
 })
 
-systemRouter.delete('/ip-whitelist', requireAuth, (req, res) => {
-  const { ip } = req.body ?? {}
-  if (!ip || typeof ip !== 'string') {
-    return res.status(400).json({ code: 'BAD_REQUEST', message: 'IP address string is required.' })
+systemRouter.delete('/ip-whitelist/:ip', requireAuth, (req, res) => {
+  const ip = String(req.params.ip || '').trim()
+  if (!ip) {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: 'IP address is required.' })
   }
   const result = removeWhitelistedIp(ip)
   if (!result.success) {

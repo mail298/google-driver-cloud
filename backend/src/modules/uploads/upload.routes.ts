@@ -346,7 +346,9 @@ export async function handleUpload(req: AuthRequest, res: Response, next: NextFu
       if (name === 'mimeType') fields.mimeType = value
       if (name === 'folderId') fields.folderId = value
       if (name === 'folderPath' || name === 'folderName') fields.folderPath = value
-      if (name === 'filesMeta') batchMeta = parseBatchMeta(value)
+      if (name === 'filesMeta') {
+        try { batchMeta = parseBatchMeta(value) } catch { /* ignore malformed filesMeta JSON */ }
+      }
     })
 
     busboy.on('file', (name, fileStream, info) => {

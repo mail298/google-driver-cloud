@@ -5,8 +5,8 @@ let isPollingStarted = false
 let lastUpdateId = 0
 
 export function startTelegramBotListener() {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN || (env as any).TELEGRAM_BOT_TOKEN
-  const chatId = process.env.TELEGRAM_CHAT_ID || (env as any).TELEGRAM_CHAT_ID || ''
+  const botToken = env.TELEGRAM_BOT_TOKEN
+  const chatId = env.TELEGRAM_CHAT_ID || ''
 
   if (!botToken) {
     console.log('[TELEGRAM_BOT] TELEGRAM_BOT_TOKEN not configured. Telegram bot listener disabled.')

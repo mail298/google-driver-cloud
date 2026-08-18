@@ -138,6 +138,8 @@ Backend conventions:
 - Google sign-in/register uses one-time auth handoff tokens; never send app tokens through URL params.
 - Email/password registration verifies reCAPTCHA only when `RECAPTCHA_SECRET_KEY` is configured.
 - Apply `authRateLimit` to all `/auth` routes; `publicApiRateLimit` to `/api` routes.
+- Read Telegram config via `env.TELEGRAM_BOT_TOKEN` / `env.TELEGRAM_CHAT_ID` — do not double-read with `process.env` fallback; `env` is already the parsed and validated source of truth.
+- Always wrap `JSON.parse` calls inside busboy `field` event handlers in try/catch — busboy event errors are not caught by the outer route try/catch.
 
 Security rules:
 - Never commit `.env` files or secrets.
@@ -292,12 +294,16 @@ Google connected accounts:
 Storage:
 - `GET /storage/summary`
 - `GET /storage/breakdown`
+- `GET /storage/routing-policy`
+- `PATCH /storage/routing-policy`
 
 Folders:
 - `GET /folders?parentId=<id>`
 - `GET /folders?all=1`
 - `GET /folders/recent?limit=4`
 - `POST /folders`
+- `PATCH /folders/batch` (batch move — body: `{ folderIds, parentId }`)
+- `DELETE /folders/batch` (batch delete with cascade — body: `{ folderIds }`)
 - `PATCH /folders/:id`
 - `DELETE /folders/:id`
 
@@ -308,19 +314,22 @@ Files:
 - `GET /files?kind=<image|video|pdf|doc|archive>`
 - `GET /files?accountId=<id>&minSize=<bytes>&maxSize=<bytes>&startDate=<iso>&endDate=<iso>`
 - `GET /files/shared-links`
+- `GET /files/trash`
 - `GET /files/:id`
 - `PATCH /files/:id`
-- `PATCH /files/batch`
-- `DELETE /files/batch`
+- `PATCH /files/batch` (batch move — body: `{ fileIds, folderId }`)
+- `DELETE /files/batch` (batch hard delete from provider + DB)
+- `POST /files/batch/restore` (restore from trash — body: `{ fileIds }`)
+- `DELETE /files/batch/permanent` (permanent delete from trash — body: `{ fileIds }`)
 - `POST /files/sync-google`
-- `POST /files/batch-download` (returns ZIP)
+- `POST /files/batch-download` (returns ZIP — body: `{ fileIds }`)
 - `POST /files/:id/share`
 - `DELETE /files/:id/share`
 - `POST /files/:id/preview-token`
-- `POST /files/:id/public-permission`
+- `POST /files/:id/public-permission` (set Google Drive file to public reader)
 - `GET /files/:id/view-url`
 - `GET /files/:id/download`
-- `DELETE /files/:id`
+- `DELETE /files/:id` (soft delete — moves to trash)
 - `GET /files/preview/:token`
 
 Invites:
@@ -336,11 +345,13 @@ Public shared files (no auth required):
 Uploads:
 - `POST /uploads` (internal dashboard upload, multipart)
 - `POST /uploads/resumable/init`
-- `POST /uploads/resumable/chunk`
+- `PUT /uploads/resumable/chunk/:sessionId` (binary chunk upload — requires `Content-Range` and `Content-Length` headers)
 - `GET /uploads/resumable/status/:sessionId`
 
 External API (rate-limited: 60 req/min per IP, API key required):
 - `POST /api/v1/uploads`
+- `GET /api/v1/files`
+- `GET /api/v1/folders`
 
 API Keys:
 - `GET /api-keys`
@@ -358,11 +369,13 @@ System:
 - `DELETE /system/error-logs`
 - `POST /system/update`
 - `GET /system/update-log`
+- `GET /system/google-config`
+- `POST /system/google-config`
 - `GET /system/ip-whitelist`
 - `POST /system/ip-whitelist`
-- `DELETE /system/ip-whitelist/:ip`
-- `POST /system/db-backup`
-- `POST /system/db-restore`
+- `DELETE /system/ip-whitelist/:ip` (IP passed as URL param, not request body)
+- `GET /system/backup`
+- `POST /system/restore`
 
 ## Docker
 
