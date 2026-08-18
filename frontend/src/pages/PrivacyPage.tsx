@@ -106,7 +106,7 @@ export function PrivacyPage() {
             <section className="space-y-3">
               <h2 className="text-lg font-bold text-white">6. Hubungi Kami</h2>
               <p className="text-xs text-slate-300">
-                Jika Anda memiliki pertanyaan seputar Kebijakan Privasi ini, silakan hubungi tim dukungan kami melalui email di <code className="text-blue-400">wakmail262@gmail.com</code>.
+                Jika Anda memiliki pertanyaan seputar Kebijakan Privasi ini, silakan hubungi tim dukungan kami melalui email di <code className="text-blue-400">windrinofedri944@gmail.com</code>.
               </p>
             </section>
           </div>
@@ -163,7 +163,7 @@ export function PrivacyPage() {
             <section className="space-y-3">
               <h2 className="text-lg font-bold text-white">6. Contact Us</h2>
               <p className="text-xs text-slate-300">
-                If you have any questions regarding this Privacy Policy, please contact our support team at <code className="text-blue-400">wakmail262@gmail.com</code>.
+                If you have any questions regarding this Privacy Policy, please contact our support team at <code className="text-blue-400">windrinofedri944@gmail.com</code>.
               </p>
             </section>
           </div>
