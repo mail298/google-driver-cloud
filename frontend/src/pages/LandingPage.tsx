@@ -312,7 +312,7 @@ print('Uploaded:', r.json())`
           {/* Brand Logo */}
           <RouterLink to="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0 min-w-0">
             <img
-              src="/logo.png"
+              src="/logo-sm.webp"
               alt="drive9 logo - Google Drive Storage & CDN Gateway"
               width="36"
               height="36"
@@ -379,7 +379,7 @@ print('Uploaded:', r.json())`
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeInOut' }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
               className="md:hidden overflow-hidden border-t border-slate-800/80 bg-[#030712]/98 backdrop-blur-2xl px-5 py-4 space-y-3.5"
             >
               <div className="flex flex-col space-y-2.5 text-sm font-semibold text-slate-300">
@@ -418,7 +418,7 @@ print('Uploaded:', r.json())`
         {/* 3D Floating Geometric Shapes */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <ElegantShape
-            delay={0.3}
+            delay={0.1}
             width={550}
             height={130}
             rotate={12}
@@ -426,7 +426,7 @@ print('Uploaded:', r.json())`
             className="left-[-10%] md:left-[-5%] top-[10%] md:top-[18%]"
           />
           <ElegantShape
-            delay={0.5}
+            delay={0.2}
             width={450}
             height={110}
             rotate={-15}
@@ -434,7 +434,7 @@ print('Uploaded:', r.json())`
             className="right-[-10%] md:right-[-2%] top-[65%] md:top-[70%]"
           />
           <ElegantShape
-            delay={0.4}
+            delay={0.15}
             width={300}
             height={75}
             rotate={-8}
@@ -446,9 +446,9 @@ print('Uploaded:', r.json())`
         <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 text-center space-y-5 sm:space-y-7 w-full">
           {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
+            transition={{ duration: 0.4 }}
             className="inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-1.5 rounded-full bg-white/[0.05] border border-white/[0.12] backdrop-blur-md max-w-full text-center shadow-inner"
           >
             <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
@@ -459,9 +459,9 @@ print('Uploaded:', r.json())`
 
           {/* Heading */}
           <motion.h1
-            initial={{ opacity: 0, y: 25 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.08 }}
             className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.15] break-words"
           >
             {lang === 'id' ? 'Google Drive Gateway, CDN & ' : 'Google Drive Gateway, CDN & '}
@@ -472,9 +472,9 @@ print('Uploaded:', r.json())`
 
           {/* Subtitle */}
           <motion.p
-            initial={{ opacity: 0, y: 25 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.45 }}
+            transition={{ duration: 0.4, delay: 0.12 }}
             className="mx-auto max-w-3xl text-xs sm:text-base md:text-lg text-slate-300 font-medium leading-relaxed px-1 sm:px-2"
           >
             {lang === 'id'
@@ -484,9 +484,9 @@ print('Uploaded:', r.json())`
 
           {/* CTA Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 25 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.6 }}
+            transition={{ duration: 0.4, delay: 0.16 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 w-full max-w-xs sm:max-w-none mx-auto"
           >
             <RouterLink to="/register" className="w-full sm:w-auto">
@@ -1342,7 +1342,7 @@ print('Uploaded:', r.json())`
       <footer className="border-t border-slate-800/80 bg-[#030712] py-8 sm:py-10 text-xs text-slate-500">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-5 sm:gap-6 text-center md:text-left">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="drive9 logo" width="32" height="32" loading="lazy" className="h-8 w-8 rounded-lg object-contain bg-slate-900/80 p-0.5 shrink-0" />
+            <img src="/logo-sm.webp" alt="drive9 logo" width="32" height="32" loading="lazy" className="h-8 w-8 rounded-lg object-contain bg-slate-900/80 p-0.5 shrink-0" />
             <span className="font-extrabold text-white text-sm">drive9</span>
             <span>© 2026 drive9. All rights reserved.</span>
           </div>

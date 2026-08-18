@@ -3,8 +3,6 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { DriveLayout } from '@/layouts/DriveLayout'
 import { LandingPage } from '@/pages/LandingPage'
-import { PrivacyPage } from '@/pages/PrivacyPage'
-import { TermsPage } from '@/pages/TermsPage'
 import { UploadProvider } from '@/context/UploadContext'
 import { LanguageProvider } from '@/context/LanguageContext'
 import { apiFetch } from '@/lib/api'
@@ -51,6 +49,8 @@ const TrashPage = safeLazy(() => import('@/pages/TrashPage'))
 const ActivityLogPage = safeLazy(() => import('@/pages/ActivityLogPage'))
 const SitemapPage = safeLazy(() => import('@/pages/SitemapPage'))
 const RobotsPage = safeLazy(() => import('@/pages/RobotsPage'))
+const PrivacyPage = safeLazy(() => import('@/pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
+const TermsPage = safeLazy(() => import('@/pages/TermsPage').then(m => ({ default: m.TermsPage })))
 
 interface ErrorBoundaryProps {
   children: ReactNode
