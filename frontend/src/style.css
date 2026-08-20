@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-@custom-variant dark (.dark &);
+@variant dark (.dark &);
 
 :root, :root.light {
   --bg-gradient:
