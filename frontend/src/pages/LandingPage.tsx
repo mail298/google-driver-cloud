@@ -106,134 +106,134 @@ function ElegantShape({
 
 const faqsId = [
   {
-    q: '1. Apa itu drive9 dan untuk siapa platform ini dirancang?',
+    q: 'Apa itu drive9 dan untuk siapa platform ini dirancang?',
     a: 'drive9 adalah platform Gateway Penyimpanan Google Drive & Proxy Media CDN Berkecepatan Tinggi yang dirancang untuk pengembang web, pemilik bisnis, kreator konten, dan pengguna umum. Platform ini memungkinkan Anda menghubungkan banyak akun Google Drive via OAuth 2.0, mengunggah file tanpa menggunakan ruang disk fisik server (Zero Disk Storage), menyajikan aset media landing page via CDN, memutar video/audio streaming tanpa buffering, mengorganisasi folder virtual, serta memantau total kuota penyimpanan gabungan secara otomatis.'
   },
   {
-    q: '2. Bagaimana cara drive9 berfungsi sebagai CDN Aset & Host Media untuk landing page atau website?',
+    q: 'Bagaimana cara drive9 berfungsi sebagai CDN Aset & Host Media untuk landing page atau website?',
     a: 'drive9 menyediakan Tautan Berbagi Publik (Public Shared Link) dan URL Tampilan Langsung (Direct View URL) berkecepatan tinggi yang dapat disematkan (embed) langsung ke tag HTML <img>, <video>, <script>, <link rel="stylesheet">, atau dokumen di landing page Anda. Permintaan media diproses melalui proxy edge drive9 yang meneruskan stream dari Google Drive dengan header caching yang dioptimalkan, mengurangi beban server web utama Anda dan menjamin uptime tinggi berbasis infrastruktur global Google.'
   },
   {
-    q: '3. Bagaimana teknologi Video & Audio Streaming tanpa buffering bekerja di drive9?',
+    q: 'Bagaimana teknologi Video & Audio Streaming tanpa buffering bekerja di drive9?',
     a: 'drive9 mengimplementasikan protokol standar HTTP 206 Partial Content (Permintaan Rentang / Range Requests). Ketika pengguna memutar video HD (MP4, WebM) atau podcast audio di website Anda menggunakan pemutar media seperti Plyr atau Video HTML5 bawaan browser, drive9 mengalirkan bagian file (chunks) yang dibutuhkan saja secara instan. Pengguna dapat melompati (seek) ke detik manapun secara langsung tanpa harus mengunduh keseluruhan file atau mengalami jeda buffering.'
   },
   {
-    q: '4. Apa yang dimaksud dengan arsitektur Direct Streaming (Zero Disk Storage)?',
+    q: 'Apa yang dimaksud dengan arsitektur Direct Streaming (Zero Disk Storage)?',
     a: 'Berbeda dengan gateway tradisional yang menyimpan file di server lokal sebelum mengunggahnya ke cloud, drive9 menggunakan Busboy multipart streaming dan Undici pipeline HTTP stream. Data file yang Anda unggah langsung dialirkan dalam memori dari peramban/klien ke API Google Drive secara real-time. Tidak ada file fisik yang pernah ditulis atau disimpan di disk fisik server drive9, menjaga keamanan total dan kecepatan transfer maksimal.'
   },
   {
-    q: '5. Bagaimana Penyeimbang Beban (Load Balancer) & Agregasi Kuota Multi-Akun bekerja?',
+    q: 'Bagaimana Penyeimbang Beban (Load Balancer) & Agregasi Kuota Multi-Akun bekerja?',
     a: 'Anda dapat menghubungkan lebih dari satu akun Google Drive (misalnya 3 akun gratis x 15 GB = 45 GB total penyimpanan). Ketika Anda mengunggah file baru, algoritma Kebijakan Rute Unggahan (Upload Routing Policy) drive9 secara otomatis memeriksa sisa kapasitas tiap akun terhubung dan secara cerdas mengarahkan unggahan ke akun yang memiliki sisa ruang paling banyak. Jika salah satu akun penuh, sistem otomatis mengalihkan unggahan ke akun berikutnya tanpa gangguan.'
   },
   {
-    q: '6. Bagaimana cara kerja API Key untuk Pengembang (Developer REST API)?',
+    q: 'Bagaimana cara kerja API Key untuk Pengembang (Developer REST API)?',
     a: 'Melalui halaman Manajemen API, Anda dapat membuat API Key terenkripsi dengan lingkup izin (scopes) terisolasi: files:read (untuk membaca metadata file/folder dan mengunduh) serta files:upload (untuk mengunggah file). API Key ini mengizinkan Anda mengirimkan file via permintaan POST /uploads bermodel multipart/form-data langsung dari formulir landing page, skrip otomatisasi Python/Node.js, atau aplikasi seluler.'
   },
   {
-    q: '7. Apakah drive9 otomatis membuat folder di Google Drive saya?',
+    q: 'Apakah drive9 otomatis membuat folder di Google Drive saya?',
     a: 'Ya. Saat pertama kali Anda mengunggah file atau menghubungkan akun, drive9 akan secara otomatis membuat folder induk khusus bernama "9drive" di Google Drive Anda. Seluruh file fisik yang diunggah melalui drive9 akan disimpan dengan rapi di dalam folder "9drive" tersebut, sehingga tidak mengotori direktori utama (root) Google Drive pribadi Anda.'
   },
   {
-    q: '8. Apakah perbedaan antara Folder Virtual di drive9 dan folder fisik di Google Drive?',
+    q: 'Apakah perbedaan antara Folder Virtual di drive9 dan folder fisik di Google Drive?',
     a: 'Folder Virtual di drive9 adalah struktur hierarki cerdas yang dikelola di database MySQL drive9. Anda dapat membuat folder bersarang (nested folders) secara instan tanpa perlu menunggu API Google Drive membuat folder fisik secara lambat. drive9 mengaitkan lokasi file secara logis dan otomatis menyinkronkan jalur direktori saat file diakses atau diunduh oleh pengguna.'
   },
   {
-    q: '9. Bagaimana drive9 mengamankan Token Akses & Data Privasi akun Google saya?',
+    q: 'Bagaimana drive9 mengamankan Token Akses & Data Privasi akun Google saya?',
     a: 'Keamanan data adalah prioritas utama drive9. Seluruh Token Akses dan Token Pembaruan (OAuth Access & Refresh Tokens) Anda dienkripsi secara simetris menggunakan algoritma standar industri AES-256-GCM sebelum disimpan ke dalam database. drive9 hanya meminta lingkup izin khusus untuk mengelola file di dalam folder "9drive" dan tidak akan pernah mengakses, membaca, atau mengubah file pribadi di luar folder tersebut.'
   },
   {
-    q: '10. Berapa batas ukuran file maksimum yang didukung untuk pengunggahan?',
+    q: 'Berapa batas ukuran file maksimum yang didukung untuk pengunggahan?',
     a: 'drive9 mendukung pengunggahan file hingga ukuran 5 GB per file. Untuk mengantisipasi koneksi jaringan yang tidak stabil, drive9 mendukung mekanisme pengunggahan bertahap (resumable chunked upload) melalui busboy stream, sehingga proses pengunggahan file berukuran besar tetap dapat berjalan lancar hingga selesai.'
   },
   {
-    q: '11. Bagaimana cara membagikan file dan menggunakan Token Pratinjau (Preview Token)?',
+    q: 'Bagaimana cara membagikan file dan menggunakan Token Pratinjau (Preview Token)?',
     a: 'Anda dapat membagikan file dalam 3 mode: (1) Tautan Berbagi Publik: URL permanen yang dapat diakses siapa saja, (2) Token Pratinjau Khusus: Token sementara terenkripsi dengan batas waktu kedaluwarsa untuk pratinjau dokumen/video yang aman, dan (3) Undangan Email: Memberikan hak akses baca atau tulis kepada email pengguna tertentu yang terdaftar di drive9.'
   },
   {
-    q: '12. Apakah saya bisa memutuskan koneksi akun Google Drive saya kapan saja?',
+    q: 'Apakah saya bisa memutuskan koneksi akun Google Drive saya kapan saja?',
     a: 'Tentu saja. Anda dapat memutuskan hubungan akun Google Drive kapan saja melalui menu Pengaturan (Settings) di dashboard drive9. Selain itu, Anda juga dapat mencabut (revoke) izin akses drive9 secara langsung dari halaman Keamanan Akun Google Anda (myaccount.google.com/permissions).'
   },
   {
-    q: '13. Apa yang terjadi jika saya menghapus file di dashboard drive9?',
+    q: 'Apa yang terjadi jika saya menghapus file di dashboard drive9?',
     a: 'Ketika Anda menghapus file di drive9, file tersebut akan dipindahkan ke Tempat Sampah (Recycle Bin) drive9 secara virtual. Anda dapat memulihkannya kapan saja atau menghapusnya secara permanen. Menghapus file secara permanen di drive9 akan menghapus catatan di database sekaligus menginstruksikan API Google Drive untuk menghapus file fisik terkait dari folder "9drive".'
   },
   {
-    q: '14. Bagaimana cara kerja fitur Sinkronisasi (Sync Engine) dengan Google Drive?',
+    q: 'Bagaimana cara kerja fitur Sinkronisasi (Sync Engine) dengan Google Drive?',
     a: 'Jika Anda mengubah, menambah, atau menghapus file secara langsung melalui aplikasi Google Drive resmi di folder "9drive", Anda dapat menekan tombol "Sinkron" di dashboard drive9. Mesin pemindai drive9 akan membandingkan data Google Drive fisik dengan database MySQL, membuat catatan file baru, memperbarui metadata yang berubah, dan memperbarui status kuota penyimpanan secara akurat.'
   },
   {
-    q: '15. Apakah drive9 dapat diintegrasikan dengan formulir kontak atau landing page WordPress/React?',
+    q: 'Apakah drive9 dapat diintegrasikan dengan formulir kontak atau landing page WordPress/React?',
     a: 'Sangat bisa! Dengan menggunakan API Key terisolasi (files:upload), Anda dapat mengirimkan file dari formulir kontak web, formulir pendaftaran, atau input file di WordPress, Next.js, React, HTML statis, maupun aplikasi mobile langsung ke akun Google Drive Anda via endpoint API drive9.'
   },
   {
-    q: '16. Apakah ada biaya tersembunyi atau biaya langganan untuk menggunakan drive9?',
+    q: 'Apakah ada biaya tersembunyi atau biaya langganan untuk menggunakan drive9?',
     a: 'drive9 dapat digunakan secara gratis memanfaatkan kuota gratis 15 GB dari setiap akun Google Drive yang Anda hubungkan. Kami tidak mengenakan biaya langganan bulanan tersembunyi untuk fitur dasar gateway, penyeimbang beban kuota, maupun proxy CDN media.'
   }
 ]
 
 const faqsEn = [
   {
-    q: '1. What is drive9 and who is it designed for?',
+    q: 'What is drive9 and who is it designed for?',
     a: 'drive9 is a Google Drive Storage Gateway & High-Speed CDN Media Proxy platform designed for web developers, business owners, content creators, and everyday users. It enables you to connect multiple Google Drive accounts via OAuth 2.0, stream file uploads without consuming physical server disk space (Zero Server Disk Storage), serve landing page media assets via CDN, stream video/audio buffer-free, organize virtual folders, and track aggregate storage quotas automatically.'
   },
   {
-    q: '2. How does drive9 function as a CDN Asset & Media Host for landing pages or websites?',
+    q: 'How does drive9 function as a CDN Asset & Media Host for landing pages or websites?',
     a: 'drive9 provides high-speed Public Shared Links and Direct View URLs that can be embedded directly into HTML tags like <img>, <video>, <script>, <link rel="stylesheet">, or documents on your landing page. Media requests are proxied through drive9 edge server with optimized caching headers, reducing load on your main web server while guaranteeing high uptime backed by Google global infrastructure.'
   },
   {
-    q: '3. How does buffer-free Video & Audio Streaming technology work in drive9?',
+    q: 'How does buffer-free Video & Audio Streaming technology work in drive9?',
     a: 'drive9 implements standard HTTP 206 Partial Content (Range Requests). When a user plays an HD video (MP4, WebM) or audio podcast on your website using media players like Plyr or browser native HTML5 Video, drive9 streams only the requested byte ranges instantly. Users can seek to any timestamp smoothly without waiting for whole file downloads or buffering pauses.'
   },
   {
-    q: '4. What is meant by Direct Streaming (Zero Server Disk Storage) architecture?',
+    q: 'What is meant by Direct Streaming (Zero Server Disk Storage) architecture?',
     a: 'Unlike traditional storage gateways that cache uploads on local server disks before uploading to the cloud, drive9 utilizes Busboy multipart streaming and Undici HTTP stream pipelines. Upload data streams in-memory from client browsers straight to the Google Drive API in real time. Zero physical files are ever written to drive9 server disks, ensuring absolute security and maximum throughput speed.'
   },
   {
-    q: '5. How does Multi-Account Load Balancing & Storage Aggregation work?',
+    q: 'How does Multi-Account Load Balancing & Storage Aggregation work?',
     a: 'You can connect multiple Google Drive accounts (e.g. 3 free accounts x 15 GB = 45 GB combined storage pool). When you upload a new file, drive9 Upload Routing Policy automatically inspects remaining storage across all connected accounts and intelligently routes the upload to the account with the most available space. If one account fills up, the system seamlessly fails over to another connected account.'
   },
   {
-    q: '6. How do Developer REST API Keys work?',
+    q: 'How do Developer REST API Keys work?',
     a: 'From the API Management page, you can generate encrypted API Keys with isolated scope permissions: files:read (read file/folder metadata & downloads) and files:upload (upload files). These API Keys allow you to send multipart uploads via POST /uploads directly from landing page forms, automated Python/Node.js scripts, or mobile applications.'
   },
   {
-    q: '7. Does drive9 automatically create a folder in my Google Drive?',
+    q: 'Does drive9 automatically create a folder in my Google Drive?',
     a: 'Yes. Upon your first upload or Google connection, drive9 automatically creates a dedicated root folder named "9drive" in your Google Drive. All physical files uploaded via drive9 are stored neatly inside this "9drive" folder, ensuring your personal Google Drive root directory remains untouched and organized.'
   },
   {
-    q: '8. What is the difference between Virtual Folders in drive9 and physical Google Drive folders?',
+    q: 'What is the difference between Virtual Folders in drive9 and physical Google Drive folders?',
     a: 'Virtual Folders in drive9 are intelligent hierarchical structures managed in drive9 MySQL database. You can build deeply nested folder trees instantly without waiting for slow physical Google Drive API folder creations. drive9 maps file paths logically and automatically resolves directory structures whenever files are accessed or downloaded.'
   },
   {
-    q: '9. How does drive9 secure my OAuth Access Tokens & Google account privacy?',
+    q: 'How does drive9 secure my OAuth Access Tokens & Google account privacy?',
     a: 'Data security is drive9 highest priority. All OAuth Access Tokens and Refresh Tokens are encrypted using industry-standard AES-256-GCM symmetric encryption before storage in the database. drive9 requests restricted permissions solely to manage files inside the dedicated "9drive" folder and will never read, access, or modify private files outside it.'
   },
   {
-    q: '10. What is the maximum file size limit supported for uploads?',
+    q: 'What is the maximum file size limit supported for uploads?',
     a: 'drive9 supports file uploads up to 5 GB per file. To handle unstable network conditions, drive9 provides resumable chunked streaming via busboy pipelines, ensuring large media uploads complete smoothly without data corruption.'
   },
   {
-    q: '11. How can I share files and use Preview Tokens?',
+    q: 'How can I share files and use Preview Tokens?',
     a: 'You can share files in 3 modes: (1) Public Shared Link: Permanent public URL accessible by anyone, (2) Custom Preview Token: Time-limited encrypted token for secure document/video viewing, and (3) Email Invitation: Granting explicit read/write access to specific registered drive9 user emails.'
   },
   {
-    q: '12. Can I disconnect my Google Drive account at any time?',
+    q: 'Can I disconnect my Google Drive account at any time?',
     a: 'Absolutely. You can disconnect your Google Drive account at any time from the Settings menu in the drive9 dashboard. Furthermore, you can revoke drive9 access permissions directly from your Google Account Security page (myaccount.google.com/permissions).'
   },
   {
-    q: '13. What happens when I delete a file in the drive9 dashboard?',
+    q: 'What happens when I delete a file in the drive9 dashboard?',
     a: 'When you delete a file in drive9, it is moved to drive9 virtual Recycle Bin. You can restore it anytime or delete it permanently. Permanently deleting a file removes the database record and instructs Google Drive API to erase the physical file from the "9drive" folder.'
   },
   {
-    q: '14. How does the Sync Engine feature work with Google Drive?',
+    q: 'How does the Sync Engine feature work with Google Drive?',
     a: 'If you modify, add, or delete files directly inside the "9drive" folder via official Google Drive apps, simply click the "Sync" button in drive9 dashboard. drive9 scanner compares physical Drive files with the MySQL database, registers newly found files, updates modified metadata, and recalculates storage quota accurately.'
   },
   {
-    q: '15. Can drive9 be integrated with contact forms or WordPress/React landing pages?',
+    q: 'Can drive9 be integrated with contact forms or WordPress/React landing pages?',
     a: 'Highly customizable! Using an isolated API Key (files:upload), you can submit file uploads from web contact forms, registration forms, or file inputs in WordPress, Next.js, React, static HTML, or mobile apps directly into your Google Drive accounts via drive9 API endpoint.'
   },
   {
-    q: '16. Are there any hidden fees or subscription costs to use drive9?',
+    q: 'Are there any hidden fees or subscription costs to use drive9?',
     a: 'drive9 is free to use leveraging the 15 GB free quota provided by each connected Google Drive account. We do not charge hidden monthly subscription fees for core gateway functions, quota load balancing, or media CDN proxying.'
   }
 ]
