@@ -35,7 +35,11 @@ async function findSharedFile(token: string): Promise<FileWithAccount> {
     include: { file: { include: { connectedAccount: true } } },
   })
 
-  if (!share || share.file.status !== 'active') throw new Error('Shared file not found')
+  if (!share || share.file.status !== 'active') {
+    const err = new Error('Shared file not found')
+    Object.assign(err, { status: 404, code: 'NOT_FOUND' })
+    throw err
+  }
 
   shareCache.set(token, { file: share.file, expires: Date.now() + CACHE_TTL_MS })
   return share.file

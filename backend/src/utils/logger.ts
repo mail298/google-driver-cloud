@@ -52,7 +52,14 @@ export function logError(req: Request, error: unknown, status = 500): ErrorLogEn
 
   const errObj = error instanceof Error ? error : new Error(String(error))
   const message = errObj.message || 'Internal server error'
-  const code = (error as any)?.code || 'INTERNAL_SERVER_ERROR'
+  const code = (error as any)?.code || (
+    status === 404 ? 'NOT_FOUND' :
+    status === 400 ? 'BAD_REQUEST' :
+    status === 403 ? 'FORBIDDEN' :
+    status === 401 ? 'UNAUTHORIZED' :
+    status === 429 ? 'TOO_MANY_REQUESTS' :
+    'INTERNAL_SERVER_ERROR'
+  )
 
   const entry: ErrorLogEntry = {
     id: `err_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,

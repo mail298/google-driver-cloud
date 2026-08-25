@@ -6,8 +6,10 @@ export function errorMiddleware(error: unknown, req: Request, res: Response, _ne
   const status = (error as any)?.status || 500
   const entry = logError(req, error, status)
 
-  // Send real-time error alert notification to Telegram
-  notifyServerError(entry).catch(() => undefined)
+  // Send real-time error alert notification to Telegram (only for server errors >= 500)
+  if (status >= 500) {
+    notifyServerError(entry).catch(() => undefined)
+  }
 
   return res.status(status).json({
     code: entry.code,
