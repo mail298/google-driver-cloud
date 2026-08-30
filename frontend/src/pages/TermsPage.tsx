@@ -15,6 +15,27 @@ export function TermsPage() {
       <Seo
         title={isId ? "Ketentuan Layanan - drive9 Google Drive Gateway" : "Terms of Service - drive9 Google Drive Gateway"}
         description={isId ? "Ketentuan penggunaan layanan drive9 untuk pengelolaan cloud storage Google Drive dan API Key pengembang." : "Terms of service for drive9 Google Drive storage gateway and developer API keys."}
+        canonicalUrl="https://drive9.wn-cdn.net/terms"
+        structuredData={[
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": isId ? "Beranda" : "Home",
+                "item": "https://drive9.wn-cdn.net/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": isId ? "Ketentuan Layanan" : "Terms of Service",
+                "item": "https://drive9.wn-cdn.net/terms"
+              }
+            ]
+          }
+        ]}
       />
       {/* Header */}
       <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50">
@@ -24,7 +45,7 @@ export function TermsPage() {
               <ArrowLeft className="h-4 w-4" />
               <span>{isId ? 'Kembali ke Beranda' : 'Back to Home'}</span>
             </Link>
-            <img src="/logo.png" alt="drive9 logo" className="h-9 w-9 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800" />
+            <img src="/logo-sm.webp" alt="drive9 logo" width="36" height="36" className="h-9 w-9 rounded-xl object-contain bg-slate-900 p-1 border border-slate-800" />
             <span className="text-lg font-black text-white">drive9</span>
           </div>
           <div className="flex items-center gap-3">
@@ -40,6 +61,21 @@ export function TermsPage() {
 
       {/* Content */}
       <main className="mx-auto max-w-4xl px-6 py-12 space-y-8">
+        {/* Semantic Breadcrumb Navigation */}
+        <nav aria-label="Breadcrumb" className="text-xs text-slate-400">
+          <ol className="flex items-center gap-2">
+            <li>
+              <Link to="/" className="hover:text-blue-400 transition-colors">
+                {isId ? 'Beranda' : 'Home'}
+              </Link>
+            </li>
+            <li aria-hidden="true" className="text-slate-600">/</li>
+            <li className="text-slate-200 font-semibold" aria-current="page">
+              {isId ? 'Ketentuan Layanan' : 'Terms of Service'}
+            </li>
+          </ol>
+        </nav>
+
         <div className="space-y-3 border-b border-slate-800 pb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-bold">
             <FileText className="h-4 w-4" />

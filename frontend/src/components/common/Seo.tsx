@@ -1,12 +1,14 @@
 import { useEffect } from 'react'
 
-interface SeoProps {
+export interface SeoProps {
   title: string
   description?: string
   keywords?: string
   canonicalUrl?: string
   ogImage?: string
   ogType?: string
+  noindex?: boolean
+  structuredData?: Record<string, any> | Record<string, any>[]
 }
 
 function setMetaTag(nameOrProperty: 'name' | 'property', key: string, content: string) {
@@ -21,11 +23,13 @@ function setMetaTag(nameOrProperty: 'name' | 'property', key: string, content: s
 
 export function Seo({
   title,
-  description = 'Platform Google Drive Storage Gateway & CDN Media Proxy tercepat. Gabungkan kuota multi-akun Google Drive, stream video & audio tanpa buffering (HTTP 206 Partial Content), host aset web, dan integrasi API Key terenkripsi AES-256.',
+  description = 'Google Drive Storage Gateway & CDN Proxy. Gabung kuota multi-akun Google Drive, stream video tanpa buffering HTTP 206, dan integrasi REST API Key aman.',
   keywords = 'drive9, Google Drive gateway, cloud storage gateway, virtual cloud storage, Google Drive API, multi account Google Drive, file streaming cloud, Google Drive quota manager',
   canonicalUrl,
   ogImage = 'https://drive9.wn-cdn.net/logo.png',
-  ogType = 'website'
+  ogType = 'website',
+  noindex = false,
+  structuredData
 }: SeoProps) {
   useEffect(() => {
     // 1. Update Title
@@ -35,6 +39,13 @@ export function Seo({
     setMetaTag('name', 'title', title)
     setMetaTag('name', 'description', description)
     setMetaTag('name', 'keywords', keywords)
+    setMetaTag(
+      'name',
+      'robots',
+      noindex
+        ? 'noindex, nofollow'
+        : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'
+    )
 
     // 3. Update Canonical Link
     const currentOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://drive9.wn-cdn.net'
@@ -61,8 +72,30 @@ export function Seo({
     setMetaTag('property', 'twitter:description', description)
     setMetaTag('property', 'twitter:url', targetUrl)
     setMetaTag('property', 'twitter:image', ogImage)
-  }, [title, description, keywords, canonicalUrl, ogImage, ogType])
+
+    // 6. Optional Dynamic Structured Data (JSON-LD)
+    const scriptId = 'dynamic-page-jsonld'
+    let scriptElement = document.getElementById(scriptId) as HTMLScriptElement | null
+    if (structuredData) {
+      if (!scriptElement) {
+        scriptElement = document.createElement('script')
+        scriptElement.id = scriptId
+        scriptElement.type = 'application/ld+json'
+        document.head.appendChild(scriptElement)
+      }
+      scriptElement.textContent = JSON.stringify(structuredData)
+    } else if (scriptElement) {
+      scriptElement.remove()
+    }
+
+    return () => {
+      // Clean up dynamic structured data script on unmount
+      const el = document.getElementById(scriptId)
+      if (el) el.remove()
+    }
+  }, [title, description, keywords, canonicalUrl, ogImage, ogType, noindex, structuredData])
 
   return null
 }
+
 

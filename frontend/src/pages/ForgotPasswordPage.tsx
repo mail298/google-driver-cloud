@@ -5,13 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { LanguageSwitcher } from '@/components/drive/LanguageSwitcher'
+import { Seo } from '@/components/common/Seo'
 import { useLanguage } from '@/context/LanguageContext'
 import { apiFetch } from '@/lib/api'
 
 const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY?.trim()
 
 export function ForgotPasswordPage() {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [email, setEmail] = useState('')
   const [captchaToken, setCaptchaToken] = useState('')
   const [loading, setLoading] = useState(false)
@@ -102,6 +103,10 @@ export function ForgotPasswordPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 p-5 dark:bg-slate-950">
+      <Seo
+        title={lang === 'id' ? 'Lupa Kata Sandi - Drive9' : 'Forgot Password - Drive9'}
+        noindex={true}
+      />
       <Card className="relative w-full max-w-md p-6 sm:p-8">
         <div className="absolute right-4 top-4">
           <LanguageSwitcher />

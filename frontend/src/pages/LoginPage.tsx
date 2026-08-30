@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { GoogleLogo } from '@/components/auth/GoogleLogo'
 import { Input } from '@/components/ui/input'
 import { LanguageSwitcher } from '@/components/drive/LanguageSwitcher'
+import { Seo } from '@/components/common/Seo'
 import { useLanguage } from '@/context/LanguageContext'
 import { apiFetch } from '@/lib/api'
 import { setAuthSession, type AuthUser } from '@/lib/auth'
@@ -14,7 +15,7 @@ type AuthResponse = { accessToken: string; refreshToken: string; user: AuthUser 
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -51,6 +52,10 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 p-5 dark:bg-slate-950">
+      <Seo
+        title={lang === 'id' ? 'Masuk ke Akun - Drive9' : 'Sign In - Drive9'}
+        noindex={true}
+      />
       <Card className="relative w-full max-w-md p-6">
         <div className="absolute right-4 top-4">
           <LanguageSwitcher />

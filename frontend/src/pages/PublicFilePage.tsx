@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { API_URL, apiFetch, formatBytes, formatDate, formatCdnUrl } from '@/lib/api'
 import { createPlyr, ensurePlyr } from '@/lib/plyr'
 import { getPreviewKind, isSpreadsheetMimeType, officeViewerUrl } from '@/lib/preview'
+import { Seo } from '@/components/common/Seo'
 
 type PublicFile = { name: string; mimeType: string; sizeBytes: string; createdAt: string }
 
@@ -79,6 +80,7 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   if (failed) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#0f1117] p-6 text-white">
+        <Seo title="Shared file not found - Drive9" noindex={true} />
         <div className="max-w-md rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-center shadow-2xl shadow-black/30">
           <FileArchive className="mx-auto h-12 w-12 text-slate-400" />
           <h1 className="mt-5 text-2xl font-extrabold">Shared file not found</h1>
@@ -89,7 +91,12 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   }
 
   if (!file) {
-    return <main className="flex min-h-screen items-center justify-center bg-[#0f1117] text-sm font-semibold text-slate-400">Loading shared file...</main>
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#0f1117] text-sm font-semibold text-slate-400">
+        <Seo title="Loading shared file... - Drive9" noindex={true} />
+        Loading shared file...
+      </main>
+    )
   }
 
   const preview = (
@@ -137,11 +144,21 @@ export function PublicFilePage({ embed = false }: { embed?: boolean }) {
   )
 
   if (embed) {
-    return <main className="h-screen overflow-hidden bg-black text-white">{preview}</main>
+    return (
+      <main className="h-screen overflow-hidden bg-black text-white">
+        <Seo title={`${file.name} (Embed) - Drive9`} noindex={true} />
+        {preview}
+      </main>
+    )
   }
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#101218] text-white">
+      <Seo
+        title={`${file.name} - Drive9`}
+        description={`Preview and download ${file.name} (${formatBytes(file.sizeBytes)}) shared via drive9.`}
+        noindex={true}
+      />
       <header className="fixed inset-x-0 top-0 z-30 flex h-16 items-center justify-between border-b border-white/10 bg-[#17191f]/95 px-4 shadow-lg shadow-black/20 backdrop-blur sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-slate-100">
