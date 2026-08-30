@@ -13,4 +13,4 @@ Disallow: /activity
 Disallow: /settings
 Disallow: /api
 
-Sitemap: /sitemap.xml
+Sitemap: https://drive9.wn-cdn.net/sitemap.xml

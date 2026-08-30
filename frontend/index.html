@@ -5,10 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#030712" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
   <!-- Primary Meta Tags -->
   <title>drive9 - Google Drive Storage Gateway, CDN Media & Video Streaming HTTP 206</title>
   <meta name="title" content="drive9 - Google Drive Storage Gateway, CDN Media & Video Streaming HTTP 206" />
@@ -30,6 +26,8 @@
   <meta property="og:description"
     content="Gabungkan kuota multi-akun Google Drive, streaming video MP4/WebM tanpa buffering (HTTP 206), dan sajikan aset website via CDN Google Drive terenkripsi." />
   <meta property="og:image" content="https://drive9.wn-cdn.net/logo.png" />
+  <meta property="og:image:width" content="512" />
+  <meta property="og:image:height" content="512" />
   <meta property="og:site_name" content="Drive9" />
   <meta property="og:locale" content="id_ID" />
   <meta name="application-name" content="Drive9" />
@@ -60,13 +58,14 @@
   <!-- Preload Critical Header Logo -->
   <link rel="preload" as="image" href="/logo-sm.webp" type="image/webp" fetchpriority="high" />
 
-  <!-- Icons -->
+  <!-- Modern Favicon Stack (Googlebot-Image & Modern Browser Compliant) -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/webp" href="/logo-sm.webp" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/logo-sm.png" />
   <link rel="alternate icon" type="image/png" href="/logo.png" />
-  <link rel="shortcut icon" type="image/png" href="/logo.png" />
-  <link rel="apple-touch-icon" href="/logo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
 
-  <!-- Schema.org Structured Data (JSON-LD) for Lighthouse 100 SEO & Google Rich Results -->
+  <!-- Schema.org Structured Data (JSON-LD) for Lighthouse 100 SEO, E-E-A-T & Google Rich Results -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -77,7 +76,23 @@
         "name": "Drive9",
         "alternateName": ["drive9", "Drive 9"],
         "url": "https://drive9.wn-cdn.net/",
-        "logo": "https://drive9.wn-cdn.net/logo.png",
+        "logo": {
+          "@type": "ImageObject",
+          "@id": "https://drive9.wn-cdn.net/#logo",
+          "url": "https://drive9.wn-cdn.net/logo.png",
+          "caption": "drive9 Storage Gateway Logo",
+          "width": "512",
+          "height": "512"
+        },
+        "description": "Penyedia platform Google Drive Storage Gateway, Multi-Account Quota Aggregator, High-Speed CDN Proxy & HTTP 206 Media Streaming.",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "contactType": "technical support",
+            "url": "https://drive9.wn-cdn.net/",
+            "availableLanguage": ["id", "en"]
+          }
+        ],
         "sameAs": []
       },
       {
@@ -90,7 +105,7 @@
         "publisher": {
           "@id": "https://drive9.wn-cdn.net/#organization"
         },
-        "inLanguage": "id"
+        "inLanguage": ["id", "en"]
       },
       {
         "@type": "SoftwareApplication",
