@@ -304,7 +304,7 @@ print('Uploaded:', r.json())`
 
   return (
     <div className="min-h-screen w-full bg-[#030712] text-slate-100 font-sans selection:bg-blue-600 selection:text-white overflow-x-hidden">
-      <Seo title={lang === 'id' ? 'drive9 - Google Drive Gateway, CDN Media & Video Streaming HTTP 206' : 'drive9 - Google Drive Gateway, CDN Media & HTTP 206 Video Streaming'} />
+      <Seo title={lang === 'id' ? 'drive9: Google Drive Gateway, CDN & Video Streaming' : 'drive9: Google Drive Gateway, CDN & Video Streaming'} />
 
       {/* ── Navigation Bar (Fully Mobile & Desktop Optimized) ───────────────── */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-[#030712]/90 backdrop-blur-xl">
@@ -464,9 +464,10 @@ print('Uploaded:', r.json())`
             transition={{ duration: 0.4, delay: 0.08 }}
             className="text-2xl sm:text-4xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-[1.15] break-words"
           >
-            {lang === 'id' ? 'Google Drive Gateway, CDN & ' : 'Google Drive Gateway, CDN & '}
+            <span className="text-white">drive9</span>
+            <span className="text-slate-400 font-normal"> — </span>
             <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent block sm:inline">
-              {lang === 'id' ? 'Streaming Tanpa Batas' : 'Unlimited Streaming'}
+              {lang === 'id' ? 'Google Drive Gateway, CDN & Streaming' : 'Google Drive Gateway, CDN & Streaming'}
             </span>
           </motion.h1>
 
