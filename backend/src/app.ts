@@ -17,20 +17,30 @@ import { publicApiRouter } from './modules/public-api/public-api.routes.js'
 import { auditLogRouter } from './modules/audit-logs/audit-log.routes.js'
 import { systemRouter } from './modules/system/system.routes.js'
 import { authRateLimit, generalRateLimit, publicApiRateLimit } from './middleware/rate-limit.middleware.js'
+import { attackDetectorMiddleware } from './middleware/attack-detector.middleware.js'
 
 export const app = express()
 app.set('trust proxy', 1)
 
+// Early Intrusion Detection & IP Blacklist enforcement
+app.use(attackDetectorMiddleware)
+
 const rawFrontendUrls = (env.FRONTEND_URL || '').split(',').map((u) => u.trim().replace(/\/$/, '')).filter(Boolean)
+const cdnSubdomains = (env.CDN_SUBDOMAINS || '').split(',').map((u) => u.trim().replace(/\/$/, '')).filter(Boolean)
+const allowedOrigins = Array.from(new Set([...rawFrontendUrls, ...cdnSubdomains]))
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true)
       const cleanOrigin = origin.replace(/\/$/, '')
-      if (rawFrontendUrls.length === 0 || rawFrontendUrls.includes(cleanOrigin) || rawFrontendUrls.includes('*')) {
+      if (allowedOrigins.length === 0 || allowedOrigins.includes(cleanOrigin) || allowedOrigins.includes('*')) {
         return callback(null, true)
       }
-      return callback(new Error(`CORS: origin ${cleanOrigin} not allowed`))
+      const corsErr: any = new Error(`CORS: origin ${cleanOrigin} not allowed`)
+      corsErr.status = 403
+      corsErr.code = 'CORS_FORBIDDEN'
+      return callback(corsErr)
     },
     credentials: true,
   })

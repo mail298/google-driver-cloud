@@ -1,5 +1,6 @@
 import { env } from '../config/env.js'
 import { addWhitelistedIp, getWhitelistedIps, removeWhitelistedIp } from '../utils/ip-whitelist.store.js'
+import { banIp, getBannedIps, unbanIp } from '../utils/ip-blacklist.store.js'
 
 let isPollingStarted = false
 let lastUpdateId = 0
@@ -35,6 +36,9 @@ async function registerBotCommands(botToken: string) {
       { command: 'addip', description: 'Tambah IP ke Whitelist (contoh: /addip 103.x.x.x)' },
       { command: 'delip', description: 'Hapus IP dari Whitelist (contoh: /delip 103.x.x.x)' },
       { command: 'whitelist', description: 'Lihat daftar IP yang terdaftar di Whitelist' },
+      { command: 'banip', description: 'Blokir IP penyerang/malicious (contoh: /banip 185.x.x.x)' },
+      { command: 'unbanip', description: 'Buka blokir IP penyerang (contoh: /unbanip 185.x.x.x)' },
+      { command: 'banned', description: 'Lihat daftar IP yang diblokir (Blacklist)' },
       { command: 'mychatid', description: 'Tampilkan Chat ID Telegram kamu' },
       { command: 'help', description: 'Bantuan & daftar menu perintah' }
     ]
@@ -122,10 +126,17 @@ async function handleTelegramMessage(botToken: string, targetChatId: string, mes
     const helpMsg = [
       `🤖 <b>Drive9 Telegram Bot Helper</b>`,
       `━━━━━━━━━━━━━━━━━━`,
-      `<b>Available Commands:</b>`,
+      `<b>Whitelist Commands:</b>`,
       `• <code>/addip &lt;ip&gt;</code> - Add IP to Whitelist`,
       `• <code>/delip &lt;ip&gt;</code> - Remove IP from Whitelist`,
-      `• <code>/whitelist</code> or <code>/listip</code> - List all Whitelisted IPs`,
+      `• <code>/whitelist</code> - List all Whitelisted IPs`,
+      ``,
+      `<b>Blacklist / Attack Defense:</b>`,
+      `• <code>/banip &lt;ip&gt;</code> - Ban malicious / attacker IP`,
+      `• <code>/unbanip &lt;ip&gt;</code> - Unban IP`,
+      `• <code>/banned</code> - List all Banned IPs`,
+      ``,
+      `<b>System:</b>`,
       `• <code>/mychatid</code> - Show your Telegram Chat ID`,
       `• <code>/help</code> - Show this command list`
     ].join('\n')
@@ -174,6 +185,51 @@ async function handleTelegramMessage(botToken: string, targetChatId: string, mes
     await replyTelegram(botToken, targetChatId, currentList)
     return
   }
+
+  if (command === '/banip' || command === '/ban') {
+    if (!argument) {
+      await replyTelegram(botToken, targetChatId, '❌ <b>Usage:</b> <code>/banip &lt;ip_address&gt;</code>\nExample: <code>/banip 185.220.101.5</code>')
+      return
+    }
+    const result = banIp(argument, 'Banned via Telegram bot')
+    const currentList = formatBannedList(result.list)
+    if (result.success) {
+      await replyTelegram(botToken, targetChatId, `🚫 <b>IP Banned!</b>\nBanned: <code>${argument}</code>\n\n${currentList}`)
+    } else {
+      await replyTelegram(botToken, targetChatId, `❌ <b>Failed:</b> ${result.message}\n\n${currentList}`)
+    }
+    return
+  }
+
+  if (command === '/unbanip' || command === '/unban') {
+    if (!argument) {
+      await replyTelegram(botToken, targetChatId, '❌ <b>Usage:</b> <code>/unbanip &lt;ip_address&gt;</code>\nExample: <code>/unbanip 185.220.101.5</code>')
+      return
+    }
+    const result = unbanIp(argument)
+    const currentList = formatBannedList(result.list)
+    if (result.success) {
+      await replyTelegram(botToken, targetChatId, `✅ <b>IP Unbanned!</b>\nUnbanned: <code>${argument}</code>\n\n${currentList}`)
+    } else {
+      await replyTelegram(botToken, targetChatId, `❌ <b>Failed:</b> ${result.message}\n\n${currentList}`)
+    }
+    return
+  }
+
+  if (command === '/banned' || command === '/blacklist' || command === '/banlist') {
+    const list = getBannedIps()
+    const currentList = formatBannedList(list)
+    await replyTelegram(botToken, targetChatId, currentList)
+    return
+  }
+}
+
+function formatBannedList(list: Array<{ ip: string; bannedAt: string; reason?: string }>): string {
+  if (list.length === 0) {
+    return '🛡️ <b>Blacklist:</b> None (No IPs currently banned)'
+  }
+  const items = list.map((item) => `• <code>${item.ip}</code> (${item.bannedAt.substring(0, 10)})`).join('\n')
+  return `🚫 <b>Banned IPs (${list.length}):</b>\n${items}`
 }
 
 function formatIpList(ips: string[]): string {

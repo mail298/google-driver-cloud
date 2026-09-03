@@ -69,6 +69,67 @@ export async function notifyUserLogin(user: { id: string; name?: string; email: 
   }
 }
 
+// In-memory throttling map to prevent Telegram bot spamming during attack sweeps
+type AttackThrottleEntry = {
+  lastSent: number
+  suppressedCount: number
+}
+const attackThrottleMap = new Map<string, AttackThrottleEntry>()
+const ATTACK_ALERT_THROTTLE_MS = 5 * 60 * 1000 // 5 minutes
+
+export async function notifySecurityAttack(entry: {
+  type: string
+  method: string
+  path: string
+  ip: string
+  userAgent?: string
+  status?: number
+  timestamp?: string
+}) {
+  try {
+    const cleanIp = String(entry.ip || 'unknown').trim().replace(/^::ffff:/, '')
+    const now = Date.now()
+    const existing = attackThrottleMap.get(cleanIp)
+
+    if (existing && now - existing.lastSent < ATTACK_ALERT_THROTTLE_MS) {
+      existing.suppressedCount++
+      console.warn(`[SECURITY] Throttling attack alert for IP ${cleanIp} (probe #${existing.suppressedCount} in current window)`)
+      return
+    }
+
+    // Set or reset throttle window
+    attackThrottleMap.set(cleanIp, {
+      lastSent: now,
+      suppressedCount: 0
+    })
+
+    const timeStr = (entry.timestamp || new Date().toISOString()).replace('T', ' ').substring(0, 19)
+    const isPublicIp = cleanIp && cleanIp !== 'unknown' && !cleanIp.startsWith('127.')
+
+    const message = [
+      `🚨 <b>SECURITY ATTACK / PROBE DETECTED!</b>`,
+      `━━━━━━━━━━━━━━━━━━`,
+      `🎯 <b>Type:</b> <code>${escapeHtml(entry.type)}</code>`,
+      `📍 <b>Target:</b> <code>${escapeHtml(entry.method)} ${escapeHtml(entry.path)}</code>`,
+      `🌐 <b>Attacker IP:</b> <code>${escapeHtml(cleanIp)}</code>`,
+      `🖥️ <b>User-Agent:</b> <code>${escapeHtml((entry.userAgent || 'unknown').slice(0, 100))}</code>`,
+      `🛡️ <b>Action:</b> <b>BLOCKED (403 Forbidden)</b>`,
+      `🕒 <b>Time:</b> ${timeStr} UTC`,
+      ...(isPublicIp
+        ? [
+            `\n💡 <b>Telegram Bot Actions:</b>`,
+            `• Ban IP: <code>/banip ${escapeHtml(cleanIp)}</code>`,
+            `• Whitelist IP: <code>/addip ${escapeHtml(cleanIp)}</code>`
+          ]
+        : [])
+    ].join('\n')
+
+    await sendTelegramNotification(message)
+  } catch (err) {
+    console.error('Error sending security attack notification to Telegram:', err)
+  }
+}
+
 export async function notifyServerError(entry: { id: string; method: string; path: string; status: number; message: string; code: string; timestamp: string }) {
   try {
     const message = [
