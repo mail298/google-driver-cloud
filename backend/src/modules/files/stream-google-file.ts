@@ -122,5 +122,13 @@ export async function streamGoogleFile(file: FileWithAccount, range: string | un
     return
   }
 
-  return Readable.fromWeb(response.body as any).pipe(res)
+  const stream = Readable.fromWeb(response.body as any)
+  res.on('close', () => {
+    if (!res.writableEnded) {
+      stream.destroy()
+    }
+  })
+
+  return stream.pipe(res)
 }
+

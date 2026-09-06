@@ -1,15 +1,9 @@
 import type { NextFunction, Request, Response } from 'express'
+import { getClientIp } from '../utils/ip.js'
 import { isIpAllowed } from '../utils/ip-whitelist.store.js'
 
 export function ipWhitelistMiddleware(req: Request, res: Response, next: NextFunction) {
-  // Extract client IP address accurately from headers or req.ip
-  const xForwardedForHeader = req.header('x-forwarded-for')
-  const xForwardedFor = Array.isArray(xForwardedForHeader) ? xForwardedForHeader[0] : xForwardedForHeader
-  const cfConnectingIpHeader = req.header('cf-connecting-ip')
-  const cfConnectingIp = Array.isArray(cfConnectingIpHeader) ? cfConnectingIpHeader[0] : cfConnectingIpHeader
-  const clientIp = cfConnectingIp || (xForwardedFor ? xForwardedFor.split(',')[0].trim() : req.ip) || ''
-
-  // Clean IPv6 prefix (e.g. ::ffff:192.168.1.1 -> 192.168.1.1)
+  const clientIp = getClientIp(req)
   const normalizedClientIp = clientIp.replace(/^::ffff:/, '')
 
   if (!isIpAllowed(normalizedClientIp)) {
@@ -21,4 +15,5 @@ export function ipWhitelistMiddleware(req: Request, res: Response, next: NextFun
 
   return next()
 }
+
 

@@ -84,6 +84,7 @@ export async function notifySecurityAttack(entry: {
   ip: string
   userAgent?: string
   status?: number
+  autoBanned?: boolean
   timestamp?: string
 }) {
   try {
@@ -106,6 +107,22 @@ export async function notifySecurityAttack(entry: {
     const timeStr = (entry.timestamp || new Date().toISOString()).replace('T', ' ').substring(0, 19)
     const isPublicIp = cleanIp && cleanIp !== 'unknown' && !cleanIp.startsWith('127.')
 
+    const actionText = entry.autoBanned
+      ? '<b>BLOCKED & AUTO-BANNED (403 Forbidden) 🚫</b>'
+      : '<b>BLOCKED (403 Forbidden)</b>'
+
+    const botActions = entry.autoBanned
+      ? [
+          `\n💡 <b>Telegram Bot Actions:</b>`,
+          `• Unban IP: <code>/unbanip ${escapeHtml(cleanIp)}</code>`,
+          `• Whitelist IP: <code>/addip ${escapeHtml(cleanIp)}</code>`
+        ]
+      : [
+          `\n💡 <b>Telegram Bot Actions:</b>`,
+          `• Ban IP: <code>/banip ${escapeHtml(cleanIp)}</code>`,
+          `• Whitelist IP: <code>/addip ${escapeHtml(cleanIp)}</code>`
+        ]
+
     const message = [
       `🚨 <b>SECURITY ATTACK / PROBE DETECTED!</b>`,
       `━━━━━━━━━━━━━━━━━━`,
@@ -113,15 +130,9 @@ export async function notifySecurityAttack(entry: {
       `📍 <b>Target:</b> <code>${escapeHtml(entry.method)} ${escapeHtml(entry.path)}</code>`,
       `🌐 <b>Attacker IP:</b> <code>${escapeHtml(cleanIp)}</code>`,
       `🖥️ <b>User-Agent:</b> <code>${escapeHtml((entry.userAgent || 'unknown').slice(0, 100))}</code>`,
-      `🛡️ <b>Action:</b> <b>BLOCKED (403 Forbidden)</b>`,
+      `🛡️ <b>Action:</b> ${actionText}`,
       `🕒 <b>Time:</b> ${timeStr} UTC`,
-      ...(isPublicIp
-        ? [
-            `\n💡 <b>Telegram Bot Actions:</b>`,
-            `• Ban IP: <code>/banip ${escapeHtml(cleanIp)}</code>`,
-            `• Whitelist IP: <code>/addip ${escapeHtml(cleanIp)}</code>`
-          ]
-        : [])
+      ...(isPublicIp ? botActions : [])
     ].join('\n')
 
     await sendTelegramNotification(message)

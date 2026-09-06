@@ -16,26 +16,52 @@ export type BannedIpEntry = {
   reason: string
 }
 
-export function getBannedIps(): BannedIpEntry[] {
+// In-memory cache for ultra-fast O(1) lookups without blocking the Node.js event loop
+let bannedIpsCache: BannedIpEntry[] | null = null
+let bannedIpSet = new Set<string>()
+
+function initCache(): BannedIpEntry[] {
+  if (bannedIpsCache !== null) {
+    return bannedIpsCache
+  }
+
   ensureDirExists()
+  let loaded: BannedIpEntry[] = []
+
   if (!fs.existsSync(FILE_PATH)) {
-    return []
+    bannedIpsCache = []
+    bannedIpSet = new Set()
+    saveToDiskAsync([])
+    return bannedIpsCache
   }
 
   try {
     const raw = fs.readFileSync(FILE_PATH, 'utf-8')
-    const list = JSON.parse(raw)
-    if (Array.isArray(list)) {
-      return list.filter((item) => item && typeof item.ip === 'string')
+    const parsed = JSON.parse(raw)
+    if (Array.isArray(parsed)) {
+      loaded = parsed.filter((item) => item && typeof item.ip === 'string')
     }
-    return []
-  } catch {
-    return []
+  } catch (err) {
+    console.error('[SECURITY] Error reading initial ip-blacklist.json:', err)
   }
+
+  bannedIpsCache = loaded
+  bannedIpSet = new Set(loaded.map((item) => item.ip.trim()))
+  return bannedIpsCache
+}
+
+function saveToDiskAsync(list: BannedIpEntry[]) {
+  ensureDirExists()
+  fs.promises
+    .writeFile(FILE_PATH, JSON.stringify(list, null, 2), 'utf-8')
+    .catch((err) => console.error('[SECURITY] Failed to save IP Blacklist asynchronously:', err))
+}
+
+export function getBannedIps(): BannedIpEntry[] {
+  return initCache()
 }
 
 export function saveBannedIps(ips: BannedIpEntry[]): BannedIpEntry[] {
-  ensureDirExists()
   const uniqueMap = new Map<string, BannedIpEntry>()
   for (const item of ips) {
     const cleanIp = item.ip.trim().replace(/^::ffff:/, '')
@@ -47,20 +73,20 @@ export function saveBannedIps(ips: BannedIpEntry[]): BannedIpEntry[] {
     }
   }
   const result = Array.from(uniqueMap.values())
-  try {
-    fs.writeFileSync(FILE_PATH, JSON.stringify(result, null, 2), 'utf-8')
-  } catch (err) {
-    console.error('Failed to save IP Blacklist file:', err)
-  }
+
+  bannedIpsCache = result
+  bannedIpSet = new Set(result.map((item) => item.ip))
+  saveToDiskAsync(result)
+
   return result
 }
 
 export function isIpBanned(clientIp: string): boolean {
   const cleanIp = clientIp.trim().replace(/^::ffff:/, '')
-  if (!cleanIp || cleanIp === '127.0.0.1' || cleanIp === '::1') return false
+  if (!cleanIp || cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost') return false
 
-  const list = getBannedIps()
-  return list.some((entry) => entry.ip === cleanIp)
+  initCache()
+  return bannedIpSet.has(cleanIp)
 }
 
 export function banIp(ip: string, reason = 'Malicious probe activity'): { success: boolean; list: BannedIpEntry[]; message: string } {
@@ -74,10 +100,9 @@ export function banIp(ip: string, reason = 'Malicious probe activity'): { succes
     return { success: false, list: getBannedIps(), message: 'Cannot ban localhost/loopback IP.' }
   }
 
-  const current = getBannedIps()
-  const existing = current.find((item) => item.ip === cleanIp)
-  if (existing) {
-    return { success: true, list: current, message: `IP ${cleanIp} is already banned.` }
+  initCache()
+  if (bannedIpSet.has(cleanIp)) {
+    return { success: true, list: bannedIpsCache!, message: `IP ${cleanIp} is already banned.` }
   }
 
   const newEntry: BannedIpEntry = {
@@ -85,8 +110,12 @@ export function banIp(ip: string, reason = 'Malicious probe activity'): { succes
     bannedAt: new Date().toISOString(),
     reason
   }
+
+  const current = [...(bannedIpsCache || [])]
   current.push(newEntry)
   const updated = saveBannedIps(current)
+
+  console.log(`[SECURITY] IP ${cleanIp} has been added to the blacklist. Reason: ${reason}`)
   return { success: true, list: updated, message: `IP ${cleanIp} banned successfully.` }
 }
 
@@ -96,12 +125,15 @@ export function unbanIp(ip: string): { success: boolean; list: BannedIpEntry[]; 
     return { success: false, list: getBannedIps(), message: 'Invalid IP address.' }
   }
 
-  const current = getBannedIps()
-  const filtered = current.filter((item) => item.ip !== cleanIp)
-  if (filtered.length === current.length) {
-    return { success: false, list: current, message: `IP ${cleanIp} is not in the ban list.` }
+  initCache()
+  if (!bannedIpSet.has(cleanIp)) {
+    return { success: false, list: bannedIpsCache!, message: `IP ${cleanIp} is not in the ban list.` }
   }
 
-  const updated = saveBannedIps(filtered)
+  const current = (bannedIpsCache || []).filter((item) => item.ip !== cleanIp)
+  const updated = saveBannedIps(current)
+
+  console.log(`[SECURITY] IP ${cleanIp} has been unbanned.`)
   return { success: true, list: updated, message: `IP ${cleanIp} unbanned successfully.` }
 }
+

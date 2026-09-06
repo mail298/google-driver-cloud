@@ -10,6 +10,7 @@ import { clearErrorLogs, getErrorLogs } from '../../utils/logger.js'
 import Busboy from 'busboy'
 
 import { addWhitelistedIp, getWhitelistedIps, removeWhitelistedIp } from '../../utils/ip-whitelist.store.js'
+import { banIp, getBannedIps, unbanIp } from '../../utils/ip-blacklist.store.js'
 
 export const systemRouter = Router()
 
@@ -40,6 +41,35 @@ systemRouter.delete('/ip-whitelist/:ip', requireAuth, (req, res) => {
     return res.status(400).json({ code: 'BAD_REQUEST', message: result.message })
   }
   return res.json({ status: 'success', message: result.message, ips: result.ips })
+})
+
+systemRouter.get('/ip-blacklist', requireAuth, (_req, res) => {
+  const list = getBannedIps()
+  return res.json({ bannedIps: list, count: list.length })
+})
+
+systemRouter.post('/ip-blacklist', requireAuth, (req, res) => {
+  const { ip, reason } = req.body ?? {}
+  if (!ip || typeof ip !== 'string') {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: 'IP address string is required.' })
+  }
+  const result = banIp(ip, reason || 'Banned via admin API')
+  if (!result.success) {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: result.message })
+  }
+  return res.json({ status: 'success', message: result.message, bannedIps: result.list })
+})
+
+systemRouter.delete('/ip-blacklist/:ip', requireAuth, (req, res) => {
+  const ip = String(req.params.ip || '').trim()
+  if (!ip) {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: 'IP address is required.' })
+  }
+  const result = unbanIp(ip)
+  if (!result.success) {
+    return res.status(400).json({ code: 'BAD_REQUEST', message: result.message })
+  }
+  return res.json({ status: 'success', message: result.message, bannedIps: result.list })
 })
 
 systemRouter.get('/analytics', requireAuth, async (_req, res, next) => {
@@ -437,6 +467,52 @@ systemRouter.post('/restore', requireAuth, (req: AuthRequest, res, next) => {
                 update: { ...item, userId, expiresAt: item.expiresAt ? new Date(item.expiresAt) : null, createdAt: new Date(item.createdAt), updatedAt: new Date(item.updatedAt) }
               }).catch(() => undefined)
             }
+          }
+
+          // Restore apiKeys
+          if (Array.isArray(data.apiKeys)) {
+            for (const item of data.apiKeys) {
+              await prisma.apiKey.upsert({
+                where: { id: item.id },
+                create: {
+                  ...item,
+                  userId,
+                  lastUsedAt: item.lastUsedAt ? new Date(item.lastUsedAt) : null,
+                  expiresAt: item.expiresAt ? new Date(item.expiresAt) : null,
+                  revokedAt: item.revokedAt ? new Date(item.revokedAt) : null,
+                  createdAt: new Date(item.createdAt),
+                  updatedAt: new Date(item.updatedAt)
+                },
+                update: {
+                  ...item,
+                  userId,
+                  lastUsedAt: item.lastUsedAt ? new Date(item.lastUsedAt) : null,
+                  expiresAt: item.expiresAt ? new Date(item.expiresAt) : null,
+                  revokedAt: item.revokedAt ? new Date(item.revokedAt) : null,
+                  createdAt: new Date(item.createdAt),
+                  updatedAt: new Date(item.updatedAt)
+                }
+              }).catch(() => undefined)
+            }
+          }
+
+          // Restore uploadRoutingPolicy
+          if (data.uploadRoutingPolicy && typeof data.uploadRoutingPolicy === 'object') {
+            const pol = data.uploadRoutingPolicy
+            await prisma.uploadRoutingPolicy.upsert({
+              where: { userId },
+              create: {
+                userId,
+                mode: pol.mode || 'most_available',
+                priorityAccountIds: pol.priorityAccountIds || [],
+                roundRobinCursor: Number(pol.roundRobinCursor || 0)
+              },
+              update: {
+                mode: pol.mode || 'most_available',
+                priorityAccountIds: pol.priorityAccountIds || [],
+                roundRobinCursor: Number(pol.roundRobinCursor || 0)
+              }
+            }).catch(() => undefined)
           }
 
           return res.json({

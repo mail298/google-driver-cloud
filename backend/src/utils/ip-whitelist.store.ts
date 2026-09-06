@@ -11,20 +11,23 @@ function ensureDirExists() {
   }
 }
 
-export function getWhitelistedIps(): string[] {
+// In-memory cache for fast lookups
+let whitelistedIpsCache: string[] | null = null
+
+function initCache(): string[] {
+  if (whitelistedIpsCache !== null) {
+    return whitelistedIpsCache
+  }
+
   ensureDirExists()
   if (!fs.existsSync(FILE_PATH)) {
     const envIps = (env.ADMIN_ALLOWED_IPS || '')
       .split(',')
       .map((ip) => ip.trim())
       .filter(Boolean)
-    
-    // Save initial env IPs to file
-    try {
-      fs.writeFileSync(FILE_PATH, JSON.stringify(envIps, null, 2), 'utf-8')
-    } catch {
-      // ignore
-    }
+
+    whitelistedIpsCache = envIps
+    saveToDiskAsync(envIps)
     return envIps
   }
 
@@ -32,22 +35,32 @@ export function getWhitelistedIps(): string[] {
     const raw = fs.readFileSync(FILE_PATH, 'utf-8')
     const list = JSON.parse(raw)
     if (Array.isArray(list)) {
-      return list.map((ip) => String(ip).trim()).filter(Boolean)
+      whitelistedIpsCache = list.map((ip) => String(ip).trim()).filter(Boolean)
+      return whitelistedIpsCache
     }
+    whitelistedIpsCache = []
     return []
   } catch {
+    whitelistedIpsCache = []
     return []
   }
 }
 
-export function saveWhitelistedIps(ips: string[]): string[] {
+function saveToDiskAsync(ips: string[]) {
   ensureDirExists()
+  fs.promises
+    .writeFile(FILE_PATH, JSON.stringify(ips, null, 2), 'utf-8')
+    .catch((err) => console.error('[SECURITY] Failed to save IP Whitelist asynchronously:', err))
+}
+
+export function getWhitelistedIps(): string[] {
+  return initCache()
+}
+
+export function saveWhitelistedIps(ips: string[]): string[] {
   const unique = Array.from(new Set(ips.map((ip) => ip.trim()).filter(Boolean)))
-  try {
-    fs.writeFileSync(FILE_PATH, JSON.stringify(unique, null, 2), 'utf-8')
-  } catch (err) {
-    console.error('Failed to save IP Whitelist file:', err)
-  }
+  whitelistedIpsCache = unique
+  saveToDiskAsync(unique)
   return unique
 }
 
@@ -75,7 +88,7 @@ export function removeWhitelistedIp(ip: string): { success: boolean; ips: string
 
   const current = getWhitelistedIps()
   const filtered = current.filter((item) => item.replace(/^::ffff:/, '') !== cleanIp)
-  
+
   if (filtered.length === current.length) {
     return { success: false, ips: current, message: `IP ${cleanIp} not found in whitelist.` }
   }
@@ -86,7 +99,7 @@ export function removeWhitelistedIp(ip: string): { success: boolean; ips: string
 
 export function isIpAllowed(clientIp: string): boolean {
   const allowedList = getWhitelistedIps()
-  
+
   // If no IPs are whitelisted, IP restriction is disabled (allow all)
   if (allowedList.length === 0) return true
 
@@ -103,3 +116,4 @@ export function isIpAllowed(clientIp: string): boolean {
     return false
   })
 }
+
