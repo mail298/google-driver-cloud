@@ -58,7 +58,7 @@ services:
       - "gatus.enable=true"
       - "gatus.name=node-js : google-driver-cloud - Backend"
       - "gatus.group=Applications"
-      - "gatus.url=https://drive9-backend.wn-cdn.net"
+      - "gatus.url=https://drive9-backend.wn-cdn.net/health"
       - "gatus.interval=60s"
       - "gatus.conditions=[STATUS] == any(200, 301, 302, 307, 401, 403), [RESPONSE_TIME] < 5000"
 
